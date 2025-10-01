@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ import {
   Download,
   Mail,
   Phone,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,12 +77,12 @@ interface InterventionPlan {
 
 // =================== VERİ İŞLEME FONKSİYONLARI ===================
 
-function generateRiskProfiles(): RiskProfile[] {
+async function generateRiskProfiles(): Promise<RiskProfile[]> {
   const students = loadStudents();
   
-  return students.map(student => {
-    const data = getStudentPerformanceData(student.id);
-    const riskScore = calculateRiskScore(student.id);
+  const profiles = await Promise.all(students.map(async (student) => {
+    const data = await getStudentPerformanceData(student.id);
+    const riskScore = await calculateRiskScore(student.id);
     
     // Risk faktörlerini hesapla
     const attendanceRate = calculateAttendanceRate(data.attendance);
@@ -146,7 +147,9 @@ function generateRiskProfiles(): RiskProfile[] {
       actionPlan,
       lastUpdated: new Date().toISOString(),
     };
-  });
+  }));
+  
+  return profiles;
 }
 
 function generateInterventionPlan(warning: EarlyWarning): InterventionPlan {
@@ -472,9 +475,28 @@ export function InterventionPlanning({ warning }: { warning: EarlyWarning }) {
 export default function EarlyWarningSystem() {
   const [selectedSeverity, setSelectedSeverity] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [warnings, setWarnings] = useState<EarlyWarning[]>([]);
+  const [riskProfiles, setRiskProfiles] = useState<RiskProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const warnings = useMemo(() => generateEarlyWarnings(), []);
-  const riskProfiles = useMemo(() => generateRiskProfiles(), []);
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const [warningsData, profilesData] = await Promise.all([
+          generateEarlyWarnings(),
+          generateRiskProfiles()
+        ]);
+        setWarnings(warningsData);
+        setRiskProfiles(profilesData);
+      } catch (error) {
+        console.error('Error loading early warning data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const filteredWarnings = warnings.filter(warning => {
     if (selectedSeverity !== "all" && warning.severity !== selectedSeverity) return false;
