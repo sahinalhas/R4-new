@@ -1292,7 +1292,7 @@ const SCHEDULE_TEMPLATES: ScheduleTemplate[] = [
     name: 'LGS Dengeli Program',
     description: 'Hafta içi günde 3 saat, hafta sonu 4 saat çalışma',
     category: 'LGS',
-    estimatedWeeklyHours: 23,
+    estimatedWeeklyHours: 20.5,
     difficulty: 'Orta',
     tags: ['lgs', 'dengeli', '8.sınıf'],
     subjects: [
@@ -1323,9 +1323,9 @@ const SCHEDULE_TEMPLATES: ScheduleTemplate[] = [
   {
     id: 'tyt-intensive',
     name: 'TYT Yoğun Program',
-    description: 'Haftalık 35 saat yo ğun çalışma programı',
+    description: 'Haftalık 35 saat yoğun çalışma programı',
     category: 'TYT',
-    estimatedWeeklyHours: 35,
+    estimatedWeeklyHours: 41.5,
     difficulty: 'Yoğun',
     tags: ['tyt', 'yoğun', '12.sınıf'],
     subjects: [
@@ -1335,7 +1335,9 @@ const SCHEDULE_TEMPLATES: ScheduleTemplate[] = [
       { id: 'biy-tyt', name: 'Biyoloji', category: 'TYT' },
       { id: 'tur-tyt', name: 'Türkçe', category: 'TYT' },
       { id: 'tar-tyt', name: 'Tarih', category: 'TYT' },
-      { id: 'cog-tyt', name: 'Coğrafya', category: 'TYT' }
+      { id: 'cog-tyt', name: 'Coğrafya', category: 'TYT' },
+      { id: 'fen-deneme', name: 'Fen Deneme Sınavı', category: 'TYT' },
+      { id: 'sos-deneme', name: 'Sosyal Deneme Sınavı', category: 'TYT' }
     ],
     slots: [
       { day: 1, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
@@ -1366,14 +1368,15 @@ const SCHEDULE_TEMPLATES: ScheduleTemplate[] = [
     name: 'AYT Dengeli Program',
     description: 'Sayısal ve sözel dengeli haftalık program',
     category: 'AYT',
-    estimatedWeeklyHours: 28,
+    estimatedWeeklyHours: 29,
     difficulty: 'Orta',
     tags: ['ayt', 'dengeli', '12.sınıf'],
     subjects: [
       { id: 'mat-ayt', name: 'Matematik', category: 'AYT' },
       { id: 'fiz-ayt', name: 'Fizik', category: 'AYT' },
       { id: 'kim-ayt', name: 'Kimya', category: 'AYT' },
-      { id: 'biy-ayt', name: 'Biyoloji', category: 'AYT' }
+      { id: 'biy-ayt', name: 'Biyoloji', category: 'AYT' },
+      { id: 'deneme-sinavi', name: 'Deneme Sınavı', category: 'AYT' }
     ],
     slots: [
       { day: 1, start: '08:00', end: '10:00', subjectId: 'mat-ayt' },
@@ -1389,6 +1392,283 @@ const SCHEDULE_TEMPLATES: ScheduleTemplate[] = [
       { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-ayt' },
       { day: 6, start: '14:00', end: '17:00', subjectId: 'fiz-ayt' },
       { day: 7, start: '10:00', end: '13:00', subjectId: 'deneme-sinavi' }
+    ]
+  },
+  {
+    id: 'lgs-light',
+    name: 'LGS Hafif Program',
+    description: 'Okul dönemi için hafif tempo - Günde 2 saat, hafta içi odaklı',
+    category: 'LGS',
+    estimatedWeeklyHours: 13.5,
+    difficulty: 'Kolay',
+    tags: ['lgs', 'hafif', 'başlangıç', '7-8.sınıf'],
+    subjects: [
+      { id: 'mat-lgs', name: 'Matematik', category: 'LGS' },
+      { id: 'fen-lgs', name: 'Fen Bilimleri', category: 'LGS' },
+      { id: 'tur-lgs', name: 'Türkçe', category: 'LGS' },
+      { id: 'sos-lgs', name: 'Sosyal Bilgiler', category: 'LGS' },
+      { id: 'ing-lgs', name: 'İngilizce', category: 'LGS' }
+    ],
+    slots: [
+      { day: 1, start: '18:00', end: '19:30', subjectId: 'mat-lgs' },
+      { day: 2, start: '18:00', end: '19:30', subjectId: 'fen-lgs' },
+      { day: 3, start: '18:00', end: '19:30', subjectId: 'tur-lgs' },
+      { day: 4, start: '18:00', end: '19:30', subjectId: 'mat-lgs' },
+      { day: 5, start: '18:00', end: '19:30', subjectId: 'sos-lgs' },
+      { day: 6, start: '10:00', end: '12:00', subjectId: 'mat-lgs' },
+      { day: 6, start: '14:00', end: '16:00', subjectId: 'fen-lgs' },
+      { day: 7, start: '10:00', end: '12:00', subjectId: 'ing-lgs' }
+    ]
+  },
+  {
+    id: 'lgs-intensive',
+    name: 'LGS Yoğun Program',
+    description: 'Son 3 ay için sprint programı - Günde 4-5 saat yoğun tempo',
+    category: 'LGS',
+    estimatedWeeklyHours: 36.5,
+    difficulty: 'Yoğun',
+    tags: ['lgs', 'yoğun', 'sprint', '8.sınıf'],
+    subjects: [
+      { id: 'mat-lgs', name: 'Matematik', category: 'LGS' },
+      { id: 'fen-lgs', name: 'Fen Bilimleri', category: 'LGS' },
+      { id: 'tur-lgs', name: 'Türkçe', category: 'LGS' },
+      { id: 'sos-lgs', name: 'Sosyal Bilgiler', category: 'LGS' },
+      { id: 'ing-lgs', name: 'İngilizce', category: 'LGS' },
+      { id: 'din-lgs', name: 'Din Kültürü', category: 'LGS' },
+      { id: 'deneme-lgs', name: 'LGS Deneme Sınavı', category: 'LGS' }
+    ],
+    slots: [
+      { day: 1, start: '08:00', end: '10:00', subjectId: 'mat-lgs' },
+      { day: 1, start: '14:00', end: '16:00', subjectId: 'tur-lgs' },
+      { day: 1, start: '17:00', end: '18:30', subjectId: 'ing-lgs' },
+      { day: 2, start: '08:00', end: '10:00', subjectId: 'mat-lgs' },
+      { day: 2, start: '14:00', end: '16:00', subjectId: 'fen-lgs' },
+      { day: 2, start: '17:00', end: '18:30', subjectId: 'sos-lgs' },
+      { day: 3, start: '08:00', end: '10:00', subjectId: 'mat-lgs' },
+      { day: 3, start: '14:00', end: '16:00', subjectId: 'tur-lgs' },
+      { day: 3, start: '17:00', end: '18:30', subjectId: 'din-lgs' },
+      { day: 4, start: '08:00', end: '10:00', subjectId: 'fen-lgs' },
+      { day: 4, start: '14:00', end: '16:00', subjectId: 'mat-lgs' },
+      { day: 4, start: '17:00', end: '18:30', subjectId: 'sos-lgs' },
+      { day: 5, start: '08:00', end: '10:00', subjectId: 'mat-lgs' },
+      { day: 5, start: '14:00', end: '16:00', subjectId: 'fen-lgs' },
+      { day: 5, start: '17:00', end: '18:30', subjectId: 'tur-lgs' },
+      { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-lgs' },
+      { day: 6, start: '14:00', end: '17:00', subjectId: 'deneme-lgs' },
+      { day: 7, start: '10:00', end: '13:00', subjectId: 'fen-lgs' }
+    ]
+  },
+  {
+    id: 'tyt-balanced',
+    name: 'TYT Dengeli Program',
+    description: 'TYT için optimal denge - Günde 3-4 saat, hafta sonu destekli',
+    category: 'TYT',
+    estimatedWeeklyHours: 25.5,
+    difficulty: 'Orta',
+    tags: ['tyt', 'dengeli', '11-12.sınıf'],
+    subjects: [
+      { id: 'mat-tyt', name: 'Matematik', category: 'TYT' },
+      { id: 'fiz-tyt', name: 'Fizik', category: 'TYT' },
+      { id: 'kim-tyt', name: 'Kimya', category: 'TYT' },
+      { id: 'biy-tyt', name: 'Biyoloji', category: 'TYT' },
+      { id: 'tur-tyt', name: 'Türkçe', category: 'TYT' },
+      { id: 'tar-tyt', name: 'Tarih', category: 'TYT' },
+      { id: 'cog-tyt', name: 'Coğrafya', category: 'TYT' },
+      { id: 'fen-deneme', name: 'Fen Deneme Sınavı', category: 'TYT' }
+    ],
+    slots: [
+      { day: 1, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 1, start: '14:00', end: '16:00', subjectId: 'tur-tyt' },
+      { day: 2, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 2, start: '14:00', end: '15:30', subjectId: 'fiz-tyt' },
+      { day: 3, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 3, start: '14:00', end: '15:30', subjectId: 'kim-tyt' },
+      { day: 4, start: '08:00', end: '10:00', subjectId: 'tur-tyt' },
+      { day: 4, start: '14:00', end: '15:30', subjectId: 'biy-tyt' },
+      { day: 5, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 5, start: '14:00', end: '16:00', subjectId: 'tar-tyt' },
+      { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-tyt' },
+      { day: 6, start: '14:00', end: '16:00', subjectId: 'fen-deneme' },
+      { day: 7, start: '10:00', end: '12:00', subjectId: 'cog-tyt' }
+    ]
+  },
+  {
+    id: 'tyt-ayt-combined',
+    name: 'TYT-AYT Kombine Program',
+    description: 'Her iki sınava birlikte hazırlık - Dengeli dağılım',
+    category: 'TYT',
+    estimatedWeeklyHours: 36.5,
+    difficulty: 'Yoğun',
+    tags: ['tyt', 'ayt', 'kombine', '12.sınıf'],
+    subjects: [
+      { id: 'mat-tyt', name: 'Matematik TYT', category: 'TYT' },
+      { id: 'mat-ayt', name: 'Matematik AYT', category: 'AYT' },
+      { id: 'fiz-tyt', name: 'Fizik TYT', category: 'TYT' },
+      { id: 'fiz-ayt', name: 'Fizik AYT', category: 'AYT' },
+      { id: 'kim-ayt', name: 'Kimya', category: 'AYT' },
+      { id: 'biy-ayt', name: 'Biyoloji', category: 'AYT' },
+      { id: 'tur-tyt', name: 'Türkçe', category: 'TYT' },
+      { id: 'tyt-deneme', name: 'TYT Deneme Sınavı', category: 'TYT' },
+      { id: 'ayt-deneme', name: 'AYT Deneme Sınavı', category: 'AYT' }
+    ],
+    slots: [
+      { day: 1, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 1, start: '10:30', end: '12:00', subjectId: 'mat-ayt' },
+      { day: 1, start: '14:00', end: '16:00', subjectId: 'fiz-ayt' },
+      { day: 2, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 2, start: '10:30', end: '12:00', subjectId: 'kim-ayt' },
+      { day: 2, start: '14:00', end: '16:00', subjectId: 'tur-tyt' },
+      { day: 3, start: '08:00', end: '10:00', subjectId: 'mat-ayt' },
+      { day: 3, start: '10:30', end: '12:00', subjectId: 'fiz-tyt' },
+      { day: 3, start: '14:00', end: '16:00', subjectId: 'biy-ayt' },
+      { day: 4, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 4, start: '10:30', end: '12:00', subjectId: 'mat-ayt' },
+      { day: 4, start: '14:00', end: '16:00', subjectId: 'kim-ayt' },
+      { day: 5, start: '08:00', end: '10:00', subjectId: 'fiz-ayt' },
+      { day: 5, start: '10:30', end: '12:00', subjectId: 'mat-ayt' },
+      { day: 5, start: '14:00', end: '16:00', subjectId: 'tur-tyt' },
+      { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-ayt' },
+      { day: 6, start: '14:00', end: '17:00', subjectId: 'tyt-deneme' },
+      { day: 7, start: '10:00', end: '13:00', subjectId: 'ayt-deneme' }
+    ]
+  },
+  {
+    id: 'ayt-intensive',
+    name: 'AYT Yoğun Program',
+    description: 'AYT son sprint - Günde 5-6 saat yoğun çalışma',
+    category: 'AYT',
+    estimatedWeeklyHours: 41.5,
+    difficulty: 'Çok Yoğun',
+    tags: ['ayt', 'yoğun', 'sprint', '12.sınıf'],
+    subjects: [
+      { id: 'mat-ayt', name: 'Matematik', category: 'AYT' },
+      { id: 'fiz-ayt', name: 'Fizik', category: 'AYT' },
+      { id: 'kim-ayt', name: 'Kimya', category: 'AYT' },
+      { id: 'biy-ayt', name: 'Biyoloji', category: 'AYT' },
+      { id: 'ayt-deneme', name: 'AYT Deneme Sınavı', category: 'AYT' },
+      { id: 'tum-dersler-tekrar', name: 'Tüm Dersler Tekrar', category: 'AYT' }
+    ],
+    slots: [
+      { day: 1, start: '08:00', end: '10:30', subjectId: 'mat-ayt' },
+      { day: 1, start: '11:00', end: '13:00', subjectId: 'fiz-ayt' },
+      { day: 1, start: '14:00', end: '16:00', subjectId: 'kim-ayt' },
+      { day: 2, start: '08:00', end: '10:30', subjectId: 'mat-ayt' },
+      { day: 2, start: '11:00', end: '13:00', subjectId: 'biy-ayt' },
+      { day: 2, start: '14:00', end: '16:00', subjectId: 'fiz-ayt' },
+      { day: 3, start: '08:00', end: '10:30', subjectId: 'mat-ayt' },
+      { day: 3, start: '11:00', end: '13:00', subjectId: 'kim-ayt' },
+      { day: 3, start: '14:00', end: '16:00', subjectId: 'biy-ayt' },
+      { day: 4, start: '08:00', end: '10:30', subjectId: 'fiz-ayt' },
+      { day: 4, start: '11:00', end: '13:00', subjectId: 'mat-ayt' },
+      { day: 4, start: '14:00', end: '16:00', subjectId: 'kim-ayt' },
+      { day: 5, start: '08:00', end: '10:30', subjectId: 'mat-ayt' },
+      { day: 5, start: '11:00', end: '13:00', subjectId: 'biy-ayt' },
+      { day: 5, start: '14:00', end: '16:00', subjectId: 'fiz-ayt' },
+      { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-ayt' },
+      { day: 6, start: '14:00', end: '17:00', subjectId: 'ayt-deneme' },
+      { day: 7, start: '10:00', end: '13:00', subjectId: 'tum-dersler-tekrar' }
+    ]
+  },
+  {
+    id: 'ydt-prep',
+    name: 'YDT Hazırlık Programı',
+    description: 'Yabancı dil sınavı odaklı haftalık program',
+    category: 'YKS',
+    estimatedWeeklyHours: 21,
+    difficulty: 'Orta',
+    tags: ['ydt', 'yabancı-dil', 'ingilizce'],
+    subjects: [
+      { id: 'ing-ydt', name: 'İngilizce', category: 'YDT' },
+      { id: 'grammar-ydt', name: 'Grammar', category: 'YDT' },
+      { id: 'vocabulary-ydt', name: 'Vocabulary', category: 'YDT' },
+      { id: 'reading-ydt', name: 'Reading', category: 'YDT' },
+      { id: 'listening-ydt', name: 'Listening', category: 'YDT' },
+      { id: 'ydt-deneme', name: 'YDT Deneme Sınavı', category: 'YDT' }
+    ],
+    slots: [
+      { day: 1, start: '08:00', end: '10:00', subjectId: 'grammar-ydt' },
+      { day: 1, start: '17:00', end: '18:30', subjectId: 'vocabulary-ydt' },
+      { day: 2, start: '08:00', end: '10:00', subjectId: 'reading-ydt' },
+      { day: 2, start: '17:00', end: '18:30', subjectId: 'listening-ydt' },
+      { day: 3, start: '08:00', end: '10:00', subjectId: 'grammar-ydt' },
+      { day: 3, start: '17:00', end: '18:30', subjectId: 'vocabulary-ydt' },
+      { day: 4, start: '08:00', end: '10:00', subjectId: 'reading-ydt' },
+      { day: 4, start: '17:00', end: '18:30', subjectId: 'grammar-ydt' },
+      { day: 5, start: '08:00', end: '10:00', subjectId: 'ing-ydt' },
+      { day: 6, start: '10:00', end: '13:00', subjectId: 'ydt-deneme' },
+      { day: 7, start: '14:00', end: '16:00', subjectId: 'listening-ydt' }
+    ]
+  },
+  {
+    id: 'school-study-balance',
+    name: 'Okul-Ders Denge Programı',
+    description: 'Okul devam ederken hafif tempo - Hafta içi kısa, hafta sonu yoğun',
+    category: 'Özel',
+    estimatedWeeklyHours: 16.5,
+    difficulty: 'Kolay',
+    tags: ['okul', 'denge', 'hafif', 'tüm-seviyeler'],
+    subjects: [
+      { id: 'mat-genel', name: 'Matematik', category: 'Genel' },
+      { id: 'fen-genel', name: 'Fen/Fizik', category: 'Genel' },
+      { id: 'tur-genel', name: 'Türkçe', category: 'Genel' },
+      { id: 'sos-genel', name: 'Sosyal', category: 'Genel' }
+    ],
+    slots: [
+      { day: 1, start: '18:00', end: '19:30', subjectId: 'mat-genel' },
+      { day: 2, start: '18:00', end: '19:30', subjectId: 'fen-genel' },
+      { day: 3, start: '18:00', end: '19:30', subjectId: 'tur-genel' },
+      { day: 4, start: '18:00', end: '19:30', subjectId: 'mat-genel' },
+      { day: 5, start: '18:00', end: '19:30', subjectId: 'sos-genel' },
+      { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-genel' },
+      { day: 6, start: '14:00', end: '17:00', subjectId: 'fen-genel' },
+      { day: 7, start: '10:00', end: '13:00', subjectId: 'tur-genel' }
+    ]
+  },
+  {
+    id: 'final-month-sprint',
+    name: 'Son Ay Sprint Programı',
+    description: 'Sınava son 30 gün - Maksimum yoğunluk, günde 8 saat',
+    category: 'Özel',
+    estimatedWeeklyHours: 56.5,
+    difficulty: 'Çok Yoğun',
+    tags: ['sprint', 'final', 'ekstrem', 'son-ay'],
+    subjects: [
+      { id: 'mat-sprint', name: 'Matematik', category: 'Genel' },
+      { id: 'fen1-sprint', name: 'Fen/Fizik', category: 'Genel' },
+      { id: 'fen2-sprint', name: 'Kimya/Biyoloji', category: 'Genel' },
+      { id: 'tur-sprint', name: 'Türkçe', category: 'Genel' },
+      { id: 'sos-sprint', name: 'Sosyal', category: 'Genel' },
+      { id: 'tekrar-zayif-konular', name: 'Zayıf Konu Tekrar', category: 'Genel' },
+      { id: 'tam-deneme-sinavi', name: 'Tam Deneme Sınavı', category: 'Genel' },
+      { id: 'deneme-cozum-analiz', name: 'Deneme Çözüm Analizi', category: 'Genel' },
+      { id: 'tam-deneme-sinavi-2', name: 'Tam Deneme Sınavı 2', category: 'Genel' },
+      { id: 'hafta-degerlendirme', name: 'Hafta Değerlendirme', category: 'Genel' }
+    ],
+    slots: [
+      { day: 1, start: '07:00', end: '09:30', subjectId: 'mat-sprint' },
+      { day: 1, start: '10:00', end: '12:00', subjectId: 'fen1-sprint' },
+      { day: 1, start: '14:00', end: '16:00', subjectId: 'tur-sprint' },
+      { day: 1, start: '17:00', end: '19:00', subjectId: 'sos-sprint' },
+      { day: 2, start: '07:00', end: '09:30', subjectId: 'mat-sprint' },
+      { day: 2, start: '10:00', end: '12:00', subjectId: 'fen2-sprint' },
+      { day: 2, start: '14:00', end: '16:00', subjectId: 'tur-sprint' },
+      { day: 2, start: '17:00', end: '19:00', subjectId: 'fen1-sprint' },
+      { day: 3, start: '07:00', end: '09:30', subjectId: 'mat-sprint' },
+      { day: 3, start: '10:00', end: '12:00', subjectId: 'fen1-sprint' },
+      { day: 3, start: '14:00', end: '16:00', subjectId: 'fen2-sprint' },
+      { day: 3, start: '17:00', end: '19:00', subjectId: 'tur-sprint' },
+      { day: 4, start: '07:00', end: '09:30', subjectId: 'mat-sprint' },
+      { day: 4, start: '10:00', end: '12:00', subjectId: 'fen2-sprint' },
+      { day: 4, start: '14:00', end: '16:00', subjectId: 'sos-sprint' },
+      { day: 4, start: '17:00', end: '19:00', subjectId: 'mat-sprint' },
+      { day: 5, start: '07:00', end: '09:30', subjectId: 'mat-sprint' },
+      { day: 5, start: '10:00', end: '12:00', subjectId: 'fen1-sprint' },
+      { day: 5, start: '14:00', end: '16:00', subjectId: 'tur-sprint' },
+      { day: 5, start: '17:00', end: '19:00', subjectId: 'tekrar-zayif-konular' },
+      { day: 6, start: '08:00', end: '13:00', subjectId: 'tam-deneme-sinavi' },
+      { day: 6, start: '14:00', end: '17:00', subjectId: 'deneme-cozum-analiz' },
+      { day: 7, start: '09:00', end: '12:00', subjectId: 'tam-deneme-sinavi-2' },
+      { day: 7, start: '14:00', end: '17:00', subjectId: 'hafta-degerlendirme' }
     ]
   }
 ];
