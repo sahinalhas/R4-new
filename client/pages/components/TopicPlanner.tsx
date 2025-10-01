@@ -13,11 +13,14 @@ import {
   loadSubjects,
   loadTopics,
   planWeek,
+  planWeekSmart,
   updateProgress,
   resetTopicProgress,
   ensureProgressForStudent,
   getProgressByStudent,
 } from "@/lib/storage";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 function mondayOf(dateISO: string) {
   const d = new Date(dateISO + "T00:00:00");
@@ -34,6 +37,7 @@ export default function TopicPlanner({ sid }: { sid: string }) {
   );
   const [refresh, setRefresh] = useState(0);
   const [plan, setPlan] = useState<Awaited<ReturnType<typeof planWeek>>>([]);
+  const [useSmartPlanning, setUseSmartPlanning] = useState(false);
 
   useEffect(() => {
     setSubjects(loadSubjects());
@@ -53,9 +57,10 @@ export default function TopicPlanner({ sid }: { sid: string }) {
 
   useEffect(() => {
     ensureProgressForStudent(sid).then(() => {
-      planWeek(sid, weekStart).then(setPlan);
+      const planFn = useSmartPlanning ? planWeekSmart : planWeek;
+      planFn(sid, weekStart).then(setPlan);
     });
-  }, [sid, weekStart, refresh]);
+  }, [sid, weekStart, refresh, useSmartPlanning]);
   const progressByTopic = useMemo(() => {
     const m = new Map<
       string,
@@ -105,6 +110,17 @@ export default function TopicPlanner({ sid }: { sid: string }) {
           <Button onClick={applyPlan} disabled={plan.length === 0}>
             Planı Uygula
           </Button>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="smart-planning"
+            checked={useSmartPlanning}
+            onCheckedChange={setUseSmartPlanning}
+          />
+          <Label htmlFor="smart-planning" className="text-sm">
+            Akıllı Planlama (Zorluk, öncelik ve enerji seviyesine göre)
+          </Label>
         </div>
 
         {/* Gün bazlı liste görünümü: Pazartesi'den Pazara */}

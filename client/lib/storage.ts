@@ -877,6 +877,11 @@ export type StudyTopic = {
   name: string;
   avgMinutes: number;
   order?: number;
+  difficultyScore?: number;    // 1-10 arası zorluk
+  priority?: number;           // 1-10 arası öncelik
+  deadline?: string;           // Son tarih (ISO)
+  prerequisites?: string[];    // Önkoşul konu ID'leri
+  energyLevel?: 'high' | 'medium' | 'low';  // Gereken enerji
 };
 export type StudyAssignment = {
   id: string;
@@ -1115,6 +1120,7 @@ export type WeeklySlot = {
   start: string; // HH:MM
   end: string; // HH:MM
   subjectId: string;
+  energyType?: 'high' | 'medium' | 'low';  // Bu saatteki enerji durumu
 };
 
 export type TopicProgress = {
@@ -1515,6 +1521,182 @@ export async function planWeek(
       currentStartMin = endMin; // advance cursor within this slot
     }
   }
+  return out;
+}
+
+// Akıllı planlama fonksiyonları
+function smartSortTopics(topics: StudyTopic[], progress: TopicProgress[]) {
+  const today = new Date();
+  
+  return topics
+    .map(topic => {
+      const prog = progress.find(p => p.topicId === topic.id);
+      
+      let score = 0;
+      
+      // 1. Deadline yakınsa +50 puan
+      if (topic.deadline) {
+        const daysUntil = Math.floor(
+          (new Date(topic.deadline).getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (daysUntil <= 7) score += 50;
+        else if (daysUntil <= 14) score += 30;
+        else if (daysUntil <= 30) score += 10;
+      }
+      
+      // 2. Öncelik puanı
+      score += (topic.priority || 5) * 10;
+      
+      // 3. Zorluk puanı (zorlar daha önce)
+      score += (topic.difficultyScore || 5) * 5;
+      
+      // 4. Kalan süre fazlaysa +puan
+      if (prog && prog.remaining > 120) score += 20;
+      
+      // 5. Hiç başlanmamışsa +puan
+      if (prog && prog.completed === 0) score += 15;
+      
+      return { ...topic, calculatedScore: score };
+    })
+    .sort((a, b) => (b.calculatedScore || 0) - (a.calculatedScore || 0));
+}
+
+function categorizeSlotsByEnergy(slots: WeeklySlot[]): WeeklySlot[] {
+  return slots.map(slot => {
+    const hour = parseInt(slot.start.split(':')[0]);
+    
+    let energyType: 'high' | 'medium' | 'low';
+    
+    if (hour >= 8 && hour <= 11) {
+      energyType = 'high';    // Sabah: Yüksek enerji
+    } else if (hour >= 14 && hour <= 17) {
+      energyType = 'medium';  // Öğleden sonra: Orta
+    } else {
+      energyType = 'low';     // Akşam: Düşük
+    }
+    
+    return { ...slot, energyType };
+  });
+}
+
+function matchTopicToSlot(topic: StudyTopic, slot: WeeklySlot): number {
+  const topicEnergy = topic.energyLevel || 'medium';
+  const slotEnergy = slot.energyType || 'medium';
+  
+  const energyMatch: Record<string, number> = {
+    'high-high': 10,
+    'high-medium': 5,
+    'high-low': 0,
+    'medium-high': 7,
+    'medium-medium': 10,
+    'medium-low': 7,
+    'low-high': 3,
+    'low-medium': 7,
+    'low-low': 10
+  };
+  
+  return energyMatch[`${topicEnergy}-${slotEnergy}`] || 5;
+}
+
+export async function planWeekSmart(
+  studentId: string,
+  weekStartISO: string
+): Promise<PlannedEntry[]> {
+  await ensureProgressForStudent(studentId);
+  
+  const slots = categorizeSlotsByEnergy(
+    getWeeklySlotsByStudent(studentId)
+      .slice()
+      .sort((a, b) => a.day - b.day || a.start.localeCompare(b.start))
+  );
+  
+  const topicsAll = loadTopics();
+  const progress = getProgressByStudent(studentId);
+  
+  // Derslere göre konuları grupla ve akıllı sırala
+  const topicsBySubject = new Map<string, StudyTopic[]>();
+  
+  for (const topic of topicsAll) {
+    const arr = topicsBySubject.get(topic.subjectId) || [];
+    arr.push(topic);
+    topicsBySubject.set(topic.subjectId, arr);
+  }
+  
+  // Her dersin konularını akıllı sırala
+  topicsBySubject.forEach((topicList, subjectId) => {
+    const sorted = smartSortTopics(topicList, progress);
+    topicsBySubject.set(subjectId, sorted as StudyTopic[]);
+  });
+  
+  const out: PlannedEntry[] = [];
+  
+  // In-memory progress map
+  const progMap = new Map<string, { remaining: number; done: boolean }>();
+  for (const t of topicsAll) {
+    const p = progress.find((pp) => pp.topicId === t.id);
+    if (p)
+      progMap.set(t.id, { remaining: p.remaining, done: !!p.completedFlag });
+  }
+  
+  // Slotlara konuları yerleştir
+  for (const slot of slots) {
+    const subjectTopics = topicsBySubject.get(slot.subjectId) || [];
+    let remainingTime = minutesBetween(slot.start, slot.end);
+    let currentMin = minutesBetween("00:00", slot.start);
+    let guard = 0;
+    
+    while (remainingTime > 0 && guard++ < 200) {
+      // En uygun konuyu bul
+      const candidateTopics = subjectTopics
+        .filter(t => {
+          const prog = progMap.get(t.id);
+          return prog && !prog.done && prog.remaining > 0;
+        })
+        .map(t => ({
+          topic: t,
+          matchScore: matchTopicToSlot(t, slot)
+        }))
+        .sort((a, b) => {
+          // Önce match score, sonra calculated score
+          if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+          const aCalc = (a.topic as any).calculatedScore || 0;
+          const bCalc = (b.topic as any).calculatedScore || 0;
+          return bCalc - aCalc;
+        });
+      
+      if (candidateTopics.length === 0) break;
+      
+      const bestTopic = candidateTopics[0].topic;
+      const prog = progMap.get(bestTopic.id)!;
+      const allocated = Math.min(remainingTime, prog.remaining);
+      
+      const date = dateFromWeekStart(weekStartISO, slot.day);
+      const startH = String(Math.floor(currentMin / 60)).padStart(2, "0");
+      const startM = String(currentMin % 60).padStart(2, "0");
+      const start = `${startH}:${startM}`;
+      const endMin = currentMin + allocated;
+      const endH = String(Math.floor(endMin / 60)).padStart(2, "0");
+      const endM = String(endMin % 60).padStart(2, "0");
+      const end = `${endH}:${endM}`;
+      
+      out.push({
+        date,
+        start,
+        end,
+        subjectId: slot.subjectId,
+        topicId: bestTopic.id,
+        allocated,
+        remainingAfter: prog.remaining - allocated
+      });
+      
+      prog.remaining -= allocated;
+      if (prog.remaining <= 0) prog.done = true;
+      
+      remainingTime -= allocated;
+      currentMin = endMin;
+    }
+  }
+  
   return out;
 }
 
