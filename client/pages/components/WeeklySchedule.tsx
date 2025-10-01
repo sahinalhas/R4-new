@@ -8,8 +8,16 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Undo2, Redo2, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   loadSubjects,
   getWeeklySlotsByStudent,
@@ -18,8 +26,10 @@ import {
   updateWeeklySlot,
   WeeklySlot,
   weeklyTotalMinutes,
+  saveWeeklySlots,
 } from "@/lib/storage";
 import { toast } from "sonner";
+import { useUndo, formatActionName, formatTime } from "@/hooks/useUndo";
 
 const DAYS: { value: 1 | 2 | 3 | 4 | 5 | 6 | 7; label: string }[] = [
   { value: 1, label: "Pazartesi" },
@@ -110,12 +120,21 @@ type SuggestedCell = { day: 1 | 2 | 3 | 4 | 5 | 6 | 7; startMin: number };
 
 export default function WeeklySchedule({ sid }: { sid: string }) {
   const [subjects, setSubjects] = useState<Awaited<ReturnType<typeof loadSubjects>>>([]);
-  const [refresh, setRefresh] = useState(0);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<"LGS" | "YKS" | "TYT" | "AYT" | "YDT" | "Tümü">("Tümü");
   const [suggestedCells, setSuggestedCells] = useState<SuggestedCell[]>([]);
   const calendarRef = useRef<HTMLDivElement | null>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const {
+    state: slots,
+    push: pushHistory,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    history
+  } = useUndo<WeeklySlot[]>([], 30);
 
   useEffect(() => {
     setSubjects(loadSubjects());
@@ -126,17 +145,46 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
   }, []);
 
   useEffect(() => {
-    const handleWeeklySlotsUpdate = () => setRefresh((x) => x + 1);
-    window.addEventListener('weeklySlotsUpdated', handleWeeklySlotsUpdate);
-    return () => window.removeEventListener('weeklySlotsUpdated', handleWeeklySlotsUpdate);
-  }, []);
+    const initialSlots = getWeeklySlotsByStudent(sid).slice().sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
+    pushHistory(initialSlots, 'load', true);
+  }, [sid, pushHistory]);
 
-  const slots = useMemo(
-    () =>
-      getWeeklySlotsByStudent(sid)
-        .slice()
-        .sort((a, b) => a.day - b.day || a.start.localeCompare(b.start)),
-    [sid, refresh],
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) {
+          const prevState = undo();
+          saveWeeklySlots(prevState).catch(console.error);
+          toast.info("Son işlem geri alındı", {
+            action: {
+              label: "Tekrarla",
+              onClick: () => {
+                if (canRedo) {
+                  const nextState = redo();
+                  saveWeeklySlots(nextState).catch(console.error);
+                }
+              }
+            }
+          });
+        }
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        if (canRedo) {
+          const nextState = redo();
+          saveWeeklySlots(nextState).catch(console.error);
+          toast.success("İşlem tekrar uygulandı");
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo, canUndo, canRedo]);
+
+  const sortedSlots = useMemo(
+    () => slots.slice().sort((a, b) => a.day - b.day || a.start.localeCompare(b.start)),
+    [slots]
   );
 
   const totalMin = weeklyTotalMinutes(sid);
@@ -163,7 +211,7 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
       | undefined;
 
     if (moving) {
-      const existing = slots.find((s) => s.id === moving.id);
+      const existing = sortedSlots.find((s) => s.id === moving.id);
       if (!existing) return;
       const duration = Math.max(
         STEP,
@@ -179,9 +227,9 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
         start: fmt(start),
         end: fmt(end),
       };
-      for (const s of slots) {
+      for (const s of sortedSlots) {
         if (s.id !== existing.id && overlaps(s, candidate)) {
-          const suggested = findNearestEmptyCells(day, start, duration, slots.filter(sl => sl.id !== existing.id));
+          const suggested = findNearestEmptyCells(day, start, duration, sortedSlots.filter(sl => sl.id !== existing.id));
           
           if (suggestionTimeoutRef.current) {
             clearTimeout(suggestionTimeoutRef.current);
@@ -200,7 +248,16 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
               onClick: () => {
                 const first = suggested[0];
                 const endMin = Math.min(first.startMin + duration, END_MIN);
-                if (canPlace(first.day, first.startMin, duration, slots.filter(sl => sl.id !== existing.id))) {
+                if (canPlace(first.day, first.startMin, duration, sortedSlots.filter(sl => sl.id !== existing.id))) {
+                  const updatedSlots = sortedSlots.map(s => 
+                    s.id === existing.id ? {
+                      ...s,
+                      day: first.day,
+                      start: fmt(first.startMin),
+                      end: fmt(endMin)
+                    } : s
+                  );
+                  pushHistory(updatedSlots, 'move');
                   updateWeeklySlot(existing.id, {
                     day: first.day,
                     start: fmt(first.startMin),
@@ -212,7 +269,6 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
                   if (suggestionTimeoutRef.current) {
                     clearTimeout(suggestionTimeoutRef.current);
                   }
-                  setRefresh((x) => x + 1);
                 } else {
                   toast.error("Seçilen saat artık uygun değil");
                 }
@@ -225,6 +281,10 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           return;
         }
       }
+      const updatedSlots = sortedSlots.map(s => 
+        s.id === existing.id ? candidate : s
+      );
+      pushHistory(updatedSlots, 'move');
       updateWeeklySlot(existing.id, {
         day,
         start: candidate.start,
@@ -233,7 +293,6 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
         studentId: existing.studentId,
       });
       (window as any)._dragSlotMove = undefined;
-      setRefresh((x) => x + 1);
       return;
     }
 
@@ -258,9 +317,9 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
       end: fmt(end),
       subjectId: chosen.id,
     };
-    for (const s of slots) {
+    for (const s of sortedSlots) {
       if (overlaps(s, w)) {
-        const suggested = findNearestEmptyCells(day, start, defaultDur, slots);
+        const suggested = findNearestEmptyCells(day, start, defaultDur, sortedSlots);
         
         if (suggestionTimeoutRef.current) {
           clearTimeout(suggestionTimeoutRef.current);
@@ -279,7 +338,7 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
             onClick: () => {
               const first = suggested[0];
               const endMin = Math.min(first.startMin + defaultDur, END_MIN);
-              if (canPlace(first.day, first.startMin, defaultDur, slots)) {
+              if (canPlace(first.day, first.startMin, defaultDur, sortedSlots)) {
                 const newSlot: WeeklySlot = {
                   id: crypto.randomUUID(),
                   studentId: sid,
@@ -288,12 +347,13 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
                   end: fmt(endMin),
                   subjectId: chosen.id,
                 };
+                const newSlots = [...sortedSlots, newSlot];
+                pushHistory(newSlots, 'add');
                 addWeeklySlot(newSlot);
                 setSuggestedCells([]);
                 if (suggestionTimeoutRef.current) {
                   clearTimeout(suggestionTimeoutRef.current);
                 }
-                setRefresh((x) => x + 1);
               } else {
                 toast.error("Seçilen saat artık uygun değil");
               }
@@ -306,8 +366,9 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
         return;
       }
     }
+    const newSlots = [...sortedSlots, w];
+    pushHistory(newSlots, 'add');
     addWeeklySlot(w);
-    setRefresh((x) => x + 1);
   };
 
   const onCellDragOver = (e: React.DragEvent) => {
@@ -356,7 +417,6 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           subjectId: st.subjectId,
         });
         appliedRef.current.start = newStart;
-        setRefresh((x) => x + 1);
       }
     } else {
       let newEnd = st.origEnd + deltaRows * STEP;
@@ -376,7 +436,6 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           subjectId: st.subjectId,
         });
         appliedRef.current.end = newEnd;
-        setRefresh((x) => x + 1);
       }
     }
   };
@@ -384,6 +443,18 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
     window.removeEventListener("pointermove", onPointerMove);
     window.removeEventListener("pointerup", onPointerUp);
     window.removeEventListener("pointercancel", onPointerUp);
+    
+    if (appliedRef.current && resizingRef.current) {
+      const updatedSlots = sortedSlots.map(s => 
+        s.id === appliedRef.current!.id ? {
+          ...s,
+          start: fmt(appliedRef.current!.start),
+          end: fmt(appliedRef.current!.end)
+        } : s
+      );
+      pushHistory(updatedSlots, 'resize');
+    }
+    
     resizingRef.current = null;
     appliedRef.current = null;
   };
@@ -430,10 +501,62 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Haftalık Ders Çizelgesi</CardTitle>
-        <CardDescription>
-          Takvim 1 — Üstten dersi sürükleyip gün/saat alanına bırakın
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Haftalık Ders Çizelgesi</CardTitle>
+            <CardDescription>
+              Takvim 1 — Üstten dersi sürükleyip gün/saat alanına bırakın
+            </CardDescription>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const prevState = undo();
+                saveWeeklySlots(prevState).catch(console.error);
+                toast.info("Son işlem geri alındı");
+              }}
+              disabled={!canUndo}
+              title="Geri Al (Ctrl+Z)"
+            >
+              <Undo2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const nextState = redo();
+                saveWeeklySlots(nextState).catch(console.error);
+                toast.success("İşlem tekrar uygulandı");
+              }}
+              disabled={!canRedo}
+              title="Tekrarla (Ctrl+Y)"
+            >
+              <Redo2 className="h-4 w-4" />
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" title="İşlem Geçmişi">
+                  <History className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel>İşlem Geçmişi</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {history.slice().reverse().map((entry, i) => (
+                  <DropdownMenuItem key={i}>
+                    <span className="text-xs text-muted-foreground">
+                      {formatActionName(entry.action)} - {formatTime(entry.timestamp)}
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-3">
@@ -645,8 +768,9 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
                               title="Kaldır"
                               className="absolute top-1 right-1 h-7 w-7 p-0"
                               onClick={() => {
+                                const newSlots = sortedSlots.filter(slot => slot.id !== s.id);
+                                pushHistory(newSlots, 'remove');
                                 removeWeeklySlot(s.id);
-                                setRefresh((x) => x + 1);
                               }}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
