@@ -1184,11 +1184,27 @@ function setupDatabaseTriggers(database: Database.Database) {
 
 // Create performance indexes on foreign keys and frequently queried columns
 function setupDatabaseIndexes(database: Database.Database) {
-  // Students table indexes for filtering
-  database.exec('CREATE INDEX IF NOT EXISTS idx_students_sinif ON students(sinif)');
-  database.exec('CREATE INDEX IF NOT EXISTS idx_students_cinsiyet ON students(cinsiyet)');
-  database.exec('CREATE INDEX IF NOT EXISTS idx_students_risk ON students(risk)');
-  database.exec('CREATE INDEX IF NOT EXISTS idx_students_sinif_cinsiyet ON students(sinif, cinsiyet)');
+  // Students table indexes for filtering (wrapped in try-catch to handle missing columns gracefully)
+  try {
+    database.exec('CREATE INDEX IF NOT EXISTS idx_students_sinif ON students(sinif)');
+  } catch (e) {
+    // Column might not exist yet, skip
+  }
+  try {
+    database.exec('CREATE INDEX IF NOT EXISTS idx_students_cinsiyet ON students(cinsiyet)');
+  } catch (e) {
+    // Column might not exist yet, skip
+  }
+  try {
+    database.exec('CREATE INDEX IF NOT EXISTS idx_students_risk ON students(risk)');
+  } catch (e) {
+    // Column might not exist yet, skip
+  }
+  try {
+    database.exec('CREATE INDEX IF NOT EXISTS idx_students_sinif_cinsiyet ON students(sinif, cinsiyet)');
+  } catch (e) {
+    // Columns might not exist yet, skip
+  }
   
   // Student-related indexes
   database.exec('CREATE INDEX IF NOT EXISTS idx_meeting_notes_studentId ON meeting_notes(studentId)');
