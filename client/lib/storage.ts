@@ -1188,26 +1188,75 @@ export function getWeeklySlotsByStudent(studentId: string) {
   return loadWeeklySlots().filter((w) => w.studentId === studentId);
 }
 export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
-  const list = loadWeeklySlots();
-  list.push(w);
-  await saveWeeklySlots(list);
+  try {
+    const response = await fetch('/api/weekly-slots', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(w)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to add weekly slot');
+    }
+    
+    const list = loadWeeklySlots();
+    list.push(w);
+    weeklySlotsCache = list;
+    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  } catch (error) {
+    console.error('Error adding weekly slot:', error);
+    toast.error('Haftalık program eklenemedi');
+    throw error;
+  }
 }
 export async function removeWeeklySlot(id: string): Promise<void> {
-  const list = loadWeeklySlots().filter((w) => w.id !== id);
-  await saveWeeklySlots(list);
+  try {
+    const response = await fetch(`/api/weekly-slots/${id}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete weekly slot');
+    }
+    
+    const list = loadWeeklySlots().filter((w) => w.id !== id);
+    weeklySlotsCache = list;
+    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  } catch (error) {
+    console.error('Error deleting weekly slot:', error);
+    toast.error('Haftalık program silinemedi');
+    throw error;
+  }
 }
 export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): Promise<void> {
-  const list = loadWeeklySlots();
-  const i = list.findIndex((w) => w.id === id);
-  if (i >= 0) {
-    list[i] = {
-      ...list[i],
-      ...patch,
-      id: list[i].id,
-      studentId: list[i].studentId,
-      subjectId: list[i].subjectId,
-    };
-    await saveWeeklySlots(list);
+  try {
+    const response = await fetch(`/api/weekly-slots/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to update weekly slot');
+    }
+    
+    const list = loadWeeklySlots();
+    const i = list.findIndex((w) => w.id === id);
+    if (i >= 0) {
+      list[i] = {
+        ...list[i],
+        ...patch,
+        id: list[i].id,
+        studentId: list[i].studentId,
+        subjectId: list[i].subjectId,
+      };
+      weeklySlotsCache = list;
+      window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+    }
+  } catch (error) {
+    console.error('Error updating weekly slot:', error);
+    toast.error('Haftalık program güncellenemedi');
+    throw error;
   }
 }
 

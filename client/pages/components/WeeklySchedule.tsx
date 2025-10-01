@@ -70,6 +70,12 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
     return () => window.removeEventListener('subjectsUpdated', handleUpdate);
   }, []);
 
+  useEffect(() => {
+    const handleWeeklySlotsUpdate = () => setRefresh((x) => x + 1);
+    window.addEventListener('weeklySlotsUpdated', handleWeeklySlotsUpdate);
+    return () => window.removeEventListener('weeklySlotsUpdated', handleWeeklySlotsUpdate);
+  }, []);
+
   const slots = useMemo(
     () =>
       getWeeklySlotsByStudent(sid)
@@ -128,6 +134,8 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
         day,
         start: candidate.start,
         end: candidate.end,
+        subjectId: existing.subjectId,
+        studentId: existing.studentId,
       });
       (window as any)._dragSlotMove = undefined;
       setRefresh((x) => x + 1);
@@ -176,6 +184,8 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
     day: 1 | 2 | 3 | 4 | 5 | 6 | 7;
     minStart: number; // lower bound for start when resizing top
     maxEnd: number; // upper bound for end when resizing bottom
+    studentId: string;
+    subjectId: string;
   }>(null);
   const appliedRef = useRef<{ id: string; start: number; end: number } | null>(
     null,
@@ -197,7 +207,13 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           end: st.origEnd,
         };
       if (appliedRef.current.start !== newStart) {
-        updateWeeklySlot(st.id, { start: fmt(newStart) });
+        updateWeeklySlot(st.id, {
+          day: st.day,
+          start: fmt(newStart),
+          end: fmt(st.origEnd),
+          studentId: st.studentId,
+          subjectId: st.subjectId,
+        });
         appliedRef.current.start = newStart;
         setRefresh((x) => x + 1);
       }
@@ -211,7 +227,13 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           end: st.origEnd,
         };
       if (appliedRef.current.end !== newEnd) {
-        updateWeeklySlot(st.id, { end: fmt(newEnd) });
+        updateWeeklySlot(st.id, {
+          day: st.day,
+          start: fmt(st.origStart),
+          end: fmt(newEnd),
+          studentId: st.studentId,
+          subjectId: st.subjectId,
+        });
         appliedRef.current.end = newEnd;
         setRefresh((x) => x + 1);
       }
@@ -255,6 +277,8 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
       day: slot.day,
       minStart,
       maxEnd,
+      studentId: slot.studentId,
+      subjectId: slot.subjectId,
     };
     appliedRef.current = { id: slot.id, start: origStart, end: origEnd };
     window.addEventListener("pointermove", onPointerMove);

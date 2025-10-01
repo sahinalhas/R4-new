@@ -112,7 +112,15 @@ export const deleteStudyAssignmentHandler: RequestHandler = (req, res) => {
 export const getAllWeeklySlotsHandler: RequestHandler = (req, res) => {
   try {
     const slots = getAllWeeklySlots();
-    res.json(slots);
+    const transformed = slots.map(slot => ({
+      id: slot.id,
+      studentId: slot.studentId,
+      day: slot.day,
+      start: slot.startTime,
+      end: slot.endTime,
+      subjectId: slot.subjectId
+    }));
+    res.json(transformed);
   } catch (error) {
     console.error('Error fetching all weekly slots:', error);
     res.status(500).json({ success: false, error: 'Haftalık program getirilirken hata oluştu' });
@@ -131,7 +139,15 @@ export const getWeeklySlots: RequestHandler = (req, res) => {
     }
     
     const slots = getWeeklySlotsByStudent(studentId);
-    res.json(slots);
+    const transformed = slots.map(slot => ({
+      id: slot.id,
+      studentId: slot.studentId,
+      day: slot.day,
+      start: slot.startTime,
+      end: slot.endTime,
+      subjectId: slot.subjectId
+    }));
+    res.json(transformed);
   } catch (error) {
     console.error('Error fetching weekly slots:', error);
     res.status(500).json({ success: false, error: 'Haftalık program getirilirken hata oluştu' });
@@ -140,30 +156,44 @@ export const getWeeklySlots: RequestHandler = (req, res) => {
 
 export const saveWeeklySlotHandler: RequestHandler = (req, res) => {
   try {
-    const slot = req.body;
+    const data = req.body;
     
-    if (!slot || typeof slot !== 'object') {
+    if (!data) {
       return res.status(400).json({ 
         success: false, 
         error: "Geçersiz program verisi" 
       });
     }
     
-    if (!slot.id || !slot.studentId || !slot.day || !slot.startTime || !slot.endTime || !slot.subjectId) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "Zorunlu alanlar eksik" 
-      });
-    }
+    const slots = Array.isArray(data) ? data : [data];
     
-    insertWeeklySlot(
-      slot.id,
-      slot.studentId,
-      slot.day,
-      slot.startTime,
-      slot.endTime,
-      slot.subjectId
-    );
+    for (const slot of slots) {
+      if (!slot || typeof slot !== 'object') {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Geçersiz program verisi" 
+        });
+      }
+      
+      const startTime = slot.startTime || slot.start;
+      const endTime = slot.endTime || slot.end;
+      
+      if (!slot.id || !slot.studentId || !slot.day || !startTime || !endTime || !slot.subjectId) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Zorunlu alanlar eksik" 
+        });
+      }
+      
+      insertWeeklySlot(
+        slot.id,
+        slot.studentId,
+        slot.day,
+        startTime,
+        endTime,
+        slot.subjectId
+      );
+    }
     
     res.json({ success: true, message: 'Haftalık program kaydedildi' });
   } catch (error) {
@@ -179,7 +209,7 @@ export const saveWeeklySlotHandler: RequestHandler = (req, res) => {
 export const updateWeeklySlotHandler: RequestHandler = (req, res) => {
   try {
     const { id } = req.params;
-    const { day, startTime, endTime, subjectId } = req.body;
+    const body = req.body;
     
     if (!id || typeof id !== 'string' || id.length > 50) {
       return res.status(400).json({ 
@@ -188,7 +218,38 @@ export const updateWeeklySlotHandler: RequestHandler = (req, res) => {
       });
     }
     
-    updateWeeklySlot(id, day, startTime, endTime, subjectId);
+    const startTime = body.startTime || body.start;
+    const endTime = body.endTime || body.end;
+    
+    if (!body.day || typeof body.day !== 'number' || body.day < 1 || body.day > 7) {
+      return res.status(400).json({
+        success: false,
+        error: "Geçersiz gün değeri"
+      });
+    }
+    
+    if (!startTime || typeof startTime !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: "Başlangıç saati gerekli"
+      });
+    }
+    
+    if (!endTime || typeof endTime !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: "Bitiş saati gerekli"
+      });
+    }
+    
+    if (!body.subjectId || typeof body.subjectId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: "Ders ID gerekli"
+      });
+    }
+    
+    updateWeeklySlot(id, body.day, startTime, endTime, body.subjectId);
     res.json({ success: true, message: 'Haftalık program güncellendi' });
   } catch (error) {
     console.error('Error updating weekly slot:', error);
