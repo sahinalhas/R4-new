@@ -107,7 +107,8 @@ export function formatActionName(action: string): string {
     resize: '↔️ Boyut değiştirildi',
     move: '↗️ Ders taşındı',
     load: '📂 Yüklendi',
-    init: '🔧 Başlatıldı'
+    init: '🔧 Başlatıldı',
+    template: '📋 Şablon uygulandı'
   };
   return names[action] || action;
 }

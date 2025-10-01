@@ -1130,6 +1130,25 @@ export type TopicProgress = {
   completed: number; // minutes
   remaining: number; // minutes
   completedFlag?: boolean; // explicit completion toggle
+  lastStudied?: string; // ISO date for spaced repetition
+  reviewCount?: number; // Number of times reviewed
+  nextReviewDate?: string; // ISO date for next review (spaced repetition)
+};
+
+export type ScheduleTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  category: 'LGS' | 'TYT' | 'AYT' | 'YKS' | 'Özel';
+  slots: Omit<WeeklySlot, 'id' | 'studentId'>[];
+  subjects: {
+    id: string;
+    name: string;
+    category: string;
+  }[];
+  estimatedWeeklyHours: number;
+  difficulty: 'Kolay' | 'Orta' | 'Yoğun' | 'Çok Yoğun';
+  tags: string[];
 };
 
 // WeeklySlots cache
@@ -1266,6 +1285,187 @@ export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): 
   }
 }
 
+// Schedule Templates
+const SCHEDULE_TEMPLATES: ScheduleTemplate[] = [
+  {
+    id: 'lgs-balanced',
+    name: 'LGS Dengeli Program',
+    description: 'Hafta içi günde 3 saat, hafta sonu 4 saat çalışma',
+    category: 'LGS',
+    estimatedWeeklyHours: 23,
+    difficulty: 'Orta',
+    tags: ['lgs', 'dengeli', '8.sınıf'],
+    subjects: [
+      { id: 'mat-lgs', name: 'Matematik', category: 'LGS' },
+      { id: 'fen-lgs', name: 'Fen Bilimleri', category: 'LGS' },
+      { id: 'tur-lgs', name: 'Türkçe', category: 'LGS' },
+      { id: 'sos-lgs', name: 'Sosyal Bilgiler', category: 'LGS' },
+      { id: 'ing-lgs', name: 'İngilizce', category: 'LGS' },
+      { id: 'din-lgs', name: 'Din Kültürü', category: 'LGS' }
+    ],
+    slots: [
+      { day: 1, start: '17:00', end: '18:30', subjectId: 'mat-lgs' },
+      { day: 1, start: '19:00', end: '20:00', subjectId: 'tur-lgs' },
+      { day: 2, start: '17:00', end: '18:30', subjectId: 'fen-lgs' },
+      { day: 2, start: '19:00', end: '20:00', subjectId: 'ing-lgs' },
+      { day: 3, start: '17:00', end: '18:30', subjectId: 'mat-lgs' },
+      { day: 3, start: '19:00', end: '20:00', subjectId: 'sos-lgs' },
+      { day: 4, start: '17:00', end: '18:30', subjectId: 'fen-lgs' },
+      { day: 4, start: '19:00', end: '20:00', subjectId: 'din-lgs' },
+      { day: 5, start: '17:00', end: '18:30', subjectId: 'mat-lgs' },
+      { day: 5, start: '19:00', end: '20:00', subjectId: 'tur-lgs' },
+      { day: 6, start: '10:00', end: '12:00', subjectId: 'mat-lgs' },
+      { day: 6, start: '14:00', end: '16:00', subjectId: 'fen-lgs' },
+      { day: 7, start: '10:00', end: '12:00', subjectId: 'sos-lgs' },
+      { day: 7, start: '14:00', end: '16:00', subjectId: 'tur-lgs' }
+    ]
+  },
+  {
+    id: 'tyt-intensive',
+    name: 'TYT Yoğun Program',
+    description: 'Haftalık 35 saat yo ğun çalışma programı',
+    category: 'TYT',
+    estimatedWeeklyHours: 35,
+    difficulty: 'Yoğun',
+    tags: ['tyt', 'yoğun', '12.sınıf'],
+    subjects: [
+      { id: 'mat-tyt', name: 'Matematik', category: 'TYT' },
+      { id: 'fiz-tyt', name: 'Fizik', category: 'TYT' },
+      { id: 'kim-tyt', name: 'Kimya', category: 'TYT' },
+      { id: 'biy-tyt', name: 'Biyoloji', category: 'TYT' },
+      { id: 'tur-tyt', name: 'Türkçe', category: 'TYT' },
+      { id: 'tar-tyt', name: 'Tarih', category: 'TYT' },
+      { id: 'cog-tyt', name: 'Coğrafya', category: 'TYT' }
+    ],
+    slots: [
+      { day: 1, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 1, start: '10:30', end: '12:00', subjectId: 'fiz-tyt' },
+      { day: 1, start: '14:00', end: '16:00', subjectId: 'tur-tyt' },
+      { day: 1, start: '17:00', end: '18:30', subjectId: 'tar-tyt' },
+      { day: 2, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 2, start: '10:30', end: '12:00', subjectId: 'kim-tyt' },
+      { day: 2, start: '14:00', end: '16:00', subjectId: 'tur-tyt' },
+      { day: 2, start: '17:00', end: '18:30', subjectId: 'cog-tyt' },
+      { day: 3, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 3, start: '10:30', end: '12:00', subjectId: 'biy-tyt' },
+      { day: 3, start: '14:00', end: '16:00', subjectId: 'fiz-tyt' },
+      { day: 4, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 4, start: '10:30', end: '12:00', subjectId: 'kim-tyt' },
+      { day: 4, start: '14:00', end: '16:00', subjectId: 'tur-tyt' },
+      { day: 5, start: '08:00', end: '10:00', subjectId: 'mat-tyt' },
+      { day: 5, start: '10:30', end: '12:00', subjectId: 'fiz-tyt' },
+      { day: 5, start: '14:00', end: '16:00', subjectId: 'tar-tyt' },
+      { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-tyt' },
+      { day: 6, start: '14:00', end: '17:00', subjectId: 'fen-deneme' },
+      { day: 7, start: '09:00', end: '12:00', subjectId: 'tur-tyt' },
+      { day: 7, start: '14:00', end: '16:00', subjectId: 'sos-deneme' }
+    ]
+  },
+  {
+    id: 'ayt-balanced',
+    name: 'AYT Dengeli Program',
+    description: 'Sayısal ve sözel dengeli haftalık program',
+    category: 'AYT',
+    estimatedWeeklyHours: 28,
+    difficulty: 'Orta',
+    tags: ['ayt', 'dengeli', '12.sınıf'],
+    subjects: [
+      { id: 'mat-ayt', name: 'Matematik', category: 'AYT' },
+      { id: 'fiz-ayt', name: 'Fizik', category: 'AYT' },
+      { id: 'kim-ayt', name: 'Kimya', category: 'AYT' },
+      { id: 'biy-ayt', name: 'Biyoloji', category: 'AYT' }
+    ],
+    slots: [
+      { day: 1, start: '08:00', end: '10:00', subjectId: 'mat-ayt' },
+      { day: 1, start: '14:00', end: '16:00', subjectId: 'fiz-ayt' },
+      { day: 2, start: '08:00', end: '10:00', subjectId: 'mat-ayt' },
+      { day: 2, start: '14:00', end: '16:00', subjectId: 'kim-ayt' },
+      { day: 3, start: '08:00', end: '10:00', subjectId: 'mat-ayt' },
+      { day: 3, start: '14:00', end: '16:00', subjectId: 'biy-ayt' },
+      { day: 4, start: '08:00', end: '10:00', subjectId: 'fiz-ayt' },
+      { day: 4, start: '14:00', end: '16:00', subjectId: 'kim-ayt' },
+      { day: 5, start: '08:00', end: '10:00', subjectId: 'mat-ayt' },
+      { day: 5, start: '14:00', end: '16:00', subjectId: 'biy-ayt' },
+      { day: 6, start: '09:00', end: '12:00', subjectId: 'mat-ayt' },
+      { day: 6, start: '14:00', end: '17:00', subjectId: 'fiz-ayt' },
+      { day: 7, start: '10:00', end: '13:00', subjectId: 'deneme-sinavi' }
+    ]
+  }
+];
+
+export function getScheduleTemplates(): ScheduleTemplate[] {
+  return SCHEDULE_TEMPLATES;
+}
+
+export function getTemplatesByCategory(category?: string): ScheduleTemplate[] {
+  if (!category || category === 'Tümü') {
+    return SCHEDULE_TEMPLATES;
+  }
+  return SCHEDULE_TEMPLATES.filter(t => t.category === category);
+}
+
+export async function applyScheduleTemplate(
+  templateId: string,
+  studentId: string,
+  replaceExisting: boolean = false
+): Promise<void> {
+  const template = SCHEDULE_TEMPLATES.find(t => t.id === templateId);
+  if (!template) {
+    toast.error('Şablon bulunamadı');
+    return;
+  }
+
+  try {
+    // Eğer replace ise, önce mevcut slotları sil
+    if (replaceExisting) {
+      const existing = getWeeklySlotsByStudent(studentId);
+      for (const slot of existing) {
+        await removeWeeklySlot(slot.id);
+      }
+    }
+
+    // Önce gerekli dersleri ekle (eğer yoksa)
+    const existingSubjects = loadSubjects();
+    const existingSubjectIds = new Set(existingSubjects.map(s => s.id));
+    
+    for (const templateSubject of template.subjects) {
+      if (!existingSubjectIds.has(templateSubject.id)) {
+        const newSubject: StudySubject = {
+          id: templateSubject.id,
+          name: templateSubject.name,
+          category: templateSubject.category as any,
+          code: templateSubject.id,
+          description: `${template.name} şablonundan eklendi`
+        };
+        existingSubjects.push(newSubject);
+      }
+    }
+    
+    await saveSubjects(existingSubjects);
+
+    // Şablon slotlarını ekle
+    for (const templateSlot of template.slots) {
+      const newSlot: WeeklySlot = {
+        id: crypto.randomUUID(),
+        studentId,
+        day: templateSlot.day,
+        start: templateSlot.start,
+        end: templateSlot.end,
+        subjectId: templateSlot.subjectId
+      };
+      await addWeeklySlot(newSlot);
+    }
+
+    toast.success(`"${template.name}" şablonu uygulandı`, {
+      description: `${template.estimatedWeeklyHours} saatlik program eklendi`
+    });
+  } catch (error) {
+    console.error('Error applying template:', error);
+    toast.error('Şablon uygulanırken hata oluştu');
+    throw error;
+  }
+}
+
 // Progress cache
 let progressCache: TopicProgress[] | null = null;
 
@@ -1360,9 +1560,65 @@ export async function resetTopicProgress(studentId: string, topicId: string) {
     p.completed = 0;
     p.remaining = t.avgMinutes;
     p.completedFlag = false;
+    p.lastStudied = undefined;
+    p.reviewCount = 0;
+    p.nextReviewDate = undefined;
     await saveProgress(list);
   }
 }
+
+export function getTopicsDueForReview(studentId: string): TopicProgress[] {
+  const today = new Date().toISOString().split('T')[0];
+  const progress = getProgressByStudent(studentId);
+  
+  return progress.filter(p => {
+    if (!p.nextReviewDate || !p.completedFlag) return false;
+    return p.nextReviewDate <= today;
+  });
+}
+
+export function getUpcomingReviews(studentId: string, days: number = 7): TopicProgress[] {
+  const today = new Date();
+  const futureDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+  const futureDateStr = futureDate.toISOString().split('T')[0];
+  const todayStr = today.toISOString().split('T')[0];
+  const progress = getProgressByStudent(studentId);
+  
+  return progress.filter(p => {
+    if (!p.nextReviewDate || !p.completedFlag) return false;
+    return p.nextReviewDate > todayStr && p.nextReviewDate <= futureDateStr;
+  }).sort((a, b) => (a.nextReviewDate || '').localeCompare(b.nextReviewDate || ''));
+}
+// Spaced Repetition Helper Functions
+function calculateNextReviewDate(reviewCount: number): string {
+  const now = new Date();
+  let daysToAdd = 0;
+  
+  switch (reviewCount) {
+    case 0:
+      daysToAdd = 1;
+      break;
+    case 1:
+      daysToAdd = 3;
+      break;
+    case 2:
+      daysToAdd = 7;
+      break;
+    case 3:
+      daysToAdd = 14;
+      break;
+    case 4:
+      daysToAdd = 30;
+      break;
+    default:
+      daysToAdd = 60;
+      break;
+  }
+  
+  const nextDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+  return nextDate.toISOString().split('T')[0];
+}
+
 export async function updateProgress(
   studentId: string,
   topicId: string,
@@ -1378,6 +1634,15 @@ export async function updateProgress(
   p.completed += minutes;
   p.remaining = Math.max(0, t.avgMinutes - p.completed);
   p.completedFlag = p.remaining === 0 ? true : p.completedFlag;
+  
+  const today = new Date().toISOString().split('T')[0];
+  p.lastStudied = today;
+  
+  if (p.completedFlag) {
+    p.reviewCount = (p.reviewCount || 0) + 1;
+    p.nextReviewDate = calculateNextReviewDate(p.reviewCount);
+  }
+  
   await saveProgress(list);
 }
 export async function setCompletedFlag(

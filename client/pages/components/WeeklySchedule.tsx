@@ -30,6 +30,7 @@ import {
 } from "@/lib/storage";
 import { toast } from "sonner";
 import { useUndo, formatActionName, formatTime } from "@/hooks/useUndo";
+import ScheduleTemplateDialog from "./ScheduleTemplateDialog";
 
 const DAYS: { value: 1 | 2 | 3 | 4 | 5 | 6 | 7; label: string }[] = [
   { value: 1, label: "Pazartesi" },
@@ -453,6 +454,10 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
         } : s
       );
       pushHistory(updatedSlots, 'resize');
+      
+      setTimeout(() => {
+        saveWeeklySlots(updatedSlots).catch(console.error);
+      }, 100);
     }
     
     resizingRef.current = null;
@@ -510,6 +515,14 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           </div>
           
           <div className="flex gap-2">
+            <ScheduleTemplateDialog
+              studentId={sid}
+              onApplied={() => {
+                const updatedSlots = getWeeklySlotsByStudent(sid);
+                pushHistory(updatedSlots, 'template');
+              }}
+            />
+            
             <Button
               variant="outline"
               size="sm"

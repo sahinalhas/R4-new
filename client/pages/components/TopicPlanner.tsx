@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Clock, AlertCircle, Zap, TrendingUp } from "lucide-react";
+import { Clock, AlertCircle, Zap, TrendingUp, RefreshCcw, Calendar } from "lucide-react";
 import {
   loadSubjects,
   loadTopics,
@@ -19,9 +19,12 @@ import {
   resetTopicProgress,
   ensureProgressForStudent,
   getProgressByStudent,
+  getTopicsDueForReview,
+  getUpcomingReviews,
 } from "@/lib/storage";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 function mondayOf(dateISO: string) {
   const d = new Date(dateISO + "T00:00:00");
@@ -61,6 +64,7 @@ export default function TopicPlanner({ sid }: { sid: string }) {
   const [refresh, setRefresh] = useState(0);
   const [plan, setPlan] = useState<Awaited<ReturnType<typeof planWeek>>>([]);
   const [useSmartPlanning, setUseSmartPlanning] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   useEffect(() => {
     setSubjects(loadSubjects());
@@ -135,26 +139,44 @@ export default function TopicPlanner({ sid }: { sid: string }) {
           </Button>
         </div>
         
-        <div className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="smart-planning"
-              checked={useSmartPlanning}
-              onCheckedChange={setUseSmartPlanning}
-            />
-            <Label htmlFor="smart-planning" className="text-sm">
-              Akıllı Planlama
-            </Label>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="space-y-1 flex-1">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="smart-planning"
+                checked={useSmartPlanning}
+                onCheckedChange={setUseSmartPlanning}
+              />
+              <Label htmlFor="smart-planning" className="text-sm">
+                Akıllı Planlama
+              </Label>
+            </div>
+            {useSmartPlanning && (
+              <p className="text-xs text-muted-foreground ml-10">
+                Konular deadline, öncelik, zorluk ve enerji seviyesine göre en uygun saatlere yerleştirilir. 
+                Sabah saatleri (08:00-11:00) zor konular, öğleden sonra (14:00-17:00) orta, akşam düşük enerji gerektiren konular için kullanılır.
+              </p>
+            )}
           </div>
-          {useSmartPlanning && (
-            <p className="text-xs text-muted-foreground ml-10">
-              Konular deadline, öncelik, zorluk ve enerji seviyesine göre en uygun saatlere yerleştirilir. 
-              Sabah saatleri (08:00-11:00) zor konular, öğleden sonra (14:00-17:00) orta, akşam düşük enerji gerektiren konular için kullanılır.
-            </p>
-          )}
+          
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+            >
+              Liste
+            </Button>
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </Button>
+          </div>
         </div>
 
-        {/* Gün bazlı liste görünümü: Pazartesi'den Pazara */}
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1">
@@ -167,7 +189,16 @@ export default function TopicPlanner({ sid }: { sid: string }) {
             <span className="size-2 rounded-full bg-amber-500" /> YDT
           </span>
         </div>
-        <div className="rounded-md border divide-y">
+
+        {viewMode === 'grid' ? (
+          <WeeklyTopicGrid
+            plan={plan}
+            weekStart={weekStart}
+            subjects={subjects}
+            topics={topics}
+          />
+        ) : (
+          <div className="rounded-md border divide-y">
           {DAYS.map((d) => {
             const date = dateFromWeekStartLocal(weekStart, d.value);
             const entries = (planByDate.get(date) || [])
@@ -284,7 +315,8 @@ export default function TopicPlanner({ sid }: { sid: string }) {
               yükleyin.
             </div>
           )}
-        </div>
+          </div>
+        )}
 
         <div className="rounded-md border p-3 space-y-2">
           <div className="text-sm font-medium">Konu Durumları</div>
@@ -351,6 +383,74 @@ export default function TopicPlanner({ sid }: { sid: string }) {
             })}
           </div>
         </div>
+
+        {(getTopicsDueForReview(sid).length > 0 || getUpcomingReviews(sid).length > 0) && (
+          <div className="rounded-md border p-3 space-y-3">
+            <div className="flex items-center gap-2">
+              <RefreshCcw className="h-4 w-4 text-blue-600" />
+              <h3 className="text-sm font-medium">Akıllı Tekrar (Spaced Repetition)</h3>
+            </div>
+            
+            {getTopicsDueForReview(sid).length > 0 && (
+              <>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-medium text-red-600">
+                    <AlertCircle className="h-3 w-3" />
+                    Bugün Tekrar Edilmesi Gerekenler
+                  </div>
+                  {getTopicsDueForReview(sid).map((prog) => {
+                    const topic = topics.find(t => t.id === prog.topicId);
+                    const subject = subjects.find(s => s.id === topic?.subjectId);
+                    if (!topic) return null;
+                    return (
+                      <div key={prog.id} className="flex items-center justify-between p-2 rounded bg-red-50 border border-red-200">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Badge variant="outline" className="bg-white">{subject?.name}</Badge>
+                          <span className="text-xs truncate">{topic.name}</span>
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 bg-blue-50 text-blue-700">
+                            {prog.reviewCount || 0}. tekrar
+                          </Badge>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          Son: {prog.lastStudied || '-'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Separator />
+              </>
+            )}
+            
+            {getUpcomingReviews(sid).length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs font-medium text-blue-600">
+                  <Calendar className="h-3 w-3" />
+                  Yaklaşan Tekrarlar (7 gün)
+                </div>
+                {getUpcomingReviews(sid).slice(0, 5).map((prog) => {
+                  const topic = topics.find(t => t.id === prog.topicId);
+                  const subject = subjects.find(s => s.id === topic?.subjectId);
+                  if (!topic) return null;
+                  return (
+                    <div key={prog.id} className="flex items-center justify-between p-2 rounded bg-blue-50 border border-blue-200">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Badge variant="outline" className="bg-white">{subject?.name}</Badge>
+                        <span className="text-xs truncate">{topic.name}</span>
+                        <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 bg-green-50 text-green-700">
+                          {prog.reviewCount || 0}. tekrar
+                        </Badge>
+                      </div>
+                      <span className="text-[10px] text-blue-700 whitespace-nowrap">
+                        {prog.nextReviewDate}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
