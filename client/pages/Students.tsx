@@ -147,7 +147,7 @@ export default function Students() {
     });
   }, [debouncedQ, sinif, cinsiyet, students]);
 
-  const { register, handleSubmit, reset, setValue, watch } = useForm<Student>({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<Student>({
     defaultValues: {
       id: "",
       ad: "",
@@ -529,24 +529,41 @@ export default function Students() {
                 onSubmit={handleSubmit(onCreate)}
                 className="grid grid-cols-1 md:grid-cols-2 gap-3"
               >
-                <Input
-                  placeholder="Öğrenci No"
-                  inputMode="numeric"
-                  pattern="\\d+"
-                  title="Sadece rakam"
-                  required
-                  {...register("id", { required: true, pattern: /^\d+$/ })}
-                />
-                <Input
-                  placeholder="Ad"
-                  required
-                  {...register("ad", { required: true })}
-                />
-                <Input
-                  placeholder="Soyad"
-                  required
-                  {...register("soyad", { required: true })}
-                />
+                <div className="space-y-1">
+                  <Input
+                    placeholder="Öğrenci No"
+                    inputMode="numeric"
+                    type="text"
+                    {...register("id", { 
+                      required: "Öğrenci numarası zorunludur",
+                      pattern: {
+                        value: /^\d+$/,
+                        message: "Öğrenci numarası sadece rakamlardan oluşmalıdır"
+                      }
+                    })}
+                  />
+                  {errors.id && (
+                    <p className="text-xs text-red-600">{errors.id.message}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    placeholder="Ad"
+                    {...register("ad", { required: "Ad zorunludur" })}
+                  />
+                  {errors.ad && (
+                    <p className="text-xs text-red-600">{errors.ad.message}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Input
+                    placeholder="Soyad"
+                    {...register("soyad", { required: "Soyad zorunludur" })}
+                  />
+                  {errors.soyad && (
+                    <p className="text-xs text-red-600">{errors.soyad.message}</p>
+                  )}
+                </div>
                 <Input placeholder="Sınıf (örn. 9/A)" {...register("sinif")} />
                 <Select
                   onValueChange={(v) => setValue("cinsiyet", v as "K" | "E")}
