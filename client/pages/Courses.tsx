@@ -133,8 +133,34 @@ export default function Courses() {
       return;
     }
     const minutes = Number(topicMinutes || 0) || 0;
-    const difficulty = topicDifficulty ? Number(topicDifficulty) : undefined;
-    const priority = topicPriority ? Number(topicPriority) : undefined;
+    
+    let difficulty: number | undefined = undefined;
+    if (topicDifficulty) {
+      const diffNum = Number(topicDifficulty);
+      if (isNaN(diffNum)) {
+        toast({ title: "Zorluk geçerli bir sayı olmalıdır", variant: "destructive" });
+        return;
+      }
+      if (diffNum < 1 || diffNum > 10) {
+        toast({ title: "Zorluk 1-10 arasında olmalıdır", variant: "destructive" });
+        return;
+      }
+      difficulty = diffNum;
+    }
+    
+    let priority: number | undefined = undefined;
+    if (topicPriority) {
+      const prioNum = Number(topicPriority);
+      if (isNaN(prioNum)) {
+        toast({ title: "Öncelik geçerli bir sayı olmalıdır", variant: "destructive" });
+        return;
+      }
+      if (prioNum < 1 || prioNum > 10) {
+        toast({ title: "Öncelik 1-10 arasında olmalıdır", variant: "destructive" });
+        return;
+      }
+      priority = prioNum;
+    }
     
     const t: StudyTopic = {
       id: crypto.randomUUID(),
@@ -463,8 +489,35 @@ function CategoryPanel(props: {
   async function saveEditTopic() {
     const name = editTopicName.trim();
     const minutes = Number(editTopicMinutes || 0) || 0;
-    const difficulty = editTopicDifficulty ? Number(editTopicDifficulty) : undefined;
-    const priority = editTopicPriority ? Number(editTopicPriority) : undefined;
+    
+    let difficulty: number | undefined = undefined;
+    if (editTopicDifficulty) {
+      const diffNum = Number(editTopicDifficulty);
+      if (isNaN(diffNum)) {
+        toast({ title: "Zorluk geçerli bir sayı olmalıdır", variant: "destructive" });
+        return;
+      }
+      if (diffNum < 1 || diffNum > 10) {
+        toast({ title: "Zorluk 1-10 arasında olmalıdır", variant: "destructive" });
+        return;
+      }
+      difficulty = diffNum;
+    }
+    
+    let priority: number | undefined = undefined;
+    if (editTopicPriority) {
+      const prioNum = Number(editTopicPriority);
+      if (isNaN(prioNum)) {
+        toast({ title: "Öncelik geçerli bir sayı olmalıdır", variant: "destructive" });
+        return;
+      }
+      if (prioNum < 1 || prioNum > 10) {
+        toast({ title: "Öncelik 1-10 arasında olmalıdır", variant: "destructive" });
+        return;
+      }
+      priority = prioNum;
+    }
+    
     if (!editTopicId || !name) return;
     await updateTopic(editTopicId, { 
       name, 
