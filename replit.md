@@ -1,0 +1,116 @@
+# Rehber360 - Student Guidance System
+
+## Overview
+Rehber360 is a comprehensive student guidance and management system with a modern React frontend and Express backend. This is a Turkish language educational application for student tracking, counseling, and administrative tasks.
+
+## Recent Changes
+- **2025-09-30 (Latest)**: Completed edit student functionality in Students page
+  - Added comprehensive edit dialog with form validation and API integration
+  - Fixed Select component bindings to properly use React Hook Form state (watch/setValue)
+  - Corrected ID validation patterns: HTML pattern="\\d+" and React Hook Form pattern: /^\d+$/
+  - Implemented optimistic UI updates with automatic rollback on API failure
+  - Added studentsUpdated event dispatch for cross-component data synchronization
+  - All CRUD operations now functional: create, read, update, delete
+  - Student data persists correctly through API with proper error handling
+- **2025-09-30**: Fresh GitHub import successfully configured for Replit
+  - Installed all npm dependencies (679 packages)
+  - Verified frontend running on port 5000 with proper host configuration (allowedHosts: true)
+  - Confirmed all API endpoints functional (/api/ping, /api/students, /api/subjects, /api/survey-templates, /api/settings)
+  - Validated SQLite database connectivity with existing student and course data
+  - Deployment configuration verified (autoscale target, npm run build, npm start)
+  - No LSP/TypeScript errors - codebase clean and ready
+- **2025-09-30**: Fixed non-functional buttons in Reports page
+  - Converted Reports tabs from uncontrolled to controlled state with activeTab state management
+  - Fixed "Detayları Görüntüle" button to properly navigate to warnings tab
+  - Implemented header "Rapor İndir" button with export format permission validation
+  - Added "Filtreler" dialog with date range, class, and risk level filters
+  - Implemented "E-posta Gönder" button with permission guard (placeholder for backend)
+  - Fixed "Ayarları Düzenle" button to navigate to settings page
+  - Enhanced export security: both header and settings exports now validate format against allowedFormats
+  - Fixed export format policy bypass vulnerability by checking permissions before export
+  - All buttons now functional with proper permission controls and user feedback
+- **2025-09-30**: Fixed async/await race conditions in Courses.tsx
+  - Fixed critical bug where topics were not being deleted due to race conditions
+  - Made all CRUD functions (create, update, delete) properly async with await statements
+  - Updated CategoryPanel TypeScript types to reflect async function signatures (Promise<void>)
+  - Fixed confirmDeleteTopic to await removeTopic before refreshing UI
+  - Fixed confirmDeleteSubject to await removeTopicsBySubject before deleting subject
+  - Fixed bulkAddTopics to await all addTopic operations before refreshing
+  - Fixed saveEditTopic to await updateTopic before refreshing
+  - All operations now complete database writes before UI updates, preventing data loss
+- **2025-09-30**: Fixed subjects and topics persistence issue
+  - Added database migration v5: Added `avgMinutes` and `order` columns to topics table
+  - Updated Topic interface to include avgMinutes and order fields
+  - Updated database service upsert statements to handle all topic fields correctly
+  - Enhanced cache update logic in storage.ts to refresh after all CRUD operations
+  - Fixed data loss on page refresh - all subjects and topics now persist correctly in database
+  - Verified data persistence survives server restarts
+- **2025-09-29**: Added 5 high-priority comprehensive student tracking features
+  - **Health Info & Emergency**: Blood type, chronic diseases, allergies, medications, emergency contacts, physician info
+  - **Special Education (BEP)**: IEP tracking, RAM reports, accommodations, support services, progress monitoring
+  - **Risk Factors & Early Warning**: Academic/behavioral/attendance/social-emotional risk levels, dropout prediction, automated alerts
+  - **Behavior Tracking**: ABC analysis (Antecedent-Behavior-Consequence), incident tracking, intervention effectiveness, pattern analysis
+  - **Exam Results (LGS/YKS)**: Test scores, net analysis, subject breakdown, strength/weakness identification, progress tracking
+  - Created 5 new database tables with full CRUD operations
+  - Implemented REST API endpoints for all features
+  - Added TypeScript types and API functions to client storage layer
+  - All features support detailed documentation, parent notification tracking, and counselor notes
+- **2025-09-29 (Latest)**: Database optimization and reliability improvements
+  - Fixed critical interventions table duplication issue (schema conflict resolved)
+  - Added 30+ performance indexes on all foreign keys and frequently queried columns
+  - Implemented versioned migration system with schema_migrations tracking table
+  - Created automated backup system (createBackup, cleanupOldBackups, scheduleAutoBackup)
+  - Migration v4: Unified interventions schema (date-based structure)
+  - Enhanced database security with .gitignore updates for sensitive files
+- **2025-09-29**: Complete localStorage to SQLite migration
+  - Migrated 11 counseling/guidance features from localStorage to SQLite database
+  - Added database tables: multiple_intelligence, learning_styles, smart_goals, coaching_recommendations, evaluations_360, achievements, self_assessments, parent_meetings, home_visits, family_participation
+  - Created comprehensive REST API endpoints (/api/coaching/*) with CRUD operations
+  - Implemented secure partial update handlers with column whitelisting
+  - Fixed SQL injection vulnerabilities with strict field validation
+  - All data now persists through API endpoints instead of browser storage
+  - Enhanced security with proper error handling and input sanitization
+- **2025-09-29**: Critical bug fixes and improvements
+  - Fixed port conflict by removing stale Vite processes
+  - Fixed rate limiting to use per-endpoint isolation (IP:METHOD:ROUTE pattern)
+  - Added error toast notifications for better user feedback
+  - Added AbortController cleanup to prevent memory leaks
+  - Removed localStorage caching to respect data privacy (API as single source of truth)
+  - Improved input sanitization with comprehensive XSS protection
+- **2025-09-29**: Project successfully imported and configured for Replit
+- Set up development workflow on port 5000 with proper host configuration
+- Verified all API endpoints (/api/ping, /api/students, /api/subjects, /api/survey-templates, etc.)
+- Database connectivity confirmed with SQLite (data.db) containing student and survey data
+- Deployment configuration set up with autoscale target
+- All core functionality tested and working
+
+## Project Architecture
+- **Frontend**: React 18 + TypeScript + Vite
+- **Backend**: Express.js with API routes
+- **Database**: SQLite (data.db) with comprehensive counseling/guidance data tables
+- **UI Framework**: Radix UI + Tailwind CSS + Framer Motion
+- **Package Manager**: NPM (originally PNPM project)
+- **Build System**: Vite for client, separate server build
+- **Development**: Full-stack development with integrated Express middleware
+- **Data Persistence**: All features use API endpoints with SQLite backend (no localStorage)
+
+## Key Features
+- Student management dashboard
+- Turkish language interface
+- Modern responsive design
+- Statistics and analytics
+- Meeting/appointment scheduling
+- Survey and testing modules
+- Report generation capabilities
+
+## Development Setup
+- Development server runs on port 5000
+- Backend API available at `/api/*` endpoints
+- Hot reload enabled for development
+- Both frontend and backend run in single development process
+
+## Deployment
+- Uses autoscale deployment target
+- Build process: `npm run build` (builds both client and server)
+- Start command: `npm start` (runs production server)
+- Production files output to `dist/` directory
