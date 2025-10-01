@@ -1723,18 +1723,31 @@ export async function applyScheduleTemplate(
     
     await saveSubjects(existingSubjects);
 
-    // Şablon slotlarını ekle
-    for (const templateSlot of template.slots) {
-      const newSlot: WeeklySlot = {
-        id: crypto.randomUUID(),
-        studentId,
-        day: templateSlot.day,
-        start: templateSlot.start,
-        end: templateSlot.end,
-        subjectId: templateSlot.subjectId
-      };
-      await addWeeklySlot(newSlot);
+    // Şablon slotlarını toplu olarak ekle (performans için)
+    const newSlots: WeeklySlot[] = template.slots.map(templateSlot => ({
+      id: crypto.randomUUID(),
+      studentId,
+      day: templateSlot.day,
+      start: templateSlot.start,
+      end: templateSlot.end,
+      subjectId: templateSlot.subjectId
+    }));
+    
+    // Toplu olarak sunucuya gönder
+    const response = await fetch('/api/weekly-slots', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSlots)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to add weekly slots');
     }
+    
+    // Cache'i güncelle ve sadece bir kez event fire et
+    const currentSlots = loadWeeklySlots();
+    weeklySlotsCache = [...currentSlots, ...newSlots];
+    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
 
     toast.success(`"${template.name}" şablonu uygulandı`, {
       description: `${template.estimatedWeeklyHours} saatlik program eklendi`

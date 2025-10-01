@@ -151,6 +151,16 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
   }, [sid, pushHistory]);
 
   useEffect(() => {
+    const handleSlotsUpdate = () => {
+      const updatedSlots = getWeeklySlotsByStudent(sid).slice().sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
+      pushHistory(updatedSlots, 'update', true);
+    };
+    
+    window.addEventListener('weeklySlotsUpdated', handleSlotsUpdate);
+    return () => window.removeEventListener('weeklySlotsUpdated', handleSlotsUpdate);
+  }, [sid, pushHistory]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
@@ -517,10 +527,6 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           <div className="flex gap-2">
             <ScheduleTemplateDialog
               studentId={sid}
-              onApplied={() => {
-                const updatedSlots = getWeeklySlotsByStudent(sid);
-                pushHistory(updatedSlots, 'template');
-              }}
             />
             
             <Button

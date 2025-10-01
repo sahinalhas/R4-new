@@ -4,7 +4,13 @@
 Rehber360 is a comprehensive student guidance and management system with a modern React frontend and Express backend. This is a Turkish language educational application for student tracking, counseling, and administrative tasks.
 
 ## Recent Changes
-- **2025-10-01 (Latest)**: Calendar system enhancements - Template scheduling, spaced repetition, and grid view
+- **2025-10-01 (Latest)**: Fixed schedule template application not reflecting in calendar
+  - **Issue**: When users applied schedule templates (Şablon Kullan), changes weren't visible in the calendar view
+  - **Root Cause**: WeeklySchedule component wasn't listening to 'weeklySlotsUpdated' events
+  - **Solution**: Added event listener in WeeklySchedule to refresh slots when templates are applied
+  - **Performance Optimization**: Converted applyScheduleTemplate to batch all slots in single API request
+  - **Result**: Templates now immediately reflect in calendar after clicking "Şablonu Uygula" button
+- **2025-10-01**: Calendar system enhancements - Template scheduling, spaced repetition, and grid view
   - **Template (Şablon) System**: Added predefined schedule templates (LGS Dengeli Program, TYT Yoğun Program, AYT Dengeli Program, YKS Dengeli Program, Hafta Sonu Yoğun, Akşam Ağırlıklı, Sabah Odaklı, Dengeli Program)
   - Created ScheduleTemplateDialog component with 8 templates including subject breakdown and time allocation
   - Templates include automatic subject creation and weekly slot generation with undo/redo support
