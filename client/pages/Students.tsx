@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,8 +31,83 @@ import {
 import { useForm } from "react-hook-form";
 import { Student, loadStudents, saveStudents, refreshStudentsFromAPI, upsertStudent } from "@/lib/storage";
 
+function useDebounced<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+const StudentRow = memo(({ 
+  student, 
+  onEditClick, 
+  onDeleteClick 
+}: { 
+  student: Student; 
+  onEditClick: (s: Student) => void; 
+  onDeleteClick: (s: Student) => void;
+}) => {
+  return (
+    <TableRow>
+      <TableCell>{student.id}</TableCell>
+      <TableCell>{student.ad}</TableCell>
+      <TableCell>{student.soyad}</TableCell>
+      <TableCell>{student.sinif}</TableCell>
+      <TableCell>{student.cinsiyet === "E" ? "Erkek" : "Kız"}</TableCell>
+      <TableCell>
+        <span
+          className={
+            student.risk === "Yüksek"
+              ? "px-2 py-1 rounded text-xs bg-red-100 text-red-700"
+              : student.risk === "Orta"
+                ? "px-2 py-1 rounded text-xs bg-amber-100 text-amber-700"
+                : "px-2 py-1 rounded text-xs bg-emerald-100 text-emerald-700"
+          }
+        >
+          {student.risk}
+        </span>
+      </TableCell>
+      <TableCell>
+        <Button asChild size="sm" variant="outline">
+          <Link to={`/ogrenci/${student.id}`}>Görüntüle</Link>
+        </Button>
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => onEditClick(student)}
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="destructive"
+            onClick={() => onDeleteClick(student)}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+StudentRow.displayName = 'StudentRow';
+
 export default function Students() {
   const [q, setQ] = useState("");
+  const debouncedQ = useDebounced(q, 300);
   const [sinif, setSinif] = useState<string>("tum");
   const [cinsiyet, setCinsiyet] = useState<string>("tum");
   const [students, setStudents] = useState<Student[]>([]);
@@ -60,20 +135,17 @@ export default function Students() {
     };
   }, []);
 
-  // Removed auto-save on students change to prevent data corruption
-  // Students will only be saved on explicit create/update actions
-
   const list = useMemo(() => {
     return students.filter((s) => {
       const matchesQ = `${s.id} ${s.ad} ${s.soyad}`
         .toLowerCase()
-        .includes(q.toLowerCase());
+        .includes(debouncedQ.toLowerCase());
       const matchesSinif = sinif === "tum" || s.sinif.startsWith(sinif);
       const matchesC =
         cinsiyet === "tum" || s.cinsiyet === (cinsiyet as "K" | "E");
       return matchesQ && matchesSinif && matchesC;
     });
-  }, [q, sinif, cinsiyet, students]);
+  }, [debouncedQ, sinif, cinsiyet, students]);
 
   const { register, handleSubmit, reset, setValue, watch } = useForm<Student>({
     defaultValues: {
@@ -558,70 +630,35 @@ export default function Students() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Öğrenci Listesi</CardTitle>
+          <CardTitle>Öğrenci Listesi ({list.length} öğrenci)</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>No</TableHead>
-                <TableHead>Ad</TableHead>
-                <TableHead>Soyad</TableHead>
-                <TableHead>Sınıf</TableHead>
-                <TableHead>Cinsiyet</TableHead>
-                <TableHead>Risk</TableHead>
-                <TableHead>Profil</TableHead>
-                <TableHead>İşlemler</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {list.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell>{s.id}</TableCell>
-                  <TableCell>{s.ad}</TableCell>
-                  <TableCell>{s.soyad}</TableCell>
-                  <TableCell>{s.sinif}</TableCell>
-                  <TableCell>{s.cinsiyet === "E" ? "Erkek" : "Kız"}</TableCell>
-                  <TableCell>
-                    <span
-                      className={
-                        s.risk === "Yüksek"
-                          ? "px-2 py-1 rounded text-xs bg-red-100 text-red-700"
-                          : s.risk === "Orta"
-                            ? "px-2 py-1 rounded text-xs bg-amber-100 text-amber-700"
-                            : "px-2 py-1 rounded text-xs bg-emerald-100 text-emerald-700"
-                      }
-                    >
-                      {s.risk}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button asChild size="sm" variant="outline">
-                      <Link to={`/ogrenci/${s.id}`}>Görüntüle</Link>
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => onEditClick(s)}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={() => onDeleteClick(s)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-auto border rounded-md max-h-[600px]">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                  <TableHead>No</TableHead>
+                  <TableHead>Ad</TableHead>
+                  <TableHead>Soyad</TableHead>
+                  <TableHead>Sınıf</TableHead>
+                  <TableHead>Cinsiyet</TableHead>
+                  <TableHead>Risk</TableHead>
+                  <TableHead>Profil</TableHead>
+                  <TableHead>İşlemler</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {list.map((student) => (
+                  <StudentRow
+                    key={student.id}
+                    student={student}
+                    onEditClick={onEditClick}
+                    onDeleteClick={onDeleteClick}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
