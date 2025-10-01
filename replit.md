@@ -4,7 +4,15 @@
 Rehber360 is a comprehensive student guidance and management system with a modern React frontend and Express backend. This is a Turkish language educational application for student tracking, counseling, and administrative tasks.
 
 ## Recent Changes
-- **2025-10-01 (Latest)**: Fresh GitHub import successfully set up for Replit
+- **2025-10-01 (Latest)**: Fixed weekly schedule persistence issue
+  - Resolved field name mismatch between client (start/end) and database (startTime/endTime)
+  - Updated server handlers to accept both field naming conventions and transform appropriately
+  - Fixed client-side CRUD functions to use individual API endpoints (POST/PUT/DELETE) instead of bulk updates
+  - Updated all drag-and-drop and resize operations to send complete slot objects, preventing field nulling
+  - Added strict validation to server's update handler to reject incomplete payloads
+  - Added weeklySlotsUpdated event listener to WeeklySchedule component for proper initial data loading
+  - Weekly lesson slots now correctly persist across page refreshes
+- **2025-10-01**: Fresh GitHub import successfully set up for Replit
   - Unzipped R4-main.zip archive and moved contents to project root
   - Installed Node.js 20 and all npm dependencies (670 packages)
   - Created .gitignore file with Node.js and Replit specific ignores
