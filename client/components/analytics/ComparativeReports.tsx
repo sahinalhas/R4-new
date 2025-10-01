@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ interface BenchmarkData {
 
 // =================== VERİ İŞLEME FONKSİYONLARI ===================
 
-function generateDemographicComparisons(): DemographicComparison[] {
+async function generateDemographicComparisons(): Promise<DemographicComparison[]> {
   const students = loadStudents();
   const comparisons: DemographicComparison[] = [];
 
@@ -76,18 +76,16 @@ function generateDemographicComparisons(): DemographicComparison[] {
     groups: [],
   };
 
-  genderGroups.forEach((groupStudents, genderName) => {
+  for (const [genderName, groupStudents] of genderGroups.entries()) {
     const studentIds = groupStudents.map(s => s.id);
-    const successRates = studentIds.map(id => predictStudentSuccess(id));
-    const attendanceRates = studentIds.map(id => 
-      calculateAttendanceRate(getStudentPerformanceData(id).attendance)
-    );
+    const successRates = await Promise.all(studentIds.map(id => predictStudentSuccess(id)));
+    const performanceData = await Promise.all(studentIds.map(id => getStudentPerformanceData(id)));
+    const attendanceRates = performanceData.map(data => calculateAttendanceRate(data.attendance));
     
     // GPA hesaplama
     const gpaValues: number[] = [];
-    studentIds.forEach(id => {
-      const academics = getStudentPerformanceData(id).academics;
-      const recentGPA = academics
+    performanceData.forEach(data => {
+      const recentGPA = data.academics
         .filter(a => a.gpa !== undefined)
         .sort((a, b) => b.term.localeCompare(a.term))[0];
       if (recentGPA) gpaValues.push(recentGPA.gpa!);
@@ -108,18 +106,18 @@ function generateDemographicComparisons(): DemographicComparison[] {
       attendanceRate: attendanceRates.reduce((sum, rate) => sum + rate, 0) / attendanceRates.length,
       riskDistribution: riskCounts,
     });
-  });
+  }
 
   comparisons.push(genderComparison);
 
   // Sınıfa göre karşılaştırma
-  const classComparisons = generateClassComparisons();
+  const classComparisons = await generateClassComparisons();
   const classComparison: DemographicComparison = {
     category: "Sınıf",
     groups: classComparisons.map(cls => ({
       name: cls.className,
       studentCount: cls.studentCount,
-      averageSuccess: cls.averageGPA / 4.0, // GPA'dan başarı oranına dönüştür
+      averageSuccess: cls.averageGPA / 4.0,
       averageGPA: cls.averageGPA,
       attendanceRate: cls.attendanceRate,
       riskDistribution: cls.riskDistribution,
@@ -131,8 +129,8 @@ function generateDemographicComparisons(): DemographicComparison[] {
   return comparisons;
 }
 
-function generatePerformanceMetrics(): PerformanceMetrics[] {
-  const classComparisons = generateClassComparisons();
+async function generatePerformanceMetrics(): Promise<PerformanceMetrics[]> {
+  const classComparisons = await generateClassComparisons();
   
   return [
     {
@@ -162,45 +160,45 @@ function generatePerformanceMetrics(): PerformanceMetrics[] {
   ];
 }
 
-function generateBenchmarkData(): BenchmarkData[] {
+async function generateBenchmarkData(): Promise<BenchmarkData[]> {
   const students = loadStudents();
   const totalStudents = students.length;
 
   // Genel başarı oranı
-  const successRates = students.map(s => predictStudentSuccess(s.id));
+  const successRates = await Promise.all(students.map(s => predictStudentSuccess(s.id)));
   const averageSuccess = successRates.reduce((sum, rate) => sum + rate, 0) / successRates.length;
 
   // Devam oranı
-  const attendanceRates = students.map(s => 
-    calculateAttendanceRate(getStudentPerformanceData(s.id).attendance)
-  );
+  const performanceData = await Promise.all(students.map(s => getStudentPerformanceData(s.id)));
+  const attendanceRates = performanceData.map(data => calculateAttendanceRate(data.attendance));
   const averageAttendance = attendanceRates.reduce((sum, rate) => sum + rate, 0) / attendanceRates.length;
 
   // Risk dağılımı
-  const highRiskCount = students.filter(s => calculateRiskScore(s.id) > 0.6).length;
+  const riskScores = await Promise.all(students.map(s => calculateRiskScore(s.id)));
+  const highRiskCount = riskScores.filter(score => score > 0.6).length;
   const riskPercentage = (highRiskCount / totalStudents) * 100;
 
   return [
     {
       category: "Genel Başarı Oranı",
       current: averageSuccess * 100,
-      target: 85, // %85 hedef
-      benchmark: 78, // Okul ortalaması
-      national: 75, // Ulusal ortalama
+      target: 85,
+      benchmark: 78,
+      national: 75,
     },
     {
       category: "Devam Oranı",
       current: averageAttendance * 100,
-      target: 95, // %95 hedef
-      benchmark: 87, // Okul ortalaması
-      national: 85, // Ulusal ortalama
+      target: 95,
+      benchmark: 87,
+      national: 85,
     },
     {
       category: "Risk Altında Öğrenci",
       current: riskPercentage,
-      target: 5, // %5 hedef (düşük olmalı)
-      benchmark: 12, // Okul ortalaması
-      national: 15, // Ulusal ortalama
+      target: 5,
+      benchmark: 12,
+      national: 15,
     },
   ];
 }
@@ -402,10 +400,17 @@ export function BenchmarkComparison({ benchmarks }: { benchmarks: BenchmarkData[
 }
 
 export default function ComparativeReports() {
-  const demographicComparisons = useMemo(() => generateDemographicComparisons(), []);
-  const performanceMetrics = useMemo(() => generatePerformanceMetrics(), []);
-  const benchmarkData = useMemo(() => generateBenchmarkData(), []);
-  const classComparisons = useMemo(() => generateClassComparisons(), []);
+  const [demographicComparisons, setDemographicComparisons] = useState<DemographicComparison[]>([]);
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics[]>([]);
+  const [benchmarkData, setBenchmarkData] = useState<BenchmarkData[]>([]);
+  const [classComparisons, setClassComparisons] = useState<any[]>([]);
+
+  useEffect(() => {
+    generateDemographicComparisons().then(setDemographicComparisons);
+    generatePerformanceMetrics().then(setPerformanceMetrics);
+    generateBenchmarkData().then(setBenchmarkData);
+    generateClassComparisons().then(setClassComparisons);
+  }, []);
 
   // Risk dağılımı için veri hazırlama
   const riskDistributionData = useMemo(() => {

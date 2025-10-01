@@ -98,25 +98,39 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
   }, []);
 
   // Genel istatistikler
-  const overallStats = useMemo(() => {
-    const totalStudents = students.length;
-    const predictedSuccessRates = students.map(s => predictStudentSuccess(s.id));
-    const averageSuccessRate = predictedSuccessRates.reduce((sum, rate) => sum + rate, 0) / predictedSuccessRates.length;
-    
-    const highSuccessCount = predictedSuccessRates.filter(rate => rate >= 0.8).length;
-    const atRiskCount = students.filter(s => calculateRiskScore(s.id) > 0.6).length;
-    
-    const criticalWarnings = warnings.filter(w => w.severity === "kritik").length;
-    const activeWarnings = warnings.length;
+  const [overallStats, setOverallStats] = useState({
+    totalStudents: 0,
+    averageSuccessRate: 0,
+    highSuccessCount: 0,
+    atRiskCount: 0,
+    criticalWarnings: 0,
+    activeWarnings: 0,
+  });
 
-    return {
-      totalStudents,
-      averageSuccessRate: averageSuccessRate * 100,
-      highSuccessCount,
-      atRiskCount,
-      criticalWarnings,
-      activeWarnings,
+  useEffect(() => {
+    const calculateStats = async () => {
+      const totalStudents = students.length;
+      const predictedSuccessRates = await Promise.all(students.map(s => predictStudentSuccess(s.id)));
+      const averageSuccessRate = predictedSuccessRates.reduce((sum, rate) => sum + rate, 0) / predictedSuccessRates.length;
+      
+      const highSuccessCount = predictedSuccessRates.filter(rate => rate >= 0.8).length;
+      const riskScores = await Promise.all(students.map(s => calculateRiskScore(s.id)));
+      const atRiskCount = riskScores.filter(score => score > 0.6).length;
+      
+      const criticalWarnings = warnings.filter(w => w.severity === "kritik").length;
+      const activeWarnings = warnings.length;
+
+      setOverallStats({
+        totalStudents,
+        averageSuccessRate: averageSuccessRate * 100,
+        highSuccessCount,
+        atRiskCount,
+        criticalWarnings,
+        activeWarnings,
+      });
     };
+    
+    calculateStats();
   }, [students, warnings]);
 
   // Risk dağılımı
@@ -237,7 +251,7 @@ function ExportSettings() {
     return user ? getExportPermissions(user.role) : { canExportAll: false, canExportFiltered: false, allowedFormats: [] };
   }, [user]);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!exportPermissions.canExportFiltered && !exportPermissions.canExportAll) {
       alert('Bu işlem için yetkiniz bulunmamaktadır.');
       return;
@@ -250,13 +264,16 @@ function ExportSettings() {
     
     try {
       const endTimer = performanceMonitor.startTiming('exportAnalyticsData');
-      const data = exportAnalyticsData(exportFormat, {
+      const rawData = await exportAnalyticsData({
         includePersonalData: includePersonalData && hasPermission('view_sensitive_data'),
-        maxRecords: exportPermissions.maxRecords,
       });
       endTimer();
       
-      const blob = new Blob([data], { 
+      const dataString = exportFormat === "json" 
+        ? JSON.stringify(rawData, null, 2)
+        : convertToCSV(rawData);
+      
+      const blob = new Blob([dataString], { 
         type: exportFormat === "json" ? "application/json" : "text/csv" 
       });
       const url = URL.createObjectURL(blob);
@@ -272,6 +289,16 @@ function ExportSettings() {
       alert('Rapor ihracı sırasında hata oluştu.');
     }
   };
+  
+  function convertToCSV(data: any[]): string {
+    if (data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const csvRows = [
+      headers.join(','),
+      ...data.map(row => headers.map(field => JSON.stringify(row[field] || '')).join(','))
+    ];
+    return csvRows.join('\n');
+  }
 
   return (
     <div className="space-y-6">
@@ -430,7 +457,7 @@ export default function Reports() {
     return user ? getExportPermissions(user.role) : { canExportAll: false, canExportFiltered: false, allowedFormats: [] };
   }, [user]);
 
-  const handleHeaderExport = () => {
+  const handleHeaderExport = async () => {
     if (!exportPermissions.canExportFiltered && !exportPermissions.canExportAll) {
       alert('Bu işlem için yetkiniz bulunmamaktadır.');
       return;
@@ -444,13 +471,16 @@ export default function Reports() {
     const format = exportPermissions.allowedFormats[0] as "json" | "csv";
     
     try {
-      const data = exportAnalyticsData(format, {
+      const rawData = await exportAnalyticsData({
         includePersonalData: hasPermission('view_sensitive_data'),
-        maxRecords: exportPermissions.maxRecords,
       });
       
+      const dataString = format === "json" 
+        ? JSON.stringify(rawData, null, 2)
+        : convertToCSV(rawData);
+      
       const mimeType = format === "json" ? "application/json" : "text/csv";
-      const blob = new Blob([data], { type: mimeType });
+      const blob = new Blob([dataString], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -464,6 +494,16 @@ export default function Reports() {
       alert('Rapor ihracı sırasında hata oluştu.');
     }
   };
+  
+  function convertToCSV(data: any[]): string {
+    if (data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const csvRows = [
+      headers.join(','),
+      ...data.map(row => headers.map(field => JSON.stringify(row[field] || '')).join(','))
+    ];
+    return csvRows.join('\n');
+  }
   
   if (!user) {
     return (

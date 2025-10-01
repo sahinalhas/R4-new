@@ -421,7 +421,7 @@ export const analyzeStudent = memoize(
 
 // =================== CLASS COMPARISON ===================
 
-export async function compareClasses(options: {
+export async function generateClassComparisons(options: {
   includePersonalData?: boolean;
 } = {}): Promise<ClassComparison[]> {
   const students = loadStudents();
@@ -492,6 +492,42 @@ export async function compareClasses(options: {
   }
 
   return comparisons.sort((a, b) => b.averageGPA - a.averageGPA);
+}
+
+// =================== PROGRESS TIMELINE ===================
+
+export function generateProgressTimeline(studentId: string): ProgressTrend[] {
+  const progress = getProgressByStudent(studentId);
+  const sessions = [];
+  
+  const dateMap = new Map<string, { total: number; count: number }>();
+  
+  progress.forEach(p => {
+    if (p.completed && p.completedDate) {
+      const date = p.completedDate.split('T')[0];
+      if (!dateMap.has(date)) {
+        dateMap.set(date, { total: 0, count: 0 });
+      }
+      const entry = dateMap.get(date)!;
+      entry.count += 1;
+    }
+  });
+  
+  const timeline: ProgressTrend[] = [];
+  const sortedDates = Array.from(dateMap.keys()).sort();
+  
+  let cumulative = 0;
+  sortedDates.forEach(date => {
+    const entry = dateMap.get(date)!;
+    cumulative += entry.count;
+    timeline.push({
+      date,
+      value: cumulative,
+      type: 'academic'
+    });
+  });
+  
+  return timeline;
 }
 
 // =================== EXPORT DATA ===================
