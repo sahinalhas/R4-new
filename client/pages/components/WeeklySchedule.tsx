@@ -204,7 +204,7 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
 
   const filteredSubjects = useMemo(() => {
     if (selectedCategory === "Okul dersleri") {
-      return subjects;
+      return subjects.filter((s) => !s.category);
     }
     return subjects.filter((s) => s.category === selectedCategory);
   }, [subjects, selectedCategory]);
