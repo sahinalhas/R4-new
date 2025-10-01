@@ -4,7 +4,20 @@
 Rehber360 is a comprehensive student guidance and management system with a modern React frontend and Express backend. This is a Turkish language educational application for student tracking, counseling, and administrative tasks.
 
 ## Recent Changes
-- **2025-10-01 (Latest)**: Fixed weekly schedule persistence issue
+- **2025-10-01 (Latest)**: Calendar system enhancements - Template scheduling, spaced repetition, and grid view
+  - **Template (Şablon) System**: Added predefined schedule templates (LGS Dengeli Program, TYT Yoğun Program, AYT Dengeli Program, YKS Dengeli Program, Hafta Sonu Yoğun, Akşam Ağırlıklı, Sabah Odaklı, Dengeli Program)
+  - Created ScheduleTemplateDialog component with 8 templates including subject breakdown and time allocation
+  - Templates include automatic subject creation and weekly slot generation with undo/redo support
+  - **Spaced Repetition (Akıllı Tekrar)**: Implemented Ebbinghaus forgetting curve-based review system
+  - Added lastStudied, reviewCount, nextReviewDate fields to TopicProgress
+  - Review intervals: 1, 3, 7, 14, 30, 60, 90 days based on study count
+  - TopicPlanner shows "Bugün Tekrar Edilmesi Gerekenler" and "Yaklaşan Tekrarlar" sections
+  - **Grid View Activation**: Integrated WeeklyTopicGrid into TopicPlanner with toggle button
+  - Users can switch between list and grid view for topic visualization
+  - **Performance Optimizations**: Added debounced saves (100ms) after resize operations
+  - Optimistic UI updates for immediate feedback during drag/drop and resize
+  - Existing undo/redo system (Ctrl+Z/Y) works with all new features
+- **2025-10-01**: Fixed weekly schedule persistence issue
   - Resolved field name mismatch between client (start/end) and database (startTime/endTime)
   - Updated server handlers to accept both field naming conventions and transform appropriately
   - Fixed client-side CRUD functions to use individual API endpoints (POST/PUT/DELETE) instead of bulk updates
