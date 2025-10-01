@@ -1650,7 +1650,19 @@ export async function planWeekSmart(
       const candidateTopics = subjectTopics
         .filter(t => {
           const prog = progMap.get(t.id);
-          return prog && !prog.done && prog.remaining > 0;
+          if (!prog || prog.done || prog.remaining <= 0) return false;
+          
+          // Prerequisite kontrolü
+          if (t.prerequisites && t.prerequisites.length > 0) {
+            for (const prereqId of t.prerequisites) {
+              const prereqProg = progMap.get(prereqId);
+              if (!prereqProg || !prereqProg.done) {
+                return false; // Prerequisite tamamlanmamış
+              }
+            }
+          }
+          
+          return true;
         })
         .map(t => ({
           topic: t,

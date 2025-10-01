@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Clock, AlertCircle, Zap, TrendingUp } from "lucide-react";
 import {
   loadSubjects,
   loadTopics,
@@ -27,6 +28,28 @@ function mondayOf(dateISO: string) {
   const wd = d.getDay() === 0 ? 7 : d.getDay(); // 1..7
   const monday = new Date(d.getTime() - (wd - 1) * 24 * 60 * 60 * 1000);
   return monday.toISOString().slice(0, 10);
+}
+
+function getDeadlineUrgency(deadline?: string) {
+  if (!deadline) return null;
+  const today = new Date();
+  const deadlineDate = new Date(deadline);
+  const daysUntil = Math.floor(
+    (deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  
+  if (daysUntil < 0) return { level: 'expired', text: 'Geçti', color: 'text-red-600 bg-red-50' };
+  if (daysUntil <= 3) return { level: 'urgent', text: `${daysUntil}g`, color: 'text-red-600 bg-red-50' };
+  if (daysUntil <= 7) return { level: 'soon', text: `${daysUntil}g`, color: 'text-orange-600 bg-orange-50' };
+  if (daysUntil <= 14) return { level: 'upcoming', text: `${daysUntil}g`, color: 'text-yellow-600 bg-yellow-50' };
+  return null;
+}
+
+function getEnergyIcon(energyLevel?: 'high' | 'medium' | 'low') {
+  if (!energyLevel) return null;
+  if (energyLevel === 'high') return { icon: Zap, color: 'text-green-600', title: 'Yüksek enerji' };
+  if (energyLevel === 'medium') return { icon: TrendingUp, color: 'text-blue-600', title: 'Orta enerji' };
+  return { icon: Clock, color: 'text-gray-600', title: 'Düşük enerji' };
 }
 
 export default function TopicPlanner({ sid }: { sid: string }) {
@@ -112,15 +135,23 @@ export default function TopicPlanner({ sid }: { sid: string }) {
           </Button>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="smart-planning"
-            checked={useSmartPlanning}
-            onCheckedChange={setUseSmartPlanning}
-          />
-          <Label htmlFor="smart-planning" className="text-sm">
-            Akıllı Planlama (Zorluk, öncelik ve enerji seviyesine göre)
-          </Label>
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="smart-planning"
+              checked={useSmartPlanning}
+              onCheckedChange={setUseSmartPlanning}
+            />
+            <Label htmlFor="smart-planning" className="text-sm">
+              Akıllı Planlama
+            </Label>
+          </div>
+          {useSmartPlanning && (
+            <p className="text-xs text-muted-foreground ml-10">
+              Konular deadline, öncelik, zorluk ve enerji seviyesine göre en uygun saatlere yerleştirilir. 
+              Sabah saatleri (08:00-11:00) zor konular, öğleden sonra (14:00-17:00) orta, akşam düşük enerji gerektiren konular için kullanılır.
+            </p>
+          )}
         </div>
 
         {/* Gün bazlı liste görünümü: Pazartesi'den Pazara */}
@@ -181,6 +212,8 @@ export default function TopicPlanner({ sid }: { sid: string }) {
                               ),
                             )
                           : 0;
+                      const deadlineInfo = getDeadlineUrgency(top?.deadline);
+                      const energyInfo = getEnergyIcon(top?.energyLevel);
                       return (
                         <div
                           key={`${p.topicId}-${i}`}
@@ -199,8 +232,32 @@ export default function TopicPlanner({ sid }: { sid: string }) {
                                   : ""} — {top?.name}
                               </span>
                             </div>
-                            <div className="text-xs text-muted-foreground whitespace-nowrap">
-                              {p.allocated} dk
+                            <div className="flex items-center gap-1">
+                              {deadlineInfo && (
+                                <Badge className={`text-[10px] px-1 py-0 h-5 ${deadlineInfo.color}`} variant="outline">
+                                  <Clock className="size-3 mr-0.5" />
+                                  {deadlineInfo.text}
+                                </Badge>
+                              )}
+                              {energyInfo && (
+                                <div className={`${energyInfo.color}`} title={energyInfo.title}>
+                                  <energyInfo.icon className="size-3.5" />
+                                </div>
+                              )}
+                              {top?.difficultyScore && top.difficultyScore >= 7 && (
+                                <Badge className="text-[10px] px-1 py-0 h-5 bg-red-50 text-red-700" variant="outline">
+                                  Zor
+                                </Badge>
+                              )}
+                              {top?.priority && top.priority >= 7 && (
+                                <Badge className="text-[10px] px-1 py-0 h-5 bg-purple-50 text-purple-700" variant="outline">
+                                  <AlertCircle className="size-3 mr-0.5" />
+                                  Önemli
+                                </Badge>
+                              )}
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                {p.allocated} dk
+                              </span>
                             </div>
                           </div>
                           <div className="mt-2 h-1.5 w-full rounded bg-muted overflow-hidden">
@@ -239,6 +296,8 @@ export default function TopicPlanner({ sid }: { sid: string }) {
               const sub = subjects.find((s) => s.id === t.subjectId);
               const prog = progressByTopic.get(t.id);
               if (!prog) return null;
+              const deadlineInfo = getDeadlineUrgency(t.deadline);
+              const energyInfo = getEnergyIcon(t.energyLevel);
               return (
                 <div
                   key={t.id}
@@ -249,6 +308,28 @@ export default function TopicPlanner({ sid }: { sid: string }) {
                     <span className="truncate" title={t.name}>
                       {t.name}
                     </span>
+                    {deadlineInfo && (
+                      <Badge className={`text-[10px] px-1 py-0 h-5 ${deadlineInfo.color}`} variant="outline">
+                        <Clock className="size-3 mr-0.5" />
+                        {deadlineInfo.text}
+                      </Badge>
+                    )}
+                    {energyInfo && (
+                      <div className={`${energyInfo.color}`} title={energyInfo.title}>
+                        <energyInfo.icon className="size-3.5" />
+                      </div>
+                    )}
+                    {t.difficultyScore && t.difficultyScore >= 7 && (
+                      <Badge className="text-[10px] px-1 py-0 h-5 bg-red-50 text-red-700" variant="outline">
+                        Zor
+                      </Badge>
+                    )}
+                    {t.priority && t.priority >= 7 && (
+                      <Badge className="text-[10px] px-1 py-0 h-5 bg-purple-50 text-purple-700" variant="outline">
+                        <AlertCircle className="size-3 mr-0.5" />
+                        Önemli
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">
