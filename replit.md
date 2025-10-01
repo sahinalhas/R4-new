@@ -4,7 +4,19 @@
 Rehber360 is a comprehensive student guidance and management system with a modern React frontend and Express backend. This is a Turkish language educational application for student tracking, counseling, and administrative tasks.
 
 ## Recent Changes
-- **2025-10-01 (Latest)**: Fixed schedule template application not reflecting in calendar
+- **2025-10-01 (Latest)**: Implemented automatic intervention system for students
+  - **Otomatik Müdahale Sistemi**: Created comprehensive automatic intervention creation system
+  - System monitors student risk levels (risk score >= 0.5: Orta, Yüksek, Kritik)
+  - Automatically creates intervention records for high-risk students without active interventions
+  - Prevents duplicate interventions by checking for existing active plans
+  - **New File**: client/lib/automatic-interventions.ts - Core automatic intervention logic
+  - **UI Integration**: Added "Otomatik Müdahale Oluştur" button to Early Warning System
+  - **Results Display**: New "Otomatik Müdahaleler" tab shows intervention creation results
+  - Intervention titles auto-generated based on warning type (Devamsızlık, Akademik, Davranışsal, Kapsamlı Risk)
+  - Toast notifications provide immediate feedback on intervention creation
+  - Fixed duplicate intervention bug where system was calling creation function twice
+  - Added loading states and visual indicators for better UX
+- **2025-10-01**: Fixed schedule template application not reflecting in calendar
   - **Issue**: When users applied schedule templates (Şablon Kullan), changes weren't visible in the calendar view
   - **Root Cause**: WeeklySchedule component wasn't listening to 'weeklySlotsUpdated' events
   - **Solution**: Added event listener in WeeklySchedule to refresh slots when templates are applied
