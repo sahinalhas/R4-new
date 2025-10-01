@@ -122,7 +122,7 @@ type SuggestedCell = { day: 1 | 2 | 3 | 4 | 5 | 6 | 7; startMin: number };
 export default function WeeklySchedule({ sid }: { sid: string }) {
   const [subjects, setSubjects] = useState<Awaited<ReturnType<typeof loadSubjects>>>([]);
   const [error, setError] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<"LGS" | "YKS" | "TYT" | "AYT" | "YDT" | "Tümü">("Tümü");
+  const [selectedCategory, setSelectedCategory] = useState<"LGS" | "YKS" | "TYT" | "AYT" | "YDT" | "Okul dersleri">("Okul dersleri");
   const [suggestedCells, setSuggestedCells] = useState<SuggestedCell[]>([]);
   const calendarRef = useRef<HTMLDivElement | null>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -203,7 +203,7 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
   const warnHigh = totalMin > 10 * 60;
 
   const filteredSubjects = useMemo(() => {
-    if (selectedCategory === "Tümü") {
+    if (selectedCategory === "Okul dersleri") {
       return subjects;
     }
     return subjects.filter((s) => s.category === selectedCategory);
@@ -582,10 +582,10 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
           <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
-              variant={selectedCategory === "Tümü" ? "default" : "outline"}
-              onClick={() => setSelectedCategory("Tümü")}
+              variant={selectedCategory === "Okul dersleri" ? "default" : "outline"}
+              onClick={() => setSelectedCategory("Okul dersleri")}
             >
-              Tümü
+              Okul dersleri
             </Button>
             <Button
               size="sm"
