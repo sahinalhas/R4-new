@@ -19,6 +19,7 @@ import {
   WeeklySlot,
   weeklyTotalMinutes,
 } from "@/lib/storage";
+import { toast } from "sonner";
 
 const DAYS: { value: 1 | 2 | 3 | 4 | 5 | 6 | 7; label: string }[] = [
   { value: 1, label: "Pazartesi" },
@@ -41,7 +42,7 @@ function toMin(t: string) {
   return h * 60 + m;
 }
 function fmt(mins: number) {
-  const m = Math.max(0, Math.min(mins, END_MIN - 1));
+  const m = Math.max(0, Math.min(mins, END_MIN));
   const h = Math.floor(m / 60);
   const mm = m % 60;
   return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
@@ -55,12 +56,66 @@ function overlaps(a: WeeklySlot, b: WeeklySlot) {
   return Math.max(s1, s2) < Math.min(e1, e2);
 }
 
+function canPlace(
+  day: 1 | 2 | 3 | 4 | 5 | 6 | 7,
+  startMin: number,
+  duration: number,
+  slots: WeeklySlot[]
+): boolean {
+  if (startMin < START_MIN || startMin % STEP !== 0) return false;
+  const endMin = startMin + duration;
+  if (endMin > END_MIN || duration < STEP) return false;
+  
+  const testSlot: WeeklySlot = {
+    id: "test",
+    studentId: "test",
+    day,
+    start: fmt(startMin),
+    end: fmt(endMin)
+  } as WeeklySlot;
+  
+  return !slots.some(s => overlaps(s, testSlot));
+}
+
+function findNearestEmptyCells(
+  targetDay: 1 | 2 | 3 | 4 | 5 | 6 | 7,
+  targetMin: number,
+  duration: number,
+  slots: WeeklySlot[],
+  limit = 3
+): SuggestedCell[] {
+  const candidates: SuggestedCell[] = [];
+  
+  for (let day = 1; day <= 7; day++) {
+    for (let min = START_MIN; min <= END_MIN - duration; min += STEP) {
+      if (canPlace(day as 1 | 2 | 3 | 4 | 5 | 6 | 7, min, duration, slots)) {
+        candidates.push({ 
+          day: day as 1 | 2 | 3 | 4 | 5 | 6 | 7, 
+          startMin: min 
+        });
+      }
+    }
+  }
+  
+  return candidates
+    .sort((a, b) => {
+      const distA = Math.abs((a.day - targetDay) * 1440) + Math.abs(a.startMin - targetMin);
+      const distB = Math.abs((b.day - targetDay) * 1440) + Math.abs(b.startMin - targetMin);
+      return distA - distB;
+    })
+    .slice(0, limit);
+}
+
+type SuggestedCell = { day: 1 | 2 | 3 | 4 | 5 | 6 | 7; startMin: number };
+
 export default function WeeklySchedule({ sid }: { sid: string }) {
   const [subjects, setSubjects] = useState<Awaited<ReturnType<typeof loadSubjects>>>([]);
   const [refresh, setRefresh] = useState(0);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<"LGS" | "YKS" | "TYT" | "AYT" | "YDT" | "Tümü">("Tümü");
+  const [suggestedCells, setSuggestedCells] = useState<SuggestedCell[]>([]);
   const calendarRef = useRef<HTMLDivElement | null>(null);
+  const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setSubjects(loadSubjects());
@@ -126,7 +181,47 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
       };
       for (const s of slots) {
         if (s.id !== existing.id && overlaps(s, candidate)) {
-          setError("Bu saatte başka bir ders var!");
+          const suggested = findNearestEmptyCells(day, start, duration, slots.filter(sl => sl.id !== existing.id));
+          
+          if (suggestionTimeoutRef.current) {
+            clearTimeout(suggestionTimeoutRef.current);
+          }
+          setSuggestedCells(suggested);
+          
+          const suggestions = suggested.slice(0, 3).map(c => {
+            const dLabel = DAYS.find(d => d.value === c.day)?.label || "";
+            return `${dLabel} ${fmt(c.startMin)}`;
+          }).join(", ");
+          
+          toast.error("Bu saatte başka bir ders var!", {
+            description: suggestions ? `Önerilen saatler: ${suggestions}` : "Boş saat bulunamadı",
+            action: suggested.length > 0 ? {
+              label: "Otomatik Yerleştir",
+              onClick: () => {
+                const first = suggested[0];
+                const endMin = Math.min(first.startMin + duration, END_MIN);
+                if (canPlace(first.day, first.startMin, duration, slots.filter(sl => sl.id !== existing.id))) {
+                  updateWeeklySlot(existing.id, {
+                    day: first.day,
+                    start: fmt(first.startMin),
+                    end: fmt(endMin),
+                    subjectId: existing.subjectId,
+                    studentId: existing.studentId,
+                  });
+                  setSuggestedCells([]);
+                  if (suggestionTimeoutRef.current) {
+                    clearTimeout(suggestionTimeoutRef.current);
+                  }
+                  setRefresh((x) => x + 1);
+                } else {
+                  toast.error("Seçilen saat artık uygun değil");
+                }
+              }
+            } : undefined,
+            duration: 5000
+          });
+          
+          suggestionTimeoutRef.current = setTimeout(() => setSuggestedCells([]), 5000);
           return;
         }
       }
@@ -148,9 +243,13 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
       setError("Lütfen bir dersi sürükleyin");
       return;
     }
-    const start = Math.max(START_MIN, Math.min(startMin, END_MIN - STEP));
     const defaultDur = 60; // dk
-    const end = Math.min(start + defaultDur, END_MIN);
+    let start = Math.max(START_MIN, Math.min(startMin, END_MIN - STEP));
+    let end = Math.min(start + defaultDur, END_MIN);
+    if (end - start < defaultDur) {
+      start = Math.max(START_MIN, END_MIN - defaultDur);
+      end = Math.min(start + defaultDur, END_MIN);
+    }
     const w: WeeklySlot = {
       id: crypto.randomUUID(),
       studentId: sid,
@@ -161,7 +260,49 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
     };
     for (const s of slots) {
       if (overlaps(s, w)) {
-        setError("Bu saatte başka bir ders var!");
+        const suggested = findNearestEmptyCells(day, start, defaultDur, slots);
+        
+        if (suggestionTimeoutRef.current) {
+          clearTimeout(suggestionTimeoutRef.current);
+        }
+        setSuggestedCells(suggested);
+        
+        const suggestions = suggested.slice(0, 3).map(c => {
+          const dLabel = DAYS.find(d => d.value === c.day)?.label || "";
+          return `${dLabel} ${fmt(c.startMin)}`;
+        }).join(", ");
+        
+        toast.error("Bu saatte başka bir ders var!", {
+          description: suggestions ? `Önerilen saatler: ${suggestions}` : "Boş saat bulunamadı",
+          action: suggested.length > 0 ? {
+            label: "Otomatik Yerleştir",
+            onClick: () => {
+              const first = suggested[0];
+              const endMin = Math.min(first.startMin + defaultDur, END_MIN);
+              if (canPlace(first.day, first.startMin, defaultDur, slots)) {
+                const newSlot: WeeklySlot = {
+                  id: crypto.randomUUID(),
+                  studentId: sid,
+                  day: first.day,
+                  start: fmt(first.startMin),
+                  end: fmt(endMin),
+                  subjectId: chosen.id,
+                };
+                addWeeklySlot(newSlot);
+                setSuggestedCells([]);
+                if (suggestionTimeoutRef.current) {
+                  clearTimeout(suggestionTimeoutRef.current);
+                }
+                setRefresh((x) => x + 1);
+              } else {
+                toast.error("Seçilen saat artık uygun değil");
+              }
+            }
+          } : undefined,
+          duration: 5000
+        });
+        
+        suggestionTimeoutRef.current = setTimeout(() => setSuggestedCells([]), 5000);
         return;
       }
     }
@@ -412,6 +553,7 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
                 <div key={d.value} className="relative">
                   {[...Array(ROWS)].map((_, ri) => {
                     const m = START_MIN + ri * STEP;
+                    const isSuggested = suggestedCells.some(c => c.day === d.value && c.startMin === m);
                     return (
                       <div
                         key={ri}
@@ -436,7 +578,9 @@ export default function WeeklySchedule({ sid }: { sid: string }) {
                           dropOn(d.value, m);
                         }}
                         style={{ height: ROW_H }}
-                        className="border-t border-l last:border-r hover:bg-muted/30 transition-colors"
+                        className={`border-t border-l last:border-r hover:bg-muted/30 transition-colors ${
+                          isSuggested ? "animate-pulse bg-blue-100 dark:bg-blue-900/30" : ""
+                        }`}
                       />
                     );
                   })}
