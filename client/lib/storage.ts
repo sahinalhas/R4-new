@@ -1704,33 +1704,52 @@ export async function applyScheduleTemplate(
       }
     }
 
-    // Önce gerekli dersleri ekle (eğer yoksa)
+    // Mevcut dersleri yükle
+    await loadSubjectsAsync();
     const existingSubjects = loadSubjects();
-    const existingSubjectIds = new Set(existingSubjects.map(s => s.id));
+    
+    // Şablon subject ID'lerini gerçek subject ID'lere map et
+    const subjectIdMap = new Map<string, string>();
+    const subjectsToAdd: StudySubject[] = [];
     
     for (const templateSubject of template.subjects) {
-      if (!existingSubjectIds.has(templateSubject.id)) {
+      // Aynı isim ve kategori kombinasyonuna sahip ders var mı kontrol et
+      const existing = existingSubjects.find(s => 
+        s.name.toLowerCase() === templateSubject.name.toLowerCase() && 
+        s.category === templateSubject.category
+      );
+      
+      if (existing) {
+        // Varolan dersin ID'sini kullan
+        subjectIdMap.set(templateSubject.id, existing.id);
+      } else {
+        // Yeni ders ekle
         const newSubject: StudySubject = {
-          id: templateSubject.id,
+          id: crypto.randomUUID(),
           name: templateSubject.name,
           category: templateSubject.category as any,
-          code: templateSubject.id,
+          code: templateSubject.name.toLowerCase().replace(/\s+/g, '-'),
           description: `${template.name} şablonundan eklendi`
         };
-        existingSubjects.push(newSubject);
+        subjectsToAdd.push(newSubject);
+        subjectIdMap.set(templateSubject.id, newSubject.id);
       }
     }
     
-    await saveSubjects(existingSubjects);
+    // Yeni dersleri ekle
+    if (subjectsToAdd.length > 0) {
+      const allSubjects = [...existingSubjects, ...subjectsToAdd];
+      await saveSubjects(allSubjects);
+    }
 
-    // Şablon slotlarını toplu olarak ekle (performans için)
+    // Şablon slotlarını toplu olarak ekle (doğru subject ID'leri ile)
     const newSlots: WeeklySlot[] = template.slots.map(templateSlot => ({
       id: crypto.randomUUID(),
       studentId,
       day: templateSlot.day,
       start: templateSlot.start,
       end: templateSlot.end,
-      subjectId: templateSlot.subjectId
+      subjectId: subjectIdMap.get(templateSlot.subjectId) || templateSlot.subjectId
     }));
     
     // Toplu olarak sunucuya gönder
