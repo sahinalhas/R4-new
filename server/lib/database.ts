@@ -189,6 +189,21 @@ function runDatabaseMigrations(database: Database.Database) {
             database.exec('ALTER TABLE topics ADD COLUMN "order" INTEGER DEFAULT 0');
           }
         }
+      },
+      {
+        version: 6,
+        name: 'add_unique_constraint_to_subjects',
+        up: () => {
+          // Check if unique index already exists
+          const indexes = database.prepare('PRAGMA index_list(subjects)').all() as { name: string }[];
+          const hasUniqueIndex = indexes.some((idx) => idx.name === 'idx_subjects_name_category_unique');
+          
+          if (!hasUniqueIndex) {
+            console.log('Creating unique index on subjects (name, category)...');
+            database.exec('CREATE UNIQUE INDEX idx_subjects_name_category_unique ON subjects(name, COALESCE(category, \'\'))');
+            console.log('Unique index created successfully');
+          }
+        }
       }
     ];
 
