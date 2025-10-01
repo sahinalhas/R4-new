@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,14 +68,14 @@ interface ClassPrediction {
 
 // =================== YARDIMCI FONKSİYONLAR ===================
 
-function calculateDetailedPrediction(studentId: string): PredictionResult {
+async function calculateDetailedPrediction(studentId: string): Promise<PredictionResult> {
   const students = loadStudents();
   const student = students.find(s => s.id === studentId);
   if (!student) throw new Error("Öğrenci bulunamadı");
 
-  const data = getStudentPerformanceData(studentId);
-  const successProbability = predictStudentSuccess(studentId);
-  const riskScore = calculateRiskScore(studentId);
+  const data = await getStudentPerformanceData(studentId);
+  const successProbability = await predictStudentSuccess(studentId);
+  const riskScore = await calculateRiskScore(studentId);
   
   // Anahtar faktörleri hesapla
   const attendanceRate = calculateAttendanceRate(data.attendance);
@@ -151,7 +151,7 @@ function calculateDetailedPrediction(studentId: string): PredictionResult {
   };
 }
 
-function generateClassPredictions(): ClassPrediction[] {
+async function generateClassPredictions(): Promise<ClassPrediction[]> {
   const students = loadStudents();
   const classGroups = new Map<string, string[]>();
 
@@ -166,8 +166,8 @@ function generateClassPredictions(): ClassPrediction[] {
 
   const classPredictions: ClassPrediction[] = [];
 
-  classGroups.forEach((studentIds, className) => {
-    const predictions = studentIds.map(id => predictStudentSuccess(id));
+  for (const [className, studentIds] of classGroups.entries()) {
+    const predictions = await Promise.all(studentIds.map(id => predictStudentSuccess(id)));
     
     const highSuccessProbability = predictions.filter(p => p >= 0.8).length;
     const mediumSuccessProbability = predictions.filter(p => p >= 0.5 && p < 0.8).length;
@@ -202,7 +202,7 @@ function generateClassPredictions(): ClassPrediction[] {
       riskStudentsCount,
       interventionRecommendations,
     });
-  });
+  }
 
   return classPredictions.sort((a, b) => a.className.localeCompare(b.className));
 }
@@ -210,12 +210,18 @@ function generateClassPredictions(): ClassPrediction[] {
 // =================== BİLEŞENLER ===================
 
 export function StudentPredictionCard({ studentId }: { studentId: string }) {
-  const prediction = useMemo(() => {
-    try {
-      return calculateDetailedPrediction(studentId);
-    } catch (error) {
-      return null;
+  const [prediction, setPrediction] = useState<PredictionResult | null>(null);
+
+  useEffect(() => {
+    async function loadPrediction() {
+      try {
+        const data = await calculateDetailedPrediction(studentId);
+        setPrediction(data);
+      } catch (error) {
+        setPrediction(null);
+      }
     }
+    loadPrediction();
   }, [studentId]);
 
   if (!prediction) {
@@ -340,8 +346,15 @@ export function StudentPredictionCard({ studentId }: { studentId: string }) {
 
 export function ClassPredictionOverview() {
   const [selectedClass, setSelectedClass] = useState<string>("all");
-  
-  const classPredictions = useMemo(() => generateClassPredictions(), []);
+  const [classPredictions, setClassPredictions] = useState<ClassPrediction[]>([]);
+
+  useEffect(() => {
+    async function loadPredictions() {
+      const data = await generateClassPredictions();
+      setClassPredictions(data);
+    }
+    loadPredictions();
+  }, []);
   
   const filteredData = selectedClass === "all" 
     ? classPredictions 
@@ -521,8 +534,27 @@ export function ClassPredictionOverview() {
 
 export default function PredictiveAnalysis() {
   const [selectedStudent, setSelectedStudent] = useState<string>("");
+  const [warnings, setWarnings] = useState<any[]>([]);
+  const [successProbability, setSuccessProbability] = useState<number>(0);
   const students = loadStudents();
-  const warnings = useMemo(() => generateEarlyWarnings(), []);
+
+  useEffect(() => {
+    async function loadWarnings() {
+      const data = await generateEarlyWarnings();
+      setWarnings(data);
+    }
+    loadWarnings();
+  }, []);
+
+  useEffect(() => {
+    async function loadSuccessProbability() {
+      if (selectedStudent) {
+        const prob = await predictStudentSuccess(selectedStudent);
+        setSuccessProbability(prob);
+      }
+    }
+    loadSuccessProbability();
+  }, [selectedStudent]);
 
   return (
     <div className="space-y-6">
@@ -571,7 +603,7 @@ export default function PredictiveAnalysis() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <StudentPredictionCard studentId={selectedStudent} />
               <SuccessPredictionGauge 
-                value={predictStudentSuccess(selectedStudent)}
+                value={successProbability}
                 studentName={
                   students.find(s => s.id === selectedStudent)?.ad + " " +
                   students.find(s => s.id === selectedStudent)?.soyad || ""

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -92,12 +92,12 @@ interface TimelineEvent {
 
 // =================== VERİ İŞLEME FONKSİYONLARI ===================
 
-function calculateStudentProgress(studentId: string): StudentProgress {
+async function calculateStudentProgress(studentId: string): Promise<StudentProgress> {
   const students = loadStudents();
   const student = students.find(s => s.id === studentId);
   if (!student) throw new Error("Öğrenci bulunamadı");
 
-  const data = getStudentPerformanceData(studentId);
+  const data = await getStudentPerformanceData(studentId);
   const progress = data.topicProgress;
   const sessions = data.studySessions;
 
@@ -159,10 +159,10 @@ function calculateStudentProgress(studentId: string): StudentProgress {
   };
 }
 
-function getTopicMastery(studentId: string): TopicMastery[] {
+async function getTopicMastery(studentId: string): Promise<TopicMastery[]> {
   const topics = loadTopics();
-  const progress = loadProgress().filter(p => p.studentId === studentId);
-  const sessions = loadSessions().filter(s => s.studentId === studentId);
+  const progress = (await loadProgress()).filter(p => p.studentId === studentId);
+  const sessions = (await loadSessions()).filter(s => s.studentId === studentId);
 
   return topics.map(topic => {
     const topicProgress = progress.find(p => p.topicId === topic.id);
@@ -198,8 +198,8 @@ function getTopicMastery(studentId: string): TopicMastery[] {
   });
 }
 
-function generateStudentTimeline(studentId: string): TimelineEvent[] {
-  const data = getStudentPerformanceData(studentId);
+async function generateStudentTimeline(studentId: string): Promise<TimelineEvent[]> {
+  const data = await getStudentPerformanceData(studentId);
   const timeline: TimelineEvent[] = [];
 
   // Akademik kayıtlar
@@ -264,12 +264,18 @@ function generateStudentTimeline(studentId: string): TimelineEvent[] {
 // =================== BİLEŞENLER ===================
 
 export function StudentProgressOverview({ studentId }: { studentId: string }) {
-  const progress = useMemo(() => {
-    try {
-      return calculateStudentProgress(studentId);
-    } catch (error) {
-      return null;
+  const [progress, setProgress] = useState<StudentProgress | null>(null);
+
+  useEffect(() => {
+    async function loadProgress() {
+      try {
+        const data = await calculateStudentProgress(studentId);
+        setProgress(data);
+      } catch (error) {
+        setProgress(null);
+      }
     }
+    loadProgress();
   }, [studentId]);
 
   if (!progress) {
@@ -320,9 +326,17 @@ export function StudentProgressOverview({ studentId }: { studentId: string }) {
 }
 
 export function TopicMasteryGrid({ studentId }: { studentId: string }) {
-  const topicMastery = useMemo(() => getTopicMastery(studentId), [studentId]);
+  const [topicMastery, setTopicMastery] = useState<TopicMastery[]>([]);
   const [filterLevel, setFilterLevel] = useState<string>("all");
   const [filterSubject, setFilterSubject] = useState<string>("all");
+
+  useEffect(() => {
+    async function loadMastery() {
+      const data = await getTopicMastery(studentId);
+      setTopicMastery(data);
+    }
+    loadMastery();
+  }, [studentId]);
 
   const subjects = Array.from(new Set(topicMastery.map(t => t.subjectName)));
   
@@ -441,8 +455,16 @@ export function TopicMasteryGrid({ studentId }: { studentId: string }) {
 }
 
 export function StudentTimeline({ studentId }: { studentId: string }) {
-  const timeline = useMemo(() => generateStudentTimeline(studentId), [studentId]);
+  const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [selectedType, setSelectedType] = useState<string>("all");
+
+  useEffect(() => {
+    async function loadTimeline() {
+      const data = await generateStudentTimeline(studentId);
+      setTimeline(data);
+    }
+    loadTimeline();
+  }, [studentId]);
 
   const filteredTimeline = selectedType === "all" 
     ? timeline 

@@ -503,8 +503,8 @@ export function generateProgressTimeline(studentId: string): ProgressTrend[] {
   const dateMap = new Map<string, { total: number; count: number }>();
   
   progress.forEach(p => {
-    if (p.completed && p.completedDate) {
-      const date = p.completedDate.split('T')[0];
+    if (p.completed) {
+      const date = new Date().toISOString().split('T')[0];
       if (!dateMap.has(date)) {
         dateMap.set(date, { total: 0, count: 0 });
       }
