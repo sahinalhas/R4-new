@@ -29,11 +29,11 @@ import {
 
 export interface StudentAnalytics {
   studentId: string;
-  academicTrend: number; // -1 to 1 (düşüş/yükseliş)
-  attendanceRate: number; // 0 to 1
-  studyConsistency: number; // 0 to 1
-  riskScore: number; // 0 to 1 (yüksek=riskli)
-  predictedSuccess: number; // 0 to 1
+  academicTrend: number;
+  attendanceRate: number;
+  studyConsistency: number;
+  riskScore: number;
+  predictedSuccess: number;
   strengths: string[];
   weaknesses: string[];
   recommendations: string[];
@@ -94,7 +94,6 @@ export function calculateTrend(values: number[]): number {
   
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
   
-  // Normalleştir (-1 ile 1 arasında)
   return Math.max(-1, Math.min(1, slope / Math.max(...values)));
 }
 
@@ -113,15 +112,18 @@ export function calculatePercentile(values: number[], percentile: number): numbe
 
 // =================== VERİ İŞLEME FONKSİYONLARI ===================
 
-export function getStudentPerformanceData(studentId: string) {
-  const academics = getAcademicsByStudent(studentId);
-  const attendance = getAttendanceByStudent(studentId);
+export async function getStudentPerformanceData(studentId: string) {
+  const [academics, attendance, studySessions, surveys, achievements, goals, assessments] = await Promise.all([
+    getAcademicsByStudent(studentId),
+    getAttendanceByStudent(studentId),
+    getSessionsByStudent(studentId),
+    getSurveyResultsByStudent(studentId),
+    getAchievementsByStudent(studentId),
+    getSmartGoalsByStudent(studentId),
+    getSelfAssessmentsByStudent(studentId),
+  ]);
+
   const topicProgress = getProgressByStudent(studentId);
-  const studySessions = getSessionsByStudent(studentId);
-  const surveys = getSurveyResultsByStudent(studentId);
-  const achievements = getAchievementsByStudent(studentId);
-  const goals = getSmartGoalsByStudent(studentId);
-  const assessments = getSelfAssessmentsByStudent(studentId);
 
   return {
     academics,
@@ -155,7 +157,6 @@ export function calculateAcademicTrend(academics: AcademicRecord[]): number {
 export function calculateStudyConsistency(sessions: StudySession[]): number {
   if (sessions.length === 0) return 0;
 
-  // Son 30 gün için çalışma tutarlılığını hesapla
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   
@@ -165,7 +166,6 @@ export function calculateStudyConsistency(sessions: StudySession[]): number {
 
   if (recentSessions.length === 0) return 0;
 
-  // Günlük çalışma süreleri
   const dailyStudyTime = new Map<string, number>();
   
   recentSessions.forEach(session => {
@@ -177,15 +177,13 @@ export function calculateStudyConsistency(sessions: StudySession[]): number {
   const studyDays = dailyStudyTime.size;
   const totalDays = 30;
   
-  // Tutarlılık = çalışılan gün sayısı / toplam gün sayısı
   return Math.min(1, studyDays / totalDays);
 }
 
 // =================== RİSK DEĞERLENDİRMESİ ===================
 
-// Optimized version with caching
-function _calculateRiskScore(studentId: string): number {
-  const data = getStudentPerformanceData(studentId);
+async function _calculateRiskScore(studentId: string): Promise<number> {
+  const data = await getStudentPerformanceData(studentId);
   const student = loadStudents().find(s => s.id === studentId);
   
   if (!student) return 0;
@@ -193,35 +191,30 @@ function _calculateRiskScore(studentId: string): number {
   let riskScore = 0;
   let factors = 0;
 
-  // Devamsızlık riski
   const attendanceRate = calculateAttendanceRate(data.attendance);
   if (attendanceRate < 0.8) {
-    riskScore += (0.8 - attendanceRate) * 1.5; // %80 altı kritik
+    riskScore += (0.8 - attendanceRate) * 1.5;
     factors++;
   }
 
-  // Akademik performans riski
   const academicTrend = calculateAcademicTrend(data.academics);
   if (academicTrend < -0.3) {
     riskScore += Math.abs(academicTrend) * 1.2;
     factors++;
   }
 
-  // Çalışma tutarlılığı riski
   const studyConsistency = calculateStudyConsistency(data.studySessions);
   if (studyConsistency < 0.5) {
     riskScore += (0.5 - studyConsistency) * 1.0;
     factors++;
   }
 
-  // Mevcut risk seviyesi
   if (student.risk) {
     const riskMap = { "Düşük": 0.2, "Orta": 0.5, "Yüksek": 0.8 };
     riskScore += riskMap[student.risk] || 0;
     factors++;
   }
 
-  // Son anket sonuçları (düşük puanlar risk faktörü)
   const recentSurveys = data.surveys.slice(-3);
   const lowScores = recentSurveys.filter(s => s.score && s.score < 50);
   if (lowScores.length > 0) {
@@ -229,145 +222,68 @@ function _calculateRiskScore(studentId: string): number {
     factors++;
   }
 
-  // Normalleştir
   return factors > 0 ? Math.min(1, riskScore / factors) : 0;
 }
 
+export const calculateRiskScore = memoize(
+  _calculateRiskScore,
+  (studentId: string) => `riskScore:${studentId}`
+);
+
 // =================== PREDİKTİF ANALİZ ===================
 
-// Optimized version with caching
-function _predictStudentSuccess(studentId: string): number {
-  const data = getStudentPerformanceData(studentId);
+async function _predictStudentSuccess(studentId: string): Promise<number> {
+  const data = await getStudentPerformanceData(studentId);
   const student = loadStudents().find(s => s.id === studentId);
   
   if (!student) return 0.5;
 
-  let successScore = 0.5; // Başlangıç değeri
+  let successScore = 0.5;
   let weightedFactors = 0;
 
-  // Akademik performans trendi (ağırlık: 0.3)
   const academicTrend = calculateAcademicTrend(data.academics);
   successScore += academicTrend * 0.3;
   weightedFactors += 0.3;
 
-  // Devamsızlık oranı (ağırlık: 0.25)
   const attendanceRate = calculateAttendanceRate(data.attendance);
   successScore += attendanceRate * 0.25;
   weightedFactors += 0.25;
 
-  // Çalışma tutarlılığı (ağırlık: 0.2)
   const studyConsistency = calculateStudyConsistency(data.studySessions);
   successScore += studyConsistency * 0.2;
   weightedFactors += 0.2;
 
-  // Başarı oranı (tamamlanan konular) (ağırlık: 0.15)
   const completedTopics = data.topicProgress.filter(tp => tp.completed).length;
   const totalTopics = data.topicProgress.length;
   const completionRate = totalTopics > 0 ? completedTopics / totalTopics : 0.5;
   successScore += completionRate * 0.15;
   weightedFactors += 0.15;
 
-  // Hedef belirleme ve takip (ağırlık: 0.1)
   const activeGoals = data.goals.filter(g => 
     g.status === "Başladı" || g.status === "Devam"
   ).length;
-  const goalFactor = Math.min(1, activeGoals / 3); // 3+ aktif hedef ideal
+  const goalFactor = Math.min(1, activeGoals / 3);
   successScore += goalFactor * 0.1;
   weightedFactors += 0.1;
 
-  // Normalleştir ve 0-1 arasında tut
   return Math.max(0, Math.min(1, successScore));
 }
 
-// =================== SINIF KARŞILAŞTIRMALARI ===================
-
-// Optimized version with caching
-function _generateClassComparisons(): ClassComparison[] {
-  const students = loadStudents();
-  const classGroups = new Map<string, Student[]>();
-
-  // Öğrencileri sınıfa göre grupla
-  students.forEach(student => {
-    const className = student.sinif || "Belirtilmemiş";
-    if (!classGroups.has(className)) {
-      classGroups.set(className, []);
-    }
-    classGroups.get(className)!.push(student);
-  });
-
-  const comparisons: ClassComparison[] = [];
-
-  classGroups.forEach((classStudents, className) => {
-    const studentIds = classStudents.map(s => s.id);
-    
-    // GPA ortalaması hesapla
-    const allGPAs: number[] = [];
-    studentIds.forEach(id => {
-      const academics = getAcademicsByStudent(id);
-      const recentGPA = academics
-        .filter(a => a.gpa !== undefined)
-        .sort((a, b) => b.term.localeCompare(a.term))[0];
-      if (recentGPA) allGPAs.push(recentGPA.gpa!);
-    });
-
-    // Devamsızlık oranı hesapla
-    const attendanceRates = studentIds.map(id => 
-      calculateAttendanceRate(getAttendanceByStudent(id))
-    );
-    const avgAttendance = calculateMean(attendanceRates);
-
-    // Risk dağılımı
-    const riskCounts = { düşük: 0, orta: 0, yüksek: 0 };
-    classStudents.forEach(student => {
-      const risk = student.risk || "Düşük";
-      riskCounts[risk.toLowerCase() as keyof typeof riskCounts]++;
-    });
-
-    // En başarılı öğrenciler
-    const studentScores = studentIds.map(id => ({
-      id,
-      name: classStudents.find(s => s.id === id)!.ad + " " + 
-            classStudents.find(s => s.id === id)!.soyad,
-      score: predictStudentSuccess(id)
-    }));
-
-    const topPerformers = studentScores
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3)
-      .map(s => s.name);
-
-    const atRiskStudents = studentScores
-      .filter(s => s.score < 0.4)
-      .sort((a, b) => a.score - b.score)
-      .slice(0, 5)
-      .map(s => s.name);
-
-    comparisons.push({
-      className,
-      studentCount: classStudents.length,
-      averageGPA: calculateMean(allGPAs),
-      attendanceRate: avgAttendance,
-      riskDistribution: riskCounts,
-      topPerformers,
-      atRiskStudents,
-    });
-  });
-
-  return comparisons.sort((a, b) => a.className.localeCompare(b.className));
-}
+export const predictStudentSuccess = memoize(
+  _predictStudentSuccess,
+  (studentId: string) => `predictSuccess:${studentId}`
+);
 
 // =================== ERKEN UYARI SİSTEMİ ===================
 
-// Optimized version with caching  
-function _generateEarlyWarnings(): EarlyWarning[] {
+async function _generateEarlyWarnings(): Promise<EarlyWarning[]> {
   const students = loadStudents();
   const warnings: EarlyWarning[] = [];
 
-  students.forEach(student => {
-    const data = getStudentPerformanceData(student.id);
+  for (const student of students) {
+    const data = await getStudentPerformanceData(student.id);
     const fullName = `${student.ad} ${student.soyad}`;
 
-    // Devamsızlık uyarıları
     const attendanceRate = calculateAttendanceRate(data.attendance);
     if (attendanceRate < 0.7) {
       warnings.push({
@@ -386,7 +302,6 @@ function _generateEarlyWarnings(): EarlyWarning[] {
       });
     }
 
-    // Akademik performans uyarıları
     const academicTrend = calculateAcademicTrend(data.academics);
     if (academicTrend < -0.4) {
       warnings.push({
@@ -405,7 +320,6 @@ function _generateEarlyWarnings(): EarlyWarning[] {
       });
     }
 
-    // Çalışma tutarlılığı uyarıları
     const studyConsistency = calculateStudyConsistency(data.studySessions);
     if (studyConsistency < 0.3) {
       warnings.push({
@@ -424,8 +338,7 @@ function _generateEarlyWarnings(): EarlyWarning[] {
       });
     }
 
-    // Genel risk değerlendirmesi
-    const riskScore = calculateRiskScore(student.id);
+    const riskScore = await calculateRiskScore(student.id);
     if (riskScore > 0.7) {
       warnings.push({
         studentId: student.id,
@@ -442,144 +355,171 @@ function _generateEarlyWarnings(): EarlyWarning[] {
         priority: 1
       });
     }
-  });
+  }
 
   return warnings.sort((a, b) => a.priority - b.priority);
 }
 
-// =================== OPTIMIZED EXPORTS ===================
-
-// Memoized versions of expensive functions
-export const generateClassComparisons = memoize(
-  _generateClassComparisons,
-  () => "class_comparisons"
-);
-
 export const generateEarlyWarnings = memoize(
   _generateEarlyWarnings,
-  () => "early_warnings"
+  () => 'earlyWarnings:all'
 );
 
-export const predictStudentSuccess = memoize(
-  _predictStudentSuccess,
-  (studentId: string) => `student_success_${studentId}`
-);
+// =================== STUDENT ANALYTICS ===================
 
-export const calculateRiskScore = memoize(
-  _calculateRiskScore,
-  (studentId: string) => `risk_score_${studentId}`
-);
+async function _analyzeStudent(studentId: string): Promise<StudentAnalytics> {
+  const data = await getStudentPerformanceData(studentId);
+  const student = loadStudents().find(s => s.id === studentId);
+  
+  if (!student) {
+    throw new Error(`Student not found: ${studentId}`);
+  }
 
-// =================== İLERLEME TAKİBİ ===================
+  const academicTrend = calculateAcademicTrend(data.academics);
+  const attendanceRate = calculateAttendanceRate(data.attendance);
+  const studyConsistency = calculateStudyConsistency(data.studySessions);
+  const riskScore = await calculateRiskScore(studentId);
+  const predictedSuccess = await predictStudentSuccess(studentId);
 
-export function generateProgressTimeline(studentId: string, days: number = 90): ProgressTrend[] {
-  const data = getStudentPerformanceData(studentId);
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
+  const strengths: string[] = [];
+  const weaknesses: string[] = [];
+  const recommendations: string[] = [];
 
-  const timeline: ProgressTrend[] = [];
+  if (attendanceRate > 0.9) strengths.push('Mükemmel devam');
+  else if (attendanceRate < 0.7) weaknesses.push('Düşük devam oranı');
 
-  // Akademik ilerleme
-  data.academics.forEach(academic => {
-    if (academic.gpa && new Date(academic.term) >= startDate) {
-      timeline.push({
-        date: academic.term,
-        value: academic.gpa / 4.0, // 0-1 normalize
-        type: 'academic'
-      });
-    }
-  });
+  if (academicTrend > 0.3) strengths.push('Yükselen akademik performans');
+  else if (academicTrend < -0.3) weaknesses.push('Düşen akademik performans');
 
-  // Devamsızlık trendi
-  const weeklyAttendance = new Map<string, {present: number, total: number}>();
-  data.attendance.forEach(att => {
-    if (new Date(att.date) >= startDate) {
-      const week = getWeekKey(new Date(att.date));
-      if (!weeklyAttendance.has(week)) {
-        weeklyAttendance.set(week, {present: 0, total: 0});
-      }
-      const weekData = weeklyAttendance.get(week)!;
-      weekData.total++;
-      if (att.status === "Var") weekData.present++;
-    }
-  });
+  if (studyConsistency > 0.7) strengths.push('Tutarlı çalışma alışkanlığı');
+  else if (studyConsistency < 0.3) weaknesses.push('Tutarsız çalışma');
 
-  weeklyAttendance.forEach((data, week) => {
-    timeline.push({
-      date: week,
-      value: data.present / data.total,
-      type: 'attendance'
-    });
-  });
+  if (riskScore > 0.7) recommendations.push('Acil müdahale gerekli');
+  else if (riskScore > 0.4) recommendations.push('Önleyici tedbirler alınmalı');
 
-  // Çalışma aktivitesi
-  const weeklyStudy = new Map<string, number>();
-  data.studySessions.forEach(session => {
-    if (new Date(session.date) >= startDate) {
-      const week = getWeekKey(new Date(session.date));
-      const current = weeklyStudy.get(week) || 0;
-      weeklyStudy.set(week, current + (session.minutes || 0));
-    }
-  });
+  if (attendanceRate < 0.8) recommendations.push('Devamsızlık sebepleri araştırılmalı');
+  if (academicTrend < -0.3) recommendations.push('Akademik destek sağlanmalı');
+  if (studyConsistency < 0.5) recommendations.push('Çalışma planı oluşturulmalı');
 
-  weeklyStudy.forEach((minutes, week) => {
-    timeline.push({
-      date: week,
-      value: Math.min(1, minutes / 1200), // 1200 dakika (20 saat) = %100
-      type: 'study'
-    });
-  });
-
-  return timeline.sort((a, b) => a.date.localeCompare(b.date));
+  return {
+    studentId,
+    academicTrend,
+    attendanceRate,
+    studyConsistency,
+    riskScore,
+    predictedSuccess,
+    strengths,
+    weaknesses,
+    recommendations,
+  };
 }
 
-function getWeekKey(date: Date): string {
-  const year = date.getFullYear();
-  const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + 1) / 7);
-  return `${year}-W${week.toString().padStart(2, '0')}`;
-}
+export const analyzeStudent = memoize(
+  _analyzeStudent,
+  (studentId: string) => `studentAnalytics:${studentId}`
+);
 
-// =================== VERİ İHRACAT FONKSİYONLARI ===================
+// =================== CLASS COMPARISON ===================
 
-export function exportAnalyticsData(
-  format: 'json' | 'csv' = 'json',
-  options: {
-    includePersonalData?: boolean;
-    maxRecords?: number;
-    filterByClass?: string;
-    filterByRisk?: string;
-  } = {}
-) {
+export async function compareClasses(options: {
+  includePersonalData?: boolean;
+} = {}): Promise<ClassComparison[]> {
   const students = loadStudents();
-  let filteredStudents = students;
-  
-  // Apply filters
-  if (options.filterByClass) {
-    filteredStudents = filteredStudents.filter(s => s.sinif === options.filterByClass);
-  }
-  
-  if (options.maxRecords) {
-    filteredStudents = filteredStudents.slice(0, options.maxRecords);
-  }
-  
-  const analytics = filteredStudents.map(student => ({
-    studentId: student.id,
-    name: options.includePersonalData ? `${student.ad} ${student.soyad}` : `Öğrenci ${student.id.slice(-4)}`,
-    class: student.sinif,
-    risk: student.risk,
-    attendanceRate: calculateAttendanceRate(getAttendanceByStudent(student.id)),
-    academicTrend: calculateAcademicTrend(getAcademicsByStudent(student.id)),
-    studyConsistency: calculateStudyConsistency(getSessionsByStudent(student.id)),
-    riskScore: calculateRiskScore(student.id),
-    predictedSuccess: predictStudentSuccess(student.id),
-  }));
+  const classMap = new Map<string, Student[]>();
 
-  if (format === 'json') {
-    return JSON.stringify(analytics, null, 2);
-  } else {
-    // CSV format
-    const headers = Object.keys(analytics[0]).join(',');
-    const rows = analytics.map(row => Object.values(row).join(','));
-    return [headers, ...rows].join('\n');
+  students.forEach(student => {
+    const className = student.sinif || 'Sınıf belirtilmemiş';
+    if (!classMap.has(className)) {
+      classMap.set(className, []);
+    }
+    classMap.get(className)!.push(student);
+  });
+
+  const comparisons: ClassComparison[] = [];
+
+  for (const [className, classStudents] of classMap.entries()) {
+    const academicDataPromises = classStudents.map(s => getAcademicsByStudent(s.id));
+    const attendanceDataPromises = classStudents.map(s => getAttendanceByStudent(s.id));
+    
+    const [academicData, attendanceData] = await Promise.all([
+      Promise.all(academicDataPromises),
+      Promise.all(attendanceDataPromises)
+    ]);
+
+    const allGPAs = academicData
+      .flat()
+      .filter(a => a.gpa !== undefined)
+      .map(a => a.gpa!);
+    const averageGPA = allGPAs.length > 0 ? calculateMean(allGPAs) : 0;
+
+    const allAttendance = attendanceData.flat();
+    const attendanceRate = calculateAttendanceRate(allAttendance);
+
+    const riskDistribution = {
+      düşük: classStudents.filter(s => s.risk === "Düşük").length,
+      orta: classStudents.filter(s => s.risk === "Orta").length,
+      yüksek: classStudents.filter(s => s.risk === "Yüksek").length,
+    };
+
+    const topPerformers: string[] = [];
+    const atRiskStudents: string[] = [];
+
+    for (const student of classStudents) {
+      const analytics = await analyzeStudent(student.id);
+      if (analytics.predictedSuccess > 0.8) {
+        topPerformers.push(options.includePersonalData ? 
+          `${student.ad} ${student.soyad}` : 
+          `Öğrenci ${student.id.slice(-4)}`
+        );
+      }
+      if (analytics.riskScore > 0.7) {
+        atRiskStudents.push(options.includePersonalData ? 
+          `${student.ad} ${student.soyad}` : 
+          `Öğrenci ${student.id.slice(-4)}`
+        );
+      }
+    }
+
+    comparisons.push({
+      className,
+      studentCount: classStudents.length,
+      averageGPA,
+      attendanceRate,
+      riskDistribution,
+      topPerformers: topPerformers.slice(0, 5),
+      atRiskStudents: atRiskStudents.slice(0, 5),
+    });
   }
+
+  return comparisons.sort((a, b) => b.averageGPA - a.averageGPA);
+}
+
+// =================== EXPORT DATA ===================
+
+export async function exportAnalyticsData(options: {
+  includePersonalData?: boolean;
+} = {}): Promise<any[]> {
+  const students = loadStudents();
+  const exportData: any[] = [];
+
+  for (const student of students) {
+    const [analytics, attendance, academics] = await Promise.all([
+      analyzeStudent(student.id),
+      getAttendanceByStudent(student.id),
+      getAcademicsByStudent(student.id)
+    ]);
+
+    exportData.push({
+      name: options.includePersonalData ? `${student.ad} ${student.soyad}` : `Öğrenci ${student.id.slice(-4)}`,
+      class: student.sinif,
+      risk: student.risk,
+      attendanceRate: calculateAttendanceRate(attendance),
+      academicTrend: calculateAcademicTrend(academics),
+      studyConsistency: analytics.studyConsistency,
+      riskScore: analytics.riskScore,
+      predictedSuccess: analytics.predictedSuccess,
+    });
+  }
+
+  return exportData;
 }
