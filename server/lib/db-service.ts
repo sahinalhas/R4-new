@@ -238,12 +238,12 @@ function initializeStatements(): void {
   getTopics: db.prepare('SELECT * FROM topics ORDER BY name'),
   getTopicsBySubject: db.prepare('SELECT * FROM topics WHERE subjectId = ? ORDER BY name'),
   getTopic: db.prepare('SELECT * FROM topics WHERE id = ?'),
-  insertTopic: db.prepare('INSERT INTO topics (id, subjectId, name, description, difficulty, estimatedHours, avgMinutes, "order") VALUES (?, ?, ?, ?, ?, ?, ?, ?)'),
-  updateTopic: db.prepare('UPDATE topics SET name = ?, description = ?, difficulty = ?, estimatedHours = ?, avgMinutes = ?, "order" = ? WHERE id = ?'),
+  insertTopic: db.prepare('INSERT INTO topics (id, subjectId, name, description, difficulty, estimatedHours, avgMinutes, "order", energyLevel, difficultyScore, priority, deadline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'),
+  updateTopic: db.prepare('UPDATE topics SET name = ?, description = ?, difficulty = ?, estimatedHours = ?, avgMinutes = ?, "order" = ?, energyLevel = ?, difficultyScore = ?, priority = ?, deadline = ? WHERE id = ?'),
   deleteTopic: db.prepare('DELETE FROM topics WHERE id = ?'),
   upsertTopic: db.prepare(`
-    INSERT INTO topics (id, subjectId, name, description, difficulty, estimatedHours, avgMinutes, "order")
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO topics (id, subjectId, name, description, difficulty, estimatedHours, avgMinutes, "order", energyLevel, difficultyScore, priority, deadline)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       subjectId = excluded.subjectId,
       name = excluded.name,
@@ -251,7 +251,11 @@ function initializeStatements(): void {
       difficulty = excluded.difficulty,
       estimatedHours = excluded.estimatedHours,
       avgMinutes = excluded.avgMinutes,
-      "order" = excluded."order"
+      "order" = excluded."order",
+      energyLevel = excluded.energyLevel,
+      difficultyScore = excluded.difficultyScore,
+      priority = excluded.priority,
+      deadline = excluded.deadline
   `),
 
   // Progress
@@ -524,6 +528,10 @@ export interface Topic {
   estimatedHours?: number;
   avgMinutes?: number;
   order?: number;
+  energyLevel?: 'low' | 'medium' | 'high';
+  difficultyScore?: number;
+  priority?: number;
+  deadline?: string;
 }
 
 export interface Progress {
@@ -773,7 +781,8 @@ export function saveTopics(topics: Topic[]) {
     for (const topic of topics) {
       statements.upsertTopic.run(
         topic.id, topic.subjectId, topic.name, topic.description,
-        topic.difficulty, topic.estimatedHours, topic.avgMinutes, topic.order
+        topic.difficulty, topic.estimatedHours, topic.avgMinutes, topic.order,
+        topic.energyLevel, topic.difficultyScore, topic.priority, topic.deadline
       );
     }
   });

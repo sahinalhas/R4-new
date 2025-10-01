@@ -234,6 +234,52 @@ function runDatabaseMigrations(database: Database.Database) {
             console.log('Unique index created successfully');
           }
         }
+      },
+      {
+        version: 7,
+        name: 'add_topic_planning_fields',
+        up: () => {
+          console.log('Adding topic planning fields (avgMinutes, order, energyLevel, difficultyScore, priority, deadline)...');
+          const topicCols = database.prepare('PRAGMA table_info(topics)').all() as { name: string }[];
+          
+          // Add avgMinutes if not exists
+          if (!topicCols.some(col => col.name === 'avgMinutes')) {
+            database.exec('ALTER TABLE topics ADD COLUMN avgMinutes INTEGER DEFAULT 0');
+            console.log('  Added avgMinutes column');
+          }
+          
+          // Add order if not exists  
+          if (!topicCols.some(col => col.name === 'order')) {
+            database.exec('ALTER TABLE topics ADD COLUMN "order" INTEGER');
+            console.log('  Added order column');
+          }
+          
+          // Add energyLevel if not exists
+          if (!topicCols.some(col => col.name === 'energyLevel')) {
+            database.exec('ALTER TABLE topics ADD COLUMN energyLevel TEXT CHECK (energyLevel IN ("low", "medium", "high")) DEFAULT "medium"');
+            console.log('  Added energyLevel column');
+          }
+          
+          // Add difficultyScore if not exists
+          if (!topicCols.some(col => col.name === 'difficultyScore')) {
+            database.exec('ALTER TABLE topics ADD COLUMN difficultyScore INTEGER CHECK (difficultyScore >= 1 AND difficultyScore <= 10)');
+            console.log('  Added difficultyScore column');
+          }
+          
+          // Add priority if not exists
+          if (!topicCols.some(col => col.name === 'priority')) {
+            database.exec('ALTER TABLE topics ADD COLUMN priority INTEGER CHECK (priority >= 1 AND priority <= 10)');
+            console.log('  Added priority column');
+          }
+          
+          // Add deadline if not exists
+          if (!topicCols.some(col => col.name === 'deadline')) {
+            database.exec('ALTER TABLE topics ADD COLUMN deadline TEXT');
+            console.log('  Added deadline column');
+          }
+          
+          console.log('Topic planning fields migration completed successfully');
+        }
       }
     ];
 
