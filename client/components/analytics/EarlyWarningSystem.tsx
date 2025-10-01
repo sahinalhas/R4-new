@@ -27,6 +27,11 @@ import {
 } from "@/lib/analytics";
 import { loadStudents } from "@/lib/storage";
 import { 
+  checkAndCreateAutomaticInterventions, 
+  type AutoInterventionResult 
+} from "@/lib/automatic-interventions";
+import { toast } from "sonner";
+import { 
   AlertTriangle, 
   Bell,
   Users,
@@ -39,6 +44,8 @@ import {
   Mail,
   Phone,
   Calendar,
+  Zap,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -478,6 +485,8 @@ export default function EarlyWarningSystem() {
   const [warnings, setWarnings] = useState<EarlyWarning[]>([]);
   const [riskProfiles, setRiskProfiles] = useState<RiskProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [autoInterventionResults, setAutoInterventionResults] = useState<AutoInterventionResult[]>([]);
+  const [isCreatingInterventions, setIsCreatingInterventions] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -529,6 +538,41 @@ export default function EarlyWarningSystem() {
     ];
   }, [riskProfiles]);
 
+  const handleAutoIntervention = async () => {
+    setIsCreatingInterventions(true);
+    try {
+      const results = await checkAndCreateAutomaticInterventions();
+      setAutoInterventionResults(results);
+      
+      const created = results.filter(r => r.interventionCreated);
+      if (created.length > 0) {
+        toast.success(`${created.length} öğrenci için otomatik müdahale planı oluşturuldu`, {
+          description: created.map(r => r.studentName).join(", ")
+        });
+      } else {
+        toast.info("Yeni otomatik müdahale planı oluşturulmadı", {
+          description: "Tüm riskli öğrenciler için mevcut müdahale planları aktif"
+        });
+      }
+    } catch (error) {
+      console.error('Automatic intervention failed:', error);
+      toast.error("Otomatik müdahale oluşturulurken hata oluştu");
+    } finally {
+      setIsCreatingInterventions(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-2">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Erken uyarı sistemi yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -539,6 +583,19 @@ export default function EarlyWarningSystem() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="default" 
+            className="gap-2"
+            onClick={handleAutoIntervention}
+            disabled={isCreatingInterventions}
+          >
+            {isCreatingInterventions ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Zap className="h-4 w-4" />
+            )}
+            Otomatik Müdahale Oluştur
+          </Button>
           <Button variant="outline" className="gap-2">
             <Filter className="h-4 w-4" />
             Filtrele
@@ -587,6 +644,7 @@ export default function EarlyWarningSystem() {
           <TabsTrigger value="warnings">Aktif Uyarılar</TabsTrigger>
           <TabsTrigger value="profiles">Risk Profilleri</TabsTrigger>
           <TabsTrigger value="intervention">Müdahale Planı</TabsTrigger>
+          <TabsTrigger value="auto-intervention">Otomatik Müdahaleler</TabsTrigger>
           <TabsTrigger value="overview">Genel Durum</TabsTrigger>
         </TabsList>
 
@@ -639,6 +697,67 @@ export default function EarlyWarningSystem() {
               <p>Müdahale gerektiren aktif uyarı bulunmuyor</p>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="auto-intervention" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-orange-500" />
+                Otomatik Müdahale Sistemi
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {autoInterventionResults.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Son otomatik müdahale kontrolü sonuçları
+                  </p>
+                  {autoInterventionResults.map((result, index) => (
+                    <div 
+                      key={index} 
+                      className={cn(
+                        "p-3 rounded-lg border",
+                        result.interventionCreated 
+                          ? "bg-green-50 border-green-200" 
+                          : "bg-gray-50 border-gray-200"
+                      )}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium">{result.studentName}</div>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            Risk Seviyesi: <Badge variant={
+                              result.riskLevel === "Kritik" ? "destructive" :
+                              result.riskLevel === "Yüksek" ? "default" : "secondary"
+                            }>{result.riskLevel}</Badge>
+                          </div>
+                          {result.reason && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {result.reason}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          {result.interventionCreated ? (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-gray-400" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  <Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>Henüz otomatik müdahale kontrolü yapılmadı</p>
+                  <p className="text-sm mt-1">Üstteki butonu kullanarak otomatik müdahale oluşturabilirsiniz</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
