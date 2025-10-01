@@ -200,6 +200,36 @@ function runDatabaseMigrations(database: Database.Database) {
           
           if (!hasUniqueIndex) {
             console.log('Creating unique index on subjects (name, category)...');
+            
+            // Pre-clean duplicates before creating unique index
+            const allSubjects = database.prepare('SELECT * FROM subjects ORDER BY created_at DESC').all() as any[];
+            const seen = new Map<string, string>();
+            const toDelete: string[] = [];
+            
+            for (const subject of allSubjects) {
+              const key = `${subject.name}|${subject.category || ''}`;
+              if (seen.has(key)) {
+                // Duplicate found - keep the first one (most recent due to DESC order)
+                toDelete.push(subject.id);
+                console.log('  Removing duplicate subject before index creation:', subject.name, subject.category || '(no category)');
+              } else {
+                seen.set(key, subject.id);
+              }
+            }
+            
+            // Delete duplicates
+            if (toDelete.length > 0) {
+              const deleteStmt = database.prepare('DELETE FROM subjects WHERE id = ?');
+              const deleteTx = database.transaction((ids: string[]) => {
+                for (const id of ids) {
+                  deleteStmt.run(id);
+                }
+              });
+              deleteTx(toDelete);
+              console.log('  Removed', toDelete.length, 'duplicate subjects');
+            }
+            
+            // Create unique index
             database.exec('CREATE UNIQUE INDEX idx_subjects_name_category_unique ON subjects(name, COALESCE(category, \'\'))');
             console.log('Unique index created successfully');
           }
