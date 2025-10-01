@@ -13,6 +13,13 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -48,6 +55,10 @@ export default function Courses() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
   const [topicName, setTopicName] = useState("");
   const [topicMinutes, setTopicMinutes] = useState<string>("");
+  const [topicEnergyLevel, setTopicEnergyLevel] = useState<'high' | 'medium' | 'low'>('medium');
+  const [topicDifficulty, setTopicDifficulty] = useState<string>("");
+  const [topicPriority, setTopicPriority] = useState<string>("");
+  const [topicDeadline, setTopicDeadline] = useState<string>("");
 
   useEffect(() => {
     refreshAll();
@@ -122,16 +133,27 @@ export default function Courses() {
       return;
     }
     const minutes = Number(topicMinutes || 0) || 0;
+    const difficulty = topicDifficulty ? Number(topicDifficulty) : undefined;
+    const priority = topicPriority ? Number(topicPriority) : undefined;
+    
     const t: StudyTopic = {
       id: crypto.randomUUID(),
       subjectId: selectedSubjectId,
       name,
       avgMinutes: minutes,
+      energyLevel: topicEnergyLevel,
+      difficultyScore: difficulty,
+      priority: priority,
+      deadline: topicDeadline || undefined,
     };
     await addTopic(t);
     await refreshAll();
     setTopicName("");
     setTopicMinutes("");
+    setTopicEnergyLevel('medium');
+    setTopicDifficulty("");
+    setTopicPriority("");
+    setTopicDeadline("");
     toast({ title: "Konu eklendi", description: `${name} • ${minutes} dk` });
   }
 
@@ -167,6 +189,14 @@ export default function Courses() {
             setTopicName={setTopicName}
             topicMinutes={topicMinutes}
             setTopicMinutes={setTopicMinutes}
+            topicEnergyLevel={topicEnergyLevel}
+            setTopicEnergyLevel={setTopicEnergyLevel}
+            topicDifficulty={topicDifficulty}
+            setTopicDifficulty={setTopicDifficulty}
+            topicPriority={topicPriority}
+            setTopicPriority={setTopicPriority}
+            topicDeadline={topicDeadline}
+            setTopicDeadline={setTopicDeadline}
             onAddTopic={onAddTopic}
             onRefresh={refreshAll}
           />
@@ -186,6 +216,14 @@ export default function Courses() {
             setTopicName={setTopicName}
             topicMinutes={topicMinutes}
             setTopicMinutes={setTopicMinutes}
+            topicEnergyLevel={topicEnergyLevel}
+            setTopicEnergyLevel={setTopicEnergyLevel}
+            topicDifficulty={topicDifficulty}
+            setTopicDifficulty={setTopicDifficulty}
+            topicPriority={topicPriority}
+            setTopicPriority={setTopicPriority}
+            topicDeadline={topicDeadline}
+            setTopicDeadline={setTopicDeadline}
             onAddTopic={onAddTopic}
             onRefresh={refreshAll}
           />
@@ -205,6 +243,14 @@ export default function Courses() {
             setTopicName={setTopicName}
             topicMinutes={topicMinutes}
             setTopicMinutes={setTopicMinutes}
+            topicEnergyLevel={topicEnergyLevel}
+            setTopicEnergyLevel={setTopicEnergyLevel}
+            topicDifficulty={topicDifficulty}
+            setTopicDifficulty={setTopicDifficulty}
+            topicPriority={topicPriority}
+            setTopicPriority={setTopicPriority}
+            topicDeadline={topicDeadline}
+            setTopicDeadline={setTopicDeadline}
             onAddTopic={onAddTopic}
             onRefresh={refreshAll}
           />
@@ -224,6 +270,14 @@ export default function Courses() {
             setTopicName={setTopicName}
             topicMinutes={topicMinutes}
             setTopicMinutes={setTopicMinutes}
+            topicEnergyLevel={topicEnergyLevel}
+            setTopicEnergyLevel={setTopicEnergyLevel}
+            topicDifficulty={topicDifficulty}
+            setTopicDifficulty={setTopicDifficulty}
+            topicPriority={topicPriority}
+            setTopicPriority={setTopicPriority}
+            topicDeadline={topicDeadline}
+            setTopicDeadline={setTopicDeadline}
             onAddTopic={onAddTopic}
             onRefresh={refreshAll}
           />
@@ -243,6 +297,14 @@ export default function Courses() {
             setTopicName={setTopicName}
             topicMinutes={topicMinutes}
             setTopicMinutes={setTopicMinutes}
+            topicEnergyLevel={topicEnergyLevel}
+            setTopicEnergyLevel={setTopicEnergyLevel}
+            topicDifficulty={topicDifficulty}
+            setTopicDifficulty={setTopicDifficulty}
+            topicPriority={topicPriority}
+            setTopicPriority={setTopicPriority}
+            topicDeadline={topicDeadline}
+            setTopicDeadline={setTopicDeadline}
             onAddTopic={onAddTopic}
             onRefresh={refreshAll}
           />
@@ -270,6 +332,14 @@ function CategoryPanel(props: {
   setTopicName: (v: string) => void;
   topicMinutes: string;
   setTopicMinutes: (v: string) => void;
+  topicEnergyLevel: 'high' | 'medium' | 'low';
+  setTopicEnergyLevel: (v: 'high' | 'medium' | 'low') => void;
+  topicDifficulty: string;
+  setTopicDifficulty: (v: string) => void;
+  topicPriority: string;
+  setTopicPriority: (v: string) => void;
+  topicDeadline: string;
+  setTopicDeadline: (v: string) => void;
   onAddTopic: () => Promise<void>;
   onRefresh: () => Promise<void>;
 }) {
@@ -286,6 +356,14 @@ function CategoryPanel(props: {
     setTopicName,
     topicMinutes,
     setTopicMinutes,
+    topicEnergyLevel,
+    setTopicEnergyLevel,
+    topicDifficulty,
+    setTopicDifficulty,
+    topicPriority,
+    setTopicPriority,
+    topicDeadline,
+    setTopicDeadline,
     onAddTopic,
     onRefresh,
   } = props;
@@ -299,6 +377,10 @@ function CategoryPanel(props: {
   const [editTopicId, setEditTopicId] = useState<string>("");
   const [editTopicName, setEditTopicName] = useState<string>("");
   const [editTopicMinutes, setEditTopicMinutes] = useState<string>("");
+  const [editTopicEnergyLevel, setEditTopicEnergyLevel] = useState<'high' | 'medium' | 'low'>('medium');
+  const [editTopicDifficulty, setEditTopicDifficulty] = useState<string>("");
+  const [editTopicPriority, setEditTopicPriority] = useState<string>("");
+  const [editTopicDeadline, setEditTopicDeadline] = useState<string>("");
 
   function startEditSubject(s: StudySubject) {
     setEditSubjectId(s.id);
@@ -373,15 +455,32 @@ function CategoryPanel(props: {
     setEditTopicId(t.id);
     setEditTopicName(t.name);
     setEditTopicMinutes(String(t.avgMinutes));
+    setEditTopicEnergyLevel(t.energyLevel || 'medium');
+    setEditTopicDifficulty(t.difficultyScore ? String(t.difficultyScore) : "");
+    setEditTopicPriority(t.priority ? String(t.priority) : "");
+    setEditTopicDeadline(t.deadline || "");
   }
   async function saveEditTopic() {
     const name = editTopicName.trim();
     const minutes = Number(editTopicMinutes || 0) || 0;
+    const difficulty = editTopicDifficulty ? Number(editTopicDifficulty) : undefined;
+    const priority = editTopicPriority ? Number(editTopicPriority) : undefined;
     if (!editTopicId || !name) return;
-    await updateTopic(editTopicId, { name, avgMinutes: minutes });
+    await updateTopic(editTopicId, { 
+      name, 
+      avgMinutes: minutes,
+      energyLevel: editTopicEnergyLevel,
+      difficultyScore: difficulty,
+      priority: priority,
+      deadline: editTopicDeadline || undefined,
+    });
     setEditTopicId("");
     setEditTopicName("");
     setEditTopicMinutes("");
+    setEditTopicEnergyLevel('medium');
+    setEditTopicDifficulty("");
+    setEditTopicPriority("");
+    setEditTopicDeadline("");
     await onRefresh();
     toast({ title: "Konu güncellendi" });
   }
@@ -389,6 +488,10 @@ function CategoryPanel(props: {
     setEditTopicId("");
     setEditTopicName("");
     setEditTopicMinutes("");
+    setEditTopicEnergyLevel('medium');
+    setEditTopicDifficulty("");
+    setEditTopicPriority("");
+    setEditTopicDeadline("");
   }
   async function confirmDeleteTopic(t: StudyTopic) {
     if (!window.confirm(`Konu silinsin mi? (${t.name})`)) return;
@@ -482,18 +585,51 @@ function CategoryPanel(props: {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col gap-2 md:flex-row">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             <Input
               placeholder="Konu adı"
               value={topicName}
               onChange={(e) => setTopicName(e.target.value)}
+              className="md:col-span-2 lg:col-span-3"
             />
             <Input
               placeholder="Tahmini süre (dk)"
               value={topicMinutes}
               onChange={(e) => setTopicMinutes(e.target.value)}
             />
-            <Button onClick={onAddTopic} disabled={!selectedSubjectId}>
+            <Select value={topicEnergyLevel} onValueChange={(v) => setTopicEnergyLevel(v as 'high' | 'medium' | 'low')}>
+              <SelectTrigger>
+                <SelectValue placeholder="Enerji Seviyesi" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="high">⚡ Yüksek Enerji</SelectItem>
+                <SelectItem value="medium">📊 Orta Enerji</SelectItem>
+                <SelectItem value="low">🌙 Düşük Enerji</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              placeholder="Zorluk (1-10)"
+              type="number"
+              min="1"
+              max="10"
+              value={topicDifficulty}
+              onChange={(e) => setTopicDifficulty(e.target.value)}
+            />
+            <Input
+              placeholder="Öncelik (1-10)"
+              type="number"
+              min="1"
+              max="10"
+              value={topicPriority}
+              onChange={(e) => setTopicPriority(e.target.value)}
+            />
+            <Input
+              placeholder="Son tarih"
+              type="date"
+              value={topicDeadline}
+              onChange={(e) => setTopicDeadline(e.target.value)}
+            />
+            <Button onClick={onAddTopic} disabled={!selectedSubjectId} className="md:col-span-2 lg:col-span-3">
               {selectedSubjectId ? "Konu Ekle" : "Önce ders seçin"}
             </Button>
           </div>
@@ -518,7 +654,11 @@ function CategoryPanel(props: {
             <TableHeader>
               <TableRow>
                 <TableHead>Konu</TableHead>
-                <TableHead className="w-32">Tahmini Süre (dk)</TableHead>
+                <TableHead className="w-24">Süre (dk)</TableHead>
+                <TableHead className="w-28">Enerji</TableHead>
+                <TableHead className="w-20">Zorluk</TableHead>
+                <TableHead className="w-20">Öncelik</TableHead>
+                <TableHead className="w-28">Son Tarih</TableHead>
                 <TableHead className="w-16">
                   <span className="sr-only">İşlemler</span>
                 </TableHead>
@@ -527,7 +667,7 @@ function CategoryPanel(props: {
             <TableBody>
               {topics.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-muted-foreground">
+                  <TableCell colSpan={7} className="text-muted-foreground">
                     {selectedSubjectId
                       ? "Bu ders için konu yok."
                       : "Ders seçin."}
@@ -546,15 +686,76 @@ function CategoryPanel(props: {
                         t.name
                       )}
                     </TableCell>
-                    <TableCell className="w-32">
+                    <TableCell className="w-24">
                       {editTopicId === t.id ? (
                         <Input
                           value={editTopicMinutes}
                           onChange={(e) => setEditTopicMinutes(e.target.value)}
-                          className="w-24"
+                          className="w-20"
                         />
                       ) : (
                         t.avgMinutes
+                      )}
+                    </TableCell>
+                    <TableCell className="w-28">
+                      {editTopicId === t.id ? (
+                        <Select value={editTopicEnergyLevel} onValueChange={(v) => setEditTopicEnergyLevel(v as 'high' | 'medium' | 'low')}>
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="high">⚡ Yüksek</SelectItem>
+                            <SelectItem value="medium">📊 Orta</SelectItem>
+                            <SelectItem value="low">🌙 Düşük</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="text-sm">
+                          {t.energyLevel === 'high' && '⚡ Yüksek'}
+                          {t.energyLevel === 'medium' && '📊 Orta'}
+                          {t.energyLevel === 'low' && '🌙 Düşük'}
+                          {!t.energyLevel && '📊 Orta'}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="w-20">
+                      {editTopicId === t.id ? (
+                        <Input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editTopicDifficulty}
+                          onChange={(e) => setEditTopicDifficulty(e.target.value)}
+                          className="w-16"
+                        />
+                      ) : (
+                        <span className="text-sm">{t.difficultyScore || '-'}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="w-20">
+                      {editTopicId === t.id ? (
+                        <Input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editTopicPriority}
+                          onChange={(e) => setEditTopicPriority(e.target.value)}
+                          className="w-16"
+                        />
+                      ) : (
+                        <span className="text-sm">{t.priority || '-'}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="w-28">
+                      {editTopicId === t.id ? (
+                        <Input
+                          type="date"
+                          value={editTopicDeadline}
+                          onChange={(e) => setEditTopicDeadline(e.target.value)}
+                          className="w-32"
+                        />
+                      ) : (
+                        <span className="text-xs">{t.deadline ? new Date(t.deadline).toLocaleDateString('tr-TR') : '-'}</span>
                       )}
                     </TableCell>
                     <TableCell className="w-16">
