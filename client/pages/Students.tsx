@@ -522,7 +522,7 @@ export default function Students() {
   return (
     <div className="space-y-6">
       {/* Modern Header with Gradient */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-900 via-cyan-600 to-sky-400 p-8 text-white shadow-xl">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-800 via-purple-600 to-fuchsia-500 p-8 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -550,7 +550,7 @@ export default function Students() {
               </Button>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="secondary" size="sm" className="bg-white text-blue-800 hover:bg-white/90">
+                  <Button variant="secondary" size="sm" className="bg-white text-purple-800 hover:bg-white/90">
                     <UserPlus className="mr-2 h-4 w-4" /> Yeni Öğrenci
                   </Button>
                 </DialogTrigger>
@@ -659,57 +659,57 @@ export default function Students() {
       
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50">
+        <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-indigo-100/50">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-blue-800 p-3">
+              <div className="rounded-full bg-indigo-600 p-3">
                 <Users className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Toplam Öğrenci</p>
-                <h3 className="text-2xl font-bold text-blue-900">{stats.total}</h3>
+                <h3 className="text-2xl font-bold text-indigo-700">{stats.total}</h3>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100/50">
+        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/50">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-cyan-600 p-3">
+              <div className="rounded-full bg-purple-600 p-3">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Kız Öğrenci</p>
-                <h3 className="text-2xl font-bold text-cyan-700">{stats.female}</h3>
+                <h3 className="text-2xl font-bold text-purple-700">{stats.female}</h3>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-sky-200 bg-gradient-to-br from-sky-50 to-sky-100/50">
+        <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100/50">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-sky-500 p-3">
+              <div className="rounded-full bg-violet-600 p-3">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Erkek Öğrenci</p>
-                <h3 className="text-2xl font-bold text-sky-600">{stats.male}</h3>
+                <h3 className="text-2xl font-bold text-violet-700">{stats.male}</h3>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50">
+        <Card className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-fuchsia-100/50">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-blue-400 p-3">
+              <div className="rounded-full bg-fuchsia-600 p-3">
                 <Filter className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Yüksek Risk</p>
-                <h3 className="text-2xl font-bold text-blue-500">{stats.highRisk}</h3>
+                <h3 className="text-2xl font-bold text-fuchsia-700">{stats.highRisk}</h3>
               </div>
             </div>
           </CardContent>
