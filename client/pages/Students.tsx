@@ -17,7 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Plus, Trash2, Pencil } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Upload, Plus, Trash2, Pencil, Search, Users, GraduationCap, Filter, Download, Eye, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
@@ -56,46 +57,62 @@ const StudentRow = memo(({
   onEditClick: (s: Student) => void; 
   onDeleteClick: (s: Student) => void;
 }) => {
+  const getRiskBadgeVariant = (risk?: string) => {
+    switch (risk) {
+      case "Yüksek":
+        return "destructive";
+      case "Orta":
+        return "default";
+      default:
+        return "secondary";
+    }
+  };
+
   return (
-    <TableRow>
-      <TableCell>{student.id}</TableCell>
-      <TableCell>{student.ad}</TableCell>
+    <TableRow className="hover:bg-muted/50 transition-colors group">
+      <TableCell className="font-medium">{student.id}</TableCell>
+      <TableCell className="font-medium">{student.ad}</TableCell>
       <TableCell>{student.soyad}</TableCell>
-      <TableCell>{student.sinif}</TableCell>
-      <TableCell>{student.cinsiyet === "E" ? "Erkek" : "Kız"}</TableCell>
       <TableCell>
-        <span
-          className={
-            student.risk === "Yüksek"
-              ? "px-2 py-1 rounded text-xs bg-red-100 text-red-700"
-              : student.risk === "Orta"
-                ? "px-2 py-1 rounded text-xs bg-amber-100 text-amber-700"
-                : "px-2 py-1 rounded text-xs bg-emerald-100 text-emerald-700"
-          }
-        >
-          {student.risk}
-        </span>
+        <Badge variant="outline" className="font-normal">
+          {student.sinif}
+        </Badge>
       </TableCell>
       <TableCell>
-        <Button asChild size="sm" variant="outline">
-          <Link to={`/ogrenci/${student.id}`}>Görüntüle</Link>
+        <Badge variant="outline" className="font-normal">
+          {student.cinsiyet === "E" ? "Erkek" : "Kız"}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <Badge variant={getRiskBadgeVariant(student.risk)} className="font-normal">
+          {student.risk || "Düşük"}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <Button asChild size="sm" variant="ghost" className="gap-1.5">
+          <Link to={`/ogrenci/${student.id}`}>
+            <Eye className="h-3.5 w-3.5" />
+            Görüntüle
+          </Link>
         </Button>
       </TableCell>
       <TableCell>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button 
             size="sm" 
-            variant="outline"
+            variant="ghost"
             onClick={() => onEditClick(student)}
+            className="h-8 w-8 p-0"
           >
-            <Pencil className="h-3 w-3" />
+            <Pencil className="h-3.5 w-3.5" />
           </Button>
           <Button 
             size="sm" 
-            variant="destructive"
+            variant="ghost"
             onClick={() => onDeleteClick(student)}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </TableCell>
@@ -493,45 +510,63 @@ export default function Students() {
     URL.revokeObjectURL(url);
   };
 
+  const stats = useMemo(() => {
+    const total = students.length;
+    const female = students.filter(s => s.cinsiyet === "K").length;
+    const male = students.filter(s => s.cinsiyet === "E").length;
+    const highRisk = students.filter(s => s.risk === "Yüksek").length;
+    
+    return { total, female, male, highRisk };
+  }, [students]);
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold">Öğrenci Yönetimi</h1>
-        <div className="flex gap-2">
-          <label className="inline-flex items-center">
-            <input
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              className="hidden"
-              onChange={(e) => e.target.files && importSheet(e.target.files[0])}
-            />
-            <Button asChild variant="outline">
-              <span>
-                <Upload className="mr-2 h-4 w-4" /> Excel/CSV İçe Aktar
-              </span>
-            </Button>
-          </label>
-          <Button variant="outline" onClick={exportCsv}>
-            CSV Dışa Aktar
-          </Button>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Yeni Öğrenci
+    <div className="space-y-6">
+      {/* Modern Header with Gradient */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8 text-white shadow-xl">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Öğrenci Yönetimi</h1>
+              <p className="text-white/90">Öğrenci kayıtlarını görüntüleyin ve yönetin</p>
+            </div>
+            <div className="flex gap-2">
+              <label className="inline-flex items-center">
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                  onChange={(e) => e.target.files && importSheet(e.target.files[0])}
+                />
+                <Button asChild variant="secondary" size="sm">
+                  <span>
+                    <Upload className="mr-2 h-4 w-4" /> İçe Aktar
+                  </span>
+                </Button>
+              </label>
+              <Button variant="secondary" size="sm" onClick={exportCsv}>
+                <Download className="mr-2 h-4 w-4" />
+                Dışa Aktar
               </Button>
-            </DialogTrigger>
-            <DialogContent>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" size="sm" className="bg-white text-purple-600 hover:bg-white/90">
+                    <UserPlus className="mr-2 h-4 w-4" /> Yeni Öğrenci
+                  </Button>
+                </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Yeni Öğrenci</DialogTitle>
+                <DialogTitle className="text-2xl">Yeni Öğrenci Ekle</DialogTitle>
               </DialogHeader>
               <form
                 id="student-form"
                 onSubmit={handleSubmit(onCreate)}
-                className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                <div className="space-y-1">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Öğrenci No</label>
                   <Input
-                    placeholder="Öğrenci No"
+                    placeholder="12345"
                     inputMode="numeric"
                     type="text"
                     {...register("id", { 
@@ -546,82 +581,162 @@ export default function Students() {
                     <p className="text-xs text-red-600">{errors.id.message}</p>
                   )}
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Ad</label>
                   <Input
-                    placeholder="Ad"
+                    placeholder="Ahmet"
                     {...register("ad", { required: "Ad zorunludur" })}
                   />
                   {errors.ad && (
                     <p className="text-xs text-red-600">{errors.ad.message}</p>
                   )}
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Soyad</label>
                   <Input
-                    placeholder="Soyad"
+                    placeholder="Yılmaz"
                     {...register("soyad", { required: "Soyad zorunludur" })}
                   />
                   {errors.soyad && (
                     <p className="text-xs text-red-600">{errors.soyad.message}</p>
                   )}
                 </div>
-                <Input placeholder="Sınıf (örn. 9/A)" {...register("sinif")} />
-                <Select
-                  onValueChange={(v) => setValue("cinsiyet", v as "K" | "E")}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Cinsiyet" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="K">Kız</SelectItem>
-                    <SelectItem value="E">Erkek</SelectItem>
-                  </SelectContent>
-                </Select>
-                <input
-                  type="hidden"
-                  {...register("cinsiyet")}
-                  defaultValue="K"
-                />
-                <Select
-                  onValueChange={(v) => setValue("risk", v as "Düşük" | "Orta" | "Yüksek")}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Risk" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Düşük">Düşük</SelectItem>
-                    <SelectItem value="Orta">Orta</SelectItem>
-                    <SelectItem value="Yüksek">Yüksek</SelectItem>
-                  </SelectContent>
-                </Select>
-                <input
-                  type="hidden"
-                  {...register("risk")}
-                  defaultValue="Düşük"
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Sınıf</label>
+                  <Input placeholder="9/A" {...register("sinif")} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Cinsiyet</label>
+                  <Select
+                    onValueChange={(v) => setValue("cinsiyet", v as "K" | "E")}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seçiniz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="K">Kız</SelectItem>
+                      <SelectItem value="E">Erkek</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <input
+                    type="hidden"
+                    {...register("cinsiyet")}
+                    defaultValue="K"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Risk Seviyesi</label>
+                  <Select
+                    onValueChange={(v) => setValue("risk", v as "Düşük" | "Orta" | "Yüksek")}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seçiniz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Düşük">Düşük</SelectItem>
+                      <SelectItem value="Orta">Orta</SelectItem>
+                      <SelectItem value="Yüksek">Yüksek</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <input
+                    type="hidden"
+                    {...register("risk")}
+                    defaultValue="Düşük"
+                  />
+                </div>
               </form>
               <DialogFooter>
-                <Button form="student-form" type="submit">
-                  Kaydet
+                <Button form="student-form" type="submit" className="w-full sm:w-auto">
+                  Öğrenci Ekle
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
       </div>
+      </div>
+      
+      {/* Statistics Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-blue-500 p-3">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Toplam Öğrenci</p>
+                <h3 className="text-2xl font-bold">{stats.total}</h3>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-pink-100/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-pink-500 p-3">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Kız Öğrenci</p>
+                <h3 className="text-2xl font-bold">{stats.female}</h3>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-purple-500 p-3">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Erkek Öğrenci</p>
+                <h3 className="text-2xl font-bold">{stats.male}</h3>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-red-200 bg-gradient-to-br from-red-50 to-red-100/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-red-500 p-3">
+                <Filter className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Yüksek Risk</p>
+                <h3 className="text-2xl font-bold">{stats.highRisk}</h3>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtreler</CardTitle>
+      {/* Modern Filter Section */}
+      <Card className="border-2 shadow-sm">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">Filtrele ve Ara</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Ara: No / Ad / Soyad"
-          />
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Öğrenci ara (No, Ad, Soyad)"
+              className="pl-9"
+            />
+          </div>
           <Select value={sinif} onValueChange={setSinif}>
             <SelectTrigger>
-              <SelectValue placeholder="Sınıf" />
+              <SelectValue placeholder="Sınıf Seçin" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="tum">Tüm Sınıflar</SelectItem>
@@ -633,7 +748,7 @@ export default function Students() {
           </Select>
           <Select value={cinsiyet} onValueChange={setCinsiyet}>
             <SelectTrigger>
-              <SelectValue placeholder="Cinsiyet" />
+              <SelectValue placeholder="Cinsiyet Seçin" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="tum">Tümü</SelectItem>
@@ -641,58 +756,85 @@ export default function Students() {
               <SelectItem value="E">Erkek</SelectItem>
             </SelectContent>
           </Select>
-          <div />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Öğrenci Listesi ({list.length} öğrenci)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-auto border rounded-md max-h-[600px]">
-            <Table>
-              <TableHeader className="sticky top-0 bg-background z-10">
-                <TableRow>
-                  <TableHead>No</TableHead>
-                  <TableHead>Ad</TableHead>
-                  <TableHead>Soyad</TableHead>
-                  <TableHead>Sınıf</TableHead>
-                  <TableHead>Cinsiyet</TableHead>
-                  <TableHead>Risk</TableHead>
-                  <TableHead>Profil</TableHead>
-                  <TableHead>İşlemler</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {list.map((student) => (
-                  <StudentRow
-                    key={student.id}
-                    student={student}
-                    onEditClick={onEditClick}
-                    onDeleteClick={onDeleteClick}
-                  />
-                ))}
-              </TableBody>
-            </Table>
+      {/* Student Table */}
+      <Card className="shadow-sm">
+        <CardHeader className="border-b bg-muted/30">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Öğrenci Listesi
+              <Badge variant="secondary" className="ml-2">{list.length} öğrenci</Badge>
+            </CardTitle>
           </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {list.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="rounded-full bg-muted p-6 mb-4">
+                <Users className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Henüz öğrenci yok</h3>
+              <p className="text-muted-foreground text-center mb-6">
+                {students.length === 0 
+                  ? "Yeni öğrenci ekleyerek başlayın veya Excel/CSV dosyasından içe aktarın"
+                  : "Filtre kriterlerinize uygun öğrenci bulunamadı"}
+              </p>
+              {students.length === 0 && (
+                <Button onClick={() => setOpen(true)}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  İlk Öğrenciyi Ekle
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-auto max-h-[600px] rounded-b-lg">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background z-10 border-b">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-semibold">No</TableHead>
+                    <TableHead className="font-semibold">Ad</TableHead>
+                    <TableHead className="font-semibold">Soyad</TableHead>
+                    <TableHead className="font-semibold">Sınıf</TableHead>
+                    <TableHead className="font-semibold">Cinsiyet</TableHead>
+                    <TableHead className="font-semibold">Risk</TableHead>
+                    <TableHead className="font-semibold">Profil</TableHead>
+                    <TableHead className="font-semibold">İşlemler</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {list.map((student) => (
+                    <StudentRow
+                      key={student.id}
+                      student={student}
+                      onEditClick={onEditClick}
+                      onDeleteClick={onDeleteClick}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Öğrenci Düzenleme Dialogu */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Öğrenci Düzenle</DialogTitle>
+            <DialogTitle className="text-2xl">Öğrenci Bilgilerini Düzenle</DialogTitle>
           </DialogHeader>
           <form
             id="student-edit-form"
             onSubmit={handleSubmit(onUpdate)}
-            className="grid grid-cols-1 md:grid-cols-2 gap-3"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <div className="space-y-1">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Öğrenci No</label>
               <Input
-                placeholder="Öğrenci No"
+                placeholder="12345"
                 inputMode="numeric"
                 type="text"
                 {...register("id", { 
@@ -707,58 +849,69 @@ export default function Students() {
                 <p className="text-xs text-red-600">{errors.id.message}</p>
               )}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Ad</label>
               <Input
-                placeholder="Ad"
+                placeholder="Ahmet"
                 {...register("ad", { required: "Ad zorunludur" })}
               />
               {errors.ad && (
                 <p className="text-xs text-red-600">{errors.ad.message}</p>
               )}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Soyad</label>
               <Input
-                placeholder="Soyad"
+                placeholder="Yılmaz"
                 {...register("soyad", { required: "Soyad zorunludur" })}
               />
               {errors.soyad && (
                 <p className="text-xs text-red-600">{errors.soyad.message}</p>
               )}
             </div>
-            <Input placeholder="Sınıf (örn. 9/A)" {...register("sinif")} />
-            <Select
-              onValueChange={(v) => setValue("cinsiyet", v as "K" | "E")}
-              value={watch("cinsiyet")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Cinsiyet" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="K">Kız</SelectItem>
-                <SelectItem value="E">Erkek</SelectItem>
-              </SelectContent>
-            </Select>
-            <input
-              type="hidden"
-              {...register("cinsiyet")}
-            />
-            <Select
-              onValueChange={(v) => setValue("risk", v as "Düşük" | "Orta" | "Yüksek")}
-              value={watch("risk")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Risk" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Düşük">Düşük</SelectItem>
-                <SelectItem value="Orta">Orta</SelectItem>
-                <SelectItem value="Yüksek">Yüksek</SelectItem>
-              </SelectContent>
-            </Select>
-            <input
-              type="hidden"
-              {...register("risk")}
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Sınıf</label>
+              <Input placeholder="9/A" {...register("sinif")} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Cinsiyet</label>
+              <Select
+                onValueChange={(v) => setValue("cinsiyet", v as "K" | "E")}
+                value={watch("cinsiyet")}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seçiniz" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="K">Kız</SelectItem>
+                  <SelectItem value="E">Erkek</SelectItem>
+                </SelectContent>
+              </Select>
+              <input
+                type="hidden"
+                {...register("cinsiyet")}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Risk Seviyesi</label>
+              <Select
+                onValueChange={(v) => setValue("risk", v as "Düşük" | "Orta" | "Yüksek")}
+                value={watch("risk")}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seçiniz" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Düşük">Düşük</SelectItem>
+                  <SelectItem value="Orta">Orta</SelectItem>
+                  <SelectItem value="Yüksek">Yüksek</SelectItem>
+                </SelectContent>
+              </Select>
+              <input
+                type="hidden"
+                {...register("risk")}
+              />
+            </div>
           </form>
           <DialogFooter>
             <Button variant="outline" onClick={() => {
@@ -769,7 +922,7 @@ export default function Students() {
               İptal
             </Button>
             <Button form="student-edit-form" type="submit">
-              Güncelle
+              Değişiklikleri Kaydet
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -777,22 +930,27 @@ export default function Students() {
 
       {/* Güvenli Silme Dialogu */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-red-600">⚠️ Öğrenci Silme</DialogTitle>
+            <DialogTitle className="text-2xl text-red-600 flex items-center gap-2">
+              <div className="rounded-full bg-red-100 p-2">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              Öğrenci Silme Onayı
+            </DialogTitle>
           </DialogHeader>
           {studentToDelete && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                <strong>{studentToDelete.ad} {studentToDelete.soyad}</strong> öğrencisini kalıcı olarak silmek istediğinizden emin misiniz?
+                <strong className="text-foreground">{studentToDelete.ad} {studentToDelete.soyad}</strong> öğrencisini kalıcı olarak silmek istediğinizden emin misiniz?
               </p>
-              <div className="bg-red-50 border border-red-200 rounded p-3">
-                <p className="text-sm text-red-800 font-medium">Bu işlem geri alınamaz!</p>
-                <p className="text-xs text-red-700 mt-1">
-                  Tüm akademik kayıtlar, notlar ve ilerleme verileri silinecektir.
+              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-800 font-semibold mb-1">⚠️ Bu işlem geri alınamaz!</p>
+                <p className="text-xs text-red-700">
+                  Tüm akademik kayıtlar, notlar ve ilerleme verileri kalıcı olarak silinecektir.
                 </p>
               </div>
-              <div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium">
                   Silme işlemini onaylamak için öğrencinin tam adını yazın:
                 </label>
@@ -800,15 +958,16 @@ export default function Students() {
                   value={confirmationName}
                   onChange={(e) => setConfirmationName(e.target.value)}
                   placeholder={`${studentToDelete.ad} ${studentToDelete.soyad}`}
-                  className="mt-2"
+                  className="border-red-300 focus:border-red-500 focus:ring-red-500"
                 />
               </div>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button 
               variant="outline" 
               onClick={() => setDeleteDialogOpen(false)}
+              className="flex-1 sm:flex-none"
             >
               İptal
             </Button>
@@ -816,9 +975,10 @@ export default function Students() {
               variant="destructive" 
               onClick={onDeleteConfirm}
               disabled={!confirmationName.trim()}
+              className="flex-1 sm:flex-none"
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Sil
+              Kalıcı Olarak Sil
             </Button>
           </DialogFooter>
         </DialogContent>
