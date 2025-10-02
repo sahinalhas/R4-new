@@ -46,7 +46,7 @@ import {
 } from "@/lib/app-settings";
 import Courses from "@/pages/Courses";
 import ClassPeriodsEditor from "@/pages/components/ClassPeriodsEditor";
-import HierarchicalTopicsEditor from "@/pages/components/HierarchicalTopicsEditor";
+import PresentationSystemEditor from "@/pages/components/PresentationSystemEditor";
 import { useSearchParams, useLocation } from "react-router-dom";
 
 const schema = z.object({
@@ -845,7 +845,7 @@ export default function SettingsPage() {
 
         <TabsContent value="sunum-sistemi">
           <div className="space-y-4">
-            <HierarchicalTopicsEditor
+            <PresentationSystemEditor
               tabs={form.watch("presentationSystem") || []}
               onChange={(tabs) =>
                 form.setValue("presentationSystem", tabs, {
