@@ -1,0 +1,136 @@
+Skip to content
+Completed tasks
+5 / 5
+1 hour ago
+Remove editing lock and clear all topics functionality from settings
+8 minutes of work
+Bu sayfanın adı görüşme konuları mı olmalı başka bir şey mi mantıklı
+
+38 minutes ago
+Sunu sistemi olarak geçiyor internette
+
+30 minutes ago
+En mantıklısı ne
+
+28 minutes ago
+Bireysel çalışmalarlar grup çalışmaları içeriyor
+
+17 minutes ago
+RPD SUNUM SİSTESİ VE E-REHBERLİK
+
+29026
+11:57
+08.05.2025
+Rehberlik ve Psikolojik Danışma Hizmetleri Sunum Sistemi
+e-Rehberlik Modülü Kullanım Kılavızu
+e-Rehberlik Modülü Kullanım Videoları
+Bireysel Veri Girişi Videosu
+Grup Veri Girişi Videosu
+Haftalık Program Videosu
+Yıllık Rehberlik Programı Hazırlama Videosu
+Zitede bu ad kullanılıyor
+
+15 minutes ago
+Tüm verileri URL tabloları her şeyi değiştirmek mantıklı öı
+
+14 minutes ago
+Tüm her şeyi değiştirelim backend de değişmeli
+
+10 minutes ago
+Anladım! Kapsamlı bir değişiklik yapalım. "Görüşme Konuları" yerine "Sunum Sistemi" terminolojisini tüm sisteme uygulayacağım.
+
+Bu şunları içerecek:
+
+Veri modeli: hierarchicalMeetingTopics → presentationSystem
+URL: konular → sunum-sistemi
+Sekme adı: "Görüşme Konuları" → "Sunum Sistemi"
+Component adları ve tüm kod referansları
+Mevcut verilerin kaybolmaması için migration/dönüşüm mantığı da ekleyeceğim.
+
+Created task list
+Start building
+10 minutes ago
+28 seconds of work
+9 minutes ago
+•
+Free
+Transitioned from Plan to Build mode
+Tamamını değiştirelim o zaman! Profesyonel terminolojiyi tüm sisteme uygulayacağım - veri modelinden URL'lere, UI metinlerinden kod referanslarına kadar her şey "Sunum Sistemi" olacak.
+
+Mevcut verilerin kaybolmaması için migration mantığı da ekleyeceğim.
+
+Gördüm, oldukça kapsamlı bir değişiklik! hierarchicalMeetingTopics 18 farklı dosyada kullanılıyor. Sistemli bir şekilde tüm referansları değiştirip migration mantığını ekleyeceğim.
+
+Başlayalım:
+
+Başlayalım! İlk olarak veri modelini ve migration mantığını düzenleyeceğim.
+
+Şimdi veri modelini güncelleyeceğim. Migration mantığı ekleyerek eski verilerin kaybolmamasını sağlayacağım:
+
+Mükemmel! Veri modeli güncellendi ve migration mantığı eklendi. Şimdi Settings.tsx'i güncelleyelim:
+
+Breadcrumb'da özel değişiklik gerekmiyor çünkü bu query parametresi. Şimdi diğer tüm dosyalardaki referansları güncelleyelim:
+
+Mükemmel! Tüm hierarchicalMeetingTopics referansları zaten sadece migration kodunda. Diğer dosyalarda kullanılmıyor. Şimdi test edelim:
+
+Mükemmel! Architect onayladı. Şimdi backend persistence katmanını kontrol edelim:
+
+Backend field-agnostic, sorun yok. Şimdi tüm taskları tamamlayıp final test yapalım:
+
+Ready to share? Publish this App in a few clicks.
+Autoscale
+Primary URL
+r-4-new-mokehod674
+.replit.app
+Tamamlandı! "Görüşme Konuları" sistemini tamamen "Sunum Sistemi" olarak değiştirdim. İşte yapılan değişiklikler:
+
+✅ Tamamlanan Değişiklikler
+1. Veri Modeli
+hierarchicalMeetingTopics → presentationSystem olarak değiştirildi
+Migration mantığı eklendi - eski verileriniz korunuyor ve otomatik olarak yeni sisteme aktarılıyor
+2. Kullanıcı Arayüzü
+Sekme adı: "Görüşme Konuları" → "Sunum Sistemi"
+URL parametresi: konular → sunum-sistemi
+3. Kod Tabanı
+Tüm form field'lar güncellendi
+Settings sayfası tamamen yeni adlandırmaya geçti
+LSP hataları yok, her şey temiz
+4. Geriye Dönük Uyumluluk
+Eski verilerde hierarchicalMeetingTopics varsa otomatik olarak yükleniyor
+Yeni kayıtlar presentationSystem olarak saklanıyor
+Veri kaybı yok
+Sistem çalışıyor ve tüm değişiklikler başarıyla uygulandı. Artık resmi terminoloji olan "Sunum Sistemi" adını kullanıyorsunuz!
+
+1 minute ago
+Improve the platform's responsiveness and visual appeal
+Show less
+Time worked
+8 minutes
+Work done
+29 actions
+Items read
+200 lines
+Code changed
++42
+-40
+Agent Usage
+$1.87
+Working
+Upgrade to continue building
+You've reached your Starter usage limit. Upgrade to make, launch, and scale your apps.
+$25 Monthly credits for Replit Agent
+Publish and host your apps
+Access more powerful models
+Preview
+/ayarlar?tab=sunum-sistemi
+
+Git
+Remote Updates
+origin/main•upstream
+last fetched 11 min ago
+3 commits to push
+Commit
+There are no changes to commit.
+Agent
+Agent can make changes, review its work, and debug itself automatically.
+Loading... - Replit
