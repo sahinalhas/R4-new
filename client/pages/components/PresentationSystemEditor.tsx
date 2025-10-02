@@ -39,7 +39,7 @@ import {
   PresentationTab,
 } from "@/lib/app-settings";
 
-interface HierarchicalTopicsEditorProps {
+interface PresentationSystemEditorProps {
   tabs: PresentationTab[];
   onChange: (tabs: PresentationTab[]) => void;
   disabled?: boolean;
@@ -51,11 +51,11 @@ interface EditingState {
   value: string;
 }
 
-export default function HierarchicalTopicsEditor({
+export default function PresentationSystemEditor({
   tabs,
   onChange,
   disabled = false,
-}: HierarchicalTopicsEditorProps) {
+}: PresentationSystemEditorProps) {
   const [activeTab, setActiveTab] = useState<string>(
     tabs && tabs.length > 0 ? tabs[0].id : "",
   );
@@ -464,7 +464,7 @@ export default function HierarchicalTopicsEditor({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Görüşme Konuları (Hiyerarşik)</span>
+          <span>Sunum Sistemi</span>
           <Badge variant="secondary">
             {getTotalItemCount(tabs)} toplam konu
           </Badge>
