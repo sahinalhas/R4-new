@@ -526,7 +526,7 @@ export default function PublicSurvey() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 border-primary/20">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -537,7 +537,7 @@ export default function PublicSurvey() {
               </div>
               <div className="flex items-center space-x-4">
                 {template.estimatedDuration && (
-                  <Badge variant="outline" className="flex items-center">
+                  <Badge variant="outline" className="flex items-center border-primary/30">
                     <Clock className="mr-1 h-3 w-3" />
                     {template.estimatedDuration} dk
                   </Badge>
@@ -553,11 +553,11 @@ export default function PublicSurvey() {
         </Card>
 
         {/* Progress */}
-        <Card className="mb-6">
+        <Card className="mb-6 border-accent/20">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">İlerleme</span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {currentQuestionIndex + 1} / {questions.length}
               </span>
             </div>
