@@ -519,10 +519,10 @@ export default function Index() {
 
       {role === "ogretmen" && !hiddenWidgets.has('early-warnings') && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <Card className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-pink-50">
+          <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2 text-fuchsia-800">
+                <CardTitle className="flex items-center gap-2 text-accent">
                   <AlertTriangle className="h-5 w-5" />
                   Erken Uyarı Sistemi
                 </CardTitle>
@@ -538,7 +538,7 @@ export default function Index() {
                   {earlyWarnings.slice(0, 5).map((warning) => (
                     <div
                       key={warning.studentId + warning.warningType}
-                      className="bg-white p-4 rounded-lg border border-fuchsia-200 hover:border-fuchsia-300 transition-colors cursor-pointer"
+                      className="bg-white p-4 rounded-lg border border-accent/30 hover:border-accent/50 transition-colors cursor-pointer"
                       onClick={() => handleQuickAction('view-student', warning.studentId)}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -586,10 +586,10 @@ export default function Index() {
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {!hiddenWidgets.has('risk-summary') && (
-              <Card className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-pink-50">
+              <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-fuchsia-800">
+                    <CardTitle className="flex items-center gap-2 text-accent">
                       <AlertTriangle className="h-5 w-5" />
                       Risk Değerlendirme
                     </CardTitle>
@@ -617,10 +617,10 @@ export default function Index() {
             )}
 
             {!hiddenWidgets.has('weekly-focus') && (
-              <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-indigo-800">
+                    <CardTitle className="flex items-center gap-2 text-primary">
                       <Target className="h-5 w-5" />
                       Bu Hafta Odak
                     </CardTitle>
@@ -648,10 +648,10 @@ export default function Index() {
             )}
 
             {!hiddenWidgets.has('weekly-progress') && (
-              <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/10">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-purple-800">
+                    <CardTitle className="flex items-center gap-2 text-primary">
                       <TrendingUp className="h-5 w-5" />
                       Haftalık İlerleme
                     </CardTitle>
@@ -679,10 +679,10 @@ export default function Index() {
             )}
 
             {!hiddenWidgets.has('quick-resources') && (
-              <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
+              <Card className="border-primary/20 bg-gradient-to-br from-accent/5 to-primary/10">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-purple-800">
+                    <CardTitle className="flex items-center gap-2 text-primary">
                       <Lightbulb className="h-5 w-5" />
                       Hızlı Kaynaklar
                     </CardTitle>
@@ -710,10 +710,10 @@ export default function Index() {
             )}
 
             {!hiddenWidgets.has('system-reminders') && (
-              <Card className="border-gray-200 bg-gradient-to-br from-gray-50 to-slate-50">
+              <Card className="border-muted bg-gradient-to-br from-muted/30 to-muted/50">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-gray-800">
+                    <CardTitle className="flex items-center gap-2">
                       <Shield className="h-5 w-5" />
                       Sistem Hatırlatma
                     </CardTitle>

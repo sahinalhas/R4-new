@@ -522,13 +522,13 @@ export default function Students() {
   return (
     <div className="space-y-6">
       {/* Modern Header with Gradient */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-800 via-purple-600 to-fuchsia-500 p-8 text-white shadow-xl">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 border border-primary/20 p-8 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
         <div className="relative">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Öğrenci Yönetimi</h1>
-              <p className="text-white/90">Öğrenci kayıtlarını görüntüleyin ve yönetin</p>
+              <h1 className="text-3xl font-bold mb-2 text-primary">Öğrenci Yönetimi</h1>
+              <p className="text-muted-foreground">Öğrenci kayıtlarını görüntüleyin ve yönetin</p>
             </div>
             <div className="flex gap-2">
               <label className="inline-flex items-center">
@@ -550,7 +550,7 @@ export default function Students() {
               </Button>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="secondary" size="sm" className="bg-white text-purple-800 hover:bg-white/90">
+                  <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                     <UserPlus className="mr-2 h-4 w-4" /> Yeni Öğrenci
                   </Button>
                 </DialogTrigger>
@@ -659,57 +659,57 @@ export default function Students() {
       
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-indigo-100/50">
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-indigo-600 p-3">
+              <div className="rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 p-3 shadow-sm">
                 <Users className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Toplam Öğrenci</p>
-                <h3 className="text-2xl font-bold text-indigo-700">{stats.total}</h3>
+                <h3 className="text-2xl font-bold text-primary">{stats.total}</h3>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/50">
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/10 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-purple-600 p-3">
+              <div className="rounded-full bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-sm">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Kız Öğrenci</p>
-                <h3 className="text-2xl font-bold text-purple-700">{stats.female}</h3>
+                <h3 className="text-2xl font-bold text-primary">{stats.female}</h3>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100/50">
+        <Card className="border-primary/20 bg-gradient-to-br from-accent/5 to-primary/10 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-violet-600 p-3">
+              <div className="rounded-full bg-gradient-to-br from-violet-500 to-violet-600 p-3 shadow-sm">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Erkek Öğrenci</p>
-                <h3 className="text-2xl font-bold text-violet-700">{stats.male}</h3>
+                <h3 className="text-2xl font-bold text-primary">{stats.male}</h3>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-fuchsia-100/50">
+        <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-fuchsia-600 p-3">
+              <div className="rounded-full bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 p-3 shadow-sm">
                 <Filter className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Yüksek Risk</p>
-                <h3 className="text-2xl font-bold text-fuchsia-700">{stats.highRisk}</h3>
+                <h3 className="text-2xl font-bold text-accent">{stats.highRisk}</h3>
               </div>
             </div>
           </CardContent>
