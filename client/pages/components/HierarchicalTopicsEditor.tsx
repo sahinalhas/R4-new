@@ -31,15 +31,6 @@ interface EditingState {
   value: string;
 }
 
-// Categories that should not allow adding new items
-const RESTRICTED_CATEGORIES = [
-  'category-2.1',
-  'category-2.2', 
-  'category-2.3',
-  'category-3.1',
-  'category-3.2',
-  'category-3.3'
-];
 
 export default function HierarchicalTopicsEditor({
   tabs,
@@ -66,9 +57,29 @@ export default function HierarchicalTopicsEditor({
     onChange(updatedTabs);
   };
 
+  const findCategory = (categoryId: string): HierarchicalTopicCategory | null => {
+    const searchInCategories = (categories: HierarchicalTopicCategory[]): HierarchicalTopicCategory | null => {
+      for (const category of categories) {
+        if (category.id === categoryId) return category;
+        const found = searchInCategories(category.children);
+        if (found) return found;
+      }
+      return null;
+    };
+
+    for (const tab of tabs) {
+      const found = searchInCategories(tab.categories);
+      if (found) return found;
+    }
+    return null;
+  };
+
   const addItem = (categoryId: string, title: string) => {
     if (!title.trim()) return;
-    if (RESTRICTED_CATEGORIES.includes(categoryId)) return; // Prevent adding to restricted categories
+
+    const targetCategory = findCategory(categoryId);
+    if (!targetCategory) return;
+    if (targetCategory.children.length > 0) return;
 
     const newItem: HierarchicalTopicItem = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -160,7 +171,7 @@ export default function HierarchicalTopicsEditor({
   const renderCategory = (category: HierarchicalTopicCategory, depth: number = 0): JSX.Element => {
     const isExpanded = expandedCategories.has(category.id);
     const hasContent = category.items.length > 0 || category.children.length > 0;
-    const canAddItems = !RESTRICTED_CATEGORIES.includes(category.id);
+    const canAddItems = category.children.length === 0;
     
     const getIndentStyle = (depth: number) => {
       return { paddingLeft: `${depth * 20 + 8}px` };
