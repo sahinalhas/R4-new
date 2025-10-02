@@ -12,6 +12,7 @@ import SettingsPage from "./pages/Settings";
 import Reports from "./pages/Reports";
 import Surveys from "./pages/Surveys";
 import PublicSurvey from "./pages/PublicSurvey";
+import CounselingSessions from "./pages/CounselingSessions";
 import { AuthProvider } from "./lib/auth-context";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -31,7 +32,7 @@ const App = () => (
               <Route path="/ogrenci/:id" element={<StudentProfile />} />
               <Route
                 path="/gorusmeler"
-                element={<Placeholder title="Görüşme & Randevu" />}
+                element={<CounselingSessions />}
               />
               <Route
                 path="/anketler"
