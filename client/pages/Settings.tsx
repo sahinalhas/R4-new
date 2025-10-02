@@ -126,7 +126,6 @@ export default function SettingsPage() {
     return allowed.has(t) ? t : "genel";
   }, [searchParams]);
   const [tab, setTab] = useState<string>(initialTab);
-  const [topicsLocked, setTopicsLocked] = useState<boolean>(true);
   const [ack1, setAck1] = useState(false);
   const [ack2, setAck2] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
@@ -846,50 +845,6 @@ export default function SettingsPage() {
 
         <TabsContent value="konular">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="topicsLock">Düzenleme kilidi</Label>
-                <Switch
-                  id="topicsLock"
-                  checked={topicsLocked}
-                  onCheckedChange={(v) => setTopicsLocked(!!v)}
-                />
-              </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    disabled={topicsLocked}
-                  >
-                    Tümünü Temizle
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Tüm konuları temizle?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tüm hiyerarşik konu yapısı silinecek ve varsayılana dönecek. Bu işlem geri alınamaz.
-                      Emin misiniz?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Vazgeç</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        form.setValue("hierarchicalMeetingTopics", [], {
-                          shouldValidate: true,
-                        });
-                        toast({ title: "Hiyerarşik konu yapısı temizlendi" });
-                      }}
-                    >
-                      Evet, temizle
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-
             <HierarchicalTopicsEditor
               tabs={form.watch("hierarchicalMeetingTopics") || []}
               onChange={(tabs) =>
@@ -897,7 +852,6 @@ export default function SettingsPage() {
                   shouldValidate: true,
                 })
               }
-              disabled={topicsLocked}
             />
           </div>
         </TabsContent>
