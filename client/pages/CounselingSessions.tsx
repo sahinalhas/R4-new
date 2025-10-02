@@ -124,7 +124,7 @@ export default function CounselingSessions() {
   const [selectedSession, setSelectedSession] = useState<CounselingSession | null>(null);
   const [studentSearchOpen, setStudentSearchOpen] = useState(false);
   const [topicSearchOpen, setTopicSearchOpen] = useState(false);
-  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [selectedStudents, setSelectedStudents] = useState<Student[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -722,9 +722,273 @@ export default function CounselingSessions() {
             </TabsContent>
 
             <TabsContent value="group">
-              <p className="text-center text-muted-foreground py-8">
-                Grup görüşme formu burada olacak
-              </p>
+              <Form {...groupForm}>
+                <form onSubmit={groupForm.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={groupForm.control}
+                    name="groupName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Grup Adı (Opsiyonel)</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Örn: 9-A Sınıfı Akran Arabuluculuğu" />
+                        </FormControl>
+                        <FormDescription>
+                          Grup görüşmesini tanımlayan bir ad verin
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={groupForm.control}
+                    name="studentIds"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Öğrenciler * ({selectedStudents.length} seçili)</FormLabel>
+                        <Popover open={studentSearchOpen} onOpenChange={setStudentSearchOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "justify-between",
+                                  selectedStudents.length === 0 && "text-muted-foreground"
+                                )}
+                              >
+                                {selectedStudents.length > 0
+                                  ? `${selectedStudents.length} öğrenci seçildi`
+                                  : "Öğrenci seçin"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[400px] p-0">
+                            <Command>
+                              <CommandInput placeholder="Öğrenci ara..." />
+                              <CommandList>
+                                <CommandEmpty>Öğrenci bulunamadı.</CommandEmpty>
+                                <CommandGroup>
+                                  {students.map((student) => {
+                                    const isSelected = selectedStudents.some(s => s.id === student.id);
+                                    return (
+                                      <CommandItem
+                                        key={student.id}
+                                        value={student.name}
+                                        onSelect={() => {
+                                          if (isSelected) {
+                                            const updated = selectedStudents.filter(s => s.id !== student.id);
+                                            setSelectedStudents(updated);
+                                            field.onChange(updated.map(s => s.id));
+                                          } else {
+                                            const updated = [...selectedStudents, student];
+                                            setSelectedStudents(updated);
+                                            field.onChange(updated.map(s => s.id));
+                                          }
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        <div>
+                                          <p className="font-medium">{student.name}</p>
+                                          <p className="text-sm text-muted-foreground">{student.className}</p>
+                                        </div>
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        {selectedStudents.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {selectedStudents.map((student) => (
+                              <Badge key={student.id} variant="secondary" className="gap-1">
+                                {student.name}
+                                <X
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => {
+                                    const updated = selectedStudents.filter(s => s.id !== student.id);
+                                    setSelectedStudents(updated);
+                                    field.onChange(updated.map(s => s.id));
+                                  }}
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={groupForm.control}
+                    name="topic"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Görüşme Konusu *</FormLabel>
+                        <Popover open={topicSearchOpen} onOpenChange={setTopicSearchOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value || "Konu seçin"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[500px] p-0">
+                            <Command>
+                              <CommandInput placeholder="Konu ara..." />
+                              <CommandList>
+                                <CommandEmpty>Konu bulunamadı.</CommandEmpty>
+                                <CommandGroup>
+                                  {topics.map((topic) => (
+                                    <CommandItem
+                                      key={topic.id}
+                                      value={topic.fullPath}
+                                      onSelect={() => {
+                                        field.onChange(topic.title);
+                                        setTopicSearchOpen(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          field.value === topic.title ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex-1">
+                                        <p className="font-medium">{topic.title}</p>
+                                        <p className="text-sm text-muted-foreground">{topic.fullPath}</p>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={groupForm.control}
+                      name="participantType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Katılımcı Tipi</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="öğrenci">Öğrenci</SelectItem>
+                              <SelectItem value="veli">Veli</SelectItem>
+                              <SelectItem value="öğretmen">Öğretmen</SelectItem>
+                              <SelectItem value="diğer">Diğer</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={groupForm.control}
+                      name="sessionMode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Görüşme Şekli</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="yüz_yüze">Yüz Yüze</SelectItem>
+                              <SelectItem value="online">Online</SelectItem>
+                              <SelectItem value="telefon">Telefon</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={groupForm.control}
+                    name="sessionLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Görüşme Yeri</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Rehberlik Servisi" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={groupForm.control}
+                    name="sessionDetails"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notlar (Opsiyonel)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field} 
+                            placeholder="Grup görüşmesi hakkında ek notlar..."
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <DialogFooter>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setDialogOpen(false)}
+                    >
+                      İptal
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={createSessionMutation.isPending}
+                    >
+                      {createSessionMutation.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Grup Görüşmesini Başlat
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
             </TabsContent>
           </Tabs>
         </DialogContent>
