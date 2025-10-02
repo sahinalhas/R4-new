@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import * as XLSX from 'xlsx';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +35,10 @@ import {
   Loader2,
   Calendar,
   Timer,
-  Bell
+  Bell,
+  Download,
+  Eye,
+  Filter
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -415,6 +419,65 @@ export default function CounselingSessions() {
     return () => clearInterval(autoCompleteInterval);
   }, [queryClient]);
 
+  const exportToExcel = () => {
+    const exportData = sessions.map(session => {
+      const duration = session.exitTime && session.entryTime 
+        ? Math.floor((new Date(`2000-01-01T${session.exitTime}`).getTime() - new Date(`2000-01-01T${session.entryTime}`).getTime()) / 1000 / 60)
+        : null;
+      
+      const studentNames = session.sessionType === 'individual' 
+        ? session.student?.name 
+        : session.students?.map(s => s.name).join(', ') || session.groupName;
+      
+      return {
+        'Tarih': new Date(session.sessionDate).toLocaleDateString('tr-TR'),
+        'Başlangıç Saati': session.entryTime,
+        'Bitiş Saati': session.exitTime || '-',
+        'Öğrenci(ler)': studentNames,
+        'Sınıf': session.sessionType === 'individual' ? session.student?.className : '-',
+        'Görüşme Tipi': session.sessionType === 'individual' ? 'Bireysel' : 'Grup',
+        'Konu': session.topic,
+        'Görüşme Şekli': session.sessionMode,
+        'Konum': session.sessionLocation,
+        'Süre (Dakika)': duration || '-',
+        'Durum': session.completed ? 'Tamamlandı' : 'Devam Ediyor',
+        'Otomatik Tamamlandı': session.autoCompleted ? 'Evet' : 'Hayır',
+        'Uzatıldı': session.extensionGranted ? 'Evet' : 'Hayır',
+        'Notlar': session.detailedNotes || session.sessionDetails || '-',
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Görüşme Defteri');
+    
+    const colWidths = [
+      { wch: 12 }, // Tarih
+      { wch: 10 }, // Başlangıç
+      { wch: 10 }, // Bitiş
+      { wch: 25 }, // Öğrenci
+      { wch: 10 }, // Sınıf
+      { wch: 12 }, // Tip
+      { wch: 30 }, // Konu
+      { wch: 12 }, // Şekil
+      { wch: 15 }, // Konum
+      { wch: 10 }, // Süre
+      { wch: 12 }, // Durum
+      { wch: 12 }, // Oto
+      { wch: 10 }, // Uzatıldı
+      { wch: 50 }, // Notlar
+    ];
+    ws['!cols'] = colWidths;
+    
+    const today = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `Gorusme_Defteri_${today}.xlsx`);
+    
+    toast({
+      title: "✅ Excel dosyası oluşturuldu",
+      description: `${sessions.length} görüşme kaydı başarıyla dışa aktarıldı.`,
+    });
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -574,30 +637,213 @@ export default function CounselingSessions() {
           )}
         </TabsContent>
 
-        <TabsContent value="completed">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tamamlanan Görüşmeler</CardTitle>
-              <CardDescription>Geçmiş görüşme kayıtlarını görüntüleyin</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Tamamlanan görüşmeler burada görüntülenecek
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="completed" className="space-y-4">
+          {sessionsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : completedSessions.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium text-muted-foreground">Tamamlanmış görüşme bulunmuyor</p>
+                <p className="text-sm text-muted-foreground">Görüşmeler tamamlandığında burada listelenecektir</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {completedSessions.map((session) => {
+                const duration = session.exitTime && session.entryTime 
+                  ? Math.floor((new Date(`2000-01-01T${session.exitTime}`).getTime() - new Date(`2000-01-01T${session.entryTime}`).getTime()) / 1000 / 60)
+                  : 0;
+                
+                return (
+                  <Card key={session.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            {session.sessionType === 'individual' ? (
+                              <User className="h-5 w-5 text-blue-600" />
+                            ) : (
+                              <Users className="h-5 w-5 text-purple-600" />
+                            )}
+                            <CardTitle className="text-lg">
+                              {session.sessionType === 'individual' 
+                                ? session.student?.name 
+                                : session.groupName || 'Grup Görüşmesi'}
+                            </CardTitle>
+                            <Badge variant={session.sessionType === 'individual' ? 'default' : 'secondary'}>
+                              {session.sessionType === 'individual' ? 'Bireysel' : 'Grup'}
+                            </Badge>
+                            {session.autoCompleted && (
+                              <Badge variant="outline" className="text-orange-600 border-orange-600">
+                                Otomatik Tamamlandı
+                              </Badge>
+                            )}
+                          </div>
+                          {session.sessionType === 'group' && session.students && (
+                            <p className="text-sm text-muted-foreground">
+                              {session.students.map(s => s.name).join(', ')}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right space-y-1">
+                          <Badge variant="outline" className="bg-green-50">
+                            <CheckCircle2 className="h-3 w-3 mr-1 text-green-600" />
+                            Tamamlandı
+                          </Badge>
+                          <div className="text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3 inline mr-1" />
+                            {duration} dakika
+                          </div>
+                        </div>
+                      </div>
+                      <CardDescription className="flex items-center gap-4 mt-2">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(session.sessionDate).toLocaleDateString('tr-TR')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {session.entryTime} - {session.exitTime}
+                        </span>
+                        <span>•</span>
+                        <span>{session.topic}</span>
+                      </CardDescription>
+                    </CardHeader>
+                    {session.detailedNotes && (
+                      <CardContent>
+                        <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                          <p className="text-sm font-medium flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Görüşme Notları
+                          </p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                            {session.detailedNotes}
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Görüşme Şekli:</span>
+                            <p className="font-medium">{session.sessionMode}</p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Konum:</span>
+                            <p className="font-medium">{session.sessionLocation}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="journal">
           <Card>
             <CardHeader>
-              <CardTitle>Görüşme Defteri</CardTitle>
-              <CardDescription>Tüm görüşmelerin tablo görünümü</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Görüşme Defteri</CardTitle>
+                  <CardDescription>Tüm görüşmelerin tablo görünümü ve dışa aktarma</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => exportToExcel()}
+                  disabled={sessions.length === 0}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Excel İndir
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Görüşme defteri burada görüntülenecek
-              </p>
+              {sessionsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : sessions.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-lg font-medium text-muted-foreground">Kayıtlı görüşme bulunmuyor</p>
+                </div>
+              ) : (
+                <div className="rounded-md border overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium">Tarih</th>
+                        <th className="px-4 py-3 text-left font-medium">Saat</th>
+                        <th className="px-4 py-3 text-left font-medium">Öğrenci(ler)</th>
+                        <th className="px-4 py-3 text-left font-medium">Tip</th>
+                        <th className="px-4 py-3 text-left font-medium">Konu</th>
+                        <th className="px-4 py-3 text-left font-medium">Süre</th>
+                        <th className="px-4 py-3 text-left font-medium">Durum</th>
+                        <th className="px-4 py-3 text-left font-medium">Notlar</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {sessions.map((session) => {
+                        const duration = session.exitTime && session.entryTime 
+                          ? Math.floor((new Date(`2000-01-01T${session.exitTime}`).getTime() - new Date(`2000-01-01T${session.entryTime}`).getTime()) / 1000 / 60)
+                          : null;
+                        
+                        const studentNames = session.sessionType === 'individual' 
+                          ? session.student?.name 
+                          : session.students?.map(s => s.name).join(', ') || session.groupName;
+                        
+                        return (
+                          <tr key={session.id} className="hover:bg-muted/30 transition-colors">
+                            <td className="px-4 py-3">
+                              {new Date(session.sessionDate).toLocaleDateString('tr-TR')}
+                            </td>
+                            <td className="px-4 py-3">
+                              {session.entryTime}
+                              {session.exitTime && ` - ${session.exitTime}`}
+                            </td>
+                            <td className="px-4 py-3 font-medium">
+                              {studentNames}
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge variant={session.sessionType === 'individual' ? 'default' : 'secondary'} className="text-xs">
+                                {session.sessionType === 'individual' ? 'Bireysel' : 'Grup'}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 max-w-xs truncate">
+                              {session.topic}
+                            </td>
+                            <td className="px-4 py-3">
+                              {duration ? `${duration} dk` : '-'}
+                            </td>
+                            <td className="px-4 py-3">
+                              {session.completed ? (
+                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Tamamlandı
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  Devam Ediyor
+                                </Badge>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 max-w-md">
+                              <p className="text-xs text-muted-foreground truncate">
+                                {session.detailedNotes || session.sessionDetails || '-'}
+                              </p>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
