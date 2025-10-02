@@ -167,7 +167,7 @@ export async function updateSettings(patch: Partial<AppSettings>): Promise<void>
   await saveSettings(next);
 }
 
-// Utility function to parse document text into hierarchical structure
+// Utility function to parse document text into presentation system structure
 export function parseDocumentToPresentationSystem(documentText: string): PresentationTab[] {
   const lines = documentText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   const tabs: PresentationTab[] = [];
