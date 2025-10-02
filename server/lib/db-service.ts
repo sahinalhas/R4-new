@@ -1352,7 +1352,18 @@ export function getAppSettings(): any | null {
     ensureInitialized();
     const result = statements.getAppSettings.get() as AppSettings | undefined;
     if (result && result.settings) {
-      return JSON.parse(result.settings);
+      const parsed = JSON.parse(result.settings);
+      
+      // Migration: hierarchicalMeetingTopics -> presentationSystem
+      if (parsed.hierarchicalMeetingTopics && !parsed.presentationSystem) {
+        parsed.presentationSystem = parsed.hierarchicalMeetingTopics;
+        delete parsed.hierarchicalMeetingTopics;
+        
+        // Save the migrated version directly to avoid recursion
+        statements.upsertAppSettings.run(JSON.stringify(parsed));
+      }
+      
+      return parsed;
     }
     return null;
   } catch (error) {
