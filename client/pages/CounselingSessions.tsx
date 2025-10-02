@@ -326,12 +326,94 @@ export default function CounselingSessions() {
     return 'text-green-600';
   };
 
+  const extendSessionMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await fetch(`/api/counseling-sessions/${sessionId}/extend`, {
+        method: 'PUT',
+      });
+      if (!response.ok) throw new Error('Görüşme uzatılamadı');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions'] });
+      toast({
+        title: "✅ Görüşme uzatıldı",
+        description: "15 dakika ek süre tanındı.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "❌ Hata",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const [remindedSessions, setRemindedSessions] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions'] });
+
+      activeSessions.forEach(session => {
+        const elapsed = getElapsedTime(session.entryTime, session.sessionDate);
+        const limit = session.extensionGranted ? 75 : 60;
+        const sessionKey = session.id;
+        const sessionName = session.sessionType === 'individual' ? session.student?.name : session.groupName;
+
+        if (elapsed === 30 && !remindedSessions.has(`${sessionKey}-30`)) {
+          toast({
+            title: "⏰ 30 Dakika Geçti",
+            description: `${sessionName} - Görüşme 30 dakikadır devam ediyor`,
+          });
+          setRemindedSessions(prev => new Set(prev).add(`${sessionKey}-30`));
+        }
+
+        if (elapsed === 45 && !remindedSessions.has(`${sessionKey}-45`)) {
+          toast({
+            title: "⚠️ 45 Dakika Geçti",
+            description: `${sessionName} - ${limit - elapsed} dakika sonra otomatik tamamlanacak`,
+            variant: "default",
+          });
+          setRemindedSessions(prev => new Set(prev).add(`${sessionKey}-45`));
+        }
+
+        if (elapsed === 55 && !remindedSessions.has(`${sessionKey}-55`)) {
+          toast({
+            title: "🔔 55 Dakika Geçti",
+            description: `${sessionName} - ${limit - elapsed} dakika sonra otomatik tamamlanacak`,
+            variant: "destructive",
+          });
+          setRemindedSessions(prev => new Set(prev).add(`${sessionKey}-55`));
+        }
+
+        if (session.extensionGranted && elapsed === 70 && !remindedSessions.has(`${sessionKey}-70`)) {
+          toast({
+            title: "🚨 70 Dakika Geçti (Uzatılmış)",
+            description: `${sessionName} - 5 dakika sonra otomatik tamamlanacak`,
+            variant: "destructive",
+          });
+          setRemindedSessions(prev => new Set(prev).add(`${sessionKey}-70`));
+        }
+      });
     }, 30000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [activeSessions, remindedSessions, toast, queryClient]);
+
+  useEffect(() => {
+    const autoCompleteInterval = setInterval(async () => {
+      try {
+        await fetch('/api/counseling-sessions/auto-complete', { method: 'POST' });
+        queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions'] });
+      } catch (error) {
+        console.error('Auto-complete error:', error);
+      }
+    }, 60000);
+
+    return () => clearInterval(autoCompleteInterval);
+  }, [queryClient]);
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -430,7 +512,9 @@ export default function CounselingSessions() {
                             {elapsed >= 30 && (
                               <Badge variant="outline" className="text-xs">
                                 <Bell className="h-3 w-3 mr-1" />
-                                {elapsed >= 60 ? '60+ dakika' : `${60 - elapsed} dk kaldı`}
+                                {elapsed >= (session.extensionGranted ? 75 : 60) 
+                                  ? `${session.extensionGranted ? '75' : '60'}+ dakika` 
+                                  : `${(session.extensionGranted ? 75 : 60) - elapsed} dk kaldı`}
                               </Badge>
                             )}
                           </div>
@@ -450,6 +534,27 @@ export default function CounselingSessions() {
                       </CardHeader>
                       <CardContent>
                         <div className="flex justify-end gap-2">
+                          {elapsed >= 55 && !session.extensionGranted && (
+                            <Button
+                              variant="secondary"
+                              onClick={() => extendSessionMutation.mutate(session.id)}
+                              disabled={extendSessionMutation.isPending}
+                              className="gap-2"
+                            >
+                              {extendSessionMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )}
+                              15 Dakika Uzat
+                            </Button>
+                          )}
+                          {session.extensionGranted && (
+                            <Badge variant="outline" className="mr-2">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Uzatıldı (+15 dk)
+                            </Badge>
+                          )}
                           <Button
                             variant="outline"
                             onClick={() => {
