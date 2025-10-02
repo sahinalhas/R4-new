@@ -95,7 +95,7 @@ const schema = z.object({
         .default([]),
     })
     .default({ periods: [] }),
-  hierarchicalMeetingTopics: z.array(z.any()).default([]),
+  presentationSystem: z.array(z.any()).default([]),
 });
 
 function EmbeddedCourses() {
@@ -118,7 +118,7 @@ export default function SettingsPage() {
       "veri",
       "entegrasyon",
       "dersler",
-      "konular",
+      "sunum-sistemi",
       "saatler",
       "guvenlik",
       "transfer",
@@ -255,7 +255,7 @@ export default function SettingsPage() {
           <TabsTrigger value="veri">Veri</TabsTrigger>
           <TabsTrigger value="entegrasyon">Entegrasyonlar</TabsTrigger>
           <TabsTrigger value="dersler">Dersler & Konular</TabsTrigger>
-          <TabsTrigger value="konular">Görüşme Konuları</TabsTrigger>
+          <TabsTrigger value="sunum-sistemi">Sunum Sistemi</TabsTrigger>
           <TabsTrigger value="saatler">Ders Saatleri</TabsTrigger>
           <TabsTrigger value="guvenlik">Güvenlik</TabsTrigger>
           <TabsTrigger value="transfer">İçe/Dışa Aktar</TabsTrigger>
@@ -843,12 +843,12 @@ export default function SettingsPage() {
           <EmbeddedCourses />
         </TabsContent>
 
-        <TabsContent value="konular">
+        <TabsContent value="sunum-sistemi">
           <div className="space-y-4">
             <HierarchicalTopicsEditor
-              tabs={form.watch("hierarchicalMeetingTopics") || []}
+              tabs={form.watch("presentationSystem") || []}
               onChange={(tabs) =>
-                form.setValue("hierarchicalMeetingTopics", tabs, {
+                form.setValue("presentationSystem", tabs, {
                   shouldValidate: true,
                 })
               }

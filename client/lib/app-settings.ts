@@ -57,7 +57,7 @@ export type AppSettings = {
   school: {
     periods: { start: string; end: string }[];
   };
-  hierarchicalMeetingTopics: HierarchicalTopicTab[];
+  presentationSystem: HierarchicalTopicTab[];
 };
 
 const SETTINGS_KEY = "rehber360:settings";
@@ -90,7 +90,7 @@ export function defaultSettings(): AppSettings {
       signature: "",
     },
     school: { periods: [] },
-    hierarchicalMeetingTopics: getDefaultHierarchicalTopics(),
+    presentationSystem: getDefaultHierarchicalTopics(),
   };
 }
 
@@ -121,8 +121,10 @@ export async function loadSettings(): Promise<AppSettings> {
       privacy: { ...defaultSettings().privacy, ...(parsed.privacy || {}) },
       account: { ...defaultSettings().account, ...(parsed.account || {}) },
       school: { ...defaultSettings().school, ...(parsed.school || {}) },
-      hierarchicalMeetingTopics: parsed.hierarchicalMeetingTopics && parsed.hierarchicalMeetingTopics.length > 0 
-        ? parsed.hierarchicalMeetingTopics 
+      presentationSystem: parsed.presentationSystem && parsed.presentationSystem.length > 0 
+        ? parsed.presentationSystem 
+        : (parsed as any).hierarchicalMeetingTopics && (parsed as any).hierarchicalMeetingTopics.length > 0
+        ? (parsed as any).hierarchicalMeetingTopics 
         : getDefaultHierarchicalTopics(),
     };
   } catch (error) {
