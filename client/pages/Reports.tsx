@@ -519,41 +519,43 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">Analiz & Raporlama</h1>
-            <Badge variant="outline">{user.role === 'admin' ? 'Yönetici' : user.role === 'counselor' ? 'Rehber Öğretmen' : user.role === 'teacher' ? 'Öğretmen' : 'Gözlemci'}</Badge>
+      <div className="rounded-xl bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 p-6 border border-primary/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">Analiz & Raporlama</h1>
+              <Badge variant="outline">{user.role === 'admin' ? 'Yönetici' : user.role === 'counselor' ? 'Rehber Öğretmen' : user.role === 'teacher' ? 'Öğretmen' : 'Gözlemci'}</Badge>
+            </div>
+            <p className="text-muted-foreground mt-1">
+              Öğrenci başarı analizleri, karşılaştırmalı raporlar ve erken uyarı sistemi
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            Öğrenci başarı analizleri, karşılaştırmalı raporlar ve erken uyarı sistemi
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleRefresh}
-            className="gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Yenile
-          </Button>
-          <Button 
-            variant="outline" 
-            className="gap-2"
-            onClick={() => setFiltersOpen(true)}
-          >
-            <Filter className="h-4 w-4" />
-            Filtreler
-          </Button>
-          <Button 
-            className="gap-2"
-            onClick={handleHeaderExport}
-            disabled={!exportPermissions.canExportFiltered && !exportPermissions.canExportAll}
-          >
-            <Download className="h-4 w-4" />
-            Rapor İndir
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleRefresh}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Yenile
+            </Button>
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={() => setFiltersOpen(true)}
+            >
+              <Filter className="h-4 w-4" />
+              Filtreler
+            </Button>
+            <Button 
+              className="gap-2"
+              onClick={handleHeaderExport}
+              disabled={!exportPermissions.canExportFiltered && !exportPermissions.canExportAll}
+            >
+              <Download className="h-4 w-4" />
+              Rapor İndir
+            </Button>
+          </div>
         </div>
       </div>
 
