@@ -42,7 +42,7 @@ import {
   updateSettings,
   AppSettings,
   defaultSettings,
-  HierarchicalTopicCategory,
+  PresentationCategory,
 } from "@/lib/app-settings";
 import Courses from "@/pages/Courses";
 import ClassPeriodsEditor from "@/pages/components/ClassPeriodsEditor";

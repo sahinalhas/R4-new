@@ -1,23 +1,23 @@
 import { toast } from "sonner";
 
-export type HierarchicalTopicItem = {
+export type PresentationItem = {
   id: string;
   title: string;
   editable: boolean; // true for items that can be edited, false for numbered headers
 };
 
-export type HierarchicalTopicCategory = {
+export type PresentationCategory = {
   id: string;
   title: string;
   number: string; // e.g., "2.1.1"
-  items: HierarchicalTopicItem[];
-  children: HierarchicalTopicCategory[];
+  items: PresentationItem[];
+  children: PresentationCategory[];
 };
 
-export type HierarchicalTopicTab = {
+export type PresentationTab = {
   id: string;
   title: string;
-  categories: HierarchicalTopicCategory[];
+  categories: PresentationCategory[];
 };
 
 export type AppSettings = {
@@ -57,7 +57,7 @@ export type AppSettings = {
   school: {
     periods: { start: string; end: string }[];
   };
-  presentationSystem: HierarchicalTopicTab[];
+  presentationSystem: PresentationTab[];
 };
 
 const SETTINGS_KEY = "rehber360:settings";
@@ -90,7 +90,7 @@ export function defaultSettings(): AppSettings {
       signature: "",
     },
     school: { periods: [] },
-    presentationSystem: getDefaultHierarchicalTopics(),
+    presentationSystem: getDefaultPresentationSystem(),
   };
 }
 
@@ -125,7 +125,7 @@ export async function loadSettings(): Promise<AppSettings> {
         ? parsed.presentationSystem 
         : (parsed as any).hierarchicalMeetingTopics && (parsed as any).hierarchicalMeetingTopics.length > 0
         ? (parsed as any).hierarchicalMeetingTopics 
-        : getDefaultHierarchicalTopics(),
+        : getDefaultPresentationSystem(),
     };
   } catch (error) {
     console.error('Error loading settings:', error);
@@ -170,11 +170,11 @@ export async function updateSettings(patch: Partial<AppSettings>): Promise<void>
 }
 
 // Utility function to parse document text into hierarchical structure
-export function parseDocumentToHierarchy(documentText: string): HierarchicalTopicTab[] {
+export function parseDocumentToPresentationSystem(documentText: string): PresentationTab[] {
   const lines = documentText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-  const tabs: HierarchicalTopicTab[] = [];
-  let currentTab: HierarchicalTopicTab | null = null;
-  const categoryStack: HierarchicalTopicCategory[] = [];
+  const tabs: PresentationTab[] = [];
+  let currentTab: PresentationTab | null = null;
+  const categoryStack: PresentationCategory[] = [];
   
   for (const line of lines) {
     // Skip page numbers and other irrelevant lines
@@ -199,7 +199,7 @@ export function parseDocumentToHierarchy(documentText: string): HierarchicalTopi
         continue; // Don't create a category for tab-level items
       }
       
-      const category: HierarchicalTopicCategory = {
+      const category: PresentationCategory = {
         id: `category-${number}`,
         title: title.trim(),
         number,
@@ -220,7 +220,7 @@ export function parseDocumentToHierarchy(documentText: string): HierarchicalTopi
       categoryStack.push(category);
     } else {
       // This is an individual item that can be edited
-      const item: HierarchicalTopicItem = {
+      const item: PresentationItem = {
         id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         title: line.trim(),
         editable: true
@@ -236,8 +236,8 @@ export function parseDocumentToHierarchy(documentText: string): HierarchicalTopi
   return tabs;
 }
 
-// Initialize hierarchical topics with default document data
-export function getDefaultHierarchicalTopics(): HierarchicalTopicTab[] {
+// Initialize presentation system with default document data
+export function getDefaultPresentationSystem(): PresentationTab[] {
   const documentText = `2. BİREYSEL ÇALIŞMALAR
 2.1. (Ö) GELİŞİMSEL VE ÖNLEYİCİ HİZMETLER
 2.1.1. ÖOB BİREYİ TANIMA ÇALIŞMALARI
@@ -409,7 +409,7 @@ GÖOVEb Grup Okul Kuralları
 İGB Grup Okula ve Çevreye Uyum
 İGB Grup Psikolojik Uyum`;
 
-  return parseDocumentToHierarchy(documentText);
+  return parseDocumentToPresentationSystem(documentText);
 }
 
 export { SETTINGS_KEY };

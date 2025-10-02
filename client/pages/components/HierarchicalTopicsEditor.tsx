@@ -34,14 +34,14 @@ import {
   Hash,
 } from "lucide-react";
 import {
-  HierarchicalTopicCategory,
-  HierarchicalTopicItem,
-  HierarchicalTopicTab,
+  PresentationCategory,
+  PresentationItem,
+  PresentationTab,
 } from "@/lib/app-settings";
 
 interface HierarchicalTopicsEditorProps {
-  tabs: HierarchicalTopicTab[];
-  onChange: (tabs: HierarchicalTopicTab[]) => void;
+  tabs: PresentationTab[];
+  onChange: (tabs: PresentationTab[]) => void;
   disabled?: boolean;
 }
 
@@ -76,16 +76,16 @@ export default function HierarchicalTopicsEditor({
     setExpandedCategories(newExpanded);
   };
 
-  const updateTabs = (updatedTabs: HierarchicalTopicTab[]) => {
+  const updateTabs = (updatedTabs: PresentationTab[]) => {
     onChange(updatedTabs);
   };
 
   const findCategory = (
     categoryId: string,
-  ): HierarchicalTopicCategory | null => {
+  ): PresentationCategory | null => {
     const searchInCategories = (
-      categories: HierarchicalTopicCategory[],
-    ): HierarchicalTopicCategory | null => {
+      categories: PresentationCategory[],
+    ): PresentationCategory | null => {
       for (const category of categories) {
         if (category.id === categoryId) return category;
         const found = searchInCategories(category.children);
@@ -108,15 +108,15 @@ export default function HierarchicalTopicsEditor({
     if (!targetCategory) return;
     if (targetCategory.children.length > 0) return;
 
-    const newItem: HierarchicalTopicItem = {
+    const newItem: PresentationItem = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       title: title.trim(),
       editable: true,
     };
 
     const updateCategory = (
-      category: HierarchicalTopicCategory,
-    ): HierarchicalTopicCategory => {
+      category: PresentationCategory,
+    ): PresentationCategory => {
       if (category.id === categoryId) {
         return {
           ...category,
@@ -129,7 +129,7 @@ export default function HierarchicalTopicsEditor({
       };
     };
 
-    const updateTab = (tab: HierarchicalTopicTab): HierarchicalTopicTab => {
+    const updateTab = (tab: PresentationTab): PresentationTab => {
       return {
         ...tab,
         categories: tab.categories.map(updateCategory),
@@ -146,8 +146,8 @@ export default function HierarchicalTopicsEditor({
     if (!newTitle.trim()) return;
 
     const updateCategory = (
-      category: HierarchicalTopicCategory,
-    ): HierarchicalTopicCategory => {
+      category: PresentationCategory,
+    ): PresentationCategory => {
       if (category.id === categoryId) {
         return {
           ...category,
@@ -162,7 +162,7 @@ export default function HierarchicalTopicsEditor({
       };
     };
 
-    const updateTab = (tab: HierarchicalTopicTab): HierarchicalTopicTab => {
+    const updateTab = (tab: PresentationTab): PresentationTab => {
       return {
         ...tab,
         categories: tab.categories.map(updateCategory),
@@ -176,8 +176,8 @@ export default function HierarchicalTopicsEditor({
 
   const removeItem = (categoryId: string, itemId: string) => {
     const updateCategory = (
-      category: HierarchicalTopicCategory,
-    ): HierarchicalTopicCategory => {
+      category: PresentationCategory,
+    ): PresentationCategory => {
       if (category.id === categoryId) {
         return {
           ...category,
@@ -190,7 +190,7 @@ export default function HierarchicalTopicsEditor({
       };
     };
 
-    const updateTab = (tab: HierarchicalTopicTab): HierarchicalTopicTab => {
+    const updateTab = (tab: PresentationTab): PresentationTab => {
       return {
         ...tab,
         categories: tab.categories.map(updateCategory),
@@ -202,7 +202,7 @@ export default function HierarchicalTopicsEditor({
   };
 
   const renderCategory = (
-    category: HierarchicalTopicCategory,
+    category: PresentationCategory,
     depth: number = 0,
   ): JSX.Element => {
     const isExpanded = expandedCategories.has(category.id);
@@ -436,11 +436,11 @@ export default function HierarchicalTopicsEditor({
     );
   };
 
-  const getTotalItemCount = (tabs: HierarchicalTopicTab[]): number => {
+  const getTotalItemCount = (tabs: PresentationTab[]): number => {
     if (!tabs || tabs.length === 0) return 0;
 
     const countCategoriesItems = (
-      categories: HierarchicalTopicCategory[],
+      categories: PresentationCategory[],
     ): number => {
       if (!categories || categories.length === 0) return 0;
       return categories.reduce((total, category) => {
