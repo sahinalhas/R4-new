@@ -171,17 +171,17 @@ export default function Index() {
   const displayStats = useMemo(() => {
     if (role === "yönetici") {
       return [
-        { label: "Toplam Öğrenci", value: stats.studentCount, icon: Users2, color: "from-blue-500/20 to-blue-600/20", trend: "+12%" },
-        { label: "Aktif Öğretmen", value: stats.teacherCount, icon: UserCheck, color: "from-green-500/20 to-green-600/20", trend: "+2" },
-        { label: "Bu Ay Rapor", value: stats.reportCount, icon: BarChart3, color: "from-purple-500/20 to-purple-600/20", trend: "+8" },
-        { label: "Açık Takip", value: stats.openInterventionCount, icon: AlertTriangle, color: "from-orange-500/20 to-orange-600/20", trend: "-3" },
+        { label: "Toplam Öğrenci", value: stats.studentCount, icon: Users2, color: "from-indigo-500/20 to-indigo-600/20", trend: "+12%" },
+        { label: "Aktif Öğretmen", value: stats.teacherCount, icon: UserCheck, color: "from-purple-500/20 to-purple-600/20", trend: "+2" },
+        { label: "Bu Ay Rapor", value: stats.reportCount, icon: BarChart3, color: "from-violet-500/20 to-violet-600/20", trend: "+8" },
+        { label: "Açık Takip", value: stats.openInterventionCount, icon: AlertTriangle, color: "from-fuchsia-500/20 to-fuchsia-600/20", trend: "-3" },
       ];
     } else {
       return [
-        { label: "Toplam Öğrenci", value: stats.studentCount, icon: Users2, color: "from-blue-500/20 to-blue-600/20", trend: "+12%" },
-        { label: "Bu Hafta Görüşme", value: stats.meetingCount, icon: CalendarDays, color: "from-green-500/20 to-green-600/20", trend: "+5" },
-        { label: "Aktif Anket", value: stats.activeSurveyCount, icon: MessageSquare, color: "from-purple-500/20 to-purple-600/20", trend: "2 aktif" },
-        { label: "Açık Takip", value: stats.openInterventionCount, icon: Bell, color: "from-orange-500/20 to-orange-600/20", trend: "-3" },
+        { label: "Toplam Öğrenci", value: stats.studentCount, icon: Users2, color: "from-indigo-500/20 to-indigo-600/20", trend: "+12%" },
+        { label: "Bu Hafta Görüşme", value: stats.meetingCount, icon: CalendarDays, color: "from-purple-500/20 to-purple-600/20", trend: "+5" },
+        { label: "Aktif Anket", value: stats.activeSurveyCount, icon: MessageSquare, color: "from-violet-500/20 to-violet-600/20", trend: "2 aktif" },
+        { label: "Açık Takip", value: stats.openInterventionCount, icon: Bell, color: "from-fuchsia-500/20 to-fuchsia-600/20", trend: "-3" },
       ];
     }
   }, [role, stats]);
@@ -301,7 +301,7 @@ export default function Index() {
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                   onClick={() => handleQuickAction('view-student', warning.studentId)}
                 >
-                  <AlertTriangle className="h-4 w-4 text-orange-600" />
+                  <AlertTriangle className="h-4 w-4 text-fuchsia-600" />
                   <div className="flex-1">
                     <div className="text-sm font-medium">{warning.studentName}</div>
                     <div className="text-xs text-muted-foreground">{warning.message}</div>
@@ -494,14 +494,14 @@ export default function Index() {
                       <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                       <span className="text-sm font-medium">Orta Risk</span>
                     </div>
-                    <Badge variant="outline" className="border-yellow-500 text-yellow-700">{riskDistribution.medium}</Badge>
+                    <Badge variant="outline" className="border-violet-500 text-violet-700">{riskDistribution.medium}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-green-500"></div>
                       <span className="text-sm font-medium">Düşük Risk</span>
                     </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">{riskDistribution.low}</Badge>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-700">{riskDistribution.low}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -519,10 +519,10 @@ export default function Index() {
 
       {role === "ogretmen" && !hiddenWidgets.has('early-warnings') && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+          <Card className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-pink-50">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2 text-orange-800">
+                <CardTitle className="flex items-center gap-2 text-fuchsia-800">
                   <AlertTriangle className="h-5 w-5" />
                   Erken Uyarı Sistemi
                 </CardTitle>
@@ -538,7 +538,7 @@ export default function Index() {
                   {earlyWarnings.slice(0, 5).map((warning) => (
                     <div
                       key={warning.studentId + warning.warningType}
-                      className="bg-white p-4 rounded-lg border border-orange-200 hover:border-orange-300 transition-colors cursor-pointer"
+                      className="bg-white p-4 rounded-lg border border-fuchsia-200 hover:border-fuchsia-300 transition-colors cursor-pointer"
                       onClick={() => handleQuickAction('view-student', warning.studentId)}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -586,10 +586,10 @@ export default function Index() {
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {!hiddenWidgets.has('risk-summary') && (
-              <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+              <Card className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-pink-50">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-orange-800">
+                    <CardTitle className="flex items-center gap-2 text-fuchsia-800">
                       <AlertTriangle className="h-5 w-5" />
                       Risk Değerlendirme
                     </CardTitle>
@@ -606,21 +606,21 @@ export default function Index() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-yellow-600">Orta Risk</span>
-                    <Badge variant="outline" className="border-yellow-500 text-yellow-700">{riskDistribution.medium}</Badge>
+                    <Badge variant="outline" className="border-violet-500 text-violet-700">{riskDistribution.medium}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-green-600">Düşük Risk</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">{riskDistribution.low}</Badge>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-700">{riskDistribution.low}</Badge>
                   </div>
                 </CardContent>
               </Card>
             )}
 
             {!hiddenWidgets.has('weekly-focus') && (
-              <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-sky-50">
+              <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-blue-800">
+                    <CardTitle className="flex items-center gap-2 text-indigo-800">
                       <Target className="h-5 w-5" />
                       Bu Hafta Odak
                     </CardTitle>
@@ -648,10 +648,10 @@ export default function Index() {
             )}
 
             {!hiddenWidgets.has('weekly-progress') && (
-              <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+              <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
                 <CardHeader className="pb-3 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2 text-green-800">
+                    <CardTitle className="flex items-center gap-2 text-purple-800">
                       <TrendingUp className="h-5 w-5" />
                       Haftalık İlerleme
                     </CardTitle>
@@ -664,11 +664,11 @@ export default function Index() {
                 <CardContent className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Tamamlanan görüşme</span>
-                    <Badge className="bg-green-100 text-green-700">{stats.meetingCount}/20</Badge>
+                    <Badge className="bg-purple-100 text-purple-700">{stats.meetingCount}/20</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Çözülen takip</span>
-                    <Badge className="bg-blue-100 text-blue-700">3</Badge>
+                    <Badge className="bg-indigo-100 text-indigo-700">3</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Olumlu gelişim</span>
@@ -734,7 +734,7 @@ export default function Index() {
                   </div>
                   <div className="text-sm flex items-center justify-between">
                     <span>Veri yedekleme</span>
-                    <Badge className="bg-green-100 text-green-700">Güncel</Badge>
+                    <Badge className="bg-purple-100 text-purple-700">Güncel</Badge>
                   </div>
                 </CardContent>
               </Card>
