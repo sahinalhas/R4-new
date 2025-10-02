@@ -1063,6 +1063,49 @@ function initializeDatabaseTables(database: Database.Database) {
     );
   `);
 
+  // Counseling Sessions tablosu - Rehberlik Görüşmeleri
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS counseling_sessions (
+      id TEXT PRIMARY KEY,
+      sessionType TEXT NOT NULL CHECK (sessionType IN ('individual', 'group')),
+      groupName TEXT,
+      counselorId TEXT NOT NULL,
+      sessionDate TEXT NOT NULL,
+      entryTime TEXT NOT NULL,
+      entryClassHourId INTEGER,
+      exitTime TEXT,
+      exitClassHourId INTEGER,
+      topic TEXT NOT NULL,
+      participantType TEXT NOT NULL,
+      relationshipType TEXT,
+      otherParticipants TEXT,
+      sessionMode TEXT NOT NULL CHECK (sessionMode IN ('yüz_yüze', 'telefon', 'online')),
+      sessionLocation TEXT NOT NULL,
+      disciplineStatus TEXT,
+      institutionalCooperation TEXT,
+      sessionDetails TEXT,
+      detailedNotes TEXT,
+      autoCompleted BOOLEAN DEFAULT FALSE,
+      extensionGranted BOOLEAN DEFAULT FALSE,
+      completed BOOLEAN DEFAULT FALSE,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Counseling Session Students tablosu - Görüşme Öğrenci İlişkileri (Grup görüşmeleri için)
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS counseling_session_students (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sessionId TEXT NOT NULL,
+      studentId TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (sessionId) REFERENCES counseling_sessions (id) ON DELETE CASCADE,
+      FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE,
+      UNIQUE(sessionId, studentId)
+    );
+  `);
+
 }
 
 // Veritabanını kapat
@@ -1224,6 +1267,14 @@ function setupDatabaseTriggers(database: Database.Database) {
     END;
   `);
 
+  database.exec(`
+    CREATE TRIGGER IF NOT EXISTS update_counseling_sessions_timestamp 
+    AFTER UPDATE ON counseling_sessions 
+    BEGIN 
+      UPDATE counseling_sessions SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id; 
+    END;
+  `);
+
   // Setup performance indexes
   setupDatabaseIndexes(database);
 }
@@ -1281,6 +1332,14 @@ function setupDatabaseIndexes(database: Database.Database) {
   database.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_studentId ON risk_factors(studentId)');
   database.exec('CREATE INDEX IF NOT EXISTS idx_behavior_incidents_studentId ON behavior_incidents(studentId)');
   database.exec('CREATE INDEX IF NOT EXISTS idx_exam_results_studentId ON exam_results(studentId)');
+  
+  // Counseling sessions indexes
+  database.exec('CREATE INDEX IF NOT EXISTS idx_counseling_sessions_counselorId ON counseling_sessions(counselorId)');
+  database.exec('CREATE INDEX IF NOT EXISTS idx_counseling_sessions_sessionDate ON counseling_sessions(sessionDate)');
+  database.exec('CREATE INDEX IF NOT EXISTS idx_counseling_sessions_completed ON counseling_sessions(completed)');
+  database.exec('CREATE INDEX IF NOT EXISTS idx_counseling_sessions_sessionType ON counseling_sessions(sessionType)');
+  database.exec('CREATE INDEX IF NOT EXISTS idx_counseling_session_students_sessionId ON counseling_session_students(sessionId)');
+  database.exec('CREATE INDEX IF NOT EXISTS idx_counseling_session_students_studentId ON counseling_session_students(studentId)');
   
   // Survey-related indexes
   database.exec('CREATE INDEX IF NOT EXISTS idx_survey_questions_templateId ON survey_questions(templateId)');

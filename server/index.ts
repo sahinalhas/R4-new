@@ -104,6 +104,7 @@ import specialEducationRouter from "./routes/special-education.js";
 import riskAssessmentRouter from "./routes/risk-assessment.js";
 import behaviorRouter from "./routes/behavior.js";
 import examsRouter from "./routes/exams.js";
+import counselingSessionsRouter, { getClassHours, getCounselingTopics } from "./routes/counseling-sessions.js";
 import { simpleRateLimit } from "./middleware/validation.js";
 
 export function createServer() {
@@ -351,6 +352,11 @@ export function createServer() {
 
   // Exam Results routes
   app.use("/api", simpleRateLimit(200, 15 * 60 * 1000), examsRouter);
+
+  // Counseling Sessions routes
+  app.use("/api/counseling-sessions", simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRouter);
+  app.get("/api/class-hours", simpleRateLimit(200, 15 * 60 * 1000), getClassHours);
+  app.get("/api/counseling-topics", simpleRateLimit(200, 15 * 60 * 1000), getCounselingTopics);
 
   return app;
 }
