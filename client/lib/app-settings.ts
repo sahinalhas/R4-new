@@ -123,8 +123,6 @@ export async function loadSettings(): Promise<AppSettings> {
       school: { ...defaultSettings().school, ...(parsed.school || {}) },
       presentationSystem: parsed.presentationSystem && parsed.presentationSystem.length > 0 
         ? parsed.presentationSystem 
-        : (parsed as any).hierarchicalMeetingTopics && (parsed as any).hierarchicalMeetingTopics.length > 0
-        ? (parsed as any).hierarchicalMeetingTopics 
         : getDefaultPresentationSystem(),
     };
   } catch (error) {
