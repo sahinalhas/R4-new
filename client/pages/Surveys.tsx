@@ -230,36 +230,38 @@ export default function Surveys() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Anket & Test Modülü</h1>
-          <p className="text-muted-foreground">
-            Anket oluşturun, sınıflara dağıtın ve sonuçları analiz edin
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <Settings className="mr-2 h-4 w-4" />
-            Ayarlar
-          </Button>
-          <SurveyCreationDialog onSurveyCreated={(survey) => {
-            console.log("New survey created:", survey);
-            loadData(); // Reload data after creation
-          }}>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Yeni Anket
+      <div className="rounded-xl bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 p-6 border border-primary/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Anket & Test Modülü</h1>
+            <p className="text-muted-foreground mt-1">
+              Anket oluşturun, sınıflara dağıtın ve sonuçları analiz edin
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline">
+              <Settings className="mr-2 h-4 w-4" />
+              Ayarlar
             </Button>
-          </SurveyCreationDialog>
+            <SurveyCreationDialog onSurveyCreated={(survey) => {
+              console.log("New survey created:", survey);
+              loadData();
+            }}>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Yeni Anket
+              </Button>
+            </SurveyCreationDialog>
+          </div>
         </div>
       </div>
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Toplam Şablon</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <FileText className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{templates.length}</div>
@@ -268,10 +270,10 @@ export default function Surveys() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Aktif Anket</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-accent" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -282,10 +284,10 @@ export default function Surveys() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/15">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Toplam Yanıt</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
+            <BarChart className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,247</div>
@@ -294,10 +296,10 @@ export default function Surveys() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-accent/10 to-primary/5 border-accent/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Tamamlanma Oranı</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
+            <BarChart className="h-4 w-4 text-accent" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">87%</div>
