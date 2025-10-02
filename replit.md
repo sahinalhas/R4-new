@@ -1,175 +1,27 @@
 # Rehber360 - Student Guidance System
 
 ## Overview
-Rehber360 is a comprehensive student guidance and management system with a modern React frontend and Express backend. This is a Turkish language educational application for student tracking, counseling, and administrative tasks.
+Rehber360 is a comprehensive Turkish-language student guidance and management system. It aims to provide a modern, elegant, and efficient platform for student tracking, counseling, and administrative tasks. The project's ambition is to offer a sophisticated educational application with features like automated intervention, smart topic planning, and detailed student profiles, serving as a vital tool for educational institutions.
 
-## Recent Changes
-- **2025-10-02 (Latest)**: Modernized Student Management page design
-  - **Modern Gradient Header**: Implemented beautiful blue-purple-pink gradient header with large typography
-  - **Statistics Cards**: Added 4 colorful, icon-based statistic cards (Total Students, Female, Male, High Risk)
-  - **Enhanced Filter Section**: Modern filter UI with search icon, clean input design, improved layout
-  - **Modern Table Design**: Implemented hover effects, Badge components for better visual hierarchy
-  - **Hover Animations**: Action buttons (edit/delete) appear on row hover with smooth transitions
-  - **Form & Dialog Improvements**: Larger titles, better labels, improved spacing and validation displays
-  - **Empty State Screen**: Modern empty state design when no students found
-  - **Responsive Design**: All components are mobile-friendly with proper breakpoints
-  - **Delete Dialog Enhancement**: Modern confirmation dialog with visual warnings and better UX
-  - All existing CRUD functionality preserved (create, read, update, delete)
-  - No regressions in import/export, filtering, or data persistence
-- **2025-10-01**: Implemented automatic intervention system for students
-  - **Otomatik Müdahale Sistemi**: Created comprehensive automatic intervention creation system
-  - System monitors student risk levels (risk score >= 0.5: Orta, Yüksek, Kritik)
-  - Automatically creates intervention records for high-risk students without active interventions
-  - Prevents duplicate interventions by checking for existing active plans
-  - **New File**: client/lib/automatic-interventions.ts - Core automatic intervention logic
-  - **UI Integration**: Added "Otomatik Müdahale Oluştur" button to Early Warning System
-  - **Results Display**: New "Otomatik Müdahaleler" tab shows intervention creation results
-  - Intervention titles auto-generated based on warning type (Devamsızlık, Akademik, Davranışsal, Kapsamlı Risk)
-  - Toast notifications provide immediate feedback on intervention creation
-  - Fixed duplicate intervention bug where system was calling creation function twice
-  - Added loading states and visual indicators for better UX
-- **2025-10-01**: Fixed schedule template application not reflecting in calendar
-  - **Issue**: When users applied schedule templates (Şablon Kullan), changes weren't visible in the calendar view
-  - **Root Cause**: WeeklySchedule component wasn't listening to 'weeklySlotsUpdated' events
-  - **Solution**: Added event listener in WeeklySchedule to refresh slots when templates are applied
-  - **Performance Optimization**: Converted applyScheduleTemplate to batch all slots in single API request
-  - **Result**: Templates now immediately reflect in calendar after clicking "Şablonu Uygula" button
-- **2025-10-01**: Calendar system enhancements - Template scheduling, spaced repetition, and grid view
-  - **Template (Şablon) System**: Added predefined schedule templates (LGS Dengeli Program, TYT Yoğun Program, AYT Dengeli Program, YKS Dengeli Program, Hafta Sonu Yoğun, Akşam Ağırlıklı, Sabah Odaklı, Dengeli Program)
-  - Created ScheduleTemplateDialog component with 8 templates including subject breakdown and time allocation
-  - Templates include automatic subject creation and weekly slot generation with undo/redo support
-  - **Spaced Repetition (Akıllı Tekrar)**: Implemented Ebbinghaus forgetting curve-based review system
-  - Added lastStudied, reviewCount, nextReviewDate fields to TopicProgress
-  - Review intervals: 1, 3, 7, 14, 30, 60, 90 days based on study count
-  - TopicPlanner shows "Bugün Tekrar Edilmesi Gerekenler" and "Yaklaşan Tekrarlar" sections
-  - **Grid View Activation**: Integrated WeeklyTopicGrid into TopicPlanner with toggle button
-  - Users can switch between list and grid view for topic visualization
-  - **Performance Optimizations**: Added debounced saves (100ms) after resize operations
-  - Optimistic UI updates for immediate feedback during drag/drop and resize
-  - Existing undo/redo system (Ctrl+Z/Y) works with all new features
-- **2025-10-01**: Fixed weekly schedule persistence issue
-  - Resolved field name mismatch between client (start/end) and database (startTime/endTime)
-  - Updated server handlers to accept both field naming conventions and transform appropriately
-  - Fixed client-side CRUD functions to use individual API endpoints (POST/PUT/DELETE) instead of bulk updates
-  - Updated all drag-and-drop and resize operations to send complete slot objects, preventing field nulling
-  - Added strict validation to server's update handler to reject incomplete payloads
-  - Added weeklySlotsUpdated event listener to WeeklySchedule component for proper initial data loading
-  - Weekly lesson slots now correctly persist across page refreshes
-- **2025-10-01**: Fresh GitHub import successfully set up for Replit
-  - Unzipped R4-main.zip archive and moved contents to project root
-  - Installed Node.js 20 and all npm dependencies (670 packages)
-  - Created .gitignore file with Node.js and Replit specific ignores
-  - Verified Vite config already has proper Replit settings (host: 0.0.0.0, port: 5000, allowedHosts: true)
-  - Configured Dev Server workflow running on port 5000
-  - Set up deployment configuration (autoscale, build and start commands)
-  - Server running successfully with Vite connected
-- **2025-09-30**: Completed edit student functionality in Students page
-  - Added comprehensive edit dialog with form validation and API integration
-  - Fixed Select component bindings to properly use React Hook Form state (watch/setValue)
-  - Corrected ID validation patterns: HTML pattern="\\d+" and React Hook Form pattern: /^\d+$/
-  - Implemented optimistic UI updates with automatic rollback on API failure
-  - Added studentsUpdated event dispatch for cross-component data synchronization
-  - All CRUD operations now functional: create, read, update, delete
-  - Student data persists correctly through API with proper error handling
-- **2025-09-30**: Fresh GitHub import successfully configured for Replit
-  - Installed all npm dependencies (679 packages)
-  - Verified frontend running on port 5000 with proper host configuration (allowedHosts: true)
-  - Confirmed all API endpoints functional (/api/ping, /api/students, /api/subjects, /api/survey-templates, /api/settings)
-  - Validated SQLite database connectivity with existing student and course data
-  - Deployment configuration verified (autoscale target, npm run build, npm start)
-  - No LSP/TypeScript errors - codebase clean and ready
-- **2025-09-30**: Fixed non-functional buttons in Reports page
-  - Converted Reports tabs from uncontrolled to controlled state with activeTab state management
-  - Fixed "Detayları Görüntüle" button to properly navigate to warnings tab
-  - Implemented header "Rapor İndir" button with export format permission validation
-  - Added "Filtreler" dialog with date range, class, and risk level filters
-  - Implemented "E-posta Gönder" button with permission guard (placeholder for backend)
-  - Fixed "Ayarları Düzenle" button to navigate to settings page
-  - Enhanced export security: both header and settings exports now validate format against allowedFormats
-  - Fixed export format policy bypass vulnerability by checking permissions before export
-  - All buttons now functional with proper permission controls and user feedback
-- **2025-09-30**: Fixed async/await race conditions in Courses.tsx
-  - Fixed critical bug where topics were not being deleted due to race conditions
-  - Made all CRUD functions (create, update, delete) properly async with await statements
-  - Updated CategoryPanel TypeScript types to reflect async function signatures (Promise<void>)
-  - Fixed confirmDeleteTopic to await removeTopic before refreshing UI
-  - Fixed confirmDeleteSubject to await removeTopicsBySubject before deleting subject
-  - Fixed bulkAddTopics to await all addTopic operations before refreshing
-  - Fixed saveEditTopic to await updateTopic before refreshing
-  - All operations now complete database writes before UI updates, preventing data loss
-- **2025-09-30**: Fixed subjects and topics persistence issue
-  - Added database migration v5: Added `avgMinutes` and `order` columns to topics table
-  - Updated Topic interface to include avgMinutes and order fields
-  - Updated database service upsert statements to handle all topic fields correctly
-  - Enhanced cache update logic in storage.ts to refresh after all CRUD operations
-  - Fixed data loss on page refresh - all subjects and topics now persist correctly in database
-  - Verified data persistence survives server restarts
-- **2025-09-29**: Added 5 high-priority comprehensive student tracking features
-  - **Health Info & Emergency**: Blood type, chronic diseases, allergies, medications, emergency contacts, physician info
-  - **Special Education (BEP)**: IEP tracking, RAM reports, accommodations, support services, progress monitoring
-  - **Risk Factors & Early Warning**: Academic/behavioral/attendance/social-emotional risk levels, dropout prediction, automated alerts
-  - **Behavior Tracking**: ABC analysis (Antecedent-Behavior-Consequence), incident tracking, intervention effectiveness, pattern analysis
-  - **Exam Results (LGS/YKS)**: Test scores, net analysis, subject breakdown, strength/weakness identification, progress tracking
-  - Created 5 new database tables with full CRUD operations
-  - Implemented REST API endpoints for all features
-  - Added TypeScript types and API functions to client storage layer
-  - All features support detailed documentation, parent notification tracking, and counselor notes
-- **2025-09-29 (Latest)**: Database optimization and reliability improvements
-  - Fixed critical interventions table duplication issue (schema conflict resolved)
-  - Added 30+ performance indexes on all foreign keys and frequently queried columns
-  - Implemented versioned migration system with schema_migrations tracking table
-  - Created automated backup system (createBackup, cleanupOldBackups, scheduleAutoBackup)
-  - Migration v4: Unified interventions schema (date-based structure)
-  - Enhanced database security with .gitignore updates for sensitive files
-- **2025-09-29**: Complete localStorage to SQLite migration
-  - Migrated 11 counseling/guidance features from localStorage to SQLite database
-  - Added database tables: multiple_intelligence, learning_styles, smart_goals, coaching_recommendations, evaluations_360, achievements, self_assessments, parent_meetings, home_visits, family_participation
-  - Created comprehensive REST API endpoints (/api/coaching/*) with CRUD operations
-  - Implemented secure partial update handlers with column whitelisting
-  - Fixed SQL injection vulnerabilities with strict field validation
-  - All data now persists through API endpoints instead of browser storage
-  - Enhanced security with proper error handling and input sanitization
-- **2025-09-29**: Critical bug fixes and improvements
-  - Fixed port conflict by removing stale Vite processes
-  - Fixed rate limiting to use per-endpoint isolation (IP:METHOD:ROUTE pattern)
-  - Added error toast notifications for better user feedback
-  - Added AbortController cleanup to prevent memory leaks
-  - Removed localStorage caching to respect data privacy (API as single source of truth)
-  - Improved input sanitization with comprehensive XSS protection
-- **2025-09-29**: Project successfully imported and configured for Replit
-- Set up development workflow on port 5000 with proper host configuration
-- Verified all API endpoints (/api/ping, /api/students, /api/subjects, /api/survey-templates, etc.)
-- Database connectivity confirmed with SQLite (data.db) containing student and survey data
-- Deployment configuration set up with autoscale target
-- All core functionality tested and working
+## User Preferences
+I prefer simple language and clear, concise explanations. I want iterative development with frequent, small updates. Ask before making major architectural changes or introducing new external dependencies. Do not make changes to the folder `node_modules` and `dist`. Do not make changes to the file `replit.nix` and `.replit`.
 
-## Project Architecture
-- **Frontend**: React 18 + TypeScript + Vite
-- **Backend**: Express.js with API routes
-- **Database**: SQLite (data.db) with comprehensive counseling/guidance data tables
-- **UI Framework**: Radix UI + Tailwind CSS + Framer Motion
-- **Package Manager**: NPM (originally PNPM project)
-- **Build System**: Vite for client, separate server build
-- **Development**: Full-stack development with integrated Express middleware
-- **Data Persistence**: All features use API endpoints with SQLite backend (no localStorage)
+## System Architecture
+The application uses a modern full-stack architecture:
+- **Frontend**: React 18 with TypeScript, built using Vite. UI components are styled with Radix UI, Tailwind CSS, and Framer Motion for animations.
+- **Backend**: Express.js handles API routes and serves the frontend.
+- **Database**: SQLite (`data.db`) is used for all data persistence, replacing prior localStorage usage. The database includes comprehensive tables for student information, counseling features, interventions, schedules, and topic tracking.
+- **UI/UX Decisions**: The design emphasizes a modern, responsive interface with a refined, light purple color palette ("hafif bir esinti"). Key UI elements include gradient headers, icon-based statistics cards, modern table designs with hover effects, and enhanced form/dialog components for improved user experience.
+- **Technical Implementations**: Features include an automatic intervention system for high-risk students, a sophisticated calendar with template scheduling and Ebbinghaus forgetting curve-based spaced repetition, and robust student tracking (health info, special education, risk factors, behavior, exam results). Data persistence is managed via API endpoints, with comprehensive error handling, input sanitization, and database indexing for performance.
+- **Deployment**: Configured for Replit's autoscale deployment, with `npm run build` for client and server, and `npm start` to run the production server.
 
-## Key Features
-- Student management dashboard
-- Turkish language interface
-- Modern responsive design
-- Statistics and analytics
-- Meeting/appointment scheduling
-- Survey and testing modules
-- Report generation capabilities
-
-## Development Setup
-- Development server runs on port 5000
-- Backend API available at `/api/*` endpoints
-- Hot reload enabled for development
-- Both frontend and backend run in single development process
-
-## Deployment
-- Uses autoscale deployment target
-- Build process: `npm run build` (builds both client and server)
-- Start command: `npm start` (runs production server)
-- Production files output to `dist/` directory
+## External Dependencies
+- **Vite**: Frontend build tool.
+- **Express.js**: Backend web framework.
+- **SQLite**: Database system for data storage.
+- **React**: Frontend library.
+- **TypeScript**: Superset of JavaScript for type safety.
+- **Radix UI**: Unstyled component library.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Framer Motion**: Animation library for React.
+- **NPM**: Package manager.
