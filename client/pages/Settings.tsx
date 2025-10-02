@@ -229,7 +229,7 @@ export default function SettingsPage() {
       <div className="rounded-xl bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 p-6 border border-primary/20">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Sistem Ayarları</h1>
+            <h1 className="text-3xl font-bold text-primary">Sistem Ayarları</h1>
             <p className="text-muted-foreground mt-1">
               Uygulama genel tercihleri
             </p>

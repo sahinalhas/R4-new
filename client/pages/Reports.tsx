@@ -523,7 +523,7 @@ export default function Reports() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">Analiz & Raporlama</h1>
+              <h1 className="text-3xl font-bold text-primary">Analiz & Raporlama</h1>
               <Badge variant="outline">{user.role === 'admin' ? 'Yönetici' : user.role === 'counselor' ? 'Rehber Öğretmen' : user.role === 'teacher' ? 'Öğretmen' : 'Gözlemci'}</Badge>
             </div>
             <p className="text-muted-foreground mt-1">
