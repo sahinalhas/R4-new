@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -16,8 +20,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, Edit3, Check, X, ChevronDown, ChevronRight, Folder, FolderOpen, FileText, Hash } from "lucide-react";
-import { HierarchicalTopicCategory, HierarchicalTopicItem, HierarchicalTopicTab } from "@/lib/app-settings";
+import {
+  Plus,
+  Trash2,
+  Edit3,
+  Check,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  FolderOpen,
+  FileText,
+  Hash,
+} from "lucide-react";
+import {
+  HierarchicalTopicCategory,
+  HierarchicalTopicItem,
+  HierarchicalTopicTab,
+} from "@/lib/app-settings";
 
 interface HierarchicalTopicsEditorProps {
   tabs: HierarchicalTopicTab[];
@@ -31,14 +51,17 @@ interface EditingState {
   value: string;
 }
 
-
 export default function HierarchicalTopicsEditor({
   tabs,
   onChange,
   disabled = false,
 }: HierarchicalTopicsEditorProps) {
-  const [activeTab, setActiveTab] = useState<string>(tabs && tabs.length > 0 ? tabs[0].id : "");
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<string>(
+    tabs && tabs.length > 0 ? tabs[0].id : "",
+  );
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set(),
+  );
   const [editingItem, setEditingItem] = useState<EditingState | null>(null);
   const [newItemText, setNewItemText] = useState<string>("");
   const [addingToCategory, setAddingToCategory] = useState<string | null>(null);
@@ -57,8 +80,12 @@ export default function HierarchicalTopicsEditor({
     onChange(updatedTabs);
   };
 
-  const findCategory = (categoryId: string): HierarchicalTopicCategory | null => {
-    const searchInCategories = (categories: HierarchicalTopicCategory[]): HierarchicalTopicCategory | null => {
+  const findCategory = (
+    categoryId: string,
+  ): HierarchicalTopicCategory | null => {
+    const searchInCategories = (
+      categories: HierarchicalTopicCategory[],
+    ): HierarchicalTopicCategory | null => {
       for (const category of categories) {
         if (category.id === categoryId) return category;
         const found = searchInCategories(category.children);
@@ -87,7 +114,9 @@ export default function HierarchicalTopicsEditor({
       editable: true,
     };
 
-    const updateCategory = (category: HierarchicalTopicCategory): HierarchicalTopicCategory => {
+    const updateCategory = (
+      category: HierarchicalTopicCategory,
+    ): HierarchicalTopicCategory => {
       if (category.id === categoryId) {
         return {
           ...category,
@@ -116,12 +145,14 @@ export default function HierarchicalTopicsEditor({
   const editItem = (categoryId: string, itemId: string, newTitle: string) => {
     if (!newTitle.trim()) return;
 
-    const updateCategory = (category: HierarchicalTopicCategory): HierarchicalTopicCategory => {
+    const updateCategory = (
+      category: HierarchicalTopicCategory,
+    ): HierarchicalTopicCategory => {
       if (category.id === categoryId) {
         return {
           ...category,
           items: category.items.map((item) =>
-            item.id === itemId ? { ...item, title: newTitle.trim() } : item
+            item.id === itemId ? { ...item, title: newTitle.trim() } : item,
           ),
         };
       }
@@ -144,7 +175,9 @@ export default function HierarchicalTopicsEditor({
   };
 
   const removeItem = (categoryId: string, itemId: string) => {
-    const updateCategory = (category: HierarchicalTopicCategory): HierarchicalTopicCategory => {
+    const updateCategory = (
+      category: HierarchicalTopicCategory,
+    ): HierarchicalTopicCategory => {
       if (category.id === categoryId) {
         return {
           ...category,
@@ -168,18 +201,26 @@ export default function HierarchicalTopicsEditor({
     updateTabs(updatedTabs);
   };
 
-  const renderCategory = (category: HierarchicalTopicCategory, depth: number = 0): JSX.Element => {
+  const renderCategory = (
+    category: HierarchicalTopicCategory,
+    depth: number = 0,
+  ): JSX.Element => {
     const isExpanded = expandedCategories.has(category.id);
-    const hasContent = category.items.length > 0 || category.children.length > 0;
+    const hasContent =
+      category.items.length > 0 || category.children.length > 0;
     const canAddItems = category.children.length === 0;
-    
+
     const getIndentStyle = (depth: number) => {
       return { paddingLeft: `${depth * 20 + 8}px` };
     };
 
     const getFolderIcon = () => {
       if (hasContent) {
-        return isExpanded ? <FolderOpen className="h-4 w-4 text-blue-500" /> : <Folder className="h-4 w-4 text-blue-500" />;
+        return isExpanded ? (
+          <FolderOpen className="h-4 w-4 text-blue-500" />
+        ) : (
+          <Folder className="h-4 w-4 text-blue-500" />
+        );
       }
       return <Hash className="h-4 w-4 text-gray-400" />;
     };
@@ -206,7 +247,9 @@ export default function HierarchicalTopicsEditor({
                   </div>
                 )}
                 {getFolderIcon()}
-                <span className="text-sm font-medium text-gray-800">{category.title}</span>
+                <span className="text-sm font-medium text-gray-800">
+                  {category.title}
+                </span>
                 {category.items.length > 0 && (
                   <span className="text-xs text-gray-500 ml-auto">
                     {category.items.length} öğe
@@ -231,7 +274,10 @@ export default function HierarchicalTopicsEditor({
                     <Input
                       value={editingItem.value}
                       onChange={(e) =>
-                        setEditingItem({ ...editingItem, value: e.target.value })
+                        setEditingItem({
+                          ...editingItem,
+                          value: e.target.value,
+                        })
                       }
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
@@ -267,7 +313,9 @@ export default function HierarchicalTopicsEditor({
                   </>
                 ) : (
                   <>
-                    <span className="flex-1 text-sm text-gray-700 hover:text-gray-900">{item.title}</span>
+                    <span className="flex-1 text-sm text-gray-700 hover:text-gray-900">
+                      {item.title}
+                    </span>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         size="sm"
@@ -299,7 +347,8 @@ export default function HierarchicalTopicsEditor({
                           <AlertDialogHeader>
                             <AlertDialogTitle>Konuyu sil?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              "{item.title}" konusu silinecek. Bu işlem geri alınamaz.
+                              "{item.title}" konusu silinecek. Bu işlem geri
+                              alınamaz.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -319,9 +368,9 @@ export default function HierarchicalTopicsEditor({
             ))}
 
             {/* Add new item */}
-            {canAddItems && (
-              addingToCategory === category.id ? (
-                <div 
+            {canAddItems &&
+              (addingToCategory === category.id ? (
+                <div
                   className="flex items-center gap-2 py-1 px-2 border border-dashed border-blue-300 bg-blue-50 rounded transition-colors"
                   style={getIndentStyle(depth + 1)}
                 >
@@ -365,7 +414,7 @@ export default function HierarchicalTopicsEditor({
                   </Button>
                 </div>
               ) : (
-                <div 
+                <div
                   className="flex items-center gap-2 py-1 px-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
                   style={getIndentStyle(depth + 1)}
                   onClick={() => setAddingToCategory(category.id)}
@@ -373,12 +422,13 @@ export default function HierarchicalTopicsEditor({
                   <Plus className="h-3 w-3 flex-shrink-0" />
                   <span className="text-sm">Yeni konu ekle...</span>
                 </div>
-              )
-            )}
+              ))}
 
             {/* Child categories */}
             <div className="space-y-1">
-              {category.children.map((child) => renderCategory(child, depth + 1))}
+              {category.children.map((child) =>
+                renderCategory(child, depth + 1),
+              )}
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -388,18 +438,24 @@ export default function HierarchicalTopicsEditor({
 
   const getTotalItemCount = (tabs: HierarchicalTopicTab[]): number => {
     if (!tabs || tabs.length === 0) return 0;
-    
-    const countCategoriesItems = (categories: HierarchicalTopicCategory[]): number => {
+
+    const countCategoriesItems = (
+      categories: HierarchicalTopicCategory[],
+    ): number => {
       if (!categories || categories.length === 0) return 0;
       return categories.reduce((total, category) => {
         const itemsCount = category.items ? category.items.length : 0;
-        const childrenCount = category.children ? countCategoriesItems(category.children) : 0;
+        const childrenCount = category.children
+          ? countCategoriesItems(category.children)
+          : 0;
         return total + itemsCount + childrenCount;
       }, 0);
     };
-    
+
     return tabs.reduce((total, tab) => {
-      const categoriesCount = tab.categories ? countCategoriesItems(tab.categories) : 0;
+      const categoriesCount = tab.categories
+        ? countCategoriesItems(tab.categories)
+        : 0;
       return total + categoriesCount;
     }, 0);
   };
@@ -409,20 +465,27 @@ export default function HierarchicalTopicsEditor({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Görüşme Konuları (Hiyerarşik)</span>
-          <Badge variant="secondary">{getTotalItemCount(tabs)} toplam konu</Badge>
+          <Badge variant="secondary">
+            {getTotalItemCount(tabs)} toplam konu
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="text-sm text-muted-foreground mb-4">
-          Kategoriler açılıp kapanabilir. Sadece konu başlıkları düzenlenebilir, numaralı kategoriler sabit kalmaktadır.
+          Kategoriler açılıp kapanabilir. Sadece konu başlıkları düzenlenebilir,
+          kategoriler sabit kalmaktadır.
         </div>
-        
+
         {!tabs || tabs.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Henüz hiç sekme yok. Veri yüklenene kadar bekleyin.
           </div>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2">
               {tabs.map((tab) => (
                 <TabsTrigger key={tab.id} value={tab.id}>
@@ -430,9 +493,13 @@ export default function HierarchicalTopicsEditor({
                 </TabsTrigger>
               ))}
             </TabsList>
-            
+
             {tabs.map((tab) => (
-              <TabsContent key={tab.id} value={tab.id} className="space-y-1 mt-4">
+              <TabsContent
+                key={tab.id}
+                value={tab.id}
+                className="space-y-1 mt-4"
+              >
                 {tab.categories.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     Bu sekmede henüz kategori yok.
