@@ -12,16 +12,16 @@ import { handleDemo } from "./routes/demo";
  * See server/features/README.md for full documentation.
  * 
  * Migration Stages (5 Stages Total):
- * - Stage 0: ✅ Scaffolding complete (current)
- * - Stage 1: Core domains - students → surveys → progress
+ * - Stage 0: ✅ Scaffolding complete
+ * - Stage 1: ✅ Core domains - students ✅ → surveys ✅ → progress ✅ (COMPLETE!)
  * - Stage 2: Adjacent domains - attendance, study, meeting-notes, documents, settings, subjects
  * - Stage 3: Peripheral routers - coaching, health, special-education, etc.
  * - Stage 4: Cleanup - remove legacy imports and old route files
  * 
- * STAGE 1 CANONICAL ORDER (MUST FOLLOW):
- * 1. students (foundation for all student features)
- * 2. surveys (independent survey system)
- * 3. progress (student progress tracking)
+ * STAGE 1 CANONICAL ORDER (COMPLETED):
+ * 1. students (foundation for all student features) ✅
+ * 2. surveys (independent survey system) ✅
+ * 3. progress (student progress tracking) ✅
  * 
  * Future state (Stage 4 - after cleanup):
  * import featureRegistry from "./features";
@@ -294,7 +294,10 @@ export function createServer() {
   app.get("/api/topics", simpleRateLimit(200, 15 * 60 * 1000), getTopics);
   app.post("/api/topics", simpleRateLimit(50, 15 * 60 * 1000), saveTopicsHandler);
 
-  // Progress & Academic Goals
+  // ✅ MIGRATED: Progress (Stage 1.3 - Stage 1 Complete!)
+  // New route: /api/progress, /api/academic-goals -> server/features/progress
+  // Legacy routes kept for backward compatibility during migration
+  // TODO (Stage 4): Remove these legacy progress routes after full migration
   app.get("/api/progress", simpleRateLimit(200, 15 * 60 * 1000), getAllProgressHandler);
   app.get("/api/progress/:studentId", simpleRateLimit(200, 15 * 60 * 1000), getProgress);
   app.post("/api/progress", simpleRateLimit(50, 15 * 60 * 1000), saveProgressHandler);
