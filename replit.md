@@ -68,6 +68,18 @@ The application uses a modern full-stack architecture:
 - Backward compatibility maintained with existing URL patterns
 
 ## Recent Changes
+**October 3, 2025** - Surveys Repository Refactored ✅
+- **Surveys Repository Modularized**: Split monolithic `surveys.repository.ts` (405 lines) into 4 focused repository modules:
+  - `templates.repository.ts` - Survey template CRUD operations
+  - `questions.repository.ts` - Survey question CRUD operations
+  - `distributions.repository.ts` - Survey distribution CRUD operations
+  - `responses.repository.ts` - Survey response CRUD operations
+  - `index.ts` - Barrel export for clean imports
+- Each module encapsulates its own prepared statements and initialization logic
+- Service layer imports updated to use new modular structure
+- Improved separation of concerns and maintainability
+- Zero breaking changes - all functionality preserved
+
 **October 3, 2025** - Additional modularization improvements ✅
 - **Coaching Routes Modularized**: Split coaching routes into 4 logical modules (goals, assessments, family, achievements) with independent rate limiting per route
 - **Surveys Routes Modularized**: Split surveys routes into 5 modules (templates, questions, distributions, responses, analytics) with proper separation of concerns
