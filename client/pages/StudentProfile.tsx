@@ -8,16 +8,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { 
   CalendarDays, 
   GraduationCap, 
@@ -43,8 +33,6 @@ import {
   BarChart2
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import WeeklySchedule from "./components/WeeklySchedule";
-import TopicPlanner from "./components/TopicPlanner";
 import BasicInfoSection from "@/components/student-profile/sections/BasicInfoSection";
 import DevamsizlikSection from "@/components/student-profile/sections/DevamsizlikSection";
 import CalismaProgramiSection from "@/components/student-profile/sections/CalismaProgramiSection";
@@ -70,86 +58,47 @@ import {
   MeetingNote,
   loadStudents,
   getNotesByStudent,
-  addNote,
-  addSurveyResult,
   getSurveyResultsByStudent,
   SurveyResult,
-  upsertStudent,
   getAttendanceByStudent,
-  addAttendance,
   AttendanceRecord,
   getAcademicsByStudent,
-  addAcademic,
   AcademicRecord,
   getInterventionsByStudent,
-  addIntervention,
   Intervention,
-  // Dijital Koçluk İmportları
-  AcademicGoal,
+  CoachingRecommendation,
   MultipleIntelligence,
   LearningStyle,
+  AcademicGoal,
   SmartGoal,
-  CoachingRecommendation,
   Evaluation360,
   Achievement,
   SelfAssessment,
-  getAcademicGoalsByStudent,
-  addAcademicGoal,
-  updateAcademicGoal,
-  getMultipleIntelligenceByStudent,
-  addMultipleIntelligence,
-  getLearningStyleByStudent,
-  addLearningStyle,
-  getSmartGoalsByStudent,
-  addSmartGoal,
-  updateSmartGoal,
   getCoachingRecommendationsByStudent,
-  addCoachingRecommendation,
-  updateCoachingRecommendation,
+  getAcademicGoalsByStudent,
+  getMultipleIntelligenceByStudent,
+  getLearningStyleByStudent,
+  getSmartGoalsByStudent,
   getEvaluations360ByStudent,
-  addEvaluation360,
   getAchievementsByStudent,
-  addAchievement,
   getSelfAssessmentsByStudent,
-  addSelfAssessment,
   getTodaysSelfAssessment,
-  generateAutoRecommendations,
-  // Eksik fonksiyonlar
-  ensureProgressForStudent,
-  getProgressByStudent,
-  loadTopics,
-  loadSubjects,
-  // Aile İletişimi İmportları
   ParentMeeting,
   HomeVisit,
   FamilyParticipation,
   getParentMeetingsByStudent,
-  addParentMeeting,
-  updateParentMeeting,
   getHomeVisitsByStudent,
-  addHomeVisit,
-  updateHomeVisit,
   getFamilyParticipationByStudent,
-  addFamilyParticipation,
-  updateFamilyParticipation,
-  // Yeni özellikler
   HealthInfo,
   SpecialEducation,
   RiskFactors,
   BehaviorIncident,
   ExamResult,
   getHealthInfoByStudent,
-  saveHealthInfo,
   getSpecialEducationByStudent,
-  addSpecialEducation,
-  getRiskFactorsByStudent,
   getLatestRiskFactors,
-  addRiskFactors,
   getBehaviorIncidentsByStudent,
-  addBehaviorIncident,
   getExamResultsByStudent,
-  getExamResultsByType,
-  addExamResult,
 } from "@/lib/storage";
 
 function RiskPill({ risk }: { risk?: string }) {
