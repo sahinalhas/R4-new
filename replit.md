@@ -47,7 +47,33 @@ The application uses a modern full-stack architecture:
 - Main page reduced from 870 lines to 280 lines (68% reduction)
 - Each tab encapsulates its own UI logic while sharing form state
 
+## Backend Architecture
+**Feature-Based Modular Structure** (October 3, 2025):
+- Backend routes migrated from flat structure to feature-based modules
+- Each feature has: repository/ (data access), services/ (business logic), routes/ (handlers), types/ (TypeScript), index.ts (router)
+- Implemented in 5 stages: Stage 0 (scaffolding) ✅, Stage 1 (core domains) ✅, Stage 2 (adjacent domains), Stage 3 (peripheral routers), Stage 4 (cleanup)
+
+**Migrated Features** (server/features/):
+- **students** - Student management, academics, progress, interventions (376 lines → modular)
+- **surveys** - Templates, questions, distributions, responses, analytics (729 lines → modular)
+- **progress** - Progress tracking and academic goals (73 lines → modular)
+
+**Benefits**:
+- Clear separation of concerns (routes ← services ← repository)
+- Improved maintainability and testability
+- Reduced coupling between domains
+- Backward compatibility maintained with legacy routes
+
 ## Recent Changes
+**October 3, 2025** - Backend modularization: Stage 1 Complete (Core Domains)
+- Created feature-based architecture in server/features/
+- Migrated 3 core domains to new structure: students, surveys, progress
+- Extracted 1,178 lines of route code into modular components
+- Database operations moved from monolithic db-service.ts to domain repositories
+- Feature registry system implemented for clean router mounting
+- All APIs maintain backward compatibility
+- Zero breaking changes - legacy routes still functional during migration
+
 **October 3, 2025** - Major refactoring: Settings.tsx modularization
 - Refactored Settings.tsx from 870 lines to 280 lines (68% reduction)
 - Created 9 focused tab components in `client/components/settings/`

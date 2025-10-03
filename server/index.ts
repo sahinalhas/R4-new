@@ -14,7 +14,7 @@ import { handleDemo } from "./routes/demo";
  * Migration Stages (5 Stages Total):
  * - Stage 0: ✅ Scaffolding complete
  * - Stage 1: ✅ Core domains - students ✅ → surveys ✅ → progress ✅ (COMPLETE!)
- * - Stage 2: Adjacent domains - attendance, study, meeting-notes, documents, settings, subjects
+ * - Stage 2: Adjacent domains - subjects ✅ → attendance, study, meeting-notes, documents, settings
  * - Stage 3: Peripheral routers - coaching, health, special-education, etc.
  * - Stage 4: Cleanup - remove legacy imports and old route files
  * 
@@ -22,6 +22,9 @@ import { handleDemo } from "./routes/demo";
  * 1. students (foundation for all student features) ✅
  * 2. surveys (independent survey system) ✅
  * 3. progress (student progress tracking) ✅
+ * 
+ * STAGE 2 CANONICAL ORDER (IN PROGRESS):
+ * 1. subjects (first adjacent domain - subjects and topics CRUD) ✅
  * 
  * Future state (Stage 4 - after cleanup):
  * import featureRegistry from "./features";
@@ -287,7 +290,10 @@ export function createServer() {
   app.post("/api/students/academics", simpleRateLimit(50, 15 * 60 * 1000), addStudentAcademic);
   app.get("/api/students/:id/progress", simpleRateLimit(200, 15 * 60 * 1000), getStudentProgress);
 
-  // Subjects & Topics
+  // ✅ MIGRATED: Subjects (Stage 2.1 - First adjacent domain)
+  // New route: /api/subjects, /api/topics -> server/features/subjects
+  // Legacy routes kept for backward compatibility during migration
+  // TODO (Stage 4): Remove these legacy subjects routes after full migration
   app.get("/api/subjects", simpleRateLimit(200, 15 * 60 * 1000), getSubjects);
   app.post("/api/subjects", simpleRateLimit(50, 15 * 60 * 1000), saveSubjectsHandler);
   app.get("/api/subjects/:id/topics", simpleRateLimit(200, 15 * 60 * 1000), getTopicsBySubjectId);
