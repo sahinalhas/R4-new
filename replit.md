@@ -26,7 +26,31 @@ The application uses a modern full-stack architecture:
 - **Framer Motion**: Animation library for React.
 - **NPM**: Package manager.
 
+## Component Structure
+**Component Organization Strategy**:
+- Centralized component structure in `client/components/` with organized subfolders
+- Each feature has its own folder: `counseling/`, `settings/`, `shared/`, `student-profile/`
+- Components follow Single Responsibility Principle (SRP) for better maintainability
+- Types, utilities, and helpers separated into dedicated files
+- Form components extracted for reusability
+
+**Counseling Components** (`client/components/counseling/`):
+- **Display Components**: SessionCard, ActiveSessionsGrid, CompletedSessionsList, SessionsTable
+- **Form Components**: IndividualSessionForm, GroupSessionForm
+- **Dialog Components**: NewSessionDialog, CompleteSessionDialog
+- **Utilities**: types.ts, sessionHelpers.ts, sessionExport.ts
+- Main page reduced from 1,419 lines to 351 lines (75% reduction)
+
 ## Recent Changes
+**October 3, 2025** - Major refactoring: CounselingSessions modularization
+- Refactored CounselingSessions.tsx from 1,419 lines to 351 lines (75% reduction)
+- Created 11 focused, reusable components in `client/components/counseling/`
+- Extracted types, schemas (Zod), and helper utilities into separate files
+- Improved code maintainability with Single Responsibility Principle
+- All functionality preserved - no breaking changes
+- LSP validation passed - no type errors
+- Application tested and working correctly
+
 **October 2, 2025** - Project imported and configured for Replit environment
 - Installed all npm dependencies
 - Configured workflow: "Dev Server" running `npm run dev` on port 5000
