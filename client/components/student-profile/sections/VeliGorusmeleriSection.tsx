@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,8 +10,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Users } from "lucide-react";
 import { ParentMeeting, addParentMeeting } from "@/lib/storage";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+
+const meetingTypes = ["YÜZ_YÜZE", "TELEFON", "ONLINE", "EV_ZİYARETİ"] as const;
+
+const parentMeetingSchema = z.object({
+  date: z.string().min(1, "Görüşme tarihi gereklidir"),
+  time: z.string().min(1, "Görüşme saati gereklidir"),
+  type: z.enum(meetingTypes),
+  participants: z.string().min(1, "Katılımcı bilgisi gereklidir"),
+  mainTopics: z.string().min(1, "Ana konular gereklidir"),
+  concerns: z.string().optional(),
+  decisions: z.string().optional(),
+  actionPlan: z.string().optional(),
+  nextMeetingDate: z.string().optional(),
+  parentSatisfaction: z.string().optional(),
+});
+
+type ParentMeetingFormValues = z.infer<typeof parentMeetingSchema>;
 
 interface VeliGorusmeleriSectionProps {
   studentId: string;
@@ -21,49 +49,51 @@ interface VeliGorusmeleriSectionProps {
 }
 
 export default function VeliGorusmeleriSection({ studentId, parentMeetings, onUpdate }: VeliGorusmeleriSectionProps) {
-  const [pmDate, setPmDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [pmTime, setPmTime] = useState<string>("14:00");
-  const [pmType, setPmType] = useState<string>("YÜZ_YÜZE");
-  const [pmParticipants, setPmParticipants] = useState<string>("");
-  const [pmTopics, setPmTopics] = useState<string>("");
-  const [pmConcerns, setPmConcerns] = useState<string>("");
-  const [pmDecisions, setPmDecisions] = useState<string>("");
-  const [pmActionPlan, setPmActionPlan] = useState<string>("");
-  const [pmNextDate, setPmNextDate] = useState<string>("");
-  const [pmSatisfaction, setPmSatisfaction] = useState<string>("");
+  const form = useForm<ParentMeetingFormValues>({
+    resolver: zodResolver(parentMeetingSchema),
+    defaultValues: {
+      date: new Date().toISOString().slice(0, 10),
+      time: "14:00",
+      type: "YÜZ_YÜZE",
+      participants: "",
+      mainTopics: "",
+      concerns: "",
+      decisions: "",
+      actionPlan: "",
+      nextMeetingDate: "",
+      parentSatisfaction: "",
+    },
+  });
 
-  const handleSaveParentMeeting = () => {
-    if (!studentId || !pmParticipants.trim()) return;
+  const onSubmit = async (data: ParentMeetingFormValues) => {
+    try {
+      const parentMeeting: ParentMeeting = {
+        id: crypto.randomUUID(),
+        studentId,
+        date: data.date,
+        time: data.time,
+        type: data.type,
+        participants: data.participants.split(",").map(p => p.trim()).filter(Boolean),
+        mainTopics: data.mainTopics.split(",").map(t => t.trim()).filter(Boolean),
+        concerns: data.concerns || undefined,
+        decisions: data.decisions || undefined,
+        actionPlan: data.actionPlan || undefined,
+        nextMeetingDate: data.nextMeetingDate || undefined,
+        parentSatisfaction: data.parentSatisfaction ? Number(data.parentSatisfaction) : undefined,
+        followUpRequired: !!data.nextMeetingDate || !!data.actionPlan,
+        notes: undefined,
+        createdBy: "Sistem",
+        createdAt: new Date().toISOString(),
+      };
 
-    const parentMeeting: ParentMeeting = {
-      id: crypto.randomUUID(),
-      studentId,
-      date: pmDate,
-      time: pmTime,
-      type: pmType as ParentMeeting["type"],
-      participants: pmParticipants.split(",").map(p => p.trim()).filter(Boolean),
-      mainTopics: pmTopics.split(",").map(t => t.trim()).filter(Boolean),
-      concerns: pmConcerns || undefined,
-      decisions: pmDecisions || undefined,
-      actionPlan: pmActionPlan || undefined,
-      nextMeetingDate: pmNextDate || undefined,
-      parentSatisfaction: pmSatisfaction ? Number(pmSatisfaction) : undefined,
-      followUpRequired: !!pmNextDate || !!pmActionPlan,
-      notes: undefined,
-      createdBy: "Sistem",
-      createdAt: new Date().toISOString(),
-    };
-
-    addParentMeeting(parentMeeting);
-
-    setPmParticipants("");
-    setPmTopics("");
-    setPmConcerns("");
-    setPmDecisions("");
-    setPmActionPlan("");
-    setPmNextDate("");
-    setPmSatisfaction("");
-    onUpdate();
+      await addParentMeeting(parentMeeting);
+      toast.success("Veli görüşmesi kaydedildi");
+      form.reset();
+      onUpdate();
+    } catch (error) {
+      toast.error("Kayıt sırasında hata oluştu");
+      console.error("Error saving parent meeting:", error);
+    }
   };
 
   return (
@@ -77,87 +107,170 @@ export default function VeliGorusmeleriSection({ studentId, parentMeetings, onUp
           Detaylı veli görüşme kayıtları ve takip planları
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            type="date"
-            placeholder="Görüşme Tarihi"
-            value={pmDate}
-            onChange={(e) => setPmDate(e.target.value)}
-          />
-          <Input
-            type="time"
-            placeholder="Görüşme Saati"
-            value={pmTime}
-            onChange={(e) => setPmTime(e.target.value)}
-          />
-          <Select value={pmType} onValueChange={setPmType}>
-            <SelectTrigger>
-              <SelectValue placeholder="Görüşme Türü" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="YÜZ_YÜZE">Yüz Yüze</SelectItem>
-              <SelectItem value="TELEFON">Telefon</SelectItem>
-              <SelectItem value="ONLINE">Online</SelectItem>
-              <SelectItem value="EV_ZİYARETİ">Ev Ziyareti</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            placeholder="Katılımcılar (virgülle ayırın)"
-            value={pmParticipants}
-            onChange={(e) => setPmParticipants(e.target.value)}
-          />
-        </div>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="date" placeholder="Görüşme Tarihi" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="time" placeholder="Görüşme Saati" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Görüşme Türü" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="YÜZ_YÜZE">Yüz Yüze</SelectItem>
+                        <SelectItem value="TELEFON">Telefon</SelectItem>
+                        <SelectItem value="ONLINE">Online</SelectItem>
+                        <SelectItem value="EV_ZİYARETİ">Ev Ziyareti</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="participants"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Katılımcılar (virgülle ayırın)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <Textarea
-          placeholder="Ana konular (virgülle ayırın)"
-          value={pmTopics}
-          onChange={(e) => setPmTopics(e.target.value)}
-        />
+            <FormField
+              control={form.control}
+              name="mainTopics"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Ana konular (virgülle ayırın)" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Textarea
-          placeholder="Endişeler ve sorunlar"
-          value={pmConcerns}
-          onChange={(e) => setPmConcerns(e.target.value)}
-        />
+            <FormField
+              control={form.control}
+              name="concerns"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Endişeler ve sorunlar" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Textarea
-          placeholder="Alınan kararlar"
-          value={pmDecisions}
-          onChange={(e) => setPmDecisions(e.target.value)}
-        />
+            <FormField
+              control={form.control}
+              name="decisions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Alınan kararlar" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Textarea
-          placeholder="Eylem planı"
-          value={pmActionPlan}
-          onChange={(e) => setPmActionPlan(e.target.value)}
-        />
+            <FormField
+              control={form.control}
+              name="actionPlan"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Eylem planı" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            type="date"
-            placeholder="Sonraki görüşme tarihi"
-            value={pmNextDate}
-            onChange={(e) => setPmNextDate(e.target.value)}
-          />
-          <Select value={pmSatisfaction} onValueChange={setPmSatisfaction}>
-            <SelectTrigger>
-              <SelectValue placeholder="Veli Memnuniyeti (1-10)" />
-            </SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="nextMeetingDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="date" placeholder="Sonraki görüşme tarihi" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="parentSatisfaction"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Veli Memnuniyeti (1-10)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                          <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <Button className="w-full" onClick={handleSaveParentMeeting}>
-          <Users className="mr-2 h-4 w-4" />
-          Veli Görüşmesi Kaydet
-        </Button>
+            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              <Users className="mr-2 h-4 w-4" />
+              {form.formState.isSubmitting ? "Kaydediliyor..." : "Veli Görüşmesi Kaydet"}
+            </Button>
+          </form>
+        </Form>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <h4 className="font-medium">Görüşme Geçmişi</h4>
           {parentMeetings.length === 0 && (
             <div className="text-sm text-muted-foreground">

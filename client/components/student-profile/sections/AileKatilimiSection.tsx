@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,8 +10,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Heart } from "lucide-react";
 import { FamilyParticipation, addFamilyParticipation } from "@/lib/storage";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+
+const eventTypes = ["VELI_TOPLANTISI", "OKUL_ETKİNLİĞİ", "ÖĞRETMEN_GÖRÜŞMESİ", "PERFORMANS_DEĞERLENDİRME", "DİĞER"] as const;
+const participationStatuses = ["KATILDI", "KATILMADI", "GEÇ_KATILDI", "ERKEN_AYRILDI"] as const;
+const engagementLevels = ["ÇOK_AKTİF", "AKTİF", "PASİF", "İLGİSİZ"] as const;
+const communicationFrequencies = ["GÜNLÜK", "HAFTALIK", "AYLIK", "SADECE_GEREKENDE"] as const;
+const contactMethods = ["TELEFON", "EMAIL", "WHATSAPP", "YÜZ_YÜZE", "OKUL_SISTEMI"] as const;
+
+const familyParticipationSchema = z.object({
+  eventType: z.enum(eventTypes),
+  eventName: z.string().min(1, "Etkinlik adı gereklidir"),
+  eventDate: z.string().min(1, "Etkinlik tarihi gereklidir"),
+  participationStatus: z.enum(participationStatuses),
+  participants: z.string().optional(),
+  engagementLevel: z.enum(engagementLevels),
+  communicationFrequency: z.enum(communicationFrequencies),
+  preferredContactMethod: z.enum(contactMethods),
+  parentAvailability: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type FamilyParticipationFormValues = z.infer<typeof familyParticipationSchema>;
 
 interface AileKatilimiSectionProps {
   studentId: string;
@@ -21,44 +53,51 @@ interface AileKatilimiSectionProps {
 }
 
 export default function AileKatilimiSection({ studentId, familyParticipation, onUpdate }: AileKatilimiSectionProps) {
-  const [fpEventType, setFpEventType] = useState<string>("VELI_TOPLANTISI");
-  const [fpEventName, setFpEventName] = useState<string>("");
-  const [fpEventDate, setFpEventDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [fpParticipationStatus, setFpParticipationStatus] = useState<string>("KATILDI");
-  const [fpParticipants, setFpParticipants] = useState<string>("");
-  const [fpEngagementLevel, setFpEngagementLevel] = useState<string>("AKTİF");
-  const [fpCommunicationFreq, setFpCommunicationFreq] = useState<string>("HAFTALIK");
-  const [fpContactMethod, setFpContactMethod] = useState<string>("TELEFON");
-  const [fpAvailability, setFpAvailability] = useState<string>("");
-  const [fpNotes, setFpNotes] = useState<string>("");
+  const form = useForm<FamilyParticipationFormValues>({
+    resolver: zodResolver(familyParticipationSchema),
+    defaultValues: {
+      eventType: "VELI_TOPLANTISI",
+      eventName: "",
+      eventDate: new Date().toISOString().slice(0, 10),
+      participationStatus: "KATILDI",
+      participants: "",
+      engagementLevel: "AKTİF",
+      communicationFrequency: "HAFTALIK",
+      preferredContactMethod: "TELEFON",
+      parentAvailability: "",
+      notes: "",
+    },
+  });
 
-  const handleSaveFamilyParticipation = () => {
-    if (!studentId || !fpEventName.trim()) return;
+  const onSubmit = async (data: FamilyParticipationFormValues) => {
+    try {
+      const familyParticipationData: FamilyParticipation = {
+        id: crypto.randomUUID(),
+        studentId,
+        eventType: data.eventType,
+        eventName: data.eventName,
+        eventDate: data.eventDate,
+        participationStatus: data.participationStatus,
+        participants: data.participants 
+          ? data.participants.split(",").map(p => p.trim()).filter(Boolean) 
+          : undefined,
+        engagementLevel: data.engagementLevel,
+        communicationFrequency: data.communicationFrequency,
+        preferredContactMethod: data.preferredContactMethod,
+        parentAvailability: data.parentAvailability || undefined,
+        notes: data.notes || undefined,
+        recordedBy: "Sistem",
+        recordedAt: new Date().toISOString(),
+      };
 
-    const familyParticipationData: FamilyParticipation = {
-      id: crypto.randomUUID(),
-      studentId,
-      eventType: fpEventType as FamilyParticipation["eventType"],
-      eventName: fpEventName,
-      eventDate: fpEventDate,
-      participationStatus: fpParticipationStatus as FamilyParticipation["participationStatus"],
-      participants: fpParticipants ? fpParticipants.split(",").map(p => p.trim()).filter(Boolean) : undefined,
-      engagementLevel: fpEngagementLevel as FamilyParticipation["engagementLevel"],
-      communicationFrequency: fpCommunicationFreq as FamilyParticipation["communicationFrequency"],
-      preferredContactMethod: fpContactMethod as FamilyParticipation["preferredContactMethod"],
-      parentAvailability: fpAvailability || undefined,
-      notes: fpNotes || undefined,
-      recordedBy: "Sistem",
-      recordedAt: new Date().toISOString(),
-    };
-
-    addFamilyParticipation(familyParticipationData);
-
-    setFpEventName("");
-    setFpParticipants("");
-    setFpAvailability("");
-    setFpNotes("");
-    onUpdate();
+      await addFamilyParticipation(familyParticipationData);
+      toast.success("Aile katılım kaydı eklendi");
+      form.reset();
+      onUpdate();
+    } catch (error) {
+      toast.error("Kayıt sırasında hata oluştu");
+      console.error("Error saving family participation:", error);
+    }
   };
 
   return (
@@ -72,109 +111,205 @@ export default function AileKatilimiSection({ studentId, familyParticipation, on
           Okul etkinlikleri ve görüşmelere katılım takibi
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select value={fpEventType} onValueChange={setFpEventType}>
-            <SelectTrigger>
-              <SelectValue placeholder="Etkinlik Türü" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="VELI_TOPLANTISI">Veli Toplantısı</SelectItem>
-              <SelectItem value="OKUL_ETKİNLİĞİ">Okul Etkinliği</SelectItem>
-              <SelectItem value="ÖĞRETMEN_GÖRÜŞMESİ">Öğretmen Görüşmesi</SelectItem>
-              <SelectItem value="PERFORMANS_DEĞERLENDİRME">Performans Değerlendirme</SelectItem>
-              <SelectItem value="DİĞER">Diğer</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            placeholder="Etkinlik Adı"
-            value={fpEventName}
-            onChange={(e) => setFpEventName(e.target.value)}
-          />
-        </div>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="eventType"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Etkinlik Türü" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="VELI_TOPLANTISI">Veli Toplantısı</SelectItem>
+                        <SelectItem value="OKUL_ETKİNLİĞİ">Okul Etkinliği</SelectItem>
+                        <SelectItem value="ÖĞRETMEN_GÖRÜŞMESİ">Öğretmen Görüşmesi</SelectItem>
+                        <SelectItem value="PERFORMANS_DEĞERLENDİRME">Performans Değerlendirme</SelectItem>
+                        <SelectItem value="DİĞER">Diğer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="eventName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Etkinlik Adı" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            type="date"
-            placeholder="Etkinlik Tarihi"
-            value={fpEventDate}
-            onChange={(e) => setFpEventDate(e.target.value)}
-          />
-          <Select value={fpParticipationStatus} onValueChange={setFpParticipationStatus}>
-            <SelectTrigger>
-              <SelectValue placeholder="Katılım Durumu" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="KATILDI">Katıldı</SelectItem>
-              <SelectItem value="KATILMADI">Katılmadı</SelectItem>
-              <SelectItem value="GEÇ_KATILDI">Geç Katıldı</SelectItem>
-              <SelectItem value="ERKEN_AYRILDI">Erken Ayrıldı</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="eventDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="date" placeholder="Etkinlik Tarihi" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="participationStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Katılım Durumu" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="KATILDI">Katıldı</SelectItem>
+                        <SelectItem value="KATILMADI">Katılmadı</SelectItem>
+                        <SelectItem value="GEÇ_KATILDI">Geç Katıldı</SelectItem>
+                        <SelectItem value="ERKEN_AYRILDI">Erken Ayrıldı</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <Input
-          placeholder="Katılan aile üyeleri (virgülle ayırın)"
-          value={fpParticipants}
-          onChange={(e) => setFpParticipants(e.target.value)}
-        />
+            <FormField
+              control={form.control}
+              name="participants"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Katılan aile üyeleri (virgülle ayırın)" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select value={fpEngagementLevel} onValueChange={setFpEngagementLevel}>
-            <SelectTrigger>
-              <SelectValue placeholder="Katılım Düzeyi" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ÇOK_AKTİF">Çok Aktif</SelectItem>
-              <SelectItem value="AKTİF">Aktif</SelectItem>
-              <SelectItem value="PASİF">Pasif</SelectItem>
-              <SelectItem value="İLGİSİZ">İlgisiz</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={fpCommunicationFreq} onValueChange={setFpCommunicationFreq}>
-            <SelectTrigger>
-              <SelectValue placeholder="İletişim Sıklığı" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="GÜNLÜK">Günlük</SelectItem>
-              <SelectItem value="HAFTALIK">Haftalık</SelectItem>
-              <SelectItem value="AYLIK">Aylık</SelectItem>
-              <SelectItem value="SADECE_GEREKENDE">Sadece Gerekende</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="engagementLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Katılım Düzeyi" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ÇOK_AKTİF">Çok Aktif</SelectItem>
+                        <SelectItem value="AKTİF">Aktif</SelectItem>
+                        <SelectItem value="PASİF">Pasif</SelectItem>
+                        <SelectItem value="İLGİSİZ">İlgisiz</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="communicationFrequency"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="İletişim Sıklığı" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="GÜNLÜK">Günlük</SelectItem>
+                        <SelectItem value="HAFTALIK">Haftalık</SelectItem>
+                        <SelectItem value="AYLIK">Aylık</SelectItem>
+                        <SelectItem value="SADECE_GEREKENDE">Sadece Gerekende</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <Select value={fpContactMethod} onValueChange={setFpContactMethod}>
-          <SelectTrigger>
-            <SelectValue placeholder="Tercih Edilen İletişim Yöntemi" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="TELEFON">Telefon</SelectItem>
-            <SelectItem value="EMAIL">E-mail</SelectItem>
-            <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
-            <SelectItem value="YÜZ_YÜZE">Yüz Yüze</SelectItem>
-            <SelectItem value="OKUL_SISTEMI">Okul Sistemi</SelectItem>
-          </SelectContent>
-        </Select>
+            <FormField
+              control={form.control}
+              name="preferredContactMethod"
+              render={({ field }) => (
+                <FormItem>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tercih Edilen İletişim Yöntemi" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="TELEFON">Telefon</SelectItem>
+                      <SelectItem value="EMAIL">E-mail</SelectItem>
+                      <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                      <SelectItem value="YÜZ_YÜZE">Yüz Yüze</SelectItem>
+                      <SelectItem value="OKUL_SISTEMI">Okul Sistemi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Input
-          placeholder="Veli müsait olduğu zamanlar"
-          value={fpAvailability}
-          onChange={(e) => setFpAvailability(e.target.value)}
-        />
+            <FormField
+              control={form.control}
+              name="parentAvailability"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Veli müsait olduğu zamanlar" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Textarea
-          placeholder="Notlar"
-          value={fpNotes}
-          onChange={(e) => setFpNotes(e.target.value)}
-        />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Notlar" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Button className="w-full" onClick={handleSaveFamilyParticipation}>
-          <Heart className="mr-2 h-4 w-4" />
-          Katılım Kaydı Ekle
-        </Button>
+            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              <Heart className="mr-2 h-4 w-4" />
+              {form.formState.isSubmitting ? "Kaydediliyor..." : "Katılım Kaydı Ekle"}
+            </Button>
+          </form>
+        </Form>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <h4 className="font-medium">Katılım Geçmişi</h4>
           {familyParticipation.length === 0 && (
             <div className="text-sm text-muted-foreground">
