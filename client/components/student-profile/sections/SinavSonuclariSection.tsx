@@ -1,4 +1,3 @@
-import { ExamResult, addExamResult } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +10,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { BarChart2 } from "lucide-react";
+import { ExamResult, addExamResult } from "@/lib/storage";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+
+const examTypes = ["LGS", "YKS_TYT", "YKS_AYT", "YKS_YDT", "DENEME", "DİĞER"] as const;
+
+const examResultSchema = z.object({
+  examType: z.enum(examTypes),
+  examName: z.string().min(1, "Sınav adı gereklidir"),
+  examDate: z.string().min(1, "Sınav tarihi gereklidir"),
+  examProvider: z.string().optional(),
+  totalScore: z.string().optional(),
+  turkishScore: z.string().optional(),
+  mathScore: z.string().optional(),
+  scienceScore: z.string().optional(),
+  socialScore: z.string().optional(),
+  foreignLanguageScore: z.string().optional(),
+  turkishNet: z.string().optional(),
+  mathNet: z.string().optional(),
+  scienceNet: z.string().optional(),
+  socialNet: z.string().optional(),
+  foreignLanguageNet: z.string().optional(),
+  totalNet: z.string().optional(),
+  classRank: z.string().optional(),
+  schoolRank: z.string().optional(),
+  isOfficial: z.boolean().default(false),
+  strengthAreas: z.string().optional(),
+  weaknessAreas: z.string().optional(),
+  counselorNotes: z.string().optional(),
+});
+
+type ExamResultFormValues = z.infer<typeof examResultSchema>;
 
 interface SinavSonuclariSectionProps {
   studentId: string;
@@ -26,114 +67,420 @@ function parseNumberOrUndefined(value: string): number | undefined {
 }
 
 export default function SinavSonuclariSection({ studentId, examResults, onUpdate }: SinavSonuclariSectionProps) {
-  const handleSave = async () => {
-    const examData: ExamResult = {
-      id: crypto.randomUUID(),
-      studentId,
-      examType: (document.getElementById('exam-type') as HTMLSelectElement)?.value || 'DENEME',
-      examName: (document.getElementById('exam-name') as HTMLInputElement)?.value || '',
-      examDate: (document.getElementById('exam-date') as HTMLInputElement)?.value || new Date().toISOString().slice(0, 10),
-      examProvider: (document.getElementById('exam-provider') as HTMLInputElement)?.value,
-      totalScore: parseFloat((document.getElementById('exam-totalScore') as HTMLInputElement)?.value) || undefined,
-      turkishScore: parseFloat((document.getElementById('exam-turkish') as HTMLInputElement)?.value) || undefined,
-      mathScore: parseFloat((document.getElementById('exam-math') as HTMLInputElement)?.value) || undefined,
-      scienceScore: parseFloat((document.getElementById('exam-science') as HTMLInputElement)?.value) || undefined,
-      socialScore: parseFloat((document.getElementById('exam-social') as HTMLInputElement)?.value) || undefined,
-      foreignLanguageScore: parseFloat((document.getElementById('exam-foreign') as HTMLInputElement)?.value) || undefined,
-      turkishNet: parseFloat((document.getElementById('exam-turkishNet') as HTMLInputElement)?.value) || undefined,
-      mathNet: parseFloat((document.getElementById('exam-mathNet') as HTMLInputElement)?.value) || undefined,
-      scienceNet: parseFloat((document.getElementById('exam-scienceNet') as HTMLInputElement)?.value) || undefined,
-      socialNet: parseFloat((document.getElementById('exam-socialNet') as HTMLInputElement)?.value) || undefined,
-      foreignLanguageNet: parseFloat((document.getElementById('exam-foreignNet') as HTMLInputElement)?.value) || undefined,
-      totalNet: parseFloat((document.getElementById('exam-totalNet') as HTMLInputElement)?.value) || undefined,
-      classRank: parseInt((document.getElementById('exam-classRank') as HTMLInputElement)?.value) || undefined,
-      schoolRank: parseInt((document.getElementById('exam-schoolRank') as HTMLInputElement)?.value) || undefined,
-      isOfficial: (document.getElementById('exam-isOfficial') as HTMLInputElement)?.checked || false,
-      strengthAreas: (document.getElementById('exam-strengths') as HTMLTextAreaElement)?.value.split(',').map(s => s.trim()).filter(Boolean),
-      weaknessAreas: (document.getElementById('exam-weaknesses') as HTMLTextAreaElement)?.value.split(',').map(s => s.trim()).filter(Boolean),
-      counselorNotes: (document.getElementById('exam-counselorNotes') as HTMLTextAreaElement)?.value,
-      goalsMet: false,
-      parentNotified: false,
-    };
-    await addExamResult(examData);
-    onUpdate();
+  const form = useForm<ExamResultFormValues>({
+    resolver: zodResolver(examResultSchema),
+    defaultValues: {
+      examType: "DENEME",
+      examName: "",
+      examDate: new Date().toISOString().slice(0, 10),
+      examProvider: "",
+      totalScore: "",
+      turkishScore: "",
+      mathScore: "",
+      scienceScore: "",
+      socialScore: "",
+      foreignLanguageScore: "",
+      turkishNet: "",
+      mathNet: "",
+      scienceNet: "",
+      socialNet: "",
+      foreignLanguageNet: "",
+      totalNet: "",
+      classRank: "",
+      schoolRank: "",
+      isOfficial: false,
+      strengthAreas: "",
+      weaknessAreas: "",
+      counselorNotes: "",
+    },
+  });
+
+  const onSubmit = async (data: ExamResultFormValues) => {
+    try {
+      const examData: ExamResult = {
+        id: crypto.randomUUID(),
+        studentId,
+        examType: data.examType,
+        examName: data.examName,
+        examDate: data.examDate,
+        examProvider: data.examProvider || undefined,
+        totalScore: parseNumberOrUndefined(data.totalScore || ""),
+        turkishScore: parseNumberOrUndefined(data.turkishScore || ""),
+        mathScore: parseNumberOrUndefined(data.mathScore || ""),
+        scienceScore: parseNumberOrUndefined(data.scienceScore || ""),
+        socialScore: parseNumberOrUndefined(data.socialScore || ""),
+        foreignLanguageScore: parseNumberOrUndefined(data.foreignLanguageScore || ""),
+        turkishNet: parseNumberOrUndefined(data.turkishNet || ""),
+        mathNet: parseNumberOrUndefined(data.mathNet || ""),
+        scienceNet: parseNumberOrUndefined(data.scienceNet || ""),
+        socialNet: parseNumberOrUndefined(data.socialNet || ""),
+        foreignLanguageNet: parseNumberOrUndefined(data.foreignLanguageNet || ""),
+        totalNet: parseNumberOrUndefined(data.totalNet || ""),
+        classRank: parseNumberOrUndefined(data.classRank || ""),
+        schoolRank: parseNumberOrUndefined(data.schoolRank || ""),
+        isOfficial: data.isOfficial,
+        strengthAreas: data.strengthAreas 
+          ? data.strengthAreas.split(",").map(s => s.trim()).filter(Boolean) 
+          : undefined,
+        weaknessAreas: data.weaknessAreas 
+          ? data.weaknessAreas.split(",").map(s => s.trim()).filter(Boolean) 
+          : undefined,
+        counselorNotes: data.counselorNotes || undefined,
+        goalsMet: false,
+        parentNotified: false,
+      };
+
+      await addExamResult(examData);
+      toast.success("Sınav sonucu kaydedildi");
+      form.reset();
+      onUpdate();
+    } catch (error) {
+      toast.error("Kayıt sırasında hata oluştu");
+      console.error("Error saving exam result:", error);
+    }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sınav Sonuçları - LGS/YKS</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart2 className="h-5 w-5" />
+          Sınav Sonuçları - LGS/YKS
+        </CardTitle>
         <CardDescription>Merkezi sınav ve deneme sonuçları takibi</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select defaultValue="DENEME">
-            <SelectTrigger id="exam-type">
-              <SelectValue placeholder="Sınav Türü" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="LGS">LGS</SelectItem>
-              <SelectItem value="YKS_TYT">YKS - TYT</SelectItem>
-              <SelectItem value="YKS_AYT">YKS - AYT</SelectItem>
-              <SelectItem value="YKS_YDT">YKS - YDT</SelectItem>
-              <SelectItem value="DENEME">Deneme Sınavı</SelectItem>
-              <SelectItem value="DİĞER">Diğer</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Input placeholder="Sınav Adı" id="exam-name" />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input type="date" placeholder="Sınav Tarihi" id="exam-date" />
-          <Input placeholder="Sınav Sağlayıcı" id="exam-provider" />
-        </div>
-        
-        <div className="border-t pt-3 mt-3">
-          <h4 className="font-medium mb-2">Puan Bilgileri</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            <Input type="number" placeholder="Toplam Puan" id="exam-totalScore" />
-            <Input type="number" placeholder="Türkçe Puan" id="exam-turkish" />
-            <Input type="number" placeholder="Matematik Puan" id="exam-math" />
-            <Input type="number" placeholder="Fen Puan" id="exam-science" />
-            <Input type="number" placeholder="Sosyal Puan" id="exam-social" />
-            <Input type="number" placeholder="Yabancı Dil" id="exam-foreign" />
-          </div>
-        </div>
-        
-        <div className="border-t pt-3 mt-3">
-          <h4 className="font-medium mb-2">Net Bilgileri</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            <Input type="number" step="0.25" placeholder="Türkçe Net" id="exam-turkishNet" />
-            <Input type="number" step="0.25" placeholder="Matematik Net" id="exam-mathNet" />
-            <Input type="number" step="0.25" placeholder="Fen Net" id="exam-scienceNet" />
-            <Input type="number" step="0.25" placeholder="Sosyal Net" id="exam-socialNet" />
-            <Input type="number" step="0.25" placeholder="Yabancı Dil Net" id="exam-foreignNet" />
-            <Input type="number" step="0.25" placeholder="Toplam Net" id="exam-totalNet" />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input type="number" placeholder="Sınıf Sıralaması" id="exam-classRank" />
-          <Input type="number" placeholder="Okul Sıralaması" id="exam-schoolRank" />
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <input type="checkbox" id="exam-isOfficial" className="h-4 w-4" />
-          <label htmlFor="exam-isOfficial">Resmi Sınav</label>
-        </div>
-        
-        <Textarea placeholder="Güçlü Alanlar (virgülle ayırın)" id="exam-strengths" rows={2} />
-        <Textarea placeholder="Gelişim Alanları (virgülle ayırın)" id="exam-weaknesses" rows={2} />
-        <Textarea placeholder="Danışman Notları ve Eylem Planı" id="exam-counselorNotes" rows={2} />
-        
-        <Button className="w-full" onClick={handleSave}>
-          <BarChart2 className="mr-2 h-4 w-4" />
-          Sınav Sonucu Kaydet
-        </Button>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="examType"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sınav Türü" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="LGS">LGS</SelectItem>
+                        <SelectItem value="YKS_TYT">YKS - TYT</SelectItem>
+                        <SelectItem value="YKS_AYT">YKS - AYT</SelectItem>
+                        <SelectItem value="YKS_YDT">YKS - YDT</SelectItem>
+                        <SelectItem value="DENEME">Deneme Sınavı</SelectItem>
+                        <SelectItem value="DİĞER">Diğer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="examName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Sınav Adı" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="examDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="date" placeholder="Sınav Tarihi" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="examProvider"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Sınav Sağlayıcı" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="border-t pt-3 mt-3">
+              <h4 className="font-medium mb-2">Puan Bilgileri</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <FormField
+                  control={form.control}
+                  name="totalScore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" placeholder="Toplam Puan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="turkishScore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" placeholder="Türkçe Puan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="mathScore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" placeholder="Matematik Puan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="scienceScore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" placeholder="Fen Puan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="socialScore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" placeholder="Sosyal Puan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="foreignLanguageScore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" placeholder="Yabancı Dil" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            
+            <div className="border-t pt-3 mt-3">
+              <h4 className="font-medium mb-2">Net Bilgileri</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <FormField
+                  control={form.control}
+                  name="turkishNet"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" step="0.25" placeholder="Türkçe Net" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="mathNet"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" step="0.25" placeholder="Matematik Net" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="scienceNet"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" step="0.25" placeholder="Fen Net" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="socialNet"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" step="0.25" placeholder="Sosyal Net" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="foreignLanguageNet"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" step="0.25" placeholder="Yabancı Dil Net" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="totalNet"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="number" step="0.25" placeholder="Toplam Net" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="classRank"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="number" placeholder="Sınıf Sıralaması" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="schoolRank"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="number" placeholder="Okul Sıralaması" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="isOfficial"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-2 space-y-0">
+                  <FormControl>
+                    <input 
+                      type="checkbox" 
+                      className="h-4 w-4" 
+                      checked={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="!mt-0 cursor-pointer">Resmi Sınav</FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="strengthAreas"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Güçlü Alanlar (virgülle ayırın)" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="weaknessAreas"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Gelişim Alanları (virgülle ayırın)" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="counselorNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea placeholder="Danışman Notları ve Eylem Planı" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              <BarChart2 className="mr-2 h-4 w-4" />
+              {form.formState.isSubmitting ? "Kaydediliyor..." : "Sınav Sonucu Kaydet"}
+            </Button>
+          </form>
+        </Form>
         
         {examResults.length > 0 && (
-          <div className="space-y-2 mt-4">
+          <div className="space-y-2 mt-6">
             <h4 className="font-medium">Sınav Geçmişi</h4>
             {examResults.map(exam => (
               <div key={exam.id} className="border rounded-lg p-3 space-y-2">

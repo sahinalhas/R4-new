@@ -15,8 +15,8 @@ import {
   ProgressTimeline,
   PerformanceTrendChart,
   SuccessMetricCard,
-  CHART_COLORS,
 } from "../charts/AnalyticsCharts";
+import { CHART_COLORS } from "@/lib/config/theme.config";
 import {
   generateProgressTimeline,
   getStudentPerformanceData,
