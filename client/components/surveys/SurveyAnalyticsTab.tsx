@@ -1,29 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
 import { 
   BarChart, 
-  PieChart, 
   TrendingUp, 
   Users, 
-  CheckCircle, 
-  AlertCircle,
-  FileText,
-  Calendar,
-  Download
+  CheckCircle,
+  FileText
 } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { SurveyDistribution } from "@/lib/survey-types";
+import { QuestionAnalyticsCard } from "./analytics";
 
 interface SurveyAnalyticsTabProps {
   distributions: SurveyDistribution[];
@@ -55,6 +42,23 @@ interface DistributionStats {
   submissionTypes: { [key: string]: number };
 }
 
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'ACTIVE':
+      return <Badge className="bg-green-100 text-green-700">Aktif</Badge>;
+    case 'CLOSED':
+      return <Badge className="bg-blue-100 text-blue-700">Kapandı</Badge>;
+    case 'DRAFT':
+      return <Badge variant="outline">Taslak</Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
+  }
+};
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('tr-TR');
+};
+
 export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTabProps) {
   const [selectedDistribution, setSelectedDistribution] = useState<string>("");
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
@@ -77,14 +81,12 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
     try {
       setLoading(true);
       
-      // Load survey analytics
       const analyticsResponse = await fetch(`/api/survey-analytics/${selectedDistribution}`);
       if (analyticsResponse.ok) {
         const analyticsData = await analyticsResponse.json();
         setAnalyticsData(analyticsData);
       }
 
-      // Load distribution statistics
       const statsResponse = await fetch(`/api/survey-statistics/${selectedDistribution}`);
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
@@ -96,128 +98,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
       console.error("Error loading analytics:", error);
       setLoading(false);
     }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return <Badge className="bg-green-100 text-green-700">Aktif</Badge>;
-      case 'CLOSED':
-        return <Badge className="bg-blue-100 text-blue-700">Kapandı</Badge>;
-      case 'DRAFT':
-        return <Badge variant="outline">Taslak</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('tr-TR');
-  };
-
-  const renderQuestionAnalytics = (question: any) => {
-    return (
-      <Card key={question.questionId} className="mb-4">
-        <CardHeader>
-          <CardTitle className="text-lg">{question.questionText}</CardTitle>
-          <CardDescription>
-            <div className="flex items-center gap-4">
-              <span>Tür: {getQuestionTypeLabel(question.questionType)}</span>
-              <span>Yanıt Oranı: {question.responseRate}</span>
-              <span>Toplam Yanıt: {question.totalResponses}</span>
-            </div>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {question.questionType === 'MULTIPLE_CHOICE' && question.optionCounts && (
-            <div className="space-y-2">
-              <h4 className="font-medium">Seçenek Dağılımı:</h4>
-              {question.optionCounts.map((option: any, index: number) => (
-                <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm">{option.option}</span>
-                  <div className="flex items-center gap-2">
-                    <Progress value={parseFloat(option.percentage)} className="w-24" />
-                    <span className="text-sm font-medium">{option.count} ({option.percentage}%)</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {(question.questionType === 'LIKERT' || question.questionType === 'RATING') && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Ortalama Puan:</h4>
-                <span className="text-2xl font-bold text-blue-600">{question.averageRating}</span>
-              </div>
-              {question.distribution && (
-                <div className="space-y-1">
-                  <h5 className="text-sm font-medium">Puan Dağılımı:</h5>
-                  {Object.entries(question.distribution).map(([rating, count]) => (
-                    <div key={rating} className="flex items-center gap-2">
-                      <span className="text-sm w-8">{rating}:</span>
-                      <Progress value={((count as number) / question.totalResponses * 100)} className="flex-1" />
-                      <span className="text-sm">{count as number}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {question.questionType === 'YES_NO' && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{question.yesCount}</div>
-                <div className="text-sm text-muted-foreground">Evet</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{question.noCount}</div>
-                <div className="text-sm text-muted-foreground">Hayır</div>
-              </div>
-            </div>
-          )}
-
-          {question.questionType === 'OPEN_ENDED' && question.sentiment && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Ortalama Uzunluk:</h4>
-                <span className="font-medium">{Math.round(question.averageLength)} karakter</span>
-              </div>
-              <div>
-                <h4 className="font-medium mb-2">Duygu Analizi:</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-green-600">{question.sentiment.positive}</div>
-                    <div className="text-sm text-muted-foreground">Pozitif</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-gray-600">{question.sentiment.neutral}</div>
-                    <div className="text-sm text-muted-foreground">Nötr</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-red-600">{question.sentiment.negative}</div>
-                    <div className="text-sm text-muted-foreground">Negatif</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const getQuestionTypeLabel = (type: string) => {
-    const labels: { [key: string]: string } = {
-      'MULTIPLE_CHOICE': 'Çoktan Seçmeli',
-      'OPEN_ENDED': 'Açık Uçlu',
-      'LIKERT': 'Likert Ölçeği',
-      'YES_NO': 'Evet/Hayır',
-      'RATING': 'Puanlama',
-      'DROPDOWN': 'Açılır Liste'
-    };
-    return labels[type] || type;
   };
 
   if (activeDistributions.length === 0) {
@@ -242,7 +122,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
 
   return (
     <div className="space-y-6">
-      {/* Distribution Selector */}
       <Card>
         <CardHeader>
           <CardTitle>Anket Analizi Seçimi</CardTitle>
@@ -274,7 +153,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
         </CardContent>
       </Card>
 
-      {/* Analytics Results */}
       {selectedDistribution && (
         <>
           {loading ? (
@@ -288,7 +166,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
           ) : (
             analyticsData && (
               <div className="space-y-6">
-                {/* Overview Stats */}
                 <div className="grid gap-4 md:grid-cols-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -345,7 +222,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
                   </Card>
                 </div>
 
-                {/* Distribution Info */}
                 <Card>
                   <CardHeader>
                     <CardTitle>{analyticsData.distributionInfo.title}</CardTitle>
@@ -372,7 +248,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
                   </CardContent>
                 </Card>
 
-                {/* Question Analytics */}
                 <Card>
                   <CardHeader>
                     <CardTitle>Soru Bazlı Analiz</CardTitle>
@@ -382,12 +257,13 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {analyticsData.questionAnalytics.map(renderQuestionAnalytics)}
+                      {analyticsData.questionAnalytics.map((question) => (
+                        <QuestionAnalyticsCard key={question.questionId} question={question} />
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Additional Statistics */}
                 {distributionStats && (
                   <Card>
                     <CardHeader>
@@ -398,7 +274,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Submission Types */}
                         <div>
                           <h4 className="font-medium mb-2">Gönderim Türleri</h4>
                           {Object.entries(distributionStats.submissionTypes).map(([type, count]) => (
@@ -409,7 +284,6 @@ export default function SurveyAnalyticsTab({ distributions }: SurveyAnalyticsTab
                           ))}
                         </div>
 
-                        {/* Class Breakdown */}
                         {Object.keys(distributionStats.demographicBreakdown.byClass).length > 0 && (
                           <div>
                             <h4 className="font-medium mb-2">Sınıf Bazlı Dağılım</h4>
