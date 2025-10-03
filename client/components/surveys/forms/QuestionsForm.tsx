@@ -1,16 +1,17 @@
-import { Control, UseFieldArrayAppend, UseFieldArrayRemove, UseFormSetValue, UseFormWatch } from "react-hook-form";
+import { Control, FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { QuestionEditor } from "../questions/QuestionEditor";
 import { QuestionTypeSelector } from "../questions/QuestionTypeSelector";
 import { SurveyQuestionType } from "@/lib/survey-types";
 import { createEmptyQuestion } from "../utils/survey-helpers";
+import { SurveyTemplateForm } from "../types";
 
 interface QuestionsFormProps {
-  control: Control<any>;
-  questions: any[];
-  append: UseFieldArrayAppend<any, "questions">;
+  control: Control<SurveyTemplateForm>;
+  questions: FieldArrayWithId<SurveyTemplateForm, "questions", "id">[];
+  append: UseFieldArrayAppend<SurveyTemplateForm, "questions">;
   remove: UseFieldArrayRemove;
-  setValue: UseFormSetValue<any>;
-  watch: UseFormWatch<any>;
+  setValue: UseFormSetValue<SurveyTemplateForm>;
+  watch: UseFormWatch<SurveyTemplateForm>;
 }
 
 export function QuestionsForm({ 

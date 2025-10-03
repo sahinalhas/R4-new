@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -14,35 +13,12 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, FileText } from "lucide-react";
-import { SurveyQuestionType, MEB_SURVEY_TEMPLATES } from "@/lib/survey-types";
+import { MEB_SURVEY_TEMPLATES } from "@/lib/survey-types";
 import { MebTemplateSelector } from "./templates/MebTemplateSelector";
 import { BasicInfoForm } from "./forms/BasicInfoForm";
 import { QuestionsForm } from "./forms/QuestionsForm";
 import { getMebDefaultQuestions } from "./templates/meb-templates";
-
-const surveyTemplateSchema = z.object({
-  title: z.string().min(1, "Başlık gereklidir"),
-  description: z.string().optional(),
-  type: z.enum(["MEB_STANDAR", "OZEL", "AKADEMIK", "SOSYAL", "REHBERLIK"]),
-  mebCompliant: z.boolean().default(false),
-  estimatedDuration: z.number().min(1).max(180).optional(),
-  targetGrades: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
-  questions: z.array(z.object({
-    questionText: z.string().min(1, "Soru metni gereklidir"),
-    questionType: z.enum(["MULTIPLE_CHOICE", "OPEN_ENDED", "LIKERT", "YES_NO", "RATING", "DROPDOWN"]),
-    required: z.boolean().default(false),
-    options: z.array(z.string()).optional(),
-    validation: z.object({
-      minLength: z.number().optional(),
-      maxLength: z.number().optional(),
-      minValue: z.number().optional(),
-      maxValue: z.number().optional(),
-    }).optional(),
-  })).default([])
-});
-
-type SurveyTemplateForm = z.infer<typeof surveyTemplateSchema>;
+import { surveyTemplateSchema, SurveyTemplateForm } from "./types";
 
 interface SurveyCreationDialogProps {
   children: React.ReactNode;

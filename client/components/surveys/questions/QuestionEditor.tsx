@@ -13,13 +13,14 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { questionTypeIcons, questionTypeLabels } from "./QuestionTypeSelector";
+import { SurveyTemplateForm } from "../types";
 
 interface QuestionEditorProps {
-  control: Control<any>;
+  control: Control<SurveyTemplateForm>;
   questionIndex: number;
   onRemove: () => void;
-  setValue: UseFormSetValue<any>;
-  watch: UseFormWatch<any>;
+  setValue: UseFormSetValue<SurveyTemplateForm>;
+  watch: UseFormWatch<SurveyTemplateForm>;
 }
 
 export function QuestionEditor({ 
