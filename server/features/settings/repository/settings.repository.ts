@@ -1,4 +1,5 @@
 import getDatabase from '../../../lib/database.js';
+import type { AppSettings } from '../../../../shared/types.js';
 
 let statements: any = null;
 let isInitialized = false;
@@ -25,12 +26,12 @@ interface AppSettingsRow {
   settings: string;
 }
 
-export function getAppSettings(): any | null {
+export function getAppSettings(): Partial<AppSettings> | null {
   try {
     ensureInitialized();
     const result = statements.getAppSettings.get() as AppSettingsRow | undefined;
     if (result && result.settings) {
-      const parsed = JSON.parse(result.settings);
+      const parsed = JSON.parse(result.settings) as Partial<AppSettings>;
       return parsed;
     }
     return null;
@@ -40,7 +41,7 @@ export function getAppSettings(): any | null {
   }
 }
 
-export function saveAppSettings(settings: any): void {
+export function saveAppSettings(settings: AppSettings): void {
   try {
     ensureInitialized();
     statements.upsertAppSettings.run(JSON.stringify(settings));
