@@ -1,0 +1,85 @@
+import { CheckCircle2, Calendar, Clock, User, Users } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+import type { CounselingSession } from "./types";
+import { calculateSessionDuration } from "./utils/sessionHelpers";
+
+interface CompletedSessionsListProps {
+  sessions: CounselingSession[];
+}
+
+export default function CompletedSessionsList({ sessions }: CompletedSessionsListProps) {
+  if (sessions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-lg font-medium text-muted-foreground">Henüz tamamlanan görüşme yok</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      {sessions.map((session) => {
+        const duration = calculateSessionDuration(session.entryTime, session.exitTime || '');
+        
+        return (
+          <Card key={session.id} className="hover:shadow-sm transition-shadow">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    {session.sessionType === 'individual' ? (
+                      <User className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <Users className="h-5 w-5 text-green-600" />
+                    )}
+                    <CardTitle className="text-lg">
+                      {session.sessionType === 'individual' 
+                        ? session.student?.name 
+                        : session.groupName || 'Grup Görüşmesi'}
+                    </CardTitle>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Tamamlandı
+                    </Badge>
+                  </div>
+                  {session.sessionType === 'group' && session.students && (
+                    <p className="text-sm text-muted-foreground">
+                      {session.students.map(s => s.name).join(', ')}
+                    </p>
+                  )}
+                </div>
+                {duration && (
+                  <Badge variant="secondary" className="text-sm">
+                    {duration} dakika
+                  </Badge>
+                )}
+              </div>
+              <CardDescription className="flex items-center gap-4 mt-2">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {new Date(session.sessionDate).toLocaleDateString('tr-TR')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {session.entryTime} - {session.exitTime}
+                </span>
+                <span>•</span>
+                <span>{session.topic}</span>
+              </CardDescription>
+            </CardHeader>
+            {session.detailedNotes && (
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{session.detailedNotes}</p>
+              </CardContent>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
