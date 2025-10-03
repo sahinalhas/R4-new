@@ -28,7 +28,6 @@ function ensureInitialized(): void {
       INSERT INTO academic_goals (id, studentId, title, description, targetScore, currentScore, examType, deadline, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
-    updateAcademicGoal: db.prepare('UPDATE academic_goals SET {FIELDS} WHERE id = ?'),
     deleteAcademicGoal: db.prepare('DELETE FROM academic_goals WHERE id = ?'),
     
     getMultipleIntelligenceByStudent: db.prepare('SELECT * FROM multiple_intelligence WHERE studentId = ? ORDER BY assessmentDate DESC'),
@@ -51,7 +50,6 @@ function ensureInitialized(): void {
                               timeBound, category, status, progress, startDate, targetDate, notes)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
-    updateSmartGoal: db.prepare('UPDATE smart_goals SET {FIELDS} WHERE id = ?'),
     
     getCoachingRecommendationsByStudent: db.prepare('SELECT * FROM coaching_recommendations WHERE studentId = ? ORDER BY created_at DESC'),
     insertCoachingRecommendation: db.prepare(`
@@ -59,7 +57,6 @@ function ensureInitialized(): void {
                                            status, automated, implementationSteps, createdAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
-    updateCoachingRecommendation: db.prepare('UPDATE coaching_recommendations SET {FIELDS} WHERE id = ?'),
     
     getEvaluations360ByStudent: db.prepare('SELECT * FROM evaluations_360 WHERE studentId = ? ORDER BY evaluationDate DESC'),
     insertEvaluation360: db.prepare(`
@@ -91,7 +88,6 @@ function ensureInitialized(): void {
                                    followUpRequired, notes, createdBy, createdAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
-    updateParentMeeting: db.prepare('UPDATE parent_meetings SET {FIELDS} WHERE id = ?'),
     
     getHomeVisitsByStudent: db.prepare('SELECT * FROM home_visits WHERE studentId = ? ORDER BY date DESC'),
     insertHomeVisit: db.prepare(`
@@ -101,7 +97,6 @@ function ensureInitialized(): void {
                               createdBy, createdAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
-    updateHomeVisit: db.prepare('UPDATE home_visits SET {FIELDS} WHERE id = ?'),
     
     getFamilyParticipationByStudent: db.prepare('SELECT * FROM family_participation WHERE studentId = ? ORDER BY eventDate DESC'),
     insertFamilyParticipation: db.prepare(`
@@ -110,7 +105,6 @@ function ensureInitialized(): void {
                                        parentAvailability, notes, recordedBy, recordedAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
-    updateFamilyParticipation: db.prepare('UPDATE family_participation SET {FIELDS} WHERE id = ?'),
   };
   
   isInitialized = true;
