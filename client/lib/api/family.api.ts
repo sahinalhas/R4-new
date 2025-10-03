@@ -159,3 +159,5 @@ export async function updateFamilyParticipation(id: string, updates: Partial<Fam
     throw error;
   }
 }
+
+export { getFamilyParticipationsByStudent as getFamilyParticipationByStudent };

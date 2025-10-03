@@ -1,4 +1,4 @@
-import type { StudyTopic, TopicProgress, WeeklySlot } from "../types/study.types";
+import type { StudyTopic, TopicProgress, WeeklySlot, PlannedEntry } from "../types/study.types";
 import { 
   loadTopics, 
   getProgressByStudent, 
@@ -6,15 +6,7 @@ import {
   getWeeklySlotsByStudent 
 } from "../api/study.api";
 
-export type PlannedEntry = {
-  date: string;
-  start: string;
-  end: string;
-  subjectId: string;
-  topicId: string;
-  allocated: number;
-  remainingAfter: number;
-};
+export type { PlannedEntry };
 
 function minutesBetween(start: string, end: string) {
   const [sh, sm] = start.split(":").map(Number);
