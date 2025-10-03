@@ -19,7 +19,7 @@ import {
 } from '../features/progress/repository/progress.repository.js';
 
 import {
-  insertAcademicGoal,
+  upsertAcademicGoal,
   type AcademicGoal
 } from '../features/coaching/repository/coaching.repository.js';
 
@@ -55,7 +55,7 @@ export function migrateFromLocalStorage(localStorageData: any) {
     if (localStorageData.academicGoals && Array.isArray(localStorageData.academicGoals)) {
       console.log(`Migrating ${localStorageData.academicGoals.length} academic goals...`);
       for (const goal of localStorageData.academicGoals) {
-        insertAcademicGoal(goal);
+        upsertAcademicGoal(goal);
       }
     }
 
