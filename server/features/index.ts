@@ -109,7 +109,7 @@ export const featureRegistry = Router();
  */
 
 featureRegistry.use('/students', studentsRouter);
-featureRegistry.use('/surveys', surveysRouter);
+featureRegistry.use('/', surveysRouter);
 featureRegistry.use('/', progressRouter);
 featureRegistry.use('/', subjectsRouter);
 featureRegistry.use('/', settingsRouter);
