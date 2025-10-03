@@ -3,7 +3,39 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Activity } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+
+const healthInfoSchema = z.object({
+  bloodType: z.string().optional(),
+  chronicDiseases: z.string().optional(),
+  allergies: z.string().optional(),
+  medications: z.string().optional(),
+  specialNeeds: z.string().optional(),
+  emergencyContact1Name: z.string().optional(),
+  emergencyContact1Phone: z.string().optional(),
+  emergencyContact1Relation: z.string().optional(),
+  emergencyContact2Name: z.string().optional(),
+  emergencyContact2Phone: z.string().optional(),
+  emergencyContact2Relation: z.string().optional(),
+  physicianName: z.string().optional(),
+  physicianPhone: z.string().optional(),
+  lastHealthCheckup: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type HealthInfoFormValues = z.infer<typeof healthInfoSchema>;
 
 interface SaglikBilgileriSectionProps {
   studentId: string;
@@ -12,28 +44,42 @@ interface SaglikBilgileriSectionProps {
 }
 
 export default function SaglikBilgileriSection({ studentId, healthInfo, onUpdate }: SaglikBilgileriSectionProps) {
-  const handleSave = async () => {
-    const healthData: HealthInfo = {
-      id: crypto.randomUUID(),
-      studentId,
-      bloodType: (document.getElementById('health-bloodType') as HTMLInputElement)?.value,
-      chronicDiseases: (document.getElementById('health-chronicDiseases') as HTMLTextAreaElement)?.value,
-      allergies: (document.getElementById('health-allergies') as HTMLTextAreaElement)?.value,
-      medications: (document.getElementById('health-medications') as HTMLTextAreaElement)?.value,
-      specialNeeds: (document.getElementById('health-specialNeeds') as HTMLTextAreaElement)?.value,
-      emergencyContact1Name: (document.getElementById('health-emergency1Name') as HTMLInputElement)?.value,
-      emergencyContact1Phone: (document.getElementById('health-emergency1Phone') as HTMLInputElement)?.value,
-      emergencyContact1Relation: (document.getElementById('health-emergency1Relation') as HTMLInputElement)?.value,
-      emergencyContact2Name: (document.getElementById('health-emergency2Name') as HTMLInputElement)?.value,
-      emergencyContact2Phone: (document.getElementById('health-emergency2Phone') as HTMLInputElement)?.value,
-      emergencyContact2Relation: (document.getElementById('health-emergency2Relation') as HTMLInputElement)?.value,
-      physicianName: (document.getElementById('health-physicianName') as HTMLInputElement)?.value,
-      physicianPhone: (document.getElementById('health-physicianPhone') as HTMLInputElement)?.value,
-      lastHealthCheckup: (document.getElementById('health-lastCheckup') as HTMLInputElement)?.value,
-      notes: (document.getElementById('health-notes') as HTMLTextAreaElement)?.value,
-    };
-    await saveHealthInfo(healthData);
-    onUpdate();
+  const form = useForm<HealthInfoFormValues>({
+    resolver: zodResolver(healthInfoSchema),
+    defaultValues: {
+      bloodType: healthInfo?.bloodType || "",
+      chronicDiseases: healthInfo?.chronicDiseases || "",
+      allergies: healthInfo?.allergies || "",
+      medications: healthInfo?.medications || "",
+      specialNeeds: healthInfo?.specialNeeds || "",
+      emergencyContact1Name: healthInfo?.emergencyContact1Name || "",
+      emergencyContact1Phone: healthInfo?.emergencyContact1Phone || "",
+      emergencyContact1Relation: healthInfo?.emergencyContact1Relation || "",
+      emergencyContact2Name: healthInfo?.emergencyContact2Name || "",
+      emergencyContact2Phone: healthInfo?.emergencyContact2Phone || "",
+      emergencyContact2Relation: healthInfo?.emergencyContact2Relation || "",
+      physicianName: healthInfo?.physicianName || "",
+      physicianPhone: healthInfo?.physicianPhone || "",
+      lastHealthCheckup: healthInfo?.lastHealthCheckup || "",
+      notes: healthInfo?.notes || "",
+    },
+  });
+
+  const onSubmit = async (data: HealthInfoFormValues) => {
+    try {
+      const healthData: HealthInfo = {
+        id: healthInfo?.id || crypto.randomUUID(),
+        studentId,
+        ...data,
+      };
+      
+      await saveHealthInfo(healthData);
+      toast.success("Sağlık bilgileri kaydedildi");
+      onUpdate();
+    } catch (error) {
+      toast.error("Kayıt sırasında hata oluştu");
+      console.error("Error saving health info:", error);
+    }
   };
 
   return (
@@ -43,38 +89,219 @@ export default function SaglikBilgileriSection({ studentId, healthInfo, onUpdate
           <CardTitle>Sağlık Bilgileri ve Acil Durum</CardTitle>
           <CardDescription>Öğrencinin sağlık bilgileri ve acil iletişim</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Input placeholder="Kan Grubu" id="health-bloodType" defaultValue={healthInfo?.bloodType || ""} />
-            <Input placeholder="Doktor Adı" id="health-physicianName" defaultValue={healthInfo?.physicianName || ""} />
-            <Input placeholder="Doktor Telefon" id="health-physicianPhone" defaultValue={healthInfo?.physicianPhone || ""} />
-          </div>
-          <Textarea placeholder="Kronik Hastalıklar" id="health-chronicDiseases" rows={2} defaultValue={healthInfo?.chronicDiseases || ""} />
-          <Textarea placeholder="Alerjiler" id="health-allergies" rows={2} defaultValue={healthInfo?.allergies || ""} />
-          <Textarea placeholder="İlaçlar" id="health-medications" rows={2} defaultValue={healthInfo?.medications || ""} />
-          <Textarea placeholder="Özel İhtiyaçlar" id="health-specialNeeds" rows={2} defaultValue={healthInfo?.specialNeeds || ""} />
-          
-          <div className="border-t pt-3 mt-3">
-            <h4 className="font-medium mb-3">Acil İletişim Kişileri</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Input placeholder="1. Kişi Adı" id="health-emergency1Name" defaultValue={healthInfo?.emergencyContact1Name || ""} />
-              <Input placeholder="1. Kişi Telefon" id="health-emergency1Phone" defaultValue={healthInfo?.emergencyContact1Phone || ""} />
-              <Input placeholder="1. Kişi Yakınlık" id="health-emergency1Relation" defaultValue={healthInfo?.emergencyContact1Relation || ""} />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-              <Input placeholder="2. Kişi Adı" id="health-emergency2Name" defaultValue={healthInfo?.emergencyContact2Name || ""} />
-              <Input placeholder="2. Kişi Telefon" id="health-emergency2Phone" defaultValue={healthInfo?.emergencyContact2Phone || ""} />
-              <Input placeholder="2. Kişi Yakınlık" id="health-emergency2Relation" defaultValue={healthInfo?.emergencyContact2Relation || ""} />
-            </div>
-          </div>
-          
-          <Input type="date" placeholder="Son Sağlık Kontrolü" id="health-lastCheckup" defaultValue={healthInfo?.lastHealthCheckup || ""} />
-          <Textarea placeholder="Ek Notlar" id="health-notes" rows={2} defaultValue={healthInfo?.notes || ""} />
-          
-          <Button className="w-full" onClick={handleSave}>
-            <Activity className="mr-2 h-4 w-4" />
-            Sağlık Bilgisi Kaydet
-          </Button>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <FormField
+                  control={form.control}
+                  name="bloodType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Kan Grubu" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="physicianName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Doktor Adı" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="physicianPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Doktor Telefon" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="chronicDiseases"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder="Kronik Hastalıklar" rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="allergies"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder="Alerjiler" rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="medications"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder="İlaçlar" rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="specialNeeds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder="Özel İhtiyaçlar" rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="border-t pt-3 mt-3">
+                <h4 className="font-medium mb-3">Acil İletişim Kişileri</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="emergencyContact1Name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="1. Kişi Adı" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="emergencyContact1Phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="1. Kişi Telefon" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="emergencyContact1Relation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="1. Kişi Yakınlık" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+                  <FormField
+                    control={form.control}
+                    name="emergencyContact2Name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="2. Kişi Adı" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="emergencyContact2Phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="2. Kişi Telefon" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="emergencyContact2Relation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="2. Kişi Yakınlık" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="lastHealthCheckup"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="date" placeholder="Son Sağlık Kontrolü" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder="Ek Notlar" rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                <Activity className="mr-2 h-4 w-4" />
+                {form.formState.isSubmitting ? "Kaydediliyor..." : "Sağlık Bilgisi Kaydet"}
+              </Button>
+            </form>
+          </Form>
           
           {healthInfo && (
             <div className="space-y-2 mt-4">
