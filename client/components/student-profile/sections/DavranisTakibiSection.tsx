@@ -1,9 +1,13 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { BehaviorIncident, addBehaviorIncident } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -11,7 +15,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { ClipboardList } from "lucide-react";
+
+const behaviorTypes = ["SÖZLÜ", "FİZİKSEL", "KURALLARA_UYMAMA", "DERSE_KATILMAMA", "DİĞER"] as const;
+const intensityLevels = ["DÜŞÜK", "ORTA", "YÜKSEK"] as const;
+const effectivenessLevels = ["ÇOK_ETKİLİ", "ETKİLİ", "KISMEN_ETKİLİ", "ETKİSİZ"] as const;
+
+const behaviorIncidentSchema = z.object({
+  incidentDate: z.string().min(1, "Olay tarihi gereklidir"),
+  incidentTime: z.string().optional(),
+  location: z.string().optional(),
+  behaviorType: z.enum(behaviorTypes),
+  description: z.string().min(1, "Davranış açıklaması gereklidir"),
+  antecedent: z.string().optional(),
+  consequence: z.string().optional(),
+  intensity: z.enum(intensityLevels).optional(),
+  interventionUsed: z.string().optional(),
+  interventionEffectiveness: z.enum(effectivenessLevels).optional(),
+  parentNotified: z.boolean().default(false),
+  recordedBy: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type BehaviorIncidentFormValues = z.infer<typeof behaviorIncidentSchema>;
 
 interface DavranisTakibiSectionProps {
   studentId: string;
@@ -20,29 +54,50 @@ interface DavranisTakibiSectionProps {
 }
 
 export default function DavranisTakibiSection({ studentId, behaviorIncidents, onUpdate }: DavranisTakibiSectionProps) {
-  const handleSave = async () => {
+  const form = useForm<BehaviorIncidentFormValues>({
+    resolver: zodResolver(behaviorIncidentSchema),
+    defaultValues: {
+      incidentDate: new Date().toISOString().slice(0, 10),
+      incidentTime: "",
+      location: "",
+      behaviorType: "SÖZLÜ",
+      description: "",
+      antecedent: "",
+      consequence: "",
+      intensity: "ORTA",
+      interventionUsed: "",
+      interventionEffectiveness: "KISMEN_ETKİLİ",
+      parentNotified: false,
+      recordedBy: "",
+      notes: "",
+    },
+  });
+
+  const onSubmit = async (data: BehaviorIncidentFormValues) => {
     const behaviorData: BehaviorIncident = {
       id: crypto.randomUUID(),
       studentId,
-      incidentDate: (document.getElementById('behavior-date') as HTMLInputElement)?.value || new Date().toISOString().slice(0, 10),
-      incidentTime: (document.getElementById('behavior-time') as HTMLInputElement)?.value || '',
-      location: (document.getElementById('behavior-location') as HTMLInputElement)?.value || '',
-      behaviorType: (document.getElementById('behavior-type') as HTMLSelectElement)?.value || 'DİĞER',
-      behaviorCategory: (document.getElementById('behavior-type') as HTMLSelectElement)?.value || 'DİĞER',
-      description: (document.getElementById('behavior-description') as HTMLTextAreaElement)?.value || '',
-      antecedent: (document.getElementById('behavior-antecedent') as HTMLTextAreaElement)?.value,
-      consequence: (document.getElementById('behavior-consequence') as HTMLTextAreaElement)?.value,
-      intensity: (document.getElementById('behavior-intensity') as HTMLSelectElement)?.value,
-      interventionUsed: (document.getElementById('behavior-intervention') as HTMLTextAreaElement)?.value,
-      interventionEffectiveness: (document.getElementById('behavior-effectiveness') as HTMLSelectElement)?.value,
-      parentNotified: (document.getElementById('behavior-parentNotified') as HTMLInputElement)?.checked || false,
+      incidentDate: data.incidentDate,
+      incidentTime: data.incidentTime || '',
+      location: data.location || '',
+      behaviorType: data.behaviorType,
+      behaviorCategory: data.behaviorType,
+      description: data.description,
+      antecedent: data.antecedent,
+      consequence: data.consequence,
+      intensity: data.intensity,
+      interventionUsed: data.interventionUsed,
+      interventionEffectiveness: data.interventionEffectiveness,
+      parentNotified: data.parentNotified,
       followUpRequired: false,
       adminNotified: false,
       status: 'KAYITLI',
-      recordedBy: (document.getElementById('behavior-recordedBy') as HTMLInputElement)?.value || 'Sistem',
-      notes: (document.getElementById('behavior-notes') as HTMLTextAreaElement)?.value,
+      recordedBy: data.recordedBy || 'Sistem',
+      notes: data.notes,
     };
+    
     await addBehaviorIncident(behaviorData);
+    form.reset();
     onUpdate();
   };
 
@@ -52,72 +107,240 @@ export default function DavranisTakibiSection({ studentId, behaviorIncidents, on
         <CardTitle>Davranış Takibi - ABC Analizi</CardTitle>
         <CardDescription>Davranış olayları ve müdahale etkinliği</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input type="date" placeholder="Olay Tarihi" id="behavior-date" defaultValue={new Date().toISOString().slice(0, 10)} />
-          <Input type="time" placeholder="Olay Saati" id="behavior-time" />
-        </div>
-        
-        <Input placeholder="Konum (Sınıf, bahçe, vb.)" id="behavior-location" />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select defaultValue="SÖZLÜ">
-            <SelectTrigger id="behavior-type">
-              <SelectValue placeholder="Davranış Türü" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SÖZLÜ">Sözlü</SelectItem>
-              <SelectItem value="FİZİKSEL">Fiziksel</SelectItem>
-              <SelectItem value="KURALLARA_UYMAMA">Kurallara Uymama</SelectItem>
-              <SelectItem value="DERSE_KATILMAMA">Derse Katılmama</SelectItem>
-              <SelectItem value="DİĞER">Diğer</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select defaultValue="ORTA">
-            <SelectTrigger id="behavior-intensity">
-              <SelectValue placeholder="Yoğunluk" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DÜŞÜK">Düşük</SelectItem>
-              <SelectItem value="ORTA">Orta</SelectItem>
-              <SelectItem value="YÜKSEK">Yüksek</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <Textarea placeholder="Davranış Açıklaması" id="behavior-description" rows={2} />
-        <Textarea placeholder="Öncül (Antecedent) - Davranıştan önce ne oldu?" id="behavior-antecedent" rows={2} />
-        <Textarea placeholder="Sonuç (Consequence) - Davranıştan sonra ne oldu?" id="behavior-consequence" rows={2} />
-        <Textarea placeholder="Kullanılan Müdahale" id="behavior-intervention" rows={2} />
-        
-        <Select defaultValue="KISMEN_ETKİLİ">
-          <SelectTrigger id="behavior-effectiveness">
-            <SelectValue placeholder="Müdahale Etkinliği" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ÇOK_ETKİLİ">Çok Etkili</SelectItem>
-            <SelectItem value="ETKİLİ">Etkili</SelectItem>
-            <SelectItem value="KISMEN_ETKİLİ">Kısmen Etkili</SelectItem>
-            <SelectItem value="ETKİSİZ">Etkisiz</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <div className="flex items-center gap-2">
-          <input type="checkbox" id="behavior-parentNotified" className="h-4 w-4" />
-          <label htmlFor="behavior-parentNotified">Veli bilgilendirildi</label>
-        </div>
-        
-        <Input placeholder="Kaydeden Kişi" id="behavior-recordedBy" />
-        <Textarea placeholder="Notlar ve Patern Analizi" id="behavior-notes" rows={2} />
-        
-        <Button className="w-full" onClick={handleSave}>
-          <ClipboardList className="mr-2 h-4 w-4" />
-          Davranış Kaydı Ekle
-        </Button>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="incidentDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Olay Tarihi</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="incidentTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Olay Saati</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Konum</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Sınıf, bahçe, vb." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="behaviorType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Davranış Türü</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Davranış türü seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="SÖZLÜ">Sözlü</SelectItem>
+                        <SelectItem value="FİZİKSEL">Fiziksel</SelectItem>
+                        <SelectItem value="KURALLARA_UYMAMA">Kurallara Uymama</SelectItem>
+                        <SelectItem value="DERSE_KATILMAMA">Derse Katılmama</SelectItem>
+                        <SelectItem value="DİĞER">Diğer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="intensity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yoğunluk</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Yoğunluk seviyesi seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="DÜŞÜK">Düşük</SelectItem>
+                        <SelectItem value="ORTA">Orta</SelectItem>
+                        <SelectItem value="YÜKSEK">Yüksek</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Davranış Açıklaması</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Davranışı detaylı olarak açıklayın" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="antecedent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Öncül (Antecedent)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Davranıştan önce ne oldu?" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="consequence"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sonuç (Consequence)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Davranıştan sonra ne oldu?" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="interventionUsed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kullanılan Müdahale</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Uygulanan müdahaleyi açıklayın" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="interventionEffectiveness"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Müdahale Etkinliği</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Etkinlik seviyesi seçin" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="ÇOK_ETKİLİ">Çok Etkili</SelectItem>
+                      <SelectItem value="ETKİLİ">Etkili</SelectItem>
+                      <SelectItem value="KISMEN_ETKİLİ">Kısmen Etkili</SelectItem>
+                      <SelectItem value="ETKİSİZ">Etkisiz</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="parentNotified"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Veli bilgilendirildi
+                    </FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="recordedBy"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kaydeden Kişi</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Adınızı girin" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notlar ve Patern Analizi</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Ek notlar ve gözlemler" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button type="submit" className="w-full">
+              <ClipboardList className="mr-2 h-4 w-4" />
+              Davranış Kaydı Ekle
+            </Button>
+          </form>
+        </Form>
         
         {behaviorIncidents.length > 0 && (
-          <div className="space-y-2 mt-4">
+          <div className="space-y-2 mt-6">
             <h4 className="font-medium">Davranış Kayıtları</h4>
             {behaviorIncidents.map(incident => (
               <div key={incident.id} className="border rounded-lg p-3 space-y-2">

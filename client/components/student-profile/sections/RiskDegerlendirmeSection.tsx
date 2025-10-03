@@ -1,9 +1,13 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { RiskFactors, addRiskFactors } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -11,7 +15,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { AlertTriangle } from "lucide-react";
+
+const riskLevels = ["DÜŞÜK", "ORTA", "YÜKSEK", "ÇOK_YÜKSEK"] as const;
+
+const riskAssessmentSchema = z.object({
+  assessmentDate: z.string().min(1, "Değerlendirme tarihi gereklidir"),
+  academicRiskLevel: z.enum(riskLevels),
+  behavioralRiskLevel: z.enum(riskLevels),
+  attendanceRiskLevel: z.enum(riskLevels),
+  socialEmotionalRiskLevel: z.enum(riskLevels),
+  academicFactors: z.string().optional(),
+  behavioralFactors: z.string().optional(),
+  protectiveFactors: z.string().optional(),
+  interventionsNeeded: z.string().optional(),
+  parentNotified: z.boolean().default(false),
+  assignedCounselor: z.string().optional(),
+  nextAssessmentDate: z.string().optional(),
+});
+
+type RiskAssessmentFormValues = z.infer<typeof riskAssessmentSchema>;
 
 interface RiskDegerlendirmeSectionProps {
   studentId: string;
@@ -20,26 +51,50 @@ interface RiskDegerlendirmeSectionProps {
 }
 
 export default function RiskDegerlendirmeSection({ studentId, riskFactors, onUpdate }: RiskDegerlendirmeSectionProps) {
-  const handleSave = async () => {
+  const form = useForm<RiskAssessmentFormValues>({
+    resolver: zodResolver(riskAssessmentSchema),
+    defaultValues: {
+      assessmentDate: new Date().toISOString().slice(0, 10),
+      academicRiskLevel: "DÜŞÜK",
+      behavioralRiskLevel: "DÜŞÜK",
+      attendanceRiskLevel: "DÜŞÜK",
+      socialEmotionalRiskLevel: "DÜŞÜK",
+      academicFactors: "",
+      behavioralFactors: "",
+      protectiveFactors: "",
+      interventionsNeeded: "",
+      parentNotified: false,
+      assignedCounselor: "",
+      nextAssessmentDate: "",
+    },
+  });
+
+  const onSubmit = async (data: RiskAssessmentFormValues) => {
     const riskData: RiskFactors = {
       id: crypto.randomUUID(),
       studentId,
-      assessmentDate: (document.getElementById('risk-assessmentDate') as HTMLInputElement)?.value || new Date().toISOString().slice(0, 10),
-      academicRiskLevel: (document.getElementById('risk-academic') as HTMLSelectElement)?.value || 'DÜŞÜK',
-      behavioralRiskLevel: (document.getElementById('risk-behavioral') as HTMLSelectElement)?.value || 'DÜŞÜK',
-      attendanceRiskLevel: (document.getElementById('risk-attendance') as HTMLSelectElement)?.value || 'DÜŞÜK',
-      socialEmotionalRiskLevel: (document.getElementById('risk-socialEmotional') as HTMLSelectElement)?.value || 'DÜŞÜK',
-      academicFactors: (document.getElementById('risk-academicFactors') as HTMLTextAreaElement)?.value,
-      behavioralFactors: (document.getElementById('risk-behavioralFactors') as HTMLTextAreaElement)?.value,
-      protectiveFactors: (document.getElementById('risk-protectiveFactors') as HTMLTextAreaElement)?.value,
-      interventionsNeeded: (document.getElementById('risk-interventions') as HTMLTextAreaElement)?.value,
-      parentNotified: (document.getElementById('risk-parentNotified') as HTMLInputElement)?.checked || false,
-      assignedCounselor: (document.getElementById('risk-counselor') as HTMLInputElement)?.value,
-      nextAssessmentDate: (document.getElementById('risk-nextAssessment') as HTMLInputElement)?.value,
+      assessmentDate: data.assessmentDate,
+      academicRiskLevel: data.academicRiskLevel,
+      behavioralRiskLevel: data.behavioralRiskLevel,
+      attendanceRiskLevel: data.attendanceRiskLevel,
+      socialEmotionalRiskLevel: data.socialEmotionalRiskLevel,
+      academicFactors: data.academicFactors,
+      behavioralFactors: data.behavioralFactors,
+      protectiveFactors: data.protectiveFactors,
+      interventionsNeeded: data.interventionsNeeded,
+      parentNotified: data.parentNotified,
+      assignedCounselor: data.assignedCounselor,
+      nextAssessmentDate: data.nextAssessmentDate,
       status: 'AKTİF'
     };
+    
     await addRiskFactors(riskData);
+    form.reset();
     onUpdate();
+  };
+
+  const getRiskBadgeVariant = (level: string) => {
+    return level === 'YÜKSEK' || level === 'ÇOK_YÜKSEK' ? 'destructive' : 'secondary';
   };
 
   return (
@@ -48,81 +103,236 @@ export default function RiskDegerlendirmeSection({ studentId, riskFactors, onUpd
         <CardTitle>Risk Değerlendirme ve Erken Uyarı</CardTitle>
         <CardDescription>Akademik, davranışsal ve sosyal-duygusal risk faktörleri</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <Input type="date" placeholder="Değerlendirme Tarihi" id="risk-assessmentDate" defaultValue={new Date().toISOString().slice(0, 10)} />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select defaultValue="DÜŞÜK">
-            <SelectTrigger id="risk-academic">
-              <SelectValue placeholder="Akademik Risk" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DÜŞÜK">Düşük</SelectItem>
-              <SelectItem value="ORTA">Orta</SelectItem>
-              <SelectItem value="YÜKSEK">Yüksek</SelectItem>
-              <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select defaultValue="DÜŞÜK">
-            <SelectTrigger id="risk-behavioral">
-              <SelectValue placeholder="Davranışsal Risk" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DÜŞÜK">Düşük</SelectItem>
-              <SelectItem value="ORTA">Orta</SelectItem>
-              <SelectItem value="YÜKSEK">Yüksek</SelectItem>
-              <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select defaultValue="DÜŞÜK">
-            <SelectTrigger id="risk-attendance">
-              <SelectValue placeholder="Devamsızlık Riski" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DÜŞÜK">Düşük</SelectItem>
-              <SelectItem value="ORTA">Orta</SelectItem>
-              <SelectItem value="YÜKSEK">Yüksek</SelectItem>
-              <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select defaultValue="DÜŞÜK">
-            <SelectTrigger id="risk-socialEmotional">
-              <SelectValue placeholder="Sosyal-Duygusal Risk" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DÜŞÜK">Düşük</SelectItem>
-              <SelectItem value="ORTA">Orta</SelectItem>
-              <SelectItem value="YÜKSEK">Yüksek</SelectItem>
-              <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <Textarea placeholder="Akademik Risk Faktörleri" id="risk-academicFactors" rows={2} />
-        <Textarea placeholder="Davranışsal Faktörler" id="risk-behavioralFactors" rows={2} />
-        <Textarea placeholder="Koruyucu Faktörler" id="risk-protectiveFactors" rows={2} />
-        <Textarea placeholder="Gerekli Müdahaleler" id="risk-interventions" rows={2} />
-        
-        <div className="flex items-center gap-2">
-          <input type="checkbox" id="risk-parentNotified" className="h-4 w-4" />
-          <label htmlFor="risk-parentNotified">Veli bilgilendirildi</label>
-        </div>
-        
-        <Input placeholder="Sorumlu Danışman" id="risk-counselor" />
-        <Input type="date" placeholder="Sonraki Değerlendirme" id="risk-nextAssessment" />
-        
-        <Button className="w-full" onClick={handleSave}>
-          <AlertTriangle className="mr-2 h-4 w-4" />
-          Risk Değerlendirmesi Kaydet
-        </Button>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="assessmentDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Değerlendirme Tarihi</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="academicRiskLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Akademik Risk</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Risk seviyesi seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="DÜŞÜK">Düşük</SelectItem>
+                        <SelectItem value="ORTA">Orta</SelectItem>
+                        <SelectItem value="YÜKSEK">Yüksek</SelectItem>
+                        <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="behavioralRiskLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Davranışsal Risk</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Risk seviyesi seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="DÜŞÜK">Düşük</SelectItem>
+                        <SelectItem value="ORTA">Orta</SelectItem>
+                        <SelectItem value="YÜKSEK">Yüksek</SelectItem>
+                        <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="attendanceRiskLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Devamsızlık Riski</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Risk seviyesi seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="DÜŞÜK">Düşük</SelectItem>
+                        <SelectItem value="ORTA">Orta</SelectItem>
+                        <SelectItem value="YÜKSEK">Yüksek</SelectItem>
+                        <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="socialEmotionalRiskLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sosyal-Duygusal Risk</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Risk seviyesi seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="DÜŞÜK">Düşük</SelectItem>
+                        <SelectItem value="ORTA">Orta</SelectItem>
+                        <SelectItem value="YÜKSEK">Yüksek</SelectItem>
+                        <SelectItem value="ÇOK_YÜKSEK">Çok Yüksek</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="academicFactors"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Akademik Risk Faktörleri</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Akademik risk faktörlerini açıklayın" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="behavioralFactors"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Davranışsal Faktörler</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Davranışsal faktörleri açıklayın" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="protectiveFactors"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Koruyucu Faktörler</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Koruyucu faktörleri belirtin" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="interventionsNeeded"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gerekli Müdahaleler</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Önerilen müdahaleleri listeleyin" rows={2} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="parentNotified"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Veli bilgilendirildi
+                    </FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="assignedCounselor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sorumlu Danışman</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Danışman adını girin" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="nextAssessmentDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sonraki Değerlendirme</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button type="submit" className="w-full">
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Risk Değerlendirmesi Kaydet
+            </Button>
+          </form>
+        </Form>
         
         {riskFactors && (
-          <div className="space-y-2 mt-4">
+          <div className="space-y-2 mt-6">
             <h4 className="font-medium">Son Risk Değerlendirmesi</h4>
             <div className="border rounded-lg p-3 space-y-2">
               <div className="text-sm font-medium">
@@ -131,13 +341,13 @@ export default function RiskDegerlendirmeSection({ studentId, riskFactors, onUpd
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-1">
                   <span>Akademik:</span>
-                  <Badge variant={riskFactors.academicRiskLevel === 'YÜKSEK' || riskFactors.academicRiskLevel === 'ÇOK_YÜKSEK' ? 'destructive' : 'secondary'}>
+                  <Badge variant={getRiskBadgeVariant(riskFactors.academicRiskLevel)}>
                     {riskFactors.academicRiskLevel}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-1">
                   <span>Davranış:</span>
-                  <Badge variant={riskFactors.behavioralRiskLevel === 'YÜKSEK' || riskFactors.behavioralRiskLevel === 'ÇOK_YÜKSEK' ? 'destructive' : 'secondary'}>
+                  <Badge variant={getRiskBadgeVariant(riskFactors.behavioralRiskLevel)}>
                     {riskFactors.behavioralRiskLevel}
                   </Badge>
                 </div>
