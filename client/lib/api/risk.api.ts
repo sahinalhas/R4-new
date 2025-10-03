@@ -1,11 +1,6 @@
 import { toast } from "sonner";
-import type { RiskFactors } from "../types/risk.types";
-import type {
-  HealthInfo,
-  SpecialEducation,
-  BehaviorIncident,
-  ExamResult
-} from "../types/academic.types";
+import type { RiskFactors, HealthInfo, SpecialEducation } from "@shared/types";
+import type { BehaviorIncident, ExamResult } from "../types/academic.types";
 
 export async function getHealthInfoByStudent(studentId: string): Promise<HealthInfo | null> {
   try {

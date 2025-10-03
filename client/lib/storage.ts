@@ -2,10 +2,11 @@ export * from "./types/student.types";
 export * from "./types/common.types";
 export * from "./types/attendance.types";
 export * from "./types/academic.types";
-export * from "./types/risk.types";
 export * from "./types/study.types";
 export * from "./types/coaching.types";
 export * from "./types/family.types";
+
+export type { HealthInfo, RiskFactors, SpecialEducation } from "@shared/types";
 
 export * from "./api/students.api";
 export * from "./api/notes.api";

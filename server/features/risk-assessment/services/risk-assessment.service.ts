@@ -1,6 +1,6 @@
 import * as repository from '../repository/risk-assessment.repository.js';
 import { sanitizeString } from '../../../middleware/validation.js';
-import type { RiskFactors } from '../types/index.js';
+import type { RiskFactors } from '../../../../shared/types.js';
 
 export function getRiskFactorsByStudent(studentId: string): RiskFactors[] {
   const sanitizedId = sanitizeString(studentId);

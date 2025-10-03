@@ -6,57 +6,6 @@ export type AcademicRecord = {
   notes?: string;
 };
 
-export type HealthInfo = {
-  id: string;
-  studentId: string;
-  bloodType?: string;
-  chronicDiseases?: string;
-  allergies?: string;
-  medications?: string;
-  specialNeeds?: string;
-  medicalHistory?: string;
-  emergencyContact1Name?: string;
-  emergencyContact1Phone?: string;
-  emergencyContact1Relation?: string;
-  emergencyContact2Name?: string;
-  emergencyContact2Phone?: string;
-  emergencyContact2Relation?: string;
-  physicianName?: string;
-  physicianPhone?: string;
-  insuranceInfo?: string;
-  vaccinations?: string;
-  dietaryRestrictions?: string;
-  physicalLimitations?: string;
-  mentalHealthNotes?: string;
-  lastHealthCheckup?: string;
-  notes?: string;
-};
-
-export type SpecialEducation = {
-  id: string;
-  studentId: string;
-  hasIEP: boolean;
-  iepStartDate?: string;
-  iepEndDate?: string;
-  iepGoals?: string;
-  diagnosis?: string;
-  ramReportDate?: string;
-  ramReportSummary?: string;
-  supportServices?: string;
-  accommodations?: string;
-  modifications?: string;
-  progressNotes?: string;
-  evaluationSchedule?: string;
-  specialistContacts?: string;
-  parentInvolvement?: string;
-  transitionPlan?: string;
-  assistiveTechnology?: string;
-  behavioralSupport?: string;
-  status: string;
-  nextReviewDate?: string;
-  notes?: string;
-};
-
 export type BehaviorIncident = {
   id: string;
   studentId: string;

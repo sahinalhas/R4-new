@@ -1,6 +1,6 @@
 import * as repository from '../repository/special-education.repository.js';
 import { sanitizeString } from '../../../middleware/validation.js';
-import type { SpecialEducation } from '../types/index.js';
+import type { SpecialEducation } from '../../../../shared/types.js';
 
 export function getSpecialEducationByStudent(studentId: string): SpecialEducation[] {
   const sanitizedId = sanitizeString(studentId);

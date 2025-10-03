@@ -1,6 +1,6 @@
 import * as repository from '../repository/health.repository.js';
 import { sanitizeString } from '../../../middleware/validation.js';
-import type { HealthInfo } from '../types/index.js';
+import type { HealthInfo } from '../../../../shared/types.js';
 
 export function getHealthInfoByStudent(studentId: string): HealthInfo | null {
   const sanitizedId = sanitizeString(studentId);

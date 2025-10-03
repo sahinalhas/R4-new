@@ -1,5 +1,5 @@
 import getDatabase from '../../../lib/database.js';
-import type { HealthInfo } from '../types/index.js';
+import type { HealthInfo } from '../../../../shared/types.js';
 
 let statements: any = null;
 let isInitialized = false;

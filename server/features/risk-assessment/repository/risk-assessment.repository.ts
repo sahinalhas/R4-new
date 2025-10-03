@@ -1,5 +1,5 @@
 import getDatabase from '../../../lib/database.js';
-import type { RiskFactors } from '../types/index.js';
+import type { RiskFactors } from '../../../../shared/types.js';
 
 let statements: any = null;
 let isInitialized = false;
