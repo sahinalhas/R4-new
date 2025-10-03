@@ -1,21 +1,27 @@
 import {
-  loadStudents as dbLoadStudents,
-  saveStudents as dbSaveStudents,
-  loadSubjects as dbLoadSubjects,
-  saveSubjects as dbSaveSubjects,
-  loadTopics as dbLoadTopics,
-  saveTopics as dbSaveTopics,
-  saveProgress as dbSaveProgress,
-  saveAcademicGoals as dbSaveAcademicGoals,
-  Student,
-  Subject,
-  Topic,
-  Progress,
-  AcademicGoal
-} from './db-service.js';
+  loadStudents,
+  saveStudents,
+  type Student
+} from '../features/students/repository/students.repository.js';
 
-// LocalStorage'dan veri yükleyen mock fonksiyonlar
-// Gerçek uygulamada bu veriler client tarafından gönderilecek
+import {
+  loadSubjects,
+  saveSubjects,
+  loadTopics,
+  saveTopics,
+  type Subject,
+  type Topic
+} from '../features/subjects/repository/subjects.repository.js';
+
+import {
+  saveProgress,
+  type Progress
+} from '../features/progress/repository/progress.repository.js';
+
+import {
+  insertAcademicGoal,
+  type AcademicGoal
+} from '../features/coaching/repository/coaching.repository.js';
 
 export function migrateFromLocalStorage(localStorageData: any) {
   console.log('Starting migration from localStorage to SQLite...');
@@ -24,31 +30,33 @@ export function migrateFromLocalStorage(localStorageData: any) {
     // Students migration
     if (localStorageData.students && Array.isArray(localStorageData.students)) {
       console.log(`Migrating ${localStorageData.students.length} students...`);
-      dbSaveStudents(localStorageData.students);
+      saveStudents(localStorageData.students);
     }
 
     // Subjects migration
     if (localStorageData.subjects && Array.isArray(localStorageData.subjects)) {
       console.log(`Migrating ${localStorageData.subjects.length} subjects...`);
-      dbSaveSubjects(localStorageData.subjects);
+      saveSubjects(localStorageData.subjects);
     }
 
     // Topics migration
     if (localStorageData.topics && Array.isArray(localStorageData.topics)) {
       console.log(`Migrating ${localStorageData.topics.length} topics...`);
-      dbSaveTopics(localStorageData.topics);
+      saveTopics(localStorageData.topics);
     }
 
     // Progress migration
     if (localStorageData.progress && Array.isArray(localStorageData.progress)) {
       console.log(`Migrating ${localStorageData.progress.length} progress records...`);
-      dbSaveProgress(localStorageData.progress);
+      saveProgress(localStorageData.progress);
     }
 
     // Academic goals migration
     if (localStorageData.academicGoals && Array.isArray(localStorageData.academicGoals)) {
       console.log(`Migrating ${localStorageData.academicGoals.length} academic goals...`);
-      dbSaveAcademicGoals(localStorageData.academicGoals);
+      for (const goal of localStorageData.academicGoals) {
+        insertAcademicGoal(goal);
+      }
     }
 
     console.log('Migration completed successfully!');
@@ -61,9 +69,9 @@ export function migrateFromLocalStorage(localStorageData: any) {
 
 export function getMigrationStatus() {
   // Check if database has any data
-  const students = dbLoadStudents();
-  const subjects = dbLoadSubjects();
-  const topics = dbLoadTopics();
+  const students = loadStudents();
+  const subjects = loadSubjects();
+  const topics = loadTopics();
   
   return {
     hasData: students.length > 0 || subjects.length > 0 || topics.length > 0,

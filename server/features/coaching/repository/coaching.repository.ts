@@ -28,6 +28,19 @@ function ensureInitialized(): void {
       INSERT INTO academic_goals (id, studentId, title, description, targetScore, currentScore, examType, deadline, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
+    upsertAcademicGoal: db.prepare(`
+      INSERT INTO academic_goals (id, studentId, title, description, targetScore, currentScore, examType, deadline, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        studentId = excluded.studentId,
+        title = excluded.title,
+        description = excluded.description,
+        targetScore = excluded.targetScore,
+        currentScore = excluded.currentScore,
+        examType = excluded.examType,
+        deadline = excluded.deadline,
+        status = excluded.status
+    `),
     deleteAcademicGoal: db.prepare('DELETE FROM academic_goals WHERE id = ?'),
     
     getMultipleIntelligenceByStudent: db.prepare('SELECT * FROM multiple_intelligence WHERE studentId = ? ORDER BY assessmentDate DESC'),
@@ -169,6 +182,26 @@ export function updateAcademicGoal(id: string, updates: Partial<AcademicGoal>): 
     db.prepare(`UPDATE academic_goals SET ${setClause} WHERE id = ?`).run(...values);
   } catch (error) {
     console.error('Error updating academic goal:', error);
+    throw error;
+  }
+}
+
+export function upsertAcademicGoal(goal: AcademicGoal): void {
+  try {
+    ensureInitialized();
+    statements.upsertAcademicGoal.run(
+      goal.id,
+      goal.studentId,
+      goal.title,
+      goal.description,
+      goal.targetScore,
+      goal.currentScore,
+      goal.examType,
+      goal.deadline,
+      goal.status || 'active'
+    );
+  } catch (error) {
+    console.error('Error upserting academic goal:', error);
     throw error;
   }
 }
