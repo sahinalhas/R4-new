@@ -68,6 +68,12 @@ The application uses a modern full-stack architecture:
 - Backward compatibility maintained with existing URL patterns
 
 ## Recent Changes
+**October 3, 2025** - Additional modularization improvements ✅
+- **Coaching Routes Modularized**: Split coaching routes into 4 logical modules (goals, assessments, family, achievements) with independent rate limiting per route
+- **Surveys Routes Modularized**: Split surveys routes into 5 modules (templates, questions, distributions, responses, analytics) with proper separation of concerns
+- **Surveys Service Modularized**: Refactored surveys service (390 lines) into 6 focused modules: templates, questions, distributions, responses, validation, and analytics. Helper functions kept private as designed
+- **Student Profile Data Fetching Extracted**: Created `client/lib/api/student-profile.api.ts` to centralize student profile data aggregation. Moved 21 API call orchestration from React hook to dedicated API module. Hook reduced from 110+ lines to ~30 lines, improving separation of concerns and testability
+
 **October 3, 2025** - Final cleanup: Removed demo route and empty directories ✅
 - Deleted obsolete demo route file (server/routes/demo.ts)
 - Removed demo route import and usage from server/index.ts
