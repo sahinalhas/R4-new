@@ -2,6 +2,40 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+
+/**
+ * BACKEND MODULARIZATION - MIGRATION IN PROGRESS
+ * 
+ * Migration Status: Stage 0 - Scaffolding Complete
+ * 
+ * We are migrating from individual route imports to a feature-based modular architecture.
+ * See server/features/README.md for full documentation.
+ * 
+ * Migration Stages (5 Stages Total):
+ * - Stage 0: ✅ Scaffolding complete (current)
+ * - Stage 1: Core domains - students → surveys → progress
+ * - Stage 2: Adjacent domains - attendance, study, meeting-notes, documents, settings, subjects
+ * - Stage 3: Peripheral routers - coaching, health, special-education, etc.
+ * - Stage 4: Cleanup - remove legacy imports and old route files
+ * 
+ * STAGE 1 CANONICAL ORDER (MUST FOLLOW):
+ * 1. students (foundation for all student features)
+ * 2. surveys (independent survey system)
+ * 3. progress (student progress tracking)
+ * 
+ * Future state (Stage 4 - after cleanup):
+ * import featureRegistry from "./features";
+ * app.use("/api", featureRegistry);
+ */
+
+import featureRegistry from "./features";
+
+// ============================================================================
+// LEGACY IMPORTS - TO BE MIGRATED
+// These imports will be gradually removed as features are migrated to the
+// new modular structure in server/features/
+// ============================================================================
+
 // Database API routes
 import { 
   getStudents, 
@@ -225,6 +259,17 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // ========================================================================
+  // FUTURE: Feature Registry Integration (Stage 4 - Final Cleanup)
+  // ========================================================================
+  // Once all features are migrated, replace individual route registrations with:
+  // app.use("/api", featureRegistry);
+  // ========================================================================
+
+  // ========================================================================
+  // LEGACY ROUTE REGISTRATIONS - TO BE REPLACED BY FEATURE REGISTRY
+  // ========================================================================
+  
   // Database API routes
   // Apply appropriate rate limits per endpoint based on operation type
   
