@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import studentsRouter from './students/index.js';
 
 /**
  * Feature Registry
@@ -6,7 +7,7 @@ import { Router } from 'express';
  * This is the central registry for all feature modules in the backend.
  * Each feature should export an Express Router from its index.ts file.
  * 
- * Migration Status: Stage 0 - Scaffolding only
+ * Migration Status: Stage 1.1 - Students migrated
  * 
  * Standard Feature Structure:
  * server/features/<feature-name>/
@@ -34,17 +35,16 @@ import { Router } from 'express';
 export const featureRegistry = Router();
 
 /**
- * Feature routers will be registered here during migration.
+ * Stage 1.1: Students - ✅ Migrated
  * 
- * Example migration pattern:
+ * Migrated features:
+ * - students: Full CRUD operations, academics, progress, interventions
  * 
- * import studentsRouter from './students';
- * import surveysRouter from './surveys';
- * import coachingRouter from './coaching';
- * 
- * featureRegistry.use('/students', studentsRouter);
- * featureRegistry.use('/surveys', surveysRouter);
- * featureRegistry.use('/coaching', coachingRouter);
+ * Next migrations (Stage 1):
+ * - surveys: Independent survey system
+ * - progress: Student progress tracking
  */
+
+featureRegistry.use('/students', studentsRouter);
 
 export default featureRegistry;

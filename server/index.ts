@@ -260,20 +260,25 @@ export function createServer() {
   app.get("/api/demo", handleDemo);
 
   // ========================================================================
-  // FUTURE: Feature Registry Integration (Stage 4 - Final Cleanup)
+  // FEATURE REGISTRY - NEW MODULAR ROUTES (Stage 1+)
   // ========================================================================
-  // Once all features are migrated, replace individual route registrations with:
-  // app.use("/api", featureRegistry);
-  // ========================================================================
-
+  // Mount the feature registry to handle new modular routes
+  // Both new and legacy routes coexist during migration for backward compatibility
+  app.use("/api", featureRegistry);
+  
   // ========================================================================
   // LEGACY ROUTE REGISTRATIONS - TO BE REPLACED BY FEATURE REGISTRY
   // ========================================================================
+  // Note: During migration, both new (feature registry) and legacy routes are active
+  // Legacy routes will be removed in Stage 4 after full migration is complete
   
   // Database API routes
   // Apply appropriate rate limits per endpoint based on operation type
   
-  // Students - read operations: generous limits, write operations: stricter limits
+  // ✅ MIGRATED: Students (Stage 1.1)
+  // New route: /api/students -> server/features/students
+  // Legacy routes kept for backward compatibility during migration
+  // TODO (Stage 4): Remove these legacy students routes after full migration
   app.get("/api/students", simpleRateLimit(200, 15 * 60 * 1000), getStudents);
   app.post("/api/students", simpleRateLimit(50, 15 * 60 * 1000), saveStudentHandler);
   app.post("/api/students/bulk", simpleRateLimit(10, 15 * 60 * 1000), saveStudentsHandler);
