@@ -15,7 +15,7 @@ import documentsRouter from './documents/index.js';
  * This is the central registry for all feature modules in the backend.
  * Each feature should export an Express Router from its index.ts file.
  * 
- * Migration Status: Stage 2 - In Progress (Stage 2.2 Complete!)
+ * Migration Status: Stage 2 - COMPLETE! ✅
  * 
  * Standard Feature Structure:
  * server/features/<feature-name>/
@@ -37,12 +37,13 @@ import documentsRouter from './documents/index.js';
  * 2. surveys (independent survey system) ✅
  * 3. progress (student progress tracking) ✅
  * 
- * STAGE 2 CANONICAL ORDER (IN PROGRESS):
+ * STAGE 2 CANONICAL ORDER (COMPLETE):
  * 1. subjects (first adjacent domain - subjects and topics CRUD) ✅
  * 2. settings (second adjacent domain - app settings management) ✅
  * 3. attendance (third adjacent domain - attendance tracking) ✅
  * 4. study (fourth adjacent domain - study assignments and weekly slots) ✅
  * 5. meeting-notes (fifth adjacent domain - meeting notes CRUD) ✅
+ * 6. documents (sixth adjacent domain - student documents CRUD) ✅
  * 
  * Subsequent stages follow dependency minimization and risk reduction principles.
  */
@@ -58,6 +59,7 @@ export const featureRegistry = Router();
  * Stage 2.3: Attendance - ✅ Migrated
  * Stage 2.4: Study - ✅ Migrated
  * Stage 2.5: Meeting Notes - ✅ Migrated
+ * Stage 2.6: Documents - ✅ Migrated (STAGE 2 COMPLETE!)
  * 
  * Migrated features:
  * - students: Full CRUD operations, academics, progress, interventions
@@ -68,9 +70,10 @@ export const featureRegistry = Router();
  * - attendance: Attendance tracking (get by student, create)
  * - study: Study assignments and weekly slots CRUD operations
  * - meeting-notes: Meeting notes CRUD operations (get, create, update, delete)
+ * - documents: Student documents CRUD operations (get, create, delete)
  * 
- * Next migrations (Stage 2):
- * - documents
+ * Next migrations (Stage 3):
+ * - coaching, health, special-education, risk-assessment, behavior, exams, counseling-sessions, auth, sessions
  */
 
 featureRegistry.use('/students', studentsRouter);
@@ -81,5 +84,6 @@ featureRegistry.use('/', settingsRouter);
 featureRegistry.use('/', attendanceRouter);
 featureRegistry.use('/', studyRouter);
 featureRegistry.use('/', meetingNotesRouter);
+featureRegistry.use('/', documentsRouter);
 
 export default featureRegistry;
