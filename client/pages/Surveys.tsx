@@ -136,12 +136,11 @@ export default function Surveys() {
       });
 
       if (response.ok) {
-        console.log("Distribution created successfully");
         toast({ 
           title: "Başarılı", 
           description: "Anket dağıtımı oluşturuldu" 
         });
-        await loadData(); // Reload data to show new distribution
+        await loadData();
         setSelectedTemplate(null);
         setTemplateQuestions([]);
         setShowTemplateSelector(false);
@@ -243,8 +242,7 @@ export default function Surveys() {
               <Settings className="mr-2 h-4 w-4" />
               Ayarlar
             </Button>
-            <SurveyCreationDialog onSurveyCreated={(survey) => {
-              console.log("New survey created:", survey);
+            <SurveyCreationDialog onSurveyCreated={() => {
               loadData();
             }}>
               <Button>
@@ -334,8 +332,7 @@ export default function Surveys() {
                     <Download className="mr-2 h-4 w-4" />
                     MEB Şablonları
                   </Button>
-                  <SurveyCreationDialog onSurveyCreated={(survey) => {
-                    console.log("New survey template created:", survey);
+                  <SurveyCreationDialog onSurveyCreated={() => {
                     loadData();
                   }}>
                     <Button size="sm">

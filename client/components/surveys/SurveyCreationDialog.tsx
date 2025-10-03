@@ -119,7 +119,6 @@ export default function SurveyCreationDialog({
         }
       }
 
-      console.log("Survey template created successfully:", templateData.title);
       onSurveyCreated?.(data);
       setOpen(false);
       form.reset();

@@ -275,7 +275,6 @@ export default function SurveyDistributionDialog({
           : undefined
       };
 
-      console.log("Creating distribution:", distributionData);
       onDistributionCreated?.(distributionData);
       setOpen(false);
       form.reset();
