@@ -305,6 +305,11 @@ export function createServer() {
   app.post("/api/migrate", simpleRateLimit(5, 15 * 60 * 1000), migrateData);
   app.get("/api/migrate/status", simpleRateLimit(200, 15 * 60 * 1000), getMigrationStatusHandler);
 
+  // ✅ MIGRATED: Surveys (Stage 1.2)
+  // New route: /api/surveys -> server/features/surveys
+  // Legacy routes kept for backward compatibility during migration
+  // TODO (Stage 4): Remove these legacy survey routes after full migration
+  
   // Survey Templates
   app.get("/api/survey-templates", simpleRateLimit(200, 15 * 60 * 1000), getSurveyTemplates);
   app.get("/api/survey-templates/:id", simpleRateLimit(200, 15 * 60 * 1000), getSurveyTemplateById);
