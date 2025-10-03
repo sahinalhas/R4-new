@@ -1,48 +1,59 @@
 import { Router } from 'express';
 import { simpleRateLimit } from '../../middleware/validation.js';
-import * as coachingRoutes from './routes/coaching.routes.js';
+import * as goalsRoutes from './routes/modules/goals.routes.js';
+import * as assessmentsRoutes from './routes/modules/assessments.routes.js';
+import * as familyRoutes from './routes/modules/family.routes.js';
+import * as achievementsRoutes from './routes/modules/achievements.routes.js';
 
 const router = Router();
 
-router.get('/academic-goals', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getAcademicGoals);
-router.get('/academic-goals/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getAcademicGoalsByStudent);
-router.post('/academic-goals', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createAcademicGoal);
-router.put('/academic-goals/:id', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.updateAcademicGoal);
-router.delete('/academic-goals/:id', simpleRateLimit(20, 15 * 60 * 1000), coachingRoutes.deleteAcademicGoal);
+const readLimit = simpleRateLimit(200, 15 * 60 * 1000);
+const writeLimit = simpleRateLimit(50, 15 * 60 * 1000);
+const deleteLimit = simpleRateLimit(20, 15 * 60 * 1000);
 
-router.get('/multiple-intelligence/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getMultipleIntelligenceByStudent);
-router.post('/multiple-intelligence', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createMultipleIntelligence);
+// ============= GOALS ROUTES =============
+router.get('/academic-goals', readLimit, goalsRoutes.getAcademicGoals);
+router.get('/academic-goals/student/:studentId', readLimit, goalsRoutes.getAcademicGoalsByStudent);
+router.post('/academic-goals', writeLimit, goalsRoutes.createAcademicGoal);
+router.put('/academic-goals/:id', writeLimit, goalsRoutes.updateAcademicGoal);
+router.delete('/academic-goals/:id', deleteLimit, goalsRoutes.deleteAcademicGoal);
 
-router.get('/learning-styles/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getLearningStylesByStudent);
-router.post('/learning-styles', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createLearningStyle);
+router.get('/smart-goals/student/:studentId', readLimit, goalsRoutes.getSmartGoalsByStudent);
+router.post('/smart-goals', writeLimit, goalsRoutes.createSmartGoal);
+router.put('/smart-goals/:id', writeLimit, goalsRoutes.updateSmartGoal);
 
-router.get('/smart-goals/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getSmartGoalsByStudent);
-router.post('/smart-goals', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createSmartGoal);
-router.put('/smart-goals/:id', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.updateSmartGoal);
+// ============= ASSESSMENTS ROUTES =============
+router.get('/multiple-intelligence/student/:studentId', readLimit, assessmentsRoutes.getMultipleIntelligenceByStudent);
+router.post('/multiple-intelligence', writeLimit, assessmentsRoutes.createMultipleIntelligence);
 
-router.get('/coaching-recommendations/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getCoachingRecommendationsByStudent);
-router.post('/coaching-recommendations', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createCoachingRecommendation);
-router.put('/coaching-recommendations/:id', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.updateCoachingRecommendation);
+router.get('/learning-styles/student/:studentId', readLimit, assessmentsRoutes.getLearningStylesByStudent);
+router.post('/learning-styles', writeLimit, assessmentsRoutes.createLearningStyle);
 
-router.get('/evaluations-360/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getEvaluations360ByStudent);
-router.post('/evaluations-360', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createEvaluation360);
+router.get('/evaluations-360/student/:studentId', readLimit, assessmentsRoutes.getEvaluations360ByStudent);
+router.post('/evaluations-360', writeLimit, assessmentsRoutes.createEvaluation360);
 
-router.get('/achievements/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getAchievementsByStudent);
-router.post('/achievements', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createAchievement);
+router.get('/self-assessments/student/:studentId', readLimit, assessmentsRoutes.getSelfAssessmentsByStudent);
+router.post('/self-assessments', writeLimit, assessmentsRoutes.createSelfAssessment);
 
-router.get('/self-assessments/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getSelfAssessmentsByStudent);
-router.post('/self-assessments', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createSelfAssessment);
+// ============= FAMILY ROUTES =============
+router.get('/parent-meetings/student/:studentId', readLimit, familyRoutes.getParentMeetingsByStudent);
+router.post('/parent-meetings', writeLimit, familyRoutes.createParentMeeting);
+router.put('/parent-meetings/:id', writeLimit, familyRoutes.updateParentMeeting);
 
-router.get('/parent-meetings/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getParentMeetingsByStudent);
-router.post('/parent-meetings', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createParentMeeting);
-router.put('/parent-meetings/:id', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.updateParentMeeting);
+router.get('/home-visits/student/:studentId', readLimit, familyRoutes.getHomeVisitsByStudent);
+router.post('/home-visits', writeLimit, familyRoutes.createHomeVisit);
+router.put('/home-visits/:id', writeLimit, familyRoutes.updateHomeVisit);
 
-router.get('/home-visits/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getHomeVisitsByStudent);
-router.post('/home-visits', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createHomeVisit);
-router.put('/home-visits/:id', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.updateHomeVisit);
+router.get('/family-participation/student/:studentId', readLimit, familyRoutes.getFamilyParticipationByStudent);
+router.post('/family-participation', writeLimit, familyRoutes.createFamilyParticipation);
+router.put('/family-participation/:id', writeLimit, familyRoutes.updateFamilyParticipation);
 
-router.get('/family-participation/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), coachingRoutes.getFamilyParticipationByStudent);
-router.post('/family-participation', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.createFamilyParticipation);
-router.put('/family-participation/:id', simpleRateLimit(50, 15 * 60 * 1000), coachingRoutes.updateFamilyParticipation);
+// ============= ACHIEVEMENTS & RECOMMENDATIONS ROUTES =============
+router.get('/coaching-recommendations/student/:studentId', readLimit, achievementsRoutes.getCoachingRecommendationsByStudent);
+router.post('/coaching-recommendations', writeLimit, achievementsRoutes.createCoachingRecommendation);
+router.put('/coaching-recommendations/:id', writeLimit, achievementsRoutes.updateCoachingRecommendation);
+
+router.get('/achievements/student/:studentId', readLimit, achievementsRoutes.getAchievementsByStudent);
+router.post('/achievements', writeLimit, achievementsRoutes.createAchievement);
 
 export default router;
