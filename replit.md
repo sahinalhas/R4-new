@@ -50,8 +50,9 @@ The application uses a modern full-stack architecture:
 ## Backend Architecture
 **Feature-Based Modular Structure** (October 3, 2025 - Migration Complete ✅):
 - Backend routes successfully migrated from flat structure to feature-based modules
-- Each feature has: repository/ (data access), services/ (business logic), routes/ (handlers), types/ (TypeScript), index.ts (router)
+- Each feature has: repository/ (data access), services/ (business logic), routes/ (handlers), index.ts (router)
 - All 5 stages completed: Stage 0 (scaffolding) ✅, Stage 1 (core domains) ✅, Stage 2 (adjacent domains) ✅, Stage 3 (peripheral routers) ✅, Stage 4 (cleanup) ✅
+- **Shared Types** (October 3, 2025): Common types (HealthInfo, RiskFactors, SpecialEducation) consolidated in `shared/types.ts` to eliminate duplication between client and server
 
 **Migrated Features** (server/features/):
 - **Core Domains**: students, surveys, progress
@@ -67,6 +68,17 @@ The application uses a modern full-stack architecture:
 - Backward compatibility maintained with existing URL patterns
 
 ## Recent Changes
+**October 3, 2025** - Code cleanup and consolidation ✅
+- Eliminated duplicate type definitions across codebase
+- Created `shared/types.ts` for common types (HealthInfo, RiskFactors, SpecialEducation)
+- Removed 3 duplicate type directories from server/features/ (health, risk-assessment, special-education)
+- Removed duplicate `client/lib/types/risk.types.ts` file
+- Cleaned up `client/lib/types/academic.types.ts` (removed HealthInfo, SpecialEducation)
+- Removed unnecessary `client/components/ui/use-toast.ts` wrapper file
+- Updated all import references to use shared types
+- All changes validated with LSP - no errors
+- Improved code maintainability and reduced duplication
+
 **October 3, 2025** - Backend modularization: Stage 4 Complete - Migration Finished! ✅
 - Removed all legacy route imports and registrations from server/index.ts (~150 lines cleaned)
 - Deleted 19 old route files from server/routes/ (kept only demo.ts)
