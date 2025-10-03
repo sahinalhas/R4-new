@@ -115,17 +115,6 @@ import {
   saveAttendanceHandler
 } from "./routes/attendance";
 import {
-  getStudyAssignments,
-  saveStudyAssignmentHandler,
-  updateStudyAssignmentHandler,
-  deleteStudyAssignmentHandler,
-  getAllWeeklySlotsHandler,
-  getWeeklySlots,
-  saveWeeklySlotHandler,
-  updateWeeklySlotHandler,
-  deleteWeeklySlotHandler
-} from "./routes/study";
-import {
   getSession,
   saveSession,
   updateSessionActivity,
@@ -375,19 +364,6 @@ export function createServer() {
   // Interventions
   app.get("/api/students/:id/interventions", simpleRateLimit(200, 15 * 60 * 1000), getStudentInterventions);
   app.post("/api/students/interventions", simpleRateLimit(50, 15 * 60 * 1000), addStudentIntervention);
-
-  // Study Assignments
-  app.get("/api/study-assignments/:studentId", simpleRateLimit(200, 15 * 60 * 1000), getStudyAssignments);
-  app.post("/api/study-assignments", simpleRateLimit(50, 15 * 60 * 1000), saveStudyAssignmentHandler);
-  app.put("/api/study-assignments/:id", simpleRateLimit(50, 15 * 60 * 1000), updateStudyAssignmentHandler);
-  app.delete("/api/study-assignments/:id", simpleRateLimit(30, 15 * 60 * 1000), deleteStudyAssignmentHandler);
-
-  // Weekly Slots
-  app.get("/api/weekly-slots", simpleRateLimit(200, 15 * 60 * 1000), getAllWeeklySlotsHandler);
-  app.get("/api/weekly-slots/:studentId", simpleRateLimit(200, 15 * 60 * 1000), getWeeklySlots);
-  app.post("/api/weekly-slots", simpleRateLimit(50, 15 * 60 * 1000), saveWeeklySlotHandler);
-  app.put("/api/weekly-slots/:id", simpleRateLimit(50, 15 * 60 * 1000), updateWeeklySlotHandler);
-  app.delete("/api/weekly-slots/:id", simpleRateLimit(30, 15 * 60 * 1000), deleteWeeklySlotHandler);
 
   // Auth/Session
   app.get("/api/session/:userId", simpleRateLimit(200, 15 * 60 * 1000), getSession);

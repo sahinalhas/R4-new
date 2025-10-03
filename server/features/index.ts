@@ -5,6 +5,7 @@ import progressRouter from './progress/index.js';
 import subjectsRouter from './subjects/index.js';
 import settingsRouter from './settings/index.js';
 import attendanceRouter from './attendance/index.js';
+import studyRouter from './study/index.js';
 
 /**
  * Feature Registry
@@ -38,6 +39,7 @@ import attendanceRouter from './attendance/index.js';
  * 1. subjects (first adjacent domain - subjects and topics CRUD) ✅
  * 2. settings (second adjacent domain - app settings management) ✅
  * 3. attendance (third adjacent domain - attendance tracking) ✅
+ * 4. study (fourth adjacent domain - study assignments and weekly slots) ✅
  * 
  * Subsequent stages follow dependency minimization and risk reduction principles.
  */
@@ -51,6 +53,7 @@ export const featureRegistry = Router();
  * Stage 2.1: Subjects - ✅ Migrated
  * Stage 2.2: Settings - ✅ Migrated
  * Stage 2.3: Attendance - ✅ Migrated
+ * Stage 2.4: Study - ✅ Migrated
  * 
  * Migrated features:
  * - students: Full CRUD operations, academics, progress, interventions
@@ -59,9 +62,10 @@ export const featureRegistry = Router();
  * - subjects: Subjects and topics CRUD operations
  * - settings: App settings management (get, save)
  * - attendance: Attendance tracking (get by student, create)
+ * - study: Study assignments and weekly slots CRUD operations
  * 
  * Next migrations (Stage 2):
- * - study, meeting-notes, documents
+ * - meeting-notes, documents
  */
 
 featureRegistry.use('/students', studentsRouter);
@@ -70,5 +74,6 @@ featureRegistry.use('/', progressRouter);
 featureRegistry.use('/', subjectsRouter);
 featureRegistry.use('/', settingsRouter);
 featureRegistry.use('/', attendanceRouter);
+featureRegistry.use('/', studyRouter);
 
 export default featureRegistry;
