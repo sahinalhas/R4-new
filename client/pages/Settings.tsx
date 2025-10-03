@@ -2,52 +2,25 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import {
   loadSettings,
   saveSettings,
-  updateSettings,
   AppSettings,
   defaultSettings,
-  PresentationCategory,
 } from "@/lib/app-settings";
-import Courses from "@/pages/Courses";
-import ClassPeriodsEditor from "@/components/settings/ClassPeriodsEditor";
-import PresentationSystemEditor from "@/components/settings/PresentationSystemEditor";
 import { useSearchParams, useLocation } from "react-router-dom";
+import GeneralSettingsTab from "@/components/settings/GeneralSettingsTab";
+import NotificationsSettingsTab from "@/components/settings/NotificationsSettingsTab";
+import DataSettingsTab from "@/components/settings/DataSettingsTab";
+import IntegrationsSettingsTab from "@/components/settings/IntegrationsSettingsTab";
+import CoursesSettingsTab from "@/components/settings/CoursesSettingsTab";
+import PresentationSettingsTab from "@/components/settings/PresentationSettingsTab";
+import ClassHoursSettingsTab from "@/components/settings/ClassHoursSettingsTab";
+import SecuritySettingsTab from "@/components/settings/SecuritySettingsTab";
+import TransferSettingsTab from "@/components/settings/TransferSettingsTab";
 
 const schema = z.object({
   theme: z.enum(["light", "dark"]),
@@ -98,14 +71,6 @@ const schema = z.object({
   presentationSystem: z.array(z.any()).default([]),
 });
 
-function EmbeddedCourses() {
-  return (
-    <div className="mt-4">
-      <Courses />
-    </div>
-  );
-}
-
 export default function SettingsPage() {
   const { toast } = useToast();
   const [init, setInit] = useState<AppSettings>(defaultSettings());
@@ -134,6 +99,7 @@ export default function SettingsPage() {
   useEffect(() => {
     setTab(initialTab);
   }, [initialTab]);
+
   const location = useLocation();
   useEffect(() => {
     if (location.hash) {
@@ -147,6 +113,7 @@ export default function SettingsPage() {
       }
     }
   }, [location.hash, tab]);
+
   const form = useForm<AppSettings>({
     resolver: zodResolver(schema) as any,
     defaultValues: init,
@@ -158,13 +125,11 @@ export default function SettingsPage() {
       setInit(settings);
       form.reset(settings);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const sub = form.watch((value, { name }) => {
       if (!value) return;
-      // instant apply theme when toggled
       if (name === "theme") {
         const root = document.documentElement;
         if (value.theme === "dark") root.classList.add("dark");
@@ -260,609 +225,53 @@ export default function SettingsPage() {
           <TabsTrigger value="guvenlik">Güvenlik</TabsTrigger>
           <TabsTrigger value="transfer">İçe/Dışa Aktar</TabsTrigger>
         </TabsList>
-        <TabsContent value="genel" className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Görünüm</CardTitle>
-              <CardDescription>Tema ve dil tercihi</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-2">
-                <Label>Tema</Label>
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    variant={
-                      form.watch("theme") === "light" ? "default" : "outline"
-                    }
-                    onClick={() =>
-                      form.setValue("theme", "light", { shouldValidate: true })
-                    }
-                  >
-                    Açık
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={
-                      form.watch("theme") === "dark" ? "default" : "outline"
-                    }
-                    onClick={() =>
-                      form.setValue("theme", "dark", { shouldValidate: true })
-                    }
-                  >
-                    Koyu
-                  </Button>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="language">Dil</Label>
-                <Select
-                  value={form.watch("language")}
-                  onValueChange={(v) =>
-                    form.setValue("language", v as AppSettings["language"], {
-                      shouldValidate: true,
-                    })
-                  }
-                >
-                  <SelectTrigger id="language">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tr">Türkçe</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="dateFormat">Tarih Formatı</Label>
-                <Select
-                  value={form.watch("dateFormat")}
-                  onValueChange={(v) =>
-                    form.setValue(
-                      "dateFormat",
-                      v as AppSettings["dateFormat"],
-                      { shouldValidate: true },
-                    )
-                  }
-                >
-                  <SelectTrigger id="dateFormat">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dd.MM.yyyy">dd.MM.yyyy</SelectItem>
-                    <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="timeFormat">Saat Formatı</Label>
-                <Select
-                  value={form.watch("timeFormat")}
-                  onValueChange={(v) =>
-                    form.setValue(
-                      "timeFormat",
-                      v as AppSettings["timeFormat"],
-                      { shouldValidate: true },
-                    )
-                  }
-                >
-                  <SelectTrigger id="timeFormat">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="HH:mm">24 Saat (HH:mm)</SelectItem>
-                    <SelectItem value="hh:mm a">12 Saat (hh:mm a)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="weekStart">Haftanın İlk Günü</Label>
-                <Select
-                  value={String(form.watch("weekStart"))}
-                  onValueChange={(v) =>
-                    form.setValue("weekStart", Number(v) as 1 | 7, {
-                      shouldValidate: true,
-                    })
-                  }
-                >
-                  <SelectTrigger id="weekStart">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Pazartesi</SelectItem>
-                    <SelectItem value="7">Pazar</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card id="account">
-            <CardHeader>
-              <CardTitle>Hesap</CardTitle>
-              <CardDescription>Kullanıcı bilgileri</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="displayName">Ad Soyad</Label>
-                <Input
-                  id="displayName"
-                  value={form.watch("account.displayName")}
-                  onChange={(e) =>
-                    form.setValue("account.displayName", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">E-posta</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={form.watch("account.email")}
-                  onChange={(e) =>
-                    form.setValue("account.email", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="institution">Kurum</Label>
-                <Input
-                  id="institution"
-                  value={form.watch("account.institution")}
-                  onChange={(e) =>
-                    form.setValue("account.institution", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="signature">İmza / Not</Label>
-                <Textarea
-                  id="signature"
-                  value={form.watch("account.signature") ?? ""}
-                  onChange={(e) =>
-                    form.setValue("account.signature", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="genel" className="mt-4">
+          <GeneralSettingsTab form={form} />
         </TabsContent>
 
-        <TabsContent value="bildirim">
-          <Card id="notifications">
-            <CardHeader>
-              <CardTitle>Bildirim Tercihleri</CardTitle>
-              <CardDescription>
-                E-posta, SMS ve bildirim ayarları
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>E-posta Bildirimleri</Label>
-                <Switch
-                  checked={form.watch("notifications.email")}
-                  onCheckedChange={(v) =>
-                    form.setValue("notifications.email", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>SMS Bildirimleri</Label>
-                <Switch
-                  checked={form.watch("notifications.sms")}
-                  onCheckedChange={(v) =>
-                    form.setValue("notifications.sms", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>Anlık Bildirimler</Label>
-                <Switch
-                  checked={form.watch("notifications.push")}
-                  onCheckedChange={(v) =>
-                    form.setValue("notifications.push", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <Separator />
-              <div className="grid gap-2 max-w-xs">
-                <Label htmlFor="digestHour">Günlük Özet Saati</Label>
-                <Input
-                  id="digestHour"
-                  type="number"
-                  min={0}
-                  max={23}
-                  value={form.watch("notifications.digestHour")}
-                  onChange={(e) =>
-                    form.setValue(
-                      "notifications.digestHour",
-                      Number(e.target.value),
-                      { shouldValidate: true },
-                    )
-                  }
-                />
-                <p className="text-xs text-muted-foreground">
-                  0-23 arası bir saat
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="bildirim" className="mt-4">
+          <NotificationsSettingsTab form={form} />
         </TabsContent>
 
-        <TabsContent value="veri" className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Veri ve Yedekleme</CardTitle>
-              <CardDescription>Otomatik kaydetme ve yedekleme</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Otomatik Kaydet</Label>
-                <Switch
-                  checked={form.watch("data.autosave")}
-                  onCheckedChange={(v) =>
-                    form.setValue("data.autosave", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2 max-w-xs">
-                <Label htmlFor="autosaveInterval">
-                  Otomatik Kaydetme Aralığı (dk)
-                </Label>
-                <Input
-                  id="autosaveInterval"
-                  type="number"
-                  min={1}
-                  max={60}
-                  value={form.watch("data.autosaveInterval")}
-                  onChange={(e) =>
-                    form.setValue(
-                      "data.autosaveInterval",
-                      Number(e.target.value),
-                      { shouldValidate: true },
-                    )
-                  }
-                />
-              </div>
-              <div className="grid gap-2 max-w-xs">
-                <Label htmlFor="backupFrequency">Yedekleme Sıklığı</Label>
-                <Select
-                  value={form.watch("data.backupFrequency")}
-                  onValueChange={(v) =>
-                    form.setValue(
-                      "data.backupFrequency",
-                      v as AppSettings["data"]["backupFrequency"],
-                      { shouldValidate: true },
-                    )
-                  }
-                >
-                  <SelectTrigger id="backupFrequency">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="never">Kapalı</SelectItem>
-                    <SelectItem value="weekly">Haftalık</SelectItem>
-                    <SelectItem value="monthly">Aylık</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="anon"
-                  checked={form.watch("data.anonymizeOnExport")}
-                  onCheckedChange={(v) =>
-                    form.setValue("data.anonymizeOnExport", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-                <Label htmlFor="anon">
-                  Dışa aktarırken verileri anonimleştir
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Veri Tutarlılığı</CardTitle>
-              <CardDescription>
-                KVKK ve anonimleştirme uyarıları
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                KVKK kapsamında kişisel verilerin korunması için anonimleştirme
-                seçeneklerini etkinleştirebilirsiniz. Yedeklemeler yalnızca bu
-                tarayıcıya yerel olarak kaydedilir.
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="veri" className="mt-4">
+          <DataSettingsTab form={form} />
         </TabsContent>
 
-        <TabsContent value="entegrasyon" className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>MEBBİS</CardTitle>
-              <CardDescription>Rapor yükleme entegrasyonu</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Etkin</Label>
-                <Switch
-                  checked={form.watch("integrations.mebisEnabled")}
-                  onCheckedChange={(v) =>
-                    form.setValue("integrations.mebisEnabled", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="mebisToken">Erişim Anahtarı</Label>
-                <Input
-                  id="mebisToken"
-                  value={form.watch("integrations.mebisToken") ?? ""}
-                  onChange={(e) =>
-                    form.setValue("integrations.mebisToken", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>e-Okul</CardTitle>
-              <CardDescription>Öğrenci verisi senkronizasyonu</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Etkin</Label>
-                <Switch
-                  checked={form.watch("integrations.eokulEnabled")}
-                  onCheckedChange={(v) =>
-                    form.setValue("integrations.eokulEnabled", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="eokulApiKey">API Anahtarı</Label>
-                <Input
-                  id="eokulApiKey"
-                  value={form.watch("integrations.eokulApiKey") ?? ""}
-                  onChange={(e) =>
-                    form.setValue("integrations.eokulApiKey", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="entegrasyon" className="mt-4">
+          <IntegrationsSettingsTab form={form} />
         </TabsContent>
 
-        <TabsContent value="guvenlik" className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gizlilik ve Güvenlik</CardTitle>
-              <CardDescription>Analitik ve veri paylaşımı</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="analytics"
-                  checked={form.watch("privacy.analyticsEnabled")}
-                  onCheckedChange={(v) =>
-                    form.setValue("privacy.analyticsEnabled", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-                <Label htmlFor="analytics">
-                  Kullanım analitiklerini etkinleştir
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="share"
-                  checked={form.watch("privacy.dataSharingEnabled")}
-                  onCheckedChange={(v) =>
-                    form.setValue("privacy.dataSharingEnabled", !!v, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-                <Label htmlFor="share">
-                  Anonim veri paylaşımını etkinleştir
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card id="secure-reset">
-            <CardHeader>
-              <CardTitle>Güvenli Sıfırlama</CardTitle>
-              <CardDescription>
-                Ayarları varsayılana döndürmeden önce ek onay gereklidir.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" onClick={onExport}>
-                  Dışa Aktar (JSON)
-                </Button>
-                <span className="text-xs text-muted-foreground">
-                  İşlemden önce ayarlarınızı yedekleyin.
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="ack1"
-                  checked={ack1}
-                  onCheckedChange={(v) => setAck1(!!v)}
-                />
-                <Label htmlFor="ack1">
-                  Tüm ayarların sıfırlanacağını onaylıyorum
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="ack2"
-                  checked={ack2}
-                  onCheckedChange={(v) => setAck2(!!v)}
-                />
-                <Label htmlFor="ack2">
-                  Bu işlemin geri alınamayacağını anladım
-                </Label>
-              </div>
-              <div className="grid gap-2 max-w-sm">
-                <Label htmlFor="confirmEmail">E-posta ile doğrula</Label>
-                <Input
-                  id="confirmEmail"
-                  placeholder={
-                    form.watch("account.email") || "user@example.com"
-                  }
-                  value={confirmEmail}
-                  onChange={(e) => setConfirmEmail(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Kayıtlı e-posta adresinizi tam olarak yazın.
-                </p>
-              </div>
-              <div className="grid gap-2 max-w-sm">
-                <Label htmlFor="confirmCode">Onay ifadesi</Label>
-                <Input
-                  id="confirmCode"
-                  placeholder="SIFIRLA"
-                  value={confirmCode}
-                  onChange={(e) => setConfirmCode(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Devam etmek için SIFIRLA yazın.
-                </p>
-              </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    disabled={
-                      !(
-                        ack1 &&
-                        ack2 &&
-                        (confirmEmail || "") ===
-                          (form.watch("account.email") || "") &&
-                        (confirmCode || "").toUpperCase() === "SIFIRLA"
-                      )
-                    }
-                  >
-                    Varsayılana Döndür
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Ayarlara geri dönülsün mü?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tüm ayarlar varsayılana dönecek ve bu işlem geri alınamaz.
-                      Emin misiniz?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Vazgeç</AlertDialogCancel>
-                    <AlertDialogAction onClick={onReset}>
-                      Evet, sıfırla
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardContent>
-          </Card>
+        <TabsContent value="dersler" className="mt-4">
+          <CoursesSettingsTab />
         </TabsContent>
 
-        <TabsContent value="transfer">
-          <Card>
-            <CardHeader>
-              <CardTitle>Ayar Transferi</CardTitle>
-              <CardDescription>Yedek al veya içe aktar</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Button type="button" onClick={onExport}>
-                  Dışa Aktar (JSON)
-                </Button>
-                <div>
-                  <input
-                    id="importFile"
-                    type="file"
-                    accept="application/json"
-                    className="hidden"
-                    onChange={onImport}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      document.getElementById("importFile")?.click()
-                    }
-                  >
-                    İçe Aktar
-                  </Button>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Ayarlar yalnızca bu tarayıcıda yerel olarak saklanır.
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="sunum-sistemi" className="mt-4">
+          <PresentationSettingsTab form={form} />
         </TabsContent>
 
-        <TabsContent value="dersler">
-          {/* İçerik: Courses sayfasını göm */}
-          <EmbeddedCourses />
+        <TabsContent value="saatler" className="mt-4">
+          <ClassHoursSettingsTab form={form} />
         </TabsContent>
 
-        <TabsContent value="sunum-sistemi">
-          <div className="space-y-4">
-            <PresentationSystemEditor
-              tabs={form.watch("presentationSystem") || []}
-              onChange={(tabs) =>
-                form.setValue("presentationSystem", tabs, {
-                  shouldValidate: true,
-                })
-              }
-            />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="saatler">
-          <ClassPeriodsEditor
-            periods={form.watch("school.periods")}
-            onChange={(v) =>
-              form.setValue("school.periods", v, { shouldValidate: true })
-            }
+        <TabsContent value="guvenlik" className="mt-4">
+          <SecuritySettingsTab
+            form={form}
+            ack1={ack1}
+            setAck1={setAck1}
+            ack2={ack2}
+            setAck2={setAck2}
+            confirmEmail={confirmEmail}
+            setConfirmEmail={setConfirmEmail}
+            confirmCode={confirmCode}
+            setConfirmCode={setConfirmCode}
+            onReset={onReset}
+            onExport={onExport}
           />
+        </TabsContent>
+
+        <TabsContent value="transfer" className="mt-4">
+          <TransferSettingsTab onExport={onExport} onImport={onImport} />
         </TabsContent>
       </Tabs>
     </div>
