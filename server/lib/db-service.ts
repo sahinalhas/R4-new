@@ -579,11 +579,13 @@ export interface AppSettings {
   settings: string;
 }
 
-// Student functions with improved error handling
+// Student functions - delegated to students repository with error handling preserved
+import * as studentsRepository from '../features/students/repository/students.repository.js';
+
 export function loadStudents(): Student[] {
   try {
     ensureInitialized();
-    return statements.getStudents.all() as Student[];
+    return studentsRepository.loadStudents();
   } catch (error) {
     handleDbError('loadStudents', error);
     return [];
@@ -591,48 +593,13 @@ export function loadStudents(): Student[] {
 }
 
 export function saveStudents(students: Student[]): void {
-  // Input validation
   if (!Array.isArray(students)) {
     throw new Error('Students parameter must be an array');
   }
   
   try {
     ensureInitialized();
-    const transaction = getDatabase().transaction(() => {
-      try {
-        // Get existing student IDs
-        const existingStudents = statements.getStudents.all() as Student[];
-        const incomingIds = new Set(students.map(s => s.id));
-        
-        // Delete students not in the incoming array
-        for (const existing of existingStudents) {
-          if (!incomingIds.has(existing.id)) {
-            statements.deleteStudent.run(existing.id);
-          }
-        }
-        
-        // Upsert students from the incoming array
-        for (const student of students) {
-          // Validate each student before saving
-          if (!student.id || !student.name) {
-            throw new Error(`Invalid student data: missing required fields (id: ${student.id}, name: ${student.name})`);
-          }
-          
-          statements.upsertStudent.run(
-            student.id, student.name, student.email, student.phone,
-            student.birthDate, student.address, student.className,
-            student.enrollmentDate, student.status, student.avatar,
-            student.parentContact, student.notes
-          );
-        }
-      } catch (transactionError) {
-        // Transaction will automatically rollback on error
-        console.error('Transaction failed, rolling back:', transactionError);
-        throw transactionError;
-      }
-    });
-    
-    transaction();
+    studentsRepository.saveStudents(students);
   } catch (error) {
     handleDbError('saveStudents', error);
     throw error;
@@ -640,7 +607,6 @@ export function saveStudents(students: Student[]): void {
 }
 
 export function saveStudent(student: Student) {
-  // Input validation
   if (!student || typeof student !== 'object') {
     throw new Error('Student parameter is required and must be an object');
   }
@@ -650,47 +616,28 @@ export function saveStudent(student: Student) {
   
   try {
     ensureInitialized();
-    const existing = statements.getStudent.get(student.id);
-    if (existing) {
-      statements.updateStudent.run(
-        student.name, student.email, student.phone, student.birthDate,
-        student.address, student.className, student.status,
-        student.avatar, student.parentContact, student.notes,
-        student.id
-      );
-    } else {
-      statements.insertStudent.run(
-        student.id, student.name, student.email, student.phone,
-        student.birthDate, student.address, student.className,
-        student.enrollmentDate, student.status, student.avatar,
-        student.parentContact, student.notes
-      );
-    }
+    studentsRepository.saveStudent(student);
   } catch (error) {
     console.error('Error saving student:', error);
-    throw error; // Re-throw for proper error propagation
+    throw error;
   }
 }
 
 export function deleteStudent(id: string) {
   try {
     ensureInitialized();
-    statements.deleteStudent.run(id);
+    studentsRepository.deleteStudent(id);
   } catch (error) {
     console.error('Error deleting student:', error);
     throw error;
   }
 }
 
-// Academic Records functions
+// Academic Records functions - delegated to students repository with error handling preserved
 export function getAcademicsByStudent(studentId: string): AcademicRecord[] {
   try {
     ensureInitialized();
-    const records = statements.getAcademicsByStudent.all(studentId) as any[];
-    return records.map(record => ({
-      ...record,
-      exams: record.exams ? JSON.parse(record.exams) : []
-    }));
+    return studentsRepository.getAcademicsByStudent(studentId);
   } catch (error) {
     console.error('Error loading academic records:', error);
     return [];
@@ -700,15 +647,7 @@ export function getAcademicsByStudent(studentId: string): AcademicRecord[] {
 export function addAcademic(record: AcademicRecord): void {
   try {
     ensureInitialized();
-    const examsJson = record.exams ? JSON.stringify(record.exams) : null;
-    statements.insertAcademic.run(
-      record.studentId,
-      record.semester,
-      record.gpa !== undefined && record.gpa !== null ? record.gpa : null,
-      record.year,
-      examsJson,
-      record.notes || null
-    );
+    studentsRepository.addAcademic(record);
   } catch (error) {
     console.error('Error adding academic record:', error);
     throw error;
