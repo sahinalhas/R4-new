@@ -11,6 +11,10 @@ import documentsRouter from './documents/index.js';
 import coachingRouter from './coaching/index.js';
 import examsRouter from './exams/index.js';
 import sessionsRouter from './sessions/index.js';
+import healthRouter from './health/index.js';
+import specialEducationRouter from './special-education/index.js';
+import riskAssessmentRouter from './risk-assessment/index.js';
+import behaviorRouter from './behavior/index.js';
 
 /**
  * Feature Registry
@@ -18,7 +22,7 @@ import sessionsRouter from './sessions/index.js';
  * This is the central registry for all feature modules in the backend.
  * Each feature should export an Express Router from its index.ts file.
  * 
- * Migration Status: Stage 3 Wave 1 - COMPLETE! ✅
+ * Migration Status: Stage 3 Wave 2 - COMPLETE! ✅
  * 
  * Standard Feature Structure:
  * server/features/<feature-name>/
@@ -33,7 +37,8 @@ import sessionsRouter from './sessions/index.js';
  * - Stage 1: ✅ Core domains - students ✅ → surveys ✅ → progress ✅
  * - Stage 2: ✅ Adjacent domains - subjects ✅ → settings ✅ → attendance ✅ → study ✅ → meeting-notes ✅ → documents ✅
  * - Stage 3 Wave 1: ✅ Academic Data Cluster - coaching ✅ → exams ✅ → sessions ✅
- * - Stage 3 Wave 2: health, special-education, risk-assessment, behavior, counseling-sessions, auth
+ * - Stage 3 Wave 2: ✅ Student Support Cluster - health ✅ → special-education ✅ → risk-assessment ✅ → behavior ✅
+ * - Stage 3 Wave 3: counseling-sessions, auth
  * - Stage 4: Cleanup - remove legacy imports, delete old route files
  * 
  * STAGE 1 CANONICAL ORDER (COMPLETED):
@@ -67,6 +72,10 @@ export const featureRegistry = Router();
  * Stage 3.1: Coaching - ✅ Migrated (Wave 1: Academic Data Cluster)
  * Stage 3.2: Exams - ✅ Migrated (Wave 1: Academic Data Cluster)
  * Stage 3.3: Sessions - ✅ Migrated (Wave 1: Academic Data Cluster - WAVE 1 COMPLETE!)
+ * Stage 3.4: Health - ✅ Migrated (Wave 2: Student Support Cluster)
+ * Stage 3.5: Special Education - ✅ Migrated (Wave 2: Student Support Cluster)
+ * Stage 3.6: Risk Assessment - ✅ Migrated (Wave 2: Student Support Cluster)
+ * Stage 3.7: Behavior - ✅ Migrated (Wave 2: Student Support Cluster - WAVE 2 COMPLETE!)
  * 
  * Migrated features:
  * - students: Full CRUD operations, academics, progress, interventions
@@ -82,9 +91,13 @@ export const featureRegistry = Router();
  *            360 evaluations, achievements, self assessments, parent meetings, home visits, family participation
  * - exams: Exam results CRUD, exam analysis, progress tracking
  * - sessions: Study sessions CRUD operations
+ * - health: Health information CRUD, emergency contacts, medical history
+ * - special-education: IEP/BEP records CRUD, RAM reports, support services
+ * - risk-assessment: Risk factors CRUD, high-risk student queries, assessment tracking
+ * - behavior: Behavior incidents CRUD, statistics, date range queries
  * 
- * Next migrations (Stage 3 Wave 2):
- * - health, special-education, risk-assessment, behavior, counseling-sessions, auth
+ * Next migrations (Stage 3 Wave 3):
+ * - counseling-sessions, auth
  */
 
 featureRegistry.use('/students', studentsRouter);
@@ -99,5 +112,9 @@ featureRegistry.use('/', documentsRouter);
 featureRegistry.use('/coaching', coachingRouter);
 featureRegistry.use('/exams', examsRouter);
 featureRegistry.use('/study-sessions', sessionsRouter);
+featureRegistry.use('/health-info', healthRouter);
+featureRegistry.use('/special-education', specialEducationRouter);
+featureRegistry.use('/risk-factors', riskAssessmentRouter);
+featureRegistry.use('/behavior-incidents', behaviorRouter);
 
 export default featureRegistry;
