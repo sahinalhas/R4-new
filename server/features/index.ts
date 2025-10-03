@@ -7,6 +7,7 @@ import settingsRouter from './settings/index.js';
 import attendanceRouter from './attendance/index.js';
 import studyRouter from './study/index.js';
 import meetingNotesRouter from './meeting-notes/index.js';
+import documentsRouter from './documents/index.js';
 
 /**
  * Feature Registry
