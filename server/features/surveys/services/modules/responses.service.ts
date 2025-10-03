@@ -1,4 +1,4 @@
-import * as repository from '../../repository/surveys.repository.js';
+import * as repository from '../../repository/index.js';
 
 export function getResponses(filters?: { distributionId?: string; studentId?: string }) {
   return repository.loadSurveyResponses(filters);

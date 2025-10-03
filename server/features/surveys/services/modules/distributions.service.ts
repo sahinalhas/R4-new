@@ -1,4 +1,4 @@
-import * as repository from '../../repository/surveys.repository.js';
+import * as repository from '../../repository/index.js';
 import { sanitizeString } from '../../../../middleware/validation.js';
 
 export function getAllDistributions() {
