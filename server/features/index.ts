@@ -3,6 +3,7 @@ import studentsRouter from './students/index.js';
 import surveysRouter from './surveys/index.js';
 import progressRouter from './progress/index.js';
 import subjectsRouter from './subjects/index.js';
+import settingsRouter from './settings/index.js';
 
 /**
  * Feature Registry
@@ -10,7 +11,7 @@ import subjectsRouter from './subjects/index.js';
  * This is the central registry for all feature modules in the backend.
  * Each feature should export an Express Router from its index.ts file.
  * 
- * Migration Status: Stage 2 - In Progress (Stage 2.1 Complete!)
+ * Migration Status: Stage 2 - In Progress (Stage 2.2 Complete!)
  * 
  * Standard Feature Structure:
  * server/features/<feature-name>/
@@ -23,7 +24,7 @@ import subjectsRouter from './subjects/index.js';
  * Migration Strategy (5 Stages):
  * - Stage 0: ✅ Scaffolding complete
  * - Stage 1: ✅ Core domains - students ✅ → surveys ✅ → progress ✅
- * - Stage 2: Adjacent domains - subjects ✅ → attendance, study, meeting-notes, documents, settings
+ * - Stage 2: Adjacent domains - subjects ✅ → settings ✅ → attendance, study, meeting-notes, documents
  * - Stage 3: Peripheral routers - coaching, health, special-education, risk-assessment, behavior, exams, counseling-sessions, auth, sessions
  * - Stage 4: Cleanup - remove legacy imports, delete old route files
  * 
@@ -34,6 +35,7 @@ import subjectsRouter from './subjects/index.js';
  * 
  * STAGE 2 CANONICAL ORDER (IN PROGRESS):
  * 1. subjects (first adjacent domain - subjects and topics CRUD) ✅
+ * 2. settings (second adjacent domain - app settings management) ✅
  * 
  * Subsequent stages follow dependency minimization and risk reduction principles.
  */
@@ -45,20 +47,23 @@ export const featureRegistry = Router();
  * Stage 1.2: Surveys - ✅ Migrated
  * Stage 1.3: Progress - ✅ Migrated
  * Stage 2.1: Subjects - ✅ Migrated
+ * Stage 2.2: Settings - ✅ Migrated
  * 
  * Migrated features:
  * - students: Full CRUD operations, academics, progress, interventions
  * - surveys: Templates, Questions, Distributions, Responses, Analytics
  * - progress: Progress tracking and academic goals
  * - subjects: Subjects and topics CRUD operations
+ * - settings: App settings management (get, save)
  * 
  * Next migrations (Stage 2):
- * - attendance, study, meeting-notes, documents, settings
+ * - attendance, study, meeting-notes, documents
  */
 
 featureRegistry.use('/students', studentsRouter);
 featureRegistry.use('/surveys', surveysRouter);
 featureRegistry.use('/', progressRouter);
 featureRegistry.use('/', subjectsRouter);
+featureRegistry.use('/', settingsRouter);
 
 export default featureRegistry;
