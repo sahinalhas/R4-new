@@ -8,6 +8,9 @@ import attendanceRouter from './attendance/index.js';
 import studyRouter from './study/index.js';
 import meetingNotesRouter from './meeting-notes/index.js';
 import documentsRouter from './documents/index.js';
+import coachingRouter from './coaching/index.js';
+import examsRouter from './exams/index.js';
+import sessionsRouter from './sessions/index.js';
 
 /**
  * Feature Registry
@@ -15,7 +18,7 @@ import documentsRouter from './documents/index.js';
  * This is the central registry for all feature modules in the backend.
  * Each feature should export an Express Router from its index.ts file.
  * 
- * Migration Status: Stage 2 - COMPLETE! ✅
+ * Migration Status: Stage 3 Wave 1 - COMPLETE! ✅
  * 
  * Standard Feature Structure:
  * server/features/<feature-name>/
@@ -28,8 +31,9 @@ import documentsRouter from './documents/index.js';
  * Migration Strategy (5 Stages):
  * - Stage 0: ✅ Scaffolding complete
  * - Stage 1: ✅ Core domains - students ✅ → surveys ✅ → progress ✅
- * - Stage 2: Adjacent domains - subjects ✅ → settings ✅ → attendance, study, meeting-notes, documents
- * - Stage 3: Peripheral routers - coaching, health, special-education, risk-assessment, behavior, exams, counseling-sessions, auth, sessions
+ * - Stage 2: ✅ Adjacent domains - subjects ✅ → settings ✅ → attendance ✅ → study ✅ → meeting-notes ✅ → documents ✅
+ * - Stage 3 Wave 1: ✅ Academic Data Cluster - coaching ✅ → exams ✅ → sessions ✅
+ * - Stage 3 Wave 2: health, special-education, risk-assessment, behavior, counseling-sessions, auth
  * - Stage 4: Cleanup - remove legacy imports, delete old route files
  * 
  * STAGE 1 CANONICAL ORDER (COMPLETED):
@@ -60,6 +64,9 @@ export const featureRegistry = Router();
  * Stage 2.4: Study - ✅ Migrated
  * Stage 2.5: Meeting Notes - ✅ Migrated
  * Stage 2.6: Documents - ✅ Migrated (STAGE 2 COMPLETE!)
+ * Stage 3.1: Coaching - ✅ Migrated (Wave 1: Academic Data Cluster)
+ * Stage 3.2: Exams - ✅ Migrated (Wave 1: Academic Data Cluster)
+ * Stage 3.3: Sessions - ✅ Migrated (Wave 1: Academic Data Cluster - WAVE 1 COMPLETE!)
  * 
  * Migrated features:
  * - students: Full CRUD operations, academics, progress, interventions
@@ -71,9 +78,13 @@ export const featureRegistry = Router();
  * - study: Study assignments and weekly slots CRUD operations
  * - meeting-notes: Meeting notes CRUD operations (get, create, update, delete)
  * - documents: Student documents CRUD operations (get, create, delete)
+ * - coaching: Academic goals, multiple intelligence, learning styles, SMART goals, recommendations, 
+ *            360 evaluations, achievements, self assessments, parent meetings, home visits, family participation
+ * - exams: Exam results CRUD, exam analysis, progress tracking
+ * - sessions: Study sessions CRUD operations
  * 
- * Next migrations (Stage 3):
- * - coaching, health, special-education, risk-assessment, behavior, exams, counseling-sessions, auth, sessions
+ * Next migrations (Stage 3 Wave 2):
+ * - health, special-education, risk-assessment, behavior, counseling-sessions, auth
  */
 
 featureRegistry.use('/students', studentsRouter);
@@ -85,5 +96,8 @@ featureRegistry.use('/', attendanceRouter);
 featureRegistry.use('/', studyRouter);
 featureRegistry.use('/', meetingNotesRouter);
 featureRegistry.use('/', documentsRouter);
+featureRegistry.use('/coaching', coachingRouter);
+featureRegistry.use('/exams', examsRouter);
+featureRegistry.use('/study-sessions', sessionsRouter);
 
 export default featureRegistry;
