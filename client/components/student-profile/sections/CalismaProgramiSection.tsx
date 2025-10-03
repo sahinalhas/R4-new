@@ -1,5 +1,5 @@
-import WeeklySchedule from "@/pages/components/WeeklySchedule";
-import TopicPlanner from "@/pages/components/TopicPlanner";
+import WeeklySchedule from "@/components/student-profile/WeeklySchedule";
+import TopicPlanner from "@/components/student-profile/TopicPlanner";
 
 interface CalismaProgramiSectionProps {
   studentId: string;

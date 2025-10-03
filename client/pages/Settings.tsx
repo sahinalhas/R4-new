@@ -45,8 +45,8 @@ import {
   PresentationCategory,
 } from "@/lib/app-settings";
 import Courses from "@/pages/Courses";
-import ClassPeriodsEditor from "@/pages/components/ClassPeriodsEditor";
-import PresentationSystemEditor from "@/pages/components/PresentationSystemEditor";
+import ClassPeriodsEditor from "@/components/settings/ClassPeriodsEditor";
+import PresentationSystemEditor from "@/components/settings/PresentationSystemEditor";
 import { useSearchParams, useLocation } from "react-router-dom";
 
 const schema = z.object({
