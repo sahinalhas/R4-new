@@ -41,7 +41,23 @@ The application uses a modern full-stack architecture:
 - **Utilities**: types.ts, sessionHelpers.ts, sessionExport.ts
 - Main page reduced from 1,419 lines to 351 lines (75% reduction)
 
+**Settings Components** (`client/components/settings/`):
+- **Tab Components**: GeneralSettingsTab, NotificationsSettingsTab, DataSettingsTab, IntegrationsSettingsTab, CoursesSettingsTab, PresentationSettingsTab, ClassHoursSettingsTab, SecuritySettingsTab, TransferSettingsTab
+- **Shared Editors**: ClassPeriodsEditor, PresentationSystemEditor
+- Main page reduced from 870 lines to 280 lines (68% reduction)
+- Each tab encapsulates its own UI logic while sharing form state
+
 ## Recent Changes
+**October 3, 2025** - Major refactoring: Settings.tsx modularization
+- Refactored Settings.tsx from 870 lines to 280 lines (68% reduction)
+- Created 9 focused tab components in `client/components/settings/`
+- Each tab (General, Notifications, Data, Integrations, Courses, Presentation, ClassHours, Security, Transfer) is now a separate component
+- Main Settings page now handles only form lifecycle, routing sync, and theme side effects
+- All tabs share form state via react-hook-form for consistent data management
+- Preserved all existing functionality including save/reset/import/export
+- LSP validation passed - no TypeScript errors
+- Application tested and working correctly
+
 **October 3, 2025** - Major refactoring: CounselingSessions modularization
 - Refactored CounselingSessions.tsx from 1,419 lines to 351 lines (75% reduction)
 - Created 11 focused, reusable components in `client/components/counseling/`
