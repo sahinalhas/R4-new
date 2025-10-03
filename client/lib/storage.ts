@@ -18,6 +18,7 @@ export * from "./api/study.api";
 export * from "./api/coaching.api";
 export * from "./api/family.api";
 export * from "./api/risk.api";
+export * from "./api/student-profile.api";
 
 export * from "./utils/templates";
 export * from "./utils/study-planning";
