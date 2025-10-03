@@ -191,29 +191,6 @@ export async function removeTopicsBySubject(subjectId: string): Promise<void> {
   await loadTopicsAsync();
 }
 
-export function loadAssignments(): StudyAssignment[] {
-  return [];
-}
-
-export function saveAssignments(v: StudyAssignment[]) {
-  console.warn('saveAssignments is deprecated');
-}
-
-export function getAssignmentsByStudent(studentId: string) {
-  return loadAssignments().filter((a) => a.studentId === studentId);
-}
-
-export function addAssignment(a: StudyAssignment) {
-  const list = loadAssignments();
-  list.unshift(a);
-  saveAssignments(list);
-}
-
-export function removeAssignment(id: string) {
-  const list = loadAssignments().filter((a) => a.id !== id);
-  saveAssignments(list);
-}
-
 export function loadWeeklySlots(): WeeklySlot[] {
   if (weeklySlotsCache !== null) {
     return weeklySlotsCache;

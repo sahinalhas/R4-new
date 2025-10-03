@@ -24,10 +24,6 @@ export async function loadAcademics(studentId: string): Promise<AcademicRecord[]
   }
 }
 
-export function saveAcademics(list: AcademicRecord[]) {
-  console.warn('saveAcademics is deprecated. Use addAcademic for individual records.');
-}
-
 export async function getAcademicsByStudent(studentId: string): Promise<AcademicRecord[]> {
   return loadAcademics(studentId);
 }
@@ -65,15 +61,6 @@ export async function addAcademic(a: AcademicRecord): Promise<void> {
     toast.error('Akademik kayıt eklenemedi');
     throw error;
   }
-}
-
-export async function loadInterventions(): Promise<Intervention[]> {
-  console.warn('loadInterventions is deprecated. Use getInterventionsByStudent instead.');
-  return [];
-}
-
-export async function saveInterventions(list: Intervention[]): Promise<void> {
-  console.warn('saveInterventions is deprecated. Use addIntervention for individual records.');
 }
 
 export async function getInterventionsByStudent(studentId: string): Promise<Intervention[]> {

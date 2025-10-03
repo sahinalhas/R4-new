@@ -1,15 +1,6 @@
 import { toast } from "sonner";
 import type { ParentMeeting, HomeVisit, FamilyParticipation } from "../types/family.types";
 
-export async function loadParentMeetings(): Promise<ParentMeeting[]> {
-  console.warn('loadParentMeetings deprecated. Use getParentMeetingsByStudent instead.');
-  return [];
-}
-
-export async function saveParentMeetings(list: ParentMeeting[]): Promise<void> {
-  console.warn('saveParentMeetings deprecated. Use addParentMeeting instead.');
-}
-
 export async function getParentMeetingsByStudent(studentId: string): Promise<ParentMeeting[]> {
   try {
     const response = await fetch(`/api/coaching/parent-meetings/student/${studentId}`);
@@ -54,15 +45,6 @@ export async function updateParentMeeting(id: string, updates: Partial<ParentMee
   }
 }
 
-export async function loadHomeVisits(): Promise<HomeVisit[]> {
-  console.warn('loadHomeVisits deprecated. Use getHomeVisitsByStudent instead.');
-  return [];
-}
-
-export async function saveHomeVisits(list: HomeVisit[]): Promise<void> {
-  console.warn('saveHomeVisits deprecated. Use addHomeVisit instead.');
-}
-
 export async function getHomeVisitsByStudent(studentId: string): Promise<HomeVisit[]> {
   try {
     const response = await fetch(`/api/coaching/home-visits/student/${studentId}`);
@@ -105,15 +87,6 @@ export async function updateHomeVisit(id: string, updates: Partial<HomeVisit>): 
     toast.error('Ev ziyareti güncellenemedi');
     throw error;
   }
-}
-
-export async function loadFamilyParticipations(): Promise<FamilyParticipation[]> {
-  console.warn('loadFamilyParticipations deprecated. Use getFamilyParticipationsByStudent instead.');
-  return [];
-}
-
-export async function saveFamilyParticipations(list: FamilyParticipation[]): Promise<void> {
-  console.warn('saveFamilyParticipations deprecated. Use addFamilyParticipation instead.');
 }
 
 export async function getFamilyParticipationsByStudent(studentId: string): Promise<FamilyParticipation[]> {

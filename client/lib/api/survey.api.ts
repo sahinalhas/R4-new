@@ -38,10 +38,6 @@ export async function loadSurveyResults(): Promise<SurveyResult[]> {
   }
 }
 
-export async function saveSurveyResults(list: SurveyResult[]): Promise<void> {
-  console.warn('saveSurveyResults is deprecated. Use createSurveyResponse instead.');
-}
-
 export async function getSurveyResultsByStudent(studentId: string): Promise<SurveyResult[]> {
   try {
     const response = await fetch(`/api/survey-responses?studentId=${encodeURIComponent(studentId)}`);

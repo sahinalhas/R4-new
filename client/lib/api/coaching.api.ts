@@ -24,10 +24,6 @@ export async function loadAcademicGoals(): Promise<AcademicGoal[]> {
   }
 }
 
-export async function saveAcademicGoals(list: AcademicGoal[]): Promise<void> {
-  console.warn('saveAcademicGoals deprecated. Use addAcademicGoal or updateAcademicGoal instead.');
-}
-
 export async function getAcademicGoalsByStudent(studentId: string): Promise<AcademicGoal[]> {
   try {
     const response = await fetch(`/api/coaching/academic-goals/student/${studentId}`);
@@ -72,15 +68,6 @@ export async function updateAcademicGoal(id: string, updates: Partial<AcademicGo
   }
 }
 
-export async function loadMultipleIntelligence(): Promise<MultipleIntelligence[]> {
-  console.warn('loadMultipleIntelligence deprecated. Use getMultipleIntelligenceByStudent instead.');
-  return [];
-}
-
-export async function saveMultipleIntelligence(list: MultipleIntelligence[]): Promise<void> {
-  console.warn('saveMultipleIntelligence deprecated. Use addMultipleIntelligence instead.');
-}
-
 export async function getMultipleIntelligenceByStudent(studentId: string): Promise<MultipleIntelligence | undefined> {
   try {
     const response = await fetch(`/api/coaching/multiple-intelligence/student/${studentId}`);
@@ -110,15 +97,6 @@ export async function addMultipleIntelligence(mi: MultipleIntelligence): Promise
   }
 }
 
-export async function loadLearningStyles(): Promise<LearningStyle[]> {
-  console.warn('loadLearningStyles deprecated. Use getLearningStyleByStudent instead.');
-  return [];
-}
-
-export async function saveLearningStyles(list: LearningStyle[]): Promise<void> {
-  console.warn('saveLearningStyles deprecated. Use addLearningStyle instead.');
-}
-
 export async function getLearningStyleByStudent(studentId: string): Promise<LearningStyle | undefined> {
   try {
     const response = await fetch(`/api/coaching/learning-styles/student/${studentId}`);
@@ -146,15 +124,6 @@ export async function addLearningStyle(ls: LearningStyle): Promise<void> {
     toast.error('Öğrenme stili eklenemedi');
     throw error;
   }
-}
-
-export async function loadSmartGoals(): Promise<SmartGoal[]> {
-  console.warn('loadSmartGoals deprecated. Use getSmartGoalsByStudent instead.');
-  return [];
-}
-
-export async function saveSmartGoals(list: SmartGoal[]): Promise<void> {
-  console.warn('saveSmartGoals deprecated. Use addSmartGoal or updateSmartGoal instead.');
 }
 
 export async function getSmartGoalsByStudent(studentId: string): Promise<SmartGoal[]> {
@@ -201,15 +170,6 @@ export async function updateSmartGoal(id: string, updates: Partial<SmartGoal>): 
   }
 }
 
-export async function loadCoachingRecommendations(): Promise<CoachingRecommendation[]> {
-  console.warn('loadCoachingRecommendations deprecated. Use getCoachingRecommendationsByStudent instead.');
-  return [];
-}
-
-export async function saveCoachingRecommendations(list: CoachingRecommendation[]): Promise<void> {
-  console.warn('saveCoachingRecommendations deprecated. Use addCoachingRecommendation instead.');
-}
-
 export async function getCoachingRecommendationsByStudent(studentId: string): Promise<CoachingRecommendation[]> {
   try {
     const response = await fetch(`/api/coaching/coaching-recommendations/student/${studentId}`);
@@ -254,15 +214,6 @@ export async function updateCoachingRecommendation(id: string, updates: Partial<
   }
 }
 
-export async function loadEvaluations360(): Promise<Evaluation360[]> {
-  console.warn('loadEvaluations360 deprecated. Use getEvaluations360ByStudent instead.');
-  return [];
-}
-
-export async function saveEvaluations360(list: Evaluation360[]): Promise<void> {
-  console.warn('saveEvaluations360 deprecated. Use addEvaluation360 instead.');
-}
-
 export async function getEvaluations360ByStudent(studentId: string): Promise<Evaluation360[]> {
   try {
     const response = await fetch(`/api/coaching/evaluations-360/student/${studentId}`);
@@ -291,15 +242,6 @@ export async function addEvaluation360(evaluation: Evaluation360): Promise<void>
   }
 }
 
-export async function loadAchievements(): Promise<Achievement[]> {
-  console.warn('loadAchievements deprecated. Use getAchievementsByStudent instead.');
-  return [];
-}
-
-export async function saveAchievements(list: Achievement[]): Promise<void> {
-  console.warn('saveAchievements deprecated. Use addAchievement instead.');
-}
-
 export async function getAchievementsByStudent(studentId: string): Promise<Achievement[]> {
   try {
     const response = await fetch(`/api/coaching/achievements/student/${studentId}`);
@@ -326,15 +268,6 @@ export async function addAchievement(achievement: Achievement): Promise<void> {
     toast.error('Başarı eklenemedi');
     throw error;
   }
-}
-
-export async function loadSelfAssessments(): Promise<SelfAssessment[]> {
-  console.warn('loadSelfAssessments deprecated. Use getSelfAssessmentsByStudent instead.');
-  return [];
-}
-
-export async function saveSelfAssessments(list: SelfAssessment[]): Promise<void> {
-  console.warn('saveSelfAssessments deprecated. Use addSelfAssessment instead.');
 }
 
 export async function getSelfAssessmentsByStudent(studentId: string): Promise<SelfAssessment[]> {

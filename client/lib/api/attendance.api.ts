@@ -16,10 +16,6 @@ export async function loadAttendance(): Promise<AttendanceRecord[]> {
   }
 }
 
-export async function saveAttendance(list: AttendanceRecord[]): Promise<void> {
-  console.warn('saveAttendance is deprecated. Use addAttendance for individual records.');
-}
-
 export async function getAttendanceByStudent(studentId: string): Promise<AttendanceRecord[]> {
   try {
     const response = await fetch(`/api/attendance/${studentId}`);
