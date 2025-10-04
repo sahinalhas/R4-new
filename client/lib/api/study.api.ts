@@ -183,12 +183,7 @@ async function loadWeeklySlotsAsync(): Promise<void> {
       weeklySlotsCache = slots;
       window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
     },
-    () => {
-      if (!weeklySlotsCache || weeklySlotsCache.length === 0) {
-        weeklySlotsCache = [];
-        window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
-      }
-    },
+    undefined,
     API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_LOAD_ERROR
   )();
 }
