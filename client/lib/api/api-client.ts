@@ -1,16 +1,17 @@
 import { toast } from "sonner";
+import { 
+  InterceptorManager, 
+  ToastConfig,
+  createDefaultErrorInterceptor,
+  createDefaultSuccessInterceptor
+} from "./api-interceptors";
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-export interface ApiRequestConfig<T = unknown> {
+export interface ApiRequestConfig<T = unknown> extends ToastConfig {
   method?: HttpMethod;
   body?: T;
   headers?: Record<string, string>;
-  showSuccessToast?: boolean;
-  successMessage?: string;
-  showErrorToast?: boolean;
-  errorMessage?: string;
-  errorDescription?: string;
 }
 
 export interface ApiResponse<T> {
@@ -23,6 +24,8 @@ class ApiClient {
   private baseHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
+
+  private interceptors = new InterceptorManager();
 
   async request<TResponse = unknown, TBody = unknown>(
     endpoint: string,
@@ -39,12 +42,29 @@ class ApiClient {
       errorDescription,
     } = config;
 
+    const toastConfig: ToastConfig = {
+      showSuccessToast,
+      successMessage,
+      showErrorToast,
+      errorMessage,
+      errorDescription,
+    };
+
+    const errorInterceptor = createDefaultErrorInterceptor(toastConfig);
+    const successInterceptor = createDefaultSuccessInterceptor(toastConfig);
+
     try {
-      const response = await fetch(endpoint, {
+      let requestConfig: RequestInit = {
         method,
         headers: { ...this.baseHeaders, ...headers },
         body: body ? JSON.stringify(body) : undefined,
-      });
+      };
+
+      requestConfig = await this.interceptors.applyRequestInterceptors(requestConfig, endpoint);
+
+      let response = await fetch(endpoint, requestConfig);
+      
+      response = await this.interceptors.applyResponseInterceptors(response, endpoint);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -54,21 +74,20 @@ class ApiClient {
 
       const data = await response.json().catch(() => null);
 
-      if (showSuccessToast && successMessage) {
-        toast.success(successMessage);
+      if (toastConfig.showSuccessToast && toastConfig.successMessage) {
+        toast.success(toastConfig.successMessage);
       }
 
       return data as TResponse;
     } catch (error) {
-      console.error(`API Error [${method} ${endpoint}]:`, error);
-
-      if (showErrorToast) {
-        const errMsg = errorMessage || 'İşlem sırasında bir hata oluştu';
-        toast.error(errMsg, errorDescription ? { description: errorDescription } : undefined);
-      }
-
+      await errorInterceptor(error as Error, endpoint, method);
+      await this.interceptors.applyErrorInterceptors(error as Error, endpoint, method);
       throw error;
     }
+  }
+
+  getInterceptors(): InterceptorManager {
+    return this.interceptors;
   }
 
   async get<TResponse = unknown>(

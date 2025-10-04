@@ -3,60 +3,10 @@
 
 import React from "react";
 import { CACHE_TTL, CACHE_LIMITS, CHART_OPTIMIZATION, DEFAULT_MAX_DATA_POINTS } from "./constants/cache.constants";
+import { CacheManager } from "./cache/cache-manager";
+import { BackgroundProcessor } from "./cache/background-processor";
 
-// =================== CACHE IMPLEMENTATION ===================
-
-interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-  ttl: number;
-}
-
-class AnalyticsCache {
-  private cache = new Map<string, CacheEntry<any>>();
-  private readonly DEFAULT_TTL = CACHE_TTL.DEFAULT;
-
-  set<T>(key: string, data: T, ttl = this.DEFAULT_TTL): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl,
-    });
-  }
-
-  get<T>(key: string): T | null {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-
-    // Check if expired
-    if (Date.now() - entry.timestamp > entry.ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return entry.data;
-  }
-
-  invalidate(pattern?: string): void {
-    if (!pattern) {
-      this.cache.clear();
-      return;
-    }
-
-    // Remove keys matching pattern
-    for (const key of this.cache.keys()) {
-      if (key.includes(pattern)) {
-        this.cache.delete(key);
-      }
-    }
-  }
-
-  size(): number {
-    return this.cache.size;
-  }
-}
-
-export const analyticsCache = new AnalyticsCache();
+export const analyticsCache = new CacheManager(CACHE_TTL.DEFAULT);
 
 // =================== MEMOIZATION HELPERS ===================
 
@@ -92,71 +42,10 @@ export function memoize<T extends (...args: any[]) => any>(
   }) as T;
 }
 
-// =================== BACKGROUND CALCULATIONS ===================
-
-class BackgroundProcessor {
-  private pendingTasks = new Set<string>();
-
-  async calculateInBackground<T>(
-    taskId: string,
-    calculation: () => T,
-    onComplete?: (result: T) => void
-  ): Promise<T> {
-    // Check if already in progress
-    if (this.pendingTasks.has(taskId)) {
-      return new Promise((resolve) => {
-        const checkComplete = () => {
-          const cached = analyticsCache.get<T>(taskId);
-          if (cached) {
-            resolve(cached);
-          } else {
-            setTimeout(checkComplete, CACHE_LIMITS.BACKGROUND_TASK_CHECK_INTERVAL);
-          }
-        };
-        checkComplete();
-      });
-    }
-
-    // Check cache first
-    const cached = analyticsCache.get<T>(taskId);
-    if (cached) {
-      return cached;
-    }
-
-    this.pendingTasks.add(taskId);
-
-    try {
-      // For complex calculations, use setTimeout to not block UI
-      const result = await new Promise<T>((resolve) => {
-        setTimeout(() => {
-          const calculatedResult = calculation();
-          resolve(calculatedResult);
-        }, 0);
-      });
-
-      // Cache the result
-      analyticsCache.set(taskId, result);
-      
-      if (onComplete) {
-        onComplete(result);
-      }
-
-      return result;
-    } finally {
-      this.pendingTasks.delete(taskId);
-    }
-  }
-
-  isProcessing(taskId: string): boolean {
-    return this.pendingTasks.has(taskId);
-  }
-
-  cancelTask(taskId: string): void {
-    this.pendingTasks.delete(taskId);
-  }
-}
-
-export const backgroundProcessor = new BackgroundProcessor();
+export const backgroundProcessor = new BackgroundProcessor({
+  cacheManager: analyticsCache,
+  checkInterval: CACHE_LIMITS.BACKGROUND_TASK_CHECK_INTERVAL
+});
 
 // =================== CHART OPTIMIZATION ===================
 
@@ -296,7 +185,7 @@ export function useOptimizedCalculation<T>(
     
     // Run calculation in background
     backgroundProcessor
-      .calculateInBackground(key, calculation)
+      .process(key, calculation)
       .then((calculatedResult) => {
         setResult(calculatedResult);
         setIsLoading(false);
