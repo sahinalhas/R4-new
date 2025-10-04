@@ -62,69 +62,65 @@ import authRouter from './auth/index.js';
 export const featureRegistry = Router();
 
 /**
- * Stage 1.1: Students - ✅ Migrated
- * Stage 1.2: Surveys - ✅ Migrated
- * Stage 1.3: Progress - ✅ Migrated
- * Stage 2.1: Subjects - ✅ Migrated
- * Stage 2.2: Settings - ✅ Migrated
- * Stage 2.3: Attendance - ✅ Migrated
- * Stage 2.4: Study - ✅ Migrated
- * Stage 2.5: Meeting Notes - ✅ Migrated
- * Stage 2.6: Documents - ✅ Migrated (STAGE 2 COMPLETE!)
- * Stage 3.1: Coaching - ✅ Migrated (Wave 1: Academic Data Cluster)
- * Stage 3.2: Exams - ✅ Migrated (Wave 1: Academic Data Cluster)
- * Stage 3.3: Sessions - ✅ Migrated (Wave 1: Academic Data Cluster - WAVE 1 COMPLETE!)
- * Stage 3.4: Health - ✅ Migrated (Wave 2: Student Support Cluster)
- * Stage 3.5: Special Education - ✅ Migrated (Wave 2: Student Support Cluster)
- * Stage 3.6: Risk Assessment - ✅ Migrated (Wave 2: Student Support Cluster)
- * Stage 3.7: Behavior - ✅ Migrated (Wave 2: Student Support Cluster - WAVE 2 COMPLETE!)
- * Stage 3.8: Counseling Sessions - ✅ Migrated (Wave 3: Cross-cutting/Stateful Features)
- * Stage 3.9: Auth - ✅ Migrated (Wave 3: Cross-cutting/Stateful Features - STAGE 3 COMPLETE!)
+ * =================== DOMAIN-BASED FEATURE ORGANIZATION ===================
  * 
- * Migrated features:
- * - students: Full CRUD operations, academics, progress, interventions
- * - surveys: Templates, Questions, Distributions, Responses, Analytics
- * - progress: Progress tracking and academic goals
- * - subjects: Subjects and topics CRUD operations
- * - settings: App settings management (get, save)
- * - attendance: Attendance tracking (get by student, create)
- * - study: Study assignments and weekly slots CRUD operations
- * - meeting-notes: Meeting notes CRUD operations (get, create, update, delete)
- * - documents: Student documents CRUD operations (get, create, delete)
- * - coaching: Academic goals, multiple intelligence, learning styles, SMART goals, recommendations, 
- *            360 evaluations, achievements, self assessments, parent meetings, home visits, family participation
- * - exams: Exam results CRUD, exam analysis, progress tracking
- * - sessions: Study sessions CRUD operations
- * - health: Health information CRUD, emergency contacts, medical history
- * - special-education: IEP/BEP records CRUD, RAM reports, support services
- * - risk-assessment: Risk factors CRUD, high-risk student queries, assessment tracking
- * - behavior: Behavior incidents CRUD, statistics, date range queries
- * - counseling-sessions: Counseling session CRUD with student relationships, group/individual sessions,
- *                       JOIN queries with students table, transactional junction table operations,
- *                       session completion, extension, auto-complete functionality
- * - auth: User session management (get, save, update, delete), JSON serialization, demoNoticeSeen handling
+ * Features are organized into logical domains for better maintainability:
  * 
- * Next stage (Stage 4):
- * - Cleanup: remove legacy imports, delete old route files
+ * 1. CORE DOMAIN - Foundation entities
+ *    - students: Student management, CRUD operations
+ * 
+ * 2. ACADEMIC DOMAIN - Educational tracking and performance
+ *    - subjects: Subjects and topics CRUD
+ *    - progress: Progress tracking and academic goals
+ *    - attendance: Attendance tracking
+ *    - exams: Exam results and analysis
+ *    - coaching: Academic goals, SMART goals, 360 evaluations
+ *    - sessions: Study sessions CRUD
+ *    - study: Study assignments and weekly slots
+ * 
+ * 3. STUDENT SUPPORT DOMAIN - Wellbeing and specialized services
+ *    - health: Health information, emergency contacts, medical history
+ *    - special-education: IEP/BEP records, RAM reports, support services
+ *    - risk-assessment: Risk factors, high-risk student queries
+ *    - behavior: Behavior incidents, statistics
+ *    - counseling-sessions: Individual/group counseling sessions
+ * 
+ * 4. COMMUNICATION DOMAIN - Engagement and feedback
+ *    - surveys: Templates, questions, distributions, responses, analytics
+ *    - meeting-notes: Meeting notes CRUD
+ *    - documents: Student documents CRUD
+ * 
+ * 5. SYSTEM DOMAIN - Configuration and authentication
+ *    - settings: App settings management
+ *    - auth: User session management
  */
 
+// =================== CORE DOMAIN ===================
 featureRegistry.use('/students', studentsRouter);
-featureRegistry.use('/', surveysRouter);
-featureRegistry.use('/', progressRouter);
+
+// =================== ACADEMIC DOMAIN ===================
 featureRegistry.use('/', subjectsRouter);
-featureRegistry.use('/', settingsRouter);
+featureRegistry.use('/', progressRouter);
 featureRegistry.use('/', attendanceRouter);
-featureRegistry.use('/', studyRouter);
-featureRegistry.use('/', meetingNotesRouter);
-featureRegistry.use('/', documentsRouter);
-featureRegistry.use('/coaching', coachingRouter);
 featureRegistry.use('/exams', examsRouter);
+featureRegistry.use('/coaching', coachingRouter);
 featureRegistry.use('/study-sessions', sessionsRouter);
+featureRegistry.use('/', studyRouter);
+
+// =================== STUDENT SUPPORT DOMAIN ===================
 featureRegistry.use('/health-info', healthRouter);
 featureRegistry.use('/special-education', specialEducationRouter);
 featureRegistry.use('/risk-factors', riskAssessmentRouter);
 featureRegistry.use('/behavior-incidents', behaviorRouter);
 featureRegistry.use('/counseling-sessions', counselingSessionsRouter);
+
+// =================== COMMUNICATION DOMAIN ===================
+featureRegistry.use('/', surveysRouter);
+featureRegistry.use('/', meetingNotesRouter);
+featureRegistry.use('/', documentsRouter);
+
+// =================== SYSTEM DOMAIN ===================
+featureRegistry.use('/', settingsRouter);
 featureRegistry.use('/session', authRouter);
 
 export default featureRegistry;
