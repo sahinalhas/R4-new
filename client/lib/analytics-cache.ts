@@ -2,18 +2,19 @@
 // Implements caching, memoization, and background calculations
 
 import React from "react";
+import { CACHE_TTL, CACHE_LIMITS, CHART_OPTIMIZATION, DEFAULT_MAX_DATA_POINTS } from "./constants/cache.constants";
 
 // =================== CACHE IMPLEMENTATION ===================
 
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
-  ttl: number; // Time to live in milliseconds
+  ttl: number;
 }
 
 class AnalyticsCache {
   private cache = new Map<string, CacheEntry<any>>();
-  private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+  private readonly DEFAULT_TTL = CACHE_TTL.DEFAULT;
 
   set<T>(key: string, data: T, ttl = this.DEFAULT_TTL): void {
     this.cache.set(key, {
@@ -64,7 +65,7 @@ export function memoize<T extends (...args: any[]) => any>(
   keyFn?: (...args: Parameters<T>) => string
 ): T {
   const cache = new Map<string, { result: ReturnType<T>; timestamp: number }>();
-  const TTL = 2 * 60 * 1000; // 2 minutes
+  const TTL = CACHE_TTL.MEMOIZE;
 
   return ((...args: Parameters<T>): ReturnType<T> => {
     const key = keyFn ? keyFn(...args) : JSON.stringify(args);
@@ -79,7 +80,7 @@ export function memoize<T extends (...args: any[]) => any>(
     cache.set(key, { result, timestamp: now });
     
     // Clean old entries periodically
-    if (cache.size > 100) {
+    if (cache.size > CACHE_LIMITS.MAX_MEMOIZE_ENTRIES) {
       for (const [k, v] of cache.entries()) {
         if (now - v.timestamp > TTL) {
           cache.delete(k);
@@ -109,7 +110,7 @@ class BackgroundProcessor {
           if (cached) {
             resolve(cached);
           } else {
-            setTimeout(checkComplete, 100);
+            setTimeout(checkComplete, CACHE_LIMITS.BACKGROUND_TASK_CHECK_INTERVAL);
           }
         };
         checkComplete();
@@ -166,30 +167,11 @@ export interface ChartOptimization {
   useWebGL: boolean;
 }
 
-export const CHART_OPTIMIZATION_CONFIGS = {
-  small: {
-    useVirtualization: false,
-    maxDataPoints: 100,
-    updateThrottle: 250,
-    useWebGL: false,
-  },
-  medium: {
-    useVirtualization: true,
-    maxDataPoints: 500,
-    updateThrottle: 500,
-    useWebGL: false,
-  },
-  large: {
-    useVirtualization: true,
-    maxDataPoints: 1000,
-    updateThrottle: 1000,
-    useWebGL: true,
-  },
-} as const;
+export const CHART_OPTIMIZATION_CONFIGS = CHART_OPTIMIZATION;
 
 export function optimizeChartData<T>(
   data: T[],
-  maxPoints: number = 100
+  maxPoints: number = DEFAULT_MAX_DATA_POINTS
 ): T[] {
   if (data.length <= maxPoints) return data;
 
@@ -254,8 +236,8 @@ export class PerformanceMonitor {
     const values = this.metrics.get(operation)!;
     values.push(value);
     
-    // Keep only last 100 measurements
-    if (values.length > 100) {
+    // Keep only last measurements
+    if (values.length > CACHE_LIMITS.MAX_PERFORMANCE_METRICS) {
       values.shift();
     }
   }
@@ -383,11 +365,11 @@ export function invalidateAllAnalyticsCache(): void {
   analyticsCache.invalidate();
 }
 
-// Auto-cleanup cache every 10 minutes
+// Auto-cleanup cache periodically
 if (typeof window !== 'undefined') {
   setInterval(() => {
     // This automatically happens in the cache get method
     // but this ensures periodic cleanup
     analyticsCache.invalidate();
-  }, 10 * 60 * 1000);
+  }, CACHE_TTL.AUTO_CLEANUP);
 }

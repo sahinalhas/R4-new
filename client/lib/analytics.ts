@@ -24,6 +24,8 @@ import {
   memoize,
   performanceMonitor,
 } from "./analytics-cache";
+import { ANALYTICS_THRESHOLDS, ANALYTICS_WEIGHTS, ANALYTICS_DEFAULTS, RISK_LEVEL_MAP, WARNING_PRIORITY } from "./constants/analytics.constants";
+import { ANALYTICS_MESSAGES } from "./constants/messages.constants";
 
 // =================== TYP TANIMLARI ===================
 
@@ -158,7 +160,7 @@ export function calculateStudyConsistency(sessions: StudySession[]): number {
   if (sessions.length === 0) return 0;
 
   const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - ANALYTICS_DEFAULTS.STUDY_PERIOD_DAYS);
   
   const recentSessions = sessions.filter(s => 
     new Date(s.date) >= thirtyDaysAgo
@@ -175,7 +177,7 @@ export function calculateStudyConsistency(sessions: StudySession[]): number {
   });
 
   const studyDays = dailyStudyTime.size;
-  const totalDays = 30;
+  const totalDays = ANALYTICS_DEFAULTS.STUDY_PERIOD_DAYS;
   
   return Math.min(1, studyDays / totalDays);
 }
@@ -192,31 +194,30 @@ async function _calculateRiskScore(studentId: string): Promise<number> {
   let factors = 0;
 
   const attendanceRate = calculateAttendanceRate(data.attendance);
-  if (attendanceRate < 0.8) {
-    riskScore += (0.8 - attendanceRate) * 1.5;
+  if (attendanceRate < ANALYTICS_THRESHOLDS.ATTENDANCE.GOOD) {
+    riskScore += (ANALYTICS_THRESHOLDS.ATTENDANCE.GOOD - attendanceRate) * ANALYTICS_WEIGHTS.RISK_FACTORS.ATTENDANCE;
     factors++;
   }
 
   const academicTrend = calculateAcademicTrend(data.academics);
-  if (academicTrend < -0.3) {
-    riskScore += Math.abs(academicTrend) * 1.2;
+  if (academicTrend < ANALYTICS_THRESHOLDS.ACADEMIC_TREND.NEGATIVE) {
+    riskScore += Math.abs(academicTrend) * ANALYTICS_WEIGHTS.RISK_FACTORS.ACADEMIC;
     factors++;
   }
 
   const studyConsistency = calculateStudyConsistency(data.studySessions);
-  if (studyConsistency < 0.5) {
-    riskScore += (0.5 - studyConsistency) * 1.0;
+  if (studyConsistency < ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.GOOD) {
+    riskScore += (ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.GOOD - studyConsistency) * ANALYTICS_WEIGHTS.RISK_FACTORS.STUDY;
     factors++;
   }
 
   if (student.risk) {
-    const riskMap = { "Düşük": 0.2, "Orta": 0.5, "Yüksek": 0.8 };
-    riskScore += riskMap[student.risk] || 0;
+    riskScore += RISK_LEVEL_MAP[student.risk] || 0;
     factors++;
   }
 
-  const recentSurveys = data.surveys.slice(-3);
-  const lowScores = recentSurveys.filter(s => s.score && s.score < 50);
+  const recentSurveys = data.surveys.slice(-ANALYTICS_DEFAULTS.RECENT_SURVEY_COUNT);
+  const lowScores = recentSurveys.filter(s => s.score && s.score < ANALYTICS_THRESHOLDS.SURVEY_SCORE.LOW);
   if (lowScores.length > 0) {
     riskScore += (lowScores.length / recentSurveys.length) * 0.5;
     factors++;
@@ -242,29 +243,29 @@ async function _predictStudentSuccess(studentId: string): Promise<number> {
   let weightedFactors = 0;
 
   const academicTrend = calculateAcademicTrend(data.academics);
-  successScore += academicTrend * 0.3;
-  weightedFactors += 0.3;
+  successScore += academicTrend * ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.ACADEMIC_TREND;
+  weightedFactors += ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.ACADEMIC_TREND;
 
   const attendanceRate = calculateAttendanceRate(data.attendance);
-  successScore += attendanceRate * 0.25;
-  weightedFactors += 0.25;
+  successScore += attendanceRate * ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.ATTENDANCE;
+  weightedFactors += ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.ATTENDANCE;
 
   const studyConsistency = calculateStudyConsistency(data.studySessions);
-  successScore += studyConsistency * 0.2;
-  weightedFactors += 0.2;
+  successScore += studyConsistency * ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.STUDY_CONSISTENCY;
+  weightedFactors += ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.STUDY_CONSISTENCY;
 
   const completedTopics = data.topicProgress.filter(tp => tp.completed).length;
   const totalTopics = data.topicProgress.length;
   const completionRate = totalTopics > 0 ? completedTopics / totalTopics : 0.5;
-  successScore += completionRate * 0.15;
-  weightedFactors += 0.15;
+  successScore += completionRate * ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.COMPLETION_RATE;
+  weightedFactors += ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.COMPLETION_RATE;
 
   const activeGoals = data.goals.filter(g => 
     g.status === "Başladı" || g.status === "Devam"
   ).length;
-  const goalFactor = Math.min(1, activeGoals / 3);
-  successScore += goalFactor * 0.1;
-  weightedFactors += 0.1;
+  const goalFactor = Math.min(1, activeGoals / ANALYTICS_DEFAULTS.ACTIVE_GOALS_TARGET);
+  successScore += goalFactor * ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.GOALS;
+  weightedFactors += ANALYTICS_WEIGHTS.SUCCESS_PREDICTION.GOALS;
 
   return Math.max(0, Math.min(1, successScore));
 }
@@ -285,74 +286,74 @@ async function _generateEarlyWarnings(): Promise<EarlyWarning[]> {
     const fullName = `${student.ad} ${student.soyad}`;
 
     const attendanceRate = calculateAttendanceRate(data.attendance);
-    if (attendanceRate < 0.7) {
+    if (attendanceRate < ANALYTICS_THRESHOLDS.ATTENDANCE.RISK) {
       warnings.push({
         studentId: student.id,
         studentName: fullName,
         warningType: 'attendance',
-        severity: attendanceRate < 0.5 ? 'kritik' : 'yüksek',
-        message: `Devamsızlık oranı %${Math.round((1-attendanceRate) * 100)}`,
+        severity: attendanceRate < ANALYTICS_THRESHOLDS.ATTENDANCE.CRITICAL ? 'kritik' : 'yüksek',
+        message: `${ANALYTICS_MESSAGES.WARNINGS.ATTENDANCE_ISSUE} %${Math.round((1-attendanceRate) * 100)}`,
         recommendations: [
-          'Veli ile acil görüşme planla',
-          'Devamsızlık sebeplerini araştır',
-          'Okula uyum programı değerlendir'
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.PARENT_MEETING,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.INVESTIGATE_CAUSES,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.ADAPTATION_PROGRAM
         ],
         since: new Date().toISOString(),
-        priority: attendanceRate < 0.5 ? 1 : 2
+        priority: attendanceRate < ANALYTICS_THRESHOLDS.ATTENDANCE.CRITICAL ? WARNING_PRIORITY.CRITICAL : WARNING_PRIORITY.HIGH
       });
     }
 
     const academicTrend = calculateAcademicTrend(data.academics);
-    if (academicTrend < -0.4) {
+    if (academicTrend < ANALYTICS_THRESHOLDS.ACADEMIC_TREND.CRITICAL) {
       warnings.push({
         studentId: student.id,
         studentName: fullName,
         warningType: 'academic',
-        severity: academicTrend < -0.7 ? 'kritik' : 'yüksek',
-        message: `Akademik performansta ciddi düşüş`,
+        severity: academicTrend < ANALYTICS_THRESHOLDS.ACADEMIC_TREND.SEVERE ? 'kritik' : 'yüksek',
+        message: ANALYTICS_MESSAGES.WARNINGS.ACADEMIC_DECLINE,
         recommendations: [
-          'Bireysel akademik destek planla',
-          'Öğrenme güçlüklerini değerlendir',
-          'Ders programını gözden geçir'
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.INDIVIDUAL_SUPPORT,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.LEARNING_ASSESSMENT,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.CURRICULUM_REVIEW
         ],
         since: new Date().toISOString(),
-        priority: academicTrend < -0.7 ? 1 : 2
+        priority: academicTrend < ANALYTICS_THRESHOLDS.ACADEMIC_TREND.SEVERE ? WARNING_PRIORITY.CRITICAL : WARNING_PRIORITY.HIGH
       });
     }
 
     const studyConsistency = calculateStudyConsistency(data.studySessions);
-    if (studyConsistency < 0.3) {
+    if (studyConsistency < ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.RISK) {
       warnings.push({
         studentId: student.id,
         studentName: fullName,
         warningType: 'behavioral',
-        severity: studyConsistency < 0.1 ? 'yüksek' : 'orta',
-        message: `Çalışma rutini tutarsız`,
+        severity: studyConsistency < ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.CRITICAL ? 'yüksek' : 'orta',
+        message: ANALYTICS_MESSAGES.WARNINGS.INCONSISTENT_ROUTINE,
         recommendations: [
-          'Çalışma planı oluştur',
-          'Motivasyon artırıcı etkinlikler',
-          'Zaman yönetimi eğitimi'
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.CREATE_STUDY_PLAN,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.MOTIVATION_ACTIVITIES,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.TIME_MANAGEMENT
         ],
         since: new Date().toISOString(),
-        priority: studyConsistency < 0.1 ? 2 : 3
+        priority: studyConsistency < ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.CRITICAL ? WARNING_PRIORITY.HIGH : WARNING_PRIORITY.MEDIUM
       });
     }
 
     const riskScore = await calculateRiskScore(student.id);
-    if (riskScore > 0.7) {
+    if (riskScore > ANALYTICS_THRESHOLDS.RISK_SCORE.HIGH) {
       warnings.push({
         studentId: student.id,
         studentName: fullName,
         warningType: 'wellbeing',
         severity: 'kritik',
-        message: `Çoklu risk faktörleri tespit edildi`,
+        message: ANALYTICS_MESSAGES.WARNINGS.MULTIPLE_RISKS,
         recommendations: [
-          'Kapsamlı değerlendirme yap',
-          'Multidisipliner ekip toplantısı',
-          'Acil müdahale planı oluştur'
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.COMPREHENSIVE_EVALUATION,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.MULTIDISCIPLINARY_MEETING,
+          ANALYTICS_MESSAGES.RECOMMENDATIONS.EMERGENCY_PLAN
         ],
         since: new Date().toISOString(),
-        priority: 1
+        priority: WARNING_PRIORITY.CRITICAL
       });
     }
   }
@@ -385,21 +386,21 @@ async function _analyzeStudent(studentId: string): Promise<StudentAnalytics> {
   const weaknesses: string[] = [];
   const recommendations: string[] = [];
 
-  if (attendanceRate > 0.9) strengths.push('Mükemmel devam');
-  else if (attendanceRate < 0.7) weaknesses.push('Düşük devam oranı');
+  if (attendanceRate > ANALYTICS_THRESHOLDS.ATTENDANCE.EXCELLENT) strengths.push(ANALYTICS_MESSAGES.STRENGTHS.EXCELLENT_ATTENDANCE);
+  else if (attendanceRate < ANALYTICS_THRESHOLDS.ATTENDANCE.RISK) weaknesses.push(ANALYTICS_MESSAGES.WEAKNESSES.LOW_ATTENDANCE);
 
-  if (academicTrend > 0.3) strengths.push('Yükselen akademik performans');
-  else if (academicTrend < -0.3) weaknesses.push('Düşen akademik performans');
+  if (academicTrend > ANALYTICS_THRESHOLDS.ACADEMIC_TREND.POSITIVE) strengths.push(ANALYTICS_MESSAGES.STRENGTHS.POSITIVE_TREND);
+  else if (academicTrend < ANALYTICS_THRESHOLDS.ACADEMIC_TREND.NEGATIVE) weaknesses.push(ANALYTICS_MESSAGES.WEAKNESSES.NEGATIVE_TREND);
 
-  if (studyConsistency > 0.7) strengths.push('Tutarlı çalışma alışkanlığı');
-  else if (studyConsistency < 0.3) weaknesses.push('Tutarsız çalışma');
+  if (studyConsistency > ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.EXCELLENT) strengths.push(ANALYTICS_MESSAGES.STRENGTHS.CONSISTENT_STUDY);
+  else if (studyConsistency < ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.RISK) weaknesses.push(ANALYTICS_MESSAGES.WEAKNESSES.INCONSISTENT_STUDY);
 
-  if (riskScore > 0.7) recommendations.push('Acil müdahale gerekli');
-  else if (riskScore > 0.4) recommendations.push('Önleyici tedbirler alınmalı');
+  if (riskScore > ANALYTICS_THRESHOLDS.RISK_SCORE.HIGH) recommendations.push(ANALYTICS_MESSAGES.RECOMMENDATIONS.URGENT_INTERVENTION);
+  else if (riskScore > ANALYTICS_THRESHOLDS.RISK_SCORE.MEDIUM) recommendations.push(ANALYTICS_MESSAGES.RECOMMENDATIONS.PREVENTIVE_MEASURES);
 
-  if (attendanceRate < 0.8) recommendations.push('Devamsızlık sebepleri araştırılmalı');
-  if (academicTrend < -0.3) recommendations.push('Akademik destek sağlanmalı');
-  if (studyConsistency < 0.5) recommendations.push('Çalışma planı oluşturulmalı');
+  if (attendanceRate < ANALYTICS_THRESHOLDS.ATTENDANCE.GOOD) recommendations.push(ANALYTICS_MESSAGES.RECOMMENDATIONS.INVESTIGATE_ABSENCE);
+  if (academicTrend < ANALYTICS_THRESHOLDS.ACADEMIC_TREND.NEGATIVE) recommendations.push(ANALYTICS_MESSAGES.RECOMMENDATIONS.ACADEMIC_SUPPORT);
+  if (studyConsistency < ANALYTICS_THRESHOLDS.STUDY_CONSISTENCY.GOOD) recommendations.push(ANALYTICS_MESSAGES.RECOMMENDATIONS.STUDY_PLAN);
 
   return {
     studentId,
@@ -428,7 +429,7 @@ export async function generateClassComparisons(options: {
   const classMap = new Map<string, Student[]>();
 
   students.forEach(student => {
-    const className = student.sinif || 'Sınıf belirtilmemiş';
+    const className = student.sinif || ANALYTICS_MESSAGES.DEFAULT_CLASS_NAME;
     if (!classMap.has(className)) {
       classMap.set(className, []);
     }
@@ -466,13 +467,13 @@ export async function generateClassComparisons(options: {
 
     for (const student of classStudents) {
       const analytics = await analyzeStudent(student.id);
-      if (analytics.predictedSuccess > 0.8) {
+      if (analytics.predictedSuccess > ANALYTICS_THRESHOLDS.PREDICTED_SUCCESS.HIGH) {
         topPerformers.push(options.includePersonalData ? 
           `${student.ad} ${student.soyad}` : 
           `Öğrenci ${student.id.slice(-4)}`
         );
       }
-      if (analytics.riskScore > 0.7) {
+      if (analytics.riskScore > ANALYTICS_THRESHOLDS.RISK_SCORE.HIGH) {
         atRiskStudents.push(options.includePersonalData ? 
           `${student.ad} ${student.soyad}` : 
           `Öğrenci ${student.id.slice(-4)}`
@@ -486,8 +487,8 @@ export async function generateClassComparisons(options: {
       averageGPA,
       attendanceRate,
       riskDistribution,
-      topPerformers: topPerformers.slice(0, 5),
-      atRiskStudents: atRiskStudents.slice(0, 5),
+      topPerformers: topPerformers.slice(0, ANALYTICS_DEFAULTS.TOP_PERFORMERS_LIMIT),
+      atRiskStudents: atRiskStudents.slice(0, ANALYTICS_DEFAULTS.AT_RISK_LIMIT),
     });
   }
 
