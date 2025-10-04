@@ -48,6 +48,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RISK_BADGE_COLORS, STATUS_SURFACE_COLORS } from "@/lib/config/theme.config";
 
 // =================== TYP TANIMLARI ===================
 
@@ -218,13 +219,6 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
 
   const classes = Array.from(new Set(profiles.map(p => p.className)));
 
-  const riskColors = {
-    "Düşük": "bg-green-100 text-green-800",
-    "Orta": "bg-yellow-100 text-yellow-800",
-    "Yüksek": "bg-orange-100 text-orange-800",
-    "Kritik": "bg-red-100 text-red-800",
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -271,7 +265,7 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
                   <p className="text-sm text-muted-foreground">{profile.className}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className={cn(riskColors[profile.riskLevel])}>
+                  <Badge className={cn(RISK_BADGE_COLORS[profile.riskLevel])}>
                     {profile.riskLevel}
                   </Badge>
                   <span className="text-sm font-medium">
@@ -719,8 +713,8 @@ export default function EarlyWarningSystem() {
                       className={cn(
                         "p-3 rounded-lg border",
                         result.interventionCreated 
-                          ? "bg-green-50 border-green-200" 
-                          : "bg-gray-50 border-gray-200"
+                          ? STATUS_SURFACE_COLORS.success 
+                          : STATUS_SURFACE_COLORS.neutral
                       )}
                     >
                       <div className="flex items-start justify-between">

@@ -35,6 +35,7 @@ import {
   Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RISK_BADGE_COLORS } from "@/lib/config/theme.config";
 
 // =================== TYP TANIMLARI ===================
 
@@ -235,12 +236,6 @@ export function StudentPredictionCard({ studentId }: { studentId: string }) {
   }
 
   const successPercentage = Math.round(prediction.successProbability * 100);
-  const riskColors = {
-    "Düşük": "bg-green-100 text-green-800",
-    "Orta": "bg-yellow-100 text-yellow-800",
-    "Yüksek": "bg-orange-100 text-orange-800",
-    "Kritik": "bg-red-100 text-red-800",
-  };
 
   return (
     <Card>
@@ -251,7 +246,7 @@ export function StudentPredictionCard({ studentId }: { studentId: string }) {
             {prediction.studentName}
           </div>
           <Badge 
-            className={cn(riskColors[prediction.riskLevel])}
+            className={cn(RISK_BADGE_COLORS[prediction.riskLevel])}
           >
             {prediction.riskLevel} Risk
           </Badge>

@@ -27,6 +27,7 @@ import {
   Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { STATUS_BAR_COLORS } from "@/lib/config/theme.config";
 
 // =================== TYP TANIMLARI ===================
 
@@ -380,8 +381,8 @@ export function BenchmarkComparison({ benchmarks }: { benchmarks: BenchmarkData[
                     className={cn(
                       "h-2 rounded-full",
                       benchmark.category.includes("Risk")
-                        ? (benchmark.current <= benchmark.target ? "bg-green-500" : "bg-red-500")
-                        : (benchmark.current >= benchmark.target ? "bg-green-500" : "bg-yellow-500")
+                        ? (benchmark.current <= benchmark.target ? STATUS_BAR_COLORS.success : STATUS_BAR_COLORS.danger)
+                        : (benchmark.current >= benchmark.target ? STATUS_BAR_COLORS.success : STATUS_BAR_COLORS.warning)
                     )}
                     style={{
                       width: benchmark.category.includes("Risk")

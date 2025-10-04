@@ -16,7 +16,7 @@ import {
   PerformanceTrendChart,
   SuccessMetricCard,
 } from "../charts/AnalyticsCharts";
-import { CHART_COLORS } from "@/lib/config/theme.config";
+import { CHART_COLORS, MASTERY_COLORS, DIFFICULTY_COLORS } from "@/lib/config/theme.config";
 import {
   generateProgressTimeline,
   getStudentPerformanceData,
@@ -346,19 +346,6 @@ export function TopicMasteryGrid({ studentId }: { studentId: string }) {
     return true;
   });
 
-  const masteryColors = {
-    "Başlangıç": "bg-gray-100 text-gray-800",
-    "Gelişiyor": "bg-blue-100 text-blue-800",
-    "Yeterli": "bg-green-100 text-green-800", 
-    "İleri": "bg-purple-100 text-purple-800",
-  };
-
-  const difficultyColors = {
-    "Kolay": "bg-green-50 border-green-200",
-    "Orta": "bg-yellow-50 border-yellow-200",
-    "Zor": "bg-red-50 border-red-200",
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -402,7 +389,7 @@ export function TopicMasteryGrid({ studentId }: { studentId: string }) {
               key={topic.topicId}
               className={cn(
                 "border rounded-lg p-4",
-                difficultyColors[topic.difficulty]
+                DIFFICULTY_COLORS[topic.difficulty]
               )}
             >
               <div className="flex items-start justify-between mb-2">
@@ -417,7 +404,7 @@ export function TopicMasteryGrid({ studentId }: { studentId: string }) {
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Badge className={cn("text-xs", masteryColors[topic.masteryLevel])}>
+                  <Badge className={cn("text-xs", MASTERY_COLORS[topic.masteryLevel])}>
                     {topic.masteryLevel}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
