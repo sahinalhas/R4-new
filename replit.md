@@ -29,9 +29,15 @@ The application employs a modern full-stack architecture with a focus on modular
   - This improves state management, validation, maintainability, and user experience with proper error handling and toast notifications.
 - **Centralized Theme Configuration**: Created `client/lib/config/theme.config.ts` for centralized color management:
   - CHART_COLORS: Primary chart colors for analytics
-  - RISK_COLORS: Risk level color mapping
+  - RISK_COLORS: Risk level color mapping (hex values)
+  - RISK_BADGE_COLORS: Risk badge Tailwind classes
+  - MASTERY_COLORS: Topic mastery level colors
+  - DIFFICULTY_COLORS: Difficulty level colors
+  - STATUS_SURFACE_COLORS: Surface colors for success/error/neutral states
+  - STATUS_BAR_COLORS: Progress bar colors (success/warning/danger)
   - PERFORMANCE_COLORS: Performance visualization colors
-  - Updated AnalyticsCharts.tsx and ProgressCharts.tsx to use centralized theme
+  - All analytics components (AnalyticsCharts, ProgressCharts, EarlyWarningSystem, PredictiveAnalysis, ComparativeReports) now use centralized theme
+  - Eliminated all hardcoded colors in analytics components for better maintainability
 - **Style Modularization**: RiskPill component refactored to use CVA for type-safe, maintainable style variants instead of hardcoded string comparisons.
 - **Type Safety**: All form schemas use Zod with proper enum types for fields like cinsiyet ("K" | "E") and risk levels ("Düşük" | "Orta" | "Yüksek").
 
