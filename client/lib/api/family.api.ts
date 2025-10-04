@@ -1,136 +1,77 @@
-import { toast } from "sonner";
 import type { ParentMeeting, HomeVisit, FamilyParticipation } from "../types/family.types";
+import { apiClient, createApiHandler } from "./api-client";
+import { API_ERROR_MESSAGES } from "../constants/messages.constants";
 
 export async function getParentMeetingsByStudent(studentId: string): Promise<ParentMeeting[]> {
-  try {
-    const response = await fetch(`/api/coaching/parent-meetings/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch parent meetings');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading parent meetings:', error);
-    toast.error('Veli görüşmeleri yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<ParentMeeting[]>(`/api/coaching/parent-meetings/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.FAMILY.PARENT_MEETINGS_LOAD_ERROR
+  )();
 }
 
 export async function addParentMeeting(meeting: ParentMeeting): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/parent-meetings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(meeting)
-    });
-    if (!response.ok) throw new Error('Failed to add parent meeting');
-    toast.success('Veli görüşmesi eklendi');
-  } catch (error) {
-    console.error('Error adding parent meeting:', error);
-    toast.error('Veli görüşmesi eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/parent-meetings', meeting, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.FAMILY.PARENT_MEETINGS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.FAMILY.PARENT_MEETINGS_ADD_ERROR,
+  });
 }
 
 export async function updateParentMeeting(id: string, updates: Partial<ParentMeeting>): Promise<void> {
-  try {
-    const response = await fetch(`/api/coaching/parent-meetings/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) throw new Error('Failed to update parent meeting');
-    toast.success('Veli görüşmesi güncellendi');
-  } catch (error) {
-    console.error('Error updating parent meeting:', error);
-    toast.error('Veli görüşmesi güncellenemedi');
-    throw error;
-  }
+  return apiClient.put(`/api/coaching/parent-meetings/${id}`, updates, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.FAMILY.PARENT_MEETINGS_UPDATE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.FAMILY.PARENT_MEETINGS_UPDATE_ERROR,
+  });
 }
 
 export async function getHomeVisitsByStudent(studentId: string): Promise<HomeVisit[]> {
-  try {
-    const response = await fetch(`/api/coaching/home-visits/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch home visits');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading home visits:', error);
-    toast.error('Ev ziyaretleri yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<HomeVisit[]>(`/api/coaching/home-visits/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.FAMILY.HOME_VISITS_LOAD_ERROR
+  )();
 }
 
 export async function addHomeVisit(visit: HomeVisit): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/home-visits', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(visit)
-    });
-    if (!response.ok) throw new Error('Failed to add home visit');
-    toast.success('Ev ziyareti eklendi');
-  } catch (error) {
-    console.error('Error adding home visit:', error);
-    toast.error('Ev ziyareti eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/home-visits', visit, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.FAMILY.HOME_VISITS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.FAMILY.HOME_VISITS_ADD_ERROR,
+  });
 }
 
 export async function updateHomeVisit(id: string, updates: Partial<HomeVisit>): Promise<void> {
-  try {
-    const response = await fetch(`/api/coaching/home-visits/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) throw new Error('Failed to update home visit');
-    toast.success('Ev ziyareti güncellendi');
-  } catch (error) {
-    console.error('Error updating home visit:', error);
-    toast.error('Ev ziyareti güncellenemedi');
-    throw error;
-  }
+  return apiClient.put(`/api/coaching/home-visits/${id}`, updates, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.FAMILY.HOME_VISITS_UPDATE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.FAMILY.HOME_VISITS_UPDATE_ERROR,
+  });
 }
 
 export async function getFamilyParticipationsByStudent(studentId: string): Promise<FamilyParticipation[]> {
-  try {
-    const response = await fetch(`/api/coaching/family-participations/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch family participations');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading family participations:', error);
-    toast.error('Aile katılım kayıtları yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<FamilyParticipation[]>(`/api/coaching/family-participations/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.FAMILY.PARTICIPATION_LOAD_ERROR
+  )();
 }
 
 export async function addFamilyParticipation(participation: FamilyParticipation): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/family-participations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(participation)
-    });
-    if (!response.ok) throw new Error('Failed to add family participation');
-    toast.success('Aile katılım kaydı eklendi');
-  } catch (error) {
-    console.error('Error adding family participation:', error);
-    toast.error('Aile katılım kaydı eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/family-participations', participation, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.FAMILY.PARTICIPATION_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.FAMILY.PARTICIPATION_ADD_ERROR,
+  });
 }
 
 export async function updateFamilyParticipation(id: string, updates: Partial<FamilyParticipation>): Promise<void> {
-  try {
-    const response = await fetch(`/api/coaching/family-participations/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) throw new Error('Failed to update family participation');
-    toast.success('Aile katılım kaydı güncellendi');
-  } catch (error) {
-    console.error('Error updating family participation:', error);
-    toast.error('Aile katılım kaydı güncellenemedi');
-    throw error;
-  }
+  return apiClient.put(`/api/coaching/family-participations/${id}`, updates, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.FAMILY.PARTICIPATION_UPDATE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.FAMILY.PARTICIPATION_UPDATE_ERROR,
+  });
 }
 
 export { getFamilyParticipationsByStudent as getFamilyParticipationByStudent };

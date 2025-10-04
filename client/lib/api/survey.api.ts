@@ -1,5 +1,6 @@
-import { toast } from "sonner";
 import type { SurveyResult } from "../types/common.types";
+import { apiClient, createApiHandler } from "./api-client";
+import { API_ERROR_MESSAGES } from "../constants/messages.constants";
 
 function extractScoreFromResponse(responseData: any): number | undefined {
   if (!responseData) return undefined;
@@ -16,81 +17,61 @@ function extractScoreFromResponse(responseData: any): number | undefined {
 }
 
 export async function loadSurveyResults(): Promise<SurveyResult[]> {
-  try {
-    const response = await fetch('/api/survey-responses');
-    if (!response.ok) {
-      throw new Error('Failed to fetch survey results');
-    }
-    const responses = await response.json();
-    
-    return responses.map((resp: any): SurveyResult => ({
-      id: resp.id || 'legacy-' + Date.now(),
-      studentId: resp.studentId || resp.studentInfo?.name || 'unknown',
-      title: `Anket Sonucu - ${resp.distributionId}`,
-      score: extractScoreFromResponse(resp.responseData),
-      date: resp.created_at || new Date().toISOString(),
-      details: JSON.stringify(resp.responseData)
-    }));
-  } catch (error) {
-    console.error('Error fetching survey results:', error);
-    toast.error('Anket sonuçları yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    async () => {
+      const responses = await apiClient.get<any[]>('/api/survey-responses', { showErrorToast: false });
+      
+      return responses.map((resp: any): SurveyResult => ({
+        id: resp.id || 'legacy-' + Date.now(),
+        studentId: resp.studentId || resp.studentInfo?.name || 'unknown',
+        title: `Anket Sonucu - ${resp.distributionId}`,
+        score: extractScoreFromResponse(resp.responseData),
+        date: resp.created_at || new Date().toISOString(),
+        details: JSON.stringify(resp.responseData)
+      }));
+    },
+    [],
+    API_ERROR_MESSAGES.SURVEY.LOAD_ERROR
+  )();
 }
 
 export async function getSurveyResultsByStudent(studentId: string): Promise<SurveyResult[]> {
-  try {
-    const response = await fetch(`/api/survey-responses?studentId=${encodeURIComponent(studentId)}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch student survey results');
-    }
-    const responses = await response.json();
-    
-    return responses.map((resp: any): SurveyResult => ({
-      id: resp.id || 'legacy-' + Date.now(),
-      studentId: resp.studentId || resp.studentInfo?.name || studentId,
-      title: `Anket Sonucu - ${resp.distributionId}`,
-      score: extractScoreFromResponse(resp.responseData),
-      date: resp.created_at || new Date().toISOString(),
-      details: JSON.stringify(resp.responseData)
-    }));
-  } catch (error) {
-    console.error('Error fetching student survey results:', error);
-    toast.error('Öğrenci anket sonuçları yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    async () => {
+      const responses = await apiClient.get<any[]>(`/api/survey-responses?studentId=${encodeURIComponent(studentId)}`, { showErrorToast: false });
+      
+      return responses.map((resp: any): SurveyResult => ({
+        id: resp.id || 'legacy-' + Date.now(),
+        studentId: resp.studentId || resp.studentInfo?.name || studentId,
+        title: `Anket Sonucu - ${resp.distributionId}`,
+        score: extractScoreFromResponse(resp.responseData),
+        date: resp.created_at || new Date().toISOString(),
+        details: JSON.stringify(resp.responseData)
+      }));
+    },
+    [],
+    API_ERROR_MESSAGES.SURVEY.STUDENT_LOAD_ERROR
+  )();
 }
 
 export async function addSurveyResult(r: SurveyResult): Promise<void> {
-  try {
-    const surveyResponse = {
-      distributionId: 'legacy-distribution',
-      studentId: r.studentId,
-      studentInfo: {
-        name: r.studentId,
-        class: 'N/A',
-        number: '0'
-      },
-      responseData: r.details ? JSON.parse(r.details) : { score: r.score, title: r.title },
-      submissionType: 'MANUAL_ENTRY',
-      isComplete: true,
-      submittedAt: r.date
-    };
-    
-    const response = await fetch('/api/survey-responses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(surveyResponse)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save survey result');
-    }
-    
-    toast.success('Anket sonucu kaydedildi');
-  } catch (error) {
-    console.error('Error saving survey result:', error);
-    toast.error('Anket sonucu kaydedilemedi');
-    throw error;
-  }
+  const surveyResponse = {
+    distributionId: 'legacy-distribution',
+    studentId: r.studentId,
+    studentInfo: {
+      name: r.studentId,
+      class: 'N/A',
+      number: '0'
+    },
+    responseData: r.details ? JSON.parse(r.details) : { score: r.score, title: r.title },
+    submissionType: 'MANUAL_ENTRY',
+    isComplete: true,
+    submittedAt: r.date
+  };
+  
+  return apiClient.post('/api/survey-responses', surveyResponse, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.SURVEY.ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.SURVEY.ADD_ERROR,
+  });
 }

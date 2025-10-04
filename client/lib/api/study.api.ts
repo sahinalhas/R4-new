@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import type { 
   StudySubject, 
   StudyTopic, 
@@ -8,6 +7,8 @@ import type {
   TopicProgress,
   ScheduleTemplate
 } from "../types/study.types";
+import { apiClient, createApiHandler } from "./api-client";
+import { API_ERROR_MESSAGES } from "../constants/messages.constants";
 
 let subjectsCache: StudySubject[] | null = null;
 let topicsCache: StudyTopic[] | null = null;
@@ -26,48 +27,34 @@ export function loadSubjects(): StudySubject[] {
 }
 
 export async function loadSubjectsAsync(): Promise<StudySubject[]> {
-  try {
-    const response = await fetch('/api/subjects');
-    if (!response.ok) {
-      throw new Error('Failed to fetch subjects');
-    }
-    const json = await response.json();
-    const subjects = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
-    subjectsCache = subjects;
-    window.dispatchEvent(new CustomEvent('subjectsUpdated'));
-    return subjects;
-  } catch (error) {
-    console.error('Error fetching subjects:', error);
-    toast.error('Dersler yüklenirken hata oluştu');
-    if (!subjectsCache || subjectsCache.length === 0) {
-      subjectsCache = [];
+  return createApiHandler(
+    async () => {
+      const json = await apiClient.get<any>('/api/subjects', { showErrorToast: false });
+      const subjects = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      subjectsCache = subjects;
       window.dispatchEvent(new CustomEvent('subjectsUpdated'));
-    }
-    return subjectsCache || [];
-  }
+      return subjects;
+    },
+    () => {
+      if (!subjectsCache || subjectsCache.length === 0) {
+        subjectsCache = [];
+        window.dispatchEvent(new CustomEvent('subjectsUpdated'));
+      }
+      return subjectsCache || [];
+    },
+    API_ERROR_MESSAGES.STUDY.SUBJECTS_LOAD_ERROR
+  )();
 }
 
 export async function saveSubjects(v: StudySubject[]): Promise<void> {
-  try {
-    const response = await fetch('/api/subjects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(v)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save subjects');
-    }
-    
-    subjectsCache = v;
-    window.dispatchEvent(new CustomEvent('subjectsUpdated'));
-    
-    toast.success('Dersler kaydedildi');
-  } catch (error) {
-    console.error('Error saving subjects:', error);
-    toast.error('Dersler kaydedilemedi');
-    throw error;
-  }
+  await apiClient.post('/api/subjects', v, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.STUDY.SUBJECTS_SAVE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.STUDY.SUBJECTS_SAVE_ERROR,
+  });
+  
+  subjectsCache = v;
+  window.dispatchEvent(new CustomEvent('subjectsUpdated'));
 }
 
 export async function addSubject(s: StudySubject): Promise<void> {
@@ -106,48 +93,34 @@ export function loadTopics(): StudyTopic[] {
 }
 
 export async function loadTopicsAsync(): Promise<StudyTopic[]> {
-  try {
-    const response = await fetch('/api/topics');
-    if (!response.ok) {
-      throw new Error('Failed to fetch topics');
-    }
-    const json = await response.json();
-    const topics = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
-    topicsCache = topics;
-    window.dispatchEvent(new CustomEvent('topicsUpdated'));
-    return topics;
-  } catch (error) {
-    console.error('Error fetching topics:', error);
-    toast.error('Konular yüklenirken hata oluştu');
-    if (!topicsCache || topicsCache.length === 0) {
-      topicsCache = [];
+  return createApiHandler(
+    async () => {
+      const json = await apiClient.get<any>('/api/topics', { showErrorToast: false });
+      const topics = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      topicsCache = topics;
       window.dispatchEvent(new CustomEvent('topicsUpdated'));
-    }
-    return topicsCache || [];
-  }
+      return topics;
+    },
+    () => {
+      if (!topicsCache || topicsCache.length === 0) {
+        topicsCache = [];
+        window.dispatchEvent(new CustomEvent('topicsUpdated'));
+      }
+      return topicsCache || [];
+    },
+    API_ERROR_MESSAGES.STUDY.TOPICS_LOAD_ERROR
+  )();
 }
 
 export async function saveTopics(v: StudyTopic[]): Promise<void> {
-  try {
-    const response = await fetch('/api/topics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(v)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save topics');
-    }
-    
-    topicsCache = v;
-    window.dispatchEvent(new CustomEvent('topicsUpdated'));
-    
-    toast.success('Konular kaydedildi');
-  } catch (error) {
-    console.error('Error saving topics:', error);
-    toast.error('Konular kaydedilemedi');
-    throw error;
-  }
+  await apiClient.post('/api/topics', v, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.STUDY.TOPICS_SAVE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.STUDY.TOPICS_SAVE_ERROR,
+  });
+  
+  topicsCache = v;
+  window.dispatchEvent(new CustomEvent('topicsUpdated'));
 }
 
 export async function addTopic(t: StudyTopic): Promise<void> {
@@ -203,45 +176,32 @@ export function loadWeeklySlots(): WeeklySlot[] {
 }
 
 async function loadWeeklySlotsAsync(): Promise<void> {
-  try {
-    const response = await fetch('/api/weekly-slots');
-    if (!response.ok) {
-      throw new Error('Failed to fetch weekly slots');
-    }
-    const json = await response.json();
-    const slots = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
-    weeklySlotsCache = slots;
-    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
-  } catch (error) {
-    console.error('Error fetching weekly slots:', error);
-    toast.error('Haftalık program yüklenirken hata oluştu');
-    if (!weeklySlotsCache || weeklySlotsCache.length === 0) {
-      weeklySlotsCache = [];
+  return createApiHandler(
+    async () => {
+      const json = await apiClient.get<any>('/api/weekly-slots', { showErrorToast: false });
+      const slots = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      weeklySlotsCache = slots;
       window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
-    }
-  }
+    },
+    () => {
+      if (!weeklySlotsCache || weeklySlotsCache.length === 0) {
+        weeklySlotsCache = [];
+        window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+      }
+    },
+    API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_LOAD_ERROR
+  )();
 }
 
 export async function saveWeeklySlots(v: WeeklySlot[]): Promise<void> {
-  try {
-    const response = await fetch('/api/weekly-slots', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(v)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save weekly slots');
-    }
-    
-    weeklySlotsCache = v;
-    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
-    toast.success('Haftalık program kaydedildi');
-  } catch (error) {
-    console.error('Error saving weekly slots:', error);
-    toast.error('Haftalık program kaydedilemedi');
-    throw error;
-  }
+  await apiClient.post('/api/weekly-slots', v, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_SAVE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_SAVE_ERROR,
+  });
+  
+  weeklySlotsCache = v;
+  window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
 }
 
 export function getWeeklySlotsByStudent(studentId: string) {
@@ -249,77 +209,46 @@ export function getWeeklySlotsByStudent(studentId: string) {
 }
 
 export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
-  try {
-    const response = await fetch('/api/weekly-slots', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(w)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to add weekly slot');
-    }
-    
-    const list = loadWeeklySlots();
-    list.push(w);
-    weeklySlotsCache = list;
-    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
-  } catch (error) {
-    console.error('Error adding weekly slot:', error);
-    toast.error('Haftalık program eklenemedi');
-    throw error;
-  }
+  await apiClient.post('/api/weekly-slots', w, {
+    showSuccessToast: false,
+    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_ADD_ERROR,
+  });
+  
+  const list = loadWeeklySlots();
+  list.push(w);
+  weeklySlotsCache = list;
+  window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
 }
 
 export async function removeWeeklySlot(id: string): Promise<void> {
-  try {
-    const response = await fetch(`/api/weekly-slots/${id}`, {
-      method: 'DELETE'
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete weekly slot');
-    }
-    
-    const list = loadWeeklySlots().filter((w) => w.id !== id);
-    weeklySlotsCache = list;
-    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
-  } catch (error) {
-    console.error('Error deleting weekly slot:', error);
-    toast.error('Haftalık program silinemedi');
-    throw error;
-  }
+  await apiClient.delete(`/api/weekly-slots/${id}`, {
+    showSuccessToast: false,
+    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_DELETE_ERROR,
+  });
+  
+  const list = loadWeeklySlots().filter((w) => w.id !== id);
+  weeklySlotsCache = list;
+  window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
 }
 
 export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): Promise<void> {
-  try {
-    const response = await fetch(`/api/weekly-slots/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update weekly slot');
-    }
-    
-    const list = loadWeeklySlots();
-    const i = list.findIndex((w) => w.id === id);
-    if (i >= 0) {
-      list[i] = {
-        ...list[i],
-        ...patch,
-        id: list[i].id,
-        studentId: list[i].studentId,
-        subjectId: list[i].subjectId,
-      };
-      weeklySlotsCache = list;
-      window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
-    }
-  } catch (error) {
-    console.error('Error updating weekly slot:', error);
-    toast.error('Haftalık program güncellenemedi');
-    throw error;
+  await apiClient.put(`/api/weekly-slots/${id}`, patch, {
+    showSuccessToast: false,
+    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_UPDATE_ERROR,
+  });
+  
+  const list = loadWeeklySlots();
+  const i = list.findIndex((w) => w.id === id);
+  if (i >= 0) {
+    list[i] = {
+      ...list[i],
+      ...patch,
+      id: list[i].id,
+      studentId: list[i].studentId,
+      subjectId: list[i].subjectId,
+    };
+    weeklySlotsCache = list;
+    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
   }
 }
 
@@ -335,45 +264,32 @@ export function loadProgress(): TopicProgress[] {
 }
 
 async function loadProgressAsync(): Promise<void> {
-  try {
-    const response = await fetch('/api/progress');
-    if (!response.ok) {
-      throw new Error('Failed to fetch progress');
-    }
-    const json = await response.json();
-    const progress = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
-    progressCache = progress;
-    window.dispatchEvent(new CustomEvent('progressUpdated'));
-  } catch (error) {
-    console.error('Error fetching progress:', error);
-    toast.error('İlerleme durumu yüklenirken hata oluştu');
-    if (!progressCache || progressCache.length === 0) {
-      progressCache = [];
+  return createApiHandler(
+    async () => {
+      const json = await apiClient.get<any>('/api/progress', { showErrorToast: false });
+      const progress = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      progressCache = progress;
       window.dispatchEvent(new CustomEvent('progressUpdated'));
-    }
-  }
+    },
+    () => {
+      if (!progressCache || progressCache.length === 0) {
+        progressCache = [];
+        window.dispatchEvent(new CustomEvent('progressUpdated'));
+      }
+    },
+    API_ERROR_MESSAGES.STUDY.PROGRESS_LOAD_ERROR
+  )();
 }
 
 export async function saveProgress(v: TopicProgress[]): Promise<void> {
-  try {
-    const response = await fetch('/api/progress', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(v)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save progress');
-    }
-    
-    progressCache = v;
-    window.dispatchEvent(new CustomEvent('progressUpdated'));
-    toast.success('İlerleme durumu kaydedildi');
-  } catch (error) {
-    console.error('Error saving progress:', error);
-    toast.error('İlerleme durumu kaydedilemedi');
-    throw error;
-  }
+  await apiClient.post('/api/progress', v, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.STUDY.PROGRESS_SAVE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.STUDY.PROGRESS_SAVE_ERROR,
+  });
+  
+  progressCache = v;
+  window.dispatchEvent(new CustomEvent('progressUpdated'));
 }
 
 export function getProgressByStudent(studentId: string) {
@@ -522,11 +438,8 @@ export async function setCompletedFlag(
 
 export async function loadSessions(): Promise<StudySession[]> {
   try {
-    const response = await fetch('/api/study-sessions/all');
-    if (response.ok) {
-      return await response.json();
-    }
-    return [];
+    const sessions = await apiClient.get<StudySession[]>('/api/study-sessions/all');
+    return sessions;
   } catch (error) {
     console.error('Error loading study sessions:', error);
     return [];
@@ -535,11 +448,8 @@ export async function loadSessions(): Promise<StudySession[]> {
 
 export async function getSessionsByStudent(studentId: string): Promise<StudySession[]> {
   try {
-    const response = await fetch(`/api/study-sessions/${studentId}`);
-    if (response.ok) {
-      return await response.json();
-    }
-    return [];
+    const sessions = await apiClient.get<StudySession[]>(`/api/study-sessions/${studentId}`);
+    return sessions;
   } catch (error) {
     console.error('Error getting study sessions:', error);
     return [];
@@ -547,21 +457,11 @@ export async function getSessionsByStudent(studentId: string): Promise<StudySess
 }
 
 export async function addSession(s: StudySession): Promise<void> {
-  try {
-    const response = await fetch('/api/study-sessions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(s)
-    });
-    if (!response.ok) {
-      throw new Error('Failed to save study session');
-    }
-    toast.success('Çalışma oturumu kaydedildi');
-  } catch (error) {
-    console.error('Error saving study session:', error);
-    toast.error('Çalışma oturumu kaydedilemedi');
-    throw error;
-  }
+  return apiClient.post('/api/study-sessions', s, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.STUDY.SESSION_SAVE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.STUDY.SESSION_SAVE_ERROR,
+  });
 }
 
 export function weeklyTotalMinutes(studentId: string) {

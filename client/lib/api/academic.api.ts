@@ -1,27 +1,23 @@
-import { toast } from "sonner";
 import type { AcademicRecord } from "../types/academic.types";
 import type { Intervention } from "../types/common.types";
+import { apiClient, createApiHandler } from "./api-client";
+import { API_ERROR_MESSAGES } from "../constants/messages.constants";
 
 export async function loadAcademics(studentId: string): Promise<AcademicRecord[]> {
-  try {
-    const response = await fetch(`/api/students/${studentId}/academics`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch academic records');
-    }
-    const records = await response.json();
-    
-    return records.map((record: any): AcademicRecord => ({
-      id: record.id?.toString() || crypto.randomUUID(),
-      studentId: record.studentId,
-      term: `${record.year}/${record.semester}`,
-      gpa: record.gpa,
-      notes: record.notes
-    }));
-  } catch (error) {
-    console.error('Error fetching academic records:', error);
-    toast.error('Akademik kayıtlar yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    async () => {
+      const records = await apiClient.get<any[]>(`/api/students/${studentId}/academics`, { showErrorToast: false });
+      return records.map((record: any): AcademicRecord => ({
+        id: record.id?.toString() || crypto.randomUUID(),
+        studentId: record.studentId,
+        term: `${record.year}/${record.semester}`,
+        gpa: record.gpa,
+        notes: record.notes
+      }));
+    },
+    [],
+    API_ERROR_MESSAGES.ACADEMIC.LOAD_ERROR
+  )();
 }
 
 export async function getAcademicsByStudent(studentId: string): Promise<AcademicRecord[]> {
@@ -29,71 +25,42 @@ export async function getAcademicsByStudent(studentId: string): Promise<Academic
 }
 
 export async function addAcademic(a: AcademicRecord): Promise<void> {
-  try {
-    const termParts = a.term.split('/');
-    const yearPart = termParts[0];
-    const semester = termParts[1] || yearPart.split('-')[1] || '1';
-    
-    const year = parseInt(yearPart.split('-')[0]);
-    
-    const backendRecord = {
-      studentId: a.studentId,
-      semester: semester,
-      year: year,
-      gpa: a.gpa,
-      exams: [],
-      notes: a.notes
-    };
-    
-    const response = await fetch('/api/students/academics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(backendRecord)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save academic record');
-    }
-    
-    toast.success('Akademik kayıt eklendi');
-  } catch (error) {
-    console.error('Error saving academic record:', error);
-    toast.error('Akademik kayıt eklenemedi');
-    throw error;
-  }
+  const termParts = a.term.split('/');
+  const yearPart = termParts[0];
+  const semester = termParts[1] || yearPart.split('-')[1] || '1';
+  const year = parseInt(yearPart.split('-')[0]);
+  
+  const backendRecord = {
+    studentId: a.studentId,
+    semester: semester,
+    year: year,
+    gpa: a.gpa,
+    exams: [],
+    notes: a.notes
+  };
+  
+  return apiClient.post('/api/students/academics', backendRecord, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.ACADEMIC.ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.ACADEMIC.ADD_ERROR,
+  });
 }
 
 export async function getInterventionsByStudent(studentId: string): Promise<Intervention[]> {
-  try {
-    const response = await fetch(`/api/students/${studentId}/interventions`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch student interventions');
-    }
-    const interventions = await response.json();
-    return Array.isArray(interventions) ? interventions : [];
-  } catch (error) {
-    console.error('Error fetching student interventions:', error);
-    toast.error('Müdahale kayıtları yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    async () => {
+      const interventions = await apiClient.get<Intervention[]>(`/api/students/${studentId}/interventions`, { showErrorToast: false });
+      return Array.isArray(interventions) ? interventions : [];
+    },
+    [],
+    API_ERROR_MESSAGES.INTERVENTION.LOAD_ERROR
+  )();
 }
 
 export async function addIntervention(i: Intervention): Promise<void> {
-  try {
-    const response = await fetch('/api/students/interventions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(i)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save intervention record');
-    }
-    
-    toast.success('Müdahale kaydı eklendi');
-  } catch (error) {
-    console.error('Error saving intervention record:', error);
-    toast.error('Müdahale kaydı eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/students/interventions', i, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.INTERVENTION.ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.INTERVENTION.ADD_ERROR,
+  });
 }

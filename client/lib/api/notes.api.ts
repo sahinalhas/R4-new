@@ -1,75 +1,38 @@
-import { toast } from "sonner";
 import type { MeetingNote } from "../types/common.types";
+import { apiClient, createApiHandler } from "./api-client";
+import { API_ERROR_MESSAGES } from "../constants/messages.constants";
 
 export async function getNotesByStudent(studentId: string): Promise<MeetingNote[]> {
-  try {
-    const response = await fetch(`/api/meeting-notes/${studentId}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch meeting notes: ${response.status}`);
-    }
-    const notes = await response.json();
-    return Array.isArray(notes) ? notes : [];
-  } catch (error) {
-    console.error('Error fetching meeting notes:', error);
-    toast.error('Görüşme notları yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    async () => {
+      const notes = await apiClient.get<MeetingNote[]>(`/api/meeting-notes/${studentId}`, { showErrorToast: false });
+      return Array.isArray(notes) ? notes : [];
+    },
+    [],
+    API_ERROR_MESSAGES.NOTES.LOAD_ERROR
+  )();
 }
 
 export async function addNote(note: MeetingNote): Promise<void> {
-  try {
-    const response = await fetch('/api/meeting-notes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(note)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save meeting note');
-    }
-    
-    toast.success('Görüşme notu kaydedildi');
-  } catch (error) {
-    console.error('Error saving meeting note:', error);
-    toast.error('Görüşme notu kaydedilemedi');
-    throw error;
-  }
+  return apiClient.post('/api/meeting-notes', note, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.NOTES.ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.NOTES.ADD_ERROR,
+  });
 }
 
 export async function updateNote(id: string, note: Partial<MeetingNote>): Promise<void> {
-  try {
-    const response = await fetch(`/api/meeting-notes/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(note)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update meeting note');
-    }
-    
-    toast.success('Görüşme notu güncellendi');
-  } catch (error) {
-    console.error('Error updating meeting note:', error);
-    toast.error('Görüşme notu güncellenemedi');
-    throw error;
-  }
+  return apiClient.put(`/api/meeting-notes/${id}`, note, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.NOTES.UPDATE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.NOTES.UPDATE_ERROR,
+  });
 }
 
 export async function deleteNote(id: string): Promise<void> {
-  try {
-    const response = await fetch(`/api/meeting-notes/${id}`, {
-      method: 'DELETE'
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete meeting note');
-    }
-    
-    toast.success('Görüşme notu silindi');
-  } catch (error) {
-    console.error('Error deleting meeting note:', error);
-    toast.error('Görüşme notu silinemedi');
-    throw error;
-  }
+  return apiClient.delete(`/api/meeting-notes/${id}`, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.NOTES.DELETE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.NOTES.DELETE_ERROR,
+  });
 }

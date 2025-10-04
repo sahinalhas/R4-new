@@ -20,6 +20,21 @@ The application employs a modern full-stack architecture with a focus on modular
 - **System Design Choices**: The system is configured for Replit's autoscale deployment, with `npm run build` for client and server, and `npm start` for the production server.
 
 ## Recent Changes (October 2025)
+- **API Layer Refactoring (Complete)**: All API modules refactored for maximum consistency and maintainability:
+  - **Generic API Client**: Created `client/lib/api/api-client.ts` with `createApiHandler` utility for centralized fetch/error handling
+  - **Centralized Constants**: Established 4 dedicated constant files:
+    - `analytics.constants.ts`: Risk thresholds, weights, defaults
+    - `cache.constants.ts`: Cache TTL, limits, chart optimization
+    - `session.constants.ts`: Session durations, time conversions, colors
+    - `messages.constants.ts`: All API error/success messages (70+ messages)
+  - **API Migration**: 10 API modules migrated to generic client pattern:
+    - academic.api.ts, attendance.api.ts, coaching.api.ts (14 functions)
+    - documents.api.ts, family.api.ts (9 functions), notes.api.ts
+    - study.api.ts (preserving caching), survey.api.ts
+    - risk.api.ts, students.api.ts
+  - **Analytics Update**: Analytics and analytics-cache modules use extracted constants instead of magic numbers
+  - **Feature Registry**: Server features reorganized into domain-based groups (Core, Academic, Student Support, Communication, System)
+  - **Benefits**: Eliminated code duplication, consistent error handling, centralized toast messaging, future i18n support ready
 - **Comprehensive Form Refactoring**: All student profile sections refactored to use React Hook Form + Zod validation:
   - BasicInfoSection, SaglikBilgileriSection, OzelEgitimSection, DavranisTakibiSection
   - EvZiyaretleriSection, RiskDegerlendirmeSection

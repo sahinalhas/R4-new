@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import type {
   AcademicGoal,
   MultipleIntelligence,
@@ -9,293 +8,175 @@ import type {
   Achievement,
   SelfAssessment
 } from "../types/coaching.types";
+import { apiClient, createApiHandler } from "./api-client";
+import { API_ERROR_MESSAGES } from "../constants/messages.constants";
 import { loadStudents } from "./students.api";
 import { getAttendanceByStudent } from "./attendance.api";
 
 export async function loadAcademicGoals(): Promise<AcademicGoal[]> {
-  try {
-    const response = await fetch('/api/coaching/academic-goals');
-    if (!response.ok) throw new Error('Failed to fetch academic goals');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading academic goals:', error);
-    toast.error('Akademik hedefler yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<AcademicGoal[]>('/api/coaching/academic-goals', { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.COACHING.ACADEMIC_GOALS_LOAD_ERROR
+  )();
 }
 
 export async function getAcademicGoalsByStudent(studentId: string): Promise<AcademicGoal[]> {
-  try {
-    const response = await fetch(`/api/coaching/academic-goals/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch student academic goals');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading student academic goals:', error);
-    toast.error('Öğrenci akademik hedefleri yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<AcademicGoal[]>(`/api/coaching/academic-goals/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.COACHING.ACADEMIC_GOALS_STUDENT_LOAD_ERROR
+  )();
 }
 
 export async function addAcademicGoal(goal: AcademicGoal): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/academic-goals', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(goal)
-    });
-    if (!response.ok) throw new Error('Failed to add academic goal');
-    toast.success('Akademik hedef eklendi');
-  } catch (error) {
-    console.error('Error adding academic goal:', error);
-    toast.error('Akademik hedef eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/academic-goals', goal, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.ACADEMIC_GOALS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.ACADEMIC_GOALS_ADD_ERROR,
+  });
 }
 
 export async function updateAcademicGoal(id: string, updates: Partial<AcademicGoal>): Promise<void> {
-  try {
-    const response = await fetch(`/api/coaching/academic-goals/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) throw new Error('Failed to update academic goal');
-    toast.success('Akademik hedef güncellendi');
-  } catch (error) {
-    console.error('Error updating academic goal:', error);
-    toast.error('Akademik hedef güncellenemedi');
-    throw error;
-  }
+  return apiClient.put(`/api/coaching/academic-goals/${id}`, updates, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.ACADEMIC_GOALS_UPDATE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.ACADEMIC_GOALS_UPDATE_ERROR,
+  });
 }
 
 export async function getMultipleIntelligenceByStudent(studentId: string): Promise<MultipleIntelligence | undefined> {
-  try {
-    const response = await fetch(`/api/coaching/multiple-intelligence/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch multiple intelligence');
-    const records = await response.json();
-    return records[0];
-  } catch (error) {
-    console.error('Error loading multiple intelligence:', error);
-    toast.error('Çoklu zeka verileri yüklenirken hata oluştu');
-    return undefined;
-  }
+  return createApiHandler(
+    async () => {
+      const records = await apiClient.get<MultipleIntelligence[]>(`/api/coaching/multiple-intelligence/student/${studentId}`, { showErrorToast: false });
+      return records[0];
+    },
+    undefined,
+    API_ERROR_MESSAGES.COACHING.MI_LOAD_ERROR
+  )();
 }
 
 export async function addMultipleIntelligence(mi: MultipleIntelligence): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/multiple-intelligence', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(mi)
-    });
-    if (!response.ok) throw new Error('Failed to add multiple intelligence');
-    toast.success('Çoklu zeka değerlendirmesi eklendi');
-  } catch (error) {
-    console.error('Error adding multiple intelligence:', error);
-    toast.error('Çoklu zeka değerlendirmesi eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/multiple-intelligence', mi, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.MI_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.MI_ADD_ERROR,
+  });
 }
 
 export async function getLearningStyleByStudent(studentId: string): Promise<LearningStyle | undefined> {
-  try {
-    const response = await fetch(`/api/coaching/learning-styles/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch learning styles');
-    const records = await response.json();
-    return records[0];
-  } catch (error) {
-    console.error('Error loading learning styles:', error);
-    toast.error('Öğrenme stilleri yüklenirken hata oluştu');
-    return undefined;
-  }
+  return createApiHandler(
+    async () => {
+      const records = await apiClient.get<LearningStyle[]>(`/api/coaching/learning-styles/student/${studentId}`, { showErrorToast: false });
+      return records[0];
+    },
+    undefined,
+    API_ERROR_MESSAGES.COACHING.LS_LOAD_ERROR
+  )();
 }
 
 export async function addLearningStyle(ls: LearningStyle): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/learning-styles', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ls)
-    });
-    if (!response.ok) throw new Error('Failed to add learning style');
-    toast.success('Öğrenme stili eklendi');
-  } catch (error) {
-    console.error('Error adding learning style:', error);
-    toast.error('Öğrenme stili eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/learning-styles', ls, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.LS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.LS_ADD_ERROR,
+  });
 }
 
 export async function getSmartGoalsByStudent(studentId: string): Promise<SmartGoal[]> {
-  try {
-    const response = await fetch(`/api/coaching/smart-goals/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch smart goals');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading smart goals:', error);
-    toast.error('SMART hedefler yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<SmartGoal[]>(`/api/coaching/smart-goals/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.COACHING.SMART_GOALS_LOAD_ERROR
+  )();
 }
 
 export async function addSmartGoal(goal: SmartGoal): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/smart-goals', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(goal)
-    });
-    if (!response.ok) throw new Error('Failed to add smart goal');
-    toast.success('SMART hedef eklendi');
-  } catch (error) {
-    console.error('Error adding smart goal:', error);
-    toast.error('SMART hedef eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/smart-goals', goal, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.SMART_GOALS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.SMART_GOALS_ADD_ERROR,
+  });
 }
 
 export async function updateSmartGoal(id: string, updates: Partial<SmartGoal>): Promise<void> {
-  try {
-    const response = await fetch(`/api/coaching/smart-goals/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) throw new Error('Failed to update smart goal');
-    toast.success('SMART hedef güncellendi');
-  } catch (error) {
-    console.error('Error updating smart goal:', error);
-    toast.error('SMART hedef güncellenemedi');
-    throw error;
-  }
+  return apiClient.put(`/api/coaching/smart-goals/${id}`, updates, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.SMART_GOALS_UPDATE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.SMART_GOALS_UPDATE_ERROR,
+  });
 }
 
 export async function getCoachingRecommendationsByStudent(studentId: string): Promise<CoachingRecommendation[]> {
-  try {
-    const response = await fetch(`/api/coaching/coaching-recommendations/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch coaching recommendations');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading coaching recommendations:', error);
-    toast.error('Koçluk önerileri yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<CoachingRecommendation[]>(`/api/coaching/coaching-recommendations/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.COACHING.RECOMMENDATIONS_LOAD_ERROR
+  )();
 }
 
 export async function addCoachingRecommendation(rec: CoachingRecommendation): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/coaching-recommendations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(rec)
-    });
-    if (!response.ok) throw new Error('Failed to add coaching recommendation');
-    toast.success('Koçluk önerisi eklendi');
-  } catch (error) {
-    console.error('Error adding coaching recommendation:', error);
-    toast.error('Koçluk önerisi eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/coaching-recommendations', rec, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.RECOMMENDATIONS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.RECOMMENDATIONS_ADD_ERROR,
+  });
 }
 
 export async function updateCoachingRecommendation(id: string, updates: Partial<CoachingRecommendation>): Promise<void> {
-  try {
-    const response = await fetch(`/api/coaching/coaching-recommendations/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) throw new Error('Failed to update coaching recommendation');
-    toast.success('Koçluk önerisi güncellendi');
-  } catch (error) {
-    console.error('Error updating coaching recommendation:', error);
-    toast.error('Koçluk önerisi güncellenemedi');
-    throw error;
-  }
+  return apiClient.put(`/api/coaching/coaching-recommendations/${id}`, updates, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.RECOMMENDATIONS_UPDATE_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.RECOMMENDATIONS_UPDATE_ERROR,
+  });
 }
 
 export async function getEvaluations360ByStudent(studentId: string): Promise<Evaluation360[]> {
-  try {
-    const response = await fetch(`/api/coaching/evaluations-360/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch 360 evaluations');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading 360 evaluations:', error);
-    toast.error('360 değerlendirmeler yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<Evaluation360[]>(`/api/coaching/evaluations-360/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.COACHING.EVAL360_LOAD_ERROR
+  )();
 }
 
 export async function addEvaluation360(evaluation: Evaluation360): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/evaluations-360', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(evaluation)
-    });
-    if (!response.ok) throw new Error('Failed to add 360 evaluation');
-    toast.success('360 değerlendirme eklendi');
-  } catch (error) {
-    console.error('Error adding 360 evaluation:', error);
-    toast.error('360 değerlendirme eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/evaluations-360', evaluation, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.EVAL360_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.EVAL360_ADD_ERROR,
+  });
 }
 
 export async function getAchievementsByStudent(studentId: string): Promise<Achievement[]> {
-  try {
-    const response = await fetch(`/api/coaching/achievements/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch achievements');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading achievements:', error);
-    toast.error('Başarılar yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<Achievement[]>(`/api/coaching/achievements/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.COACHING.ACHIEVEMENTS_LOAD_ERROR
+  )();
 }
 
 export async function addAchievement(achievement: Achievement): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/achievements', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(achievement)
-    });
-    if (!response.ok) throw new Error('Failed to add achievement');
-    toast.success('Başarı eklendi');
-  } catch (error) {
-    console.error('Error adding achievement:', error);
-    toast.error('Başarı eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/achievements', achievement, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.ACHIEVEMENTS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.ACHIEVEMENTS_ADD_ERROR,
+  });
 }
 
 export async function getSelfAssessmentsByStudent(studentId: string): Promise<SelfAssessment[]> {
-  try {
-    const response = await fetch(`/api/coaching/self-assessments/student/${studentId}`);
-    if (!response.ok) throw new Error('Failed to fetch self assessments');
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading self assessments:', error);
-    toast.error('Öz değerlendirmeler yüklenirken hata oluştu');
-    return [];
-  }
+  return createApiHandler(
+    () => apiClient.get<SelfAssessment[]>(`/api/coaching/self-assessments/student/${studentId}`, { showErrorToast: false }),
+    [],
+    API_ERROR_MESSAGES.COACHING.SELF_ASSESSMENTS_LOAD_ERROR
+  )();
 }
 
 export async function addSelfAssessment(assessment: SelfAssessment): Promise<void> {
-  try {
-    const response = await fetch('/api/coaching/self-assessments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(assessment)
-    });
-    if (!response.ok) throw new Error('Failed to add self assessment');
-    toast.success('Öz değerlendirme eklendi');
-  } catch (error) {
-    console.error('Error adding self assessment:', error);
-    toast.error('Öz değerlendirme eklenemedi');
-    throw error;
-  }
+  return apiClient.post('/api/coaching/self-assessments', assessment, {
+    showSuccessToast: true,
+    successMessage: API_ERROR_MESSAGES.COACHING.SELF_ASSESSMENTS_ADD_SUCCESS,
+    errorMessage: API_ERROR_MESSAGES.COACHING.SELF_ASSESSMENTS_ADD_ERROR,
+  });
 }
 
 export async function getTodaysSelfAssessment(studentId: string): Promise<SelfAssessment | undefined> {
