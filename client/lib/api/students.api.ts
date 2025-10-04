@@ -1,19 +1,14 @@
-import { toast } from "sonner";
 import type { Student, BackendStudent } from "../types/student.types";
 import { backendToFrontend, frontendToBackend } from "../types/student.types";
+import { apiClient } from "./api-client";
+import { API_ERROR_MESSAGES } from "../constants/messages.constants";
+import { toast } from "sonner";
 
 let studentsCache: Student[] | null = null;
 
 async function fetchStudentsFromAPI(): Promise<BackendStudent[]> {
   try {
-    const response = await fetch('/api/students');
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch students: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    return data;
+    return await apiClient.get<BackendStudent[]>('/api/students', { showErrorToast: false });
   } catch (error) {
     console.error('Error fetching students from API:', error);
     return [];
@@ -21,17 +16,7 @@ async function fetchStudentsFromAPI(): Promise<BackendStudent[]> {
 }
 
 async function saveStudentsToAPI(students: BackendStudent[]): Promise<void> {
-  try {
-    const response = await fetch('/api/students/bulk', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(students)
-    });
-    if (!response.ok) throw new Error('Failed to save students');
-  } catch (error) {
-    console.error('Error saving students to API:', error);
-    throw error;
-  }
+  return apiClient.post('/api/students/bulk', students, { showErrorToast: false });
 }
 
 export function loadStudents(): Student[] {
@@ -55,8 +40,8 @@ async function loadStudentsAsync(): Promise<void> {
   } catch (error) {
     console.error('Failed to load students from API:', error);
     
-    toast.error('Öğrenci verileri yüklenirken hata oluştu', {
-      description: 'Lütfen internet bağlantınızı kontrol edip tekrar deneyin.',
+    toast.error(API_ERROR_MESSAGES.STUDENT.LOAD_ERROR, {
+      description: API_ERROR_MESSAGES.STUDENT.LOAD_ERROR_DESCRIPTION,
       duration: 5000
     });
     
@@ -82,8 +67,8 @@ async function saveStudentsAsync(students: Student[]): Promise<void> {
   } catch (error) {
     console.error('Error saving students to API:', error);
     
-    toast.error('Öğrenci verileri kaydedilirken hata oluştu', {
-      description: 'Verileriniz kaydedilemedi. Lütfen tekrar deneyin.',
+    toast.error(API_ERROR_MESSAGES.STUDENT.SAVE_ERROR, {
+      description: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR_DESCRIPTION,
       duration: 5000
     });
     
@@ -95,17 +80,7 @@ export async function upsertStudent(stu: Student): Promise<void> {
   try {
     const backendStudent = frontendToBackend(stu);
     
-    const response = await fetch('/api/students', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(backendStudent)
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
-      throw new Error(errorMessage);
-    }
+    await apiClient.post('/api/students', backendStudent, { showErrorToast: false });
     
     const list = studentsCache || [];
     const idx = list.findIndex((s) => s.id === stu.id);
@@ -134,8 +109,8 @@ export async function refreshStudentsFromAPI(): Promise<Student[]> {
   } catch (error) {
     console.error('Failed to refresh students from API:', error);
     
-    toast.error('Öğrenci verileri güncellenirken hata oluştu', {
-      description: 'Sunucuya erişilemiyor. Lütfen daha sonra tekrar deneyin.',
+    toast.error(API_ERROR_MESSAGES.STUDENT.REFRESH_ERROR, {
+      description: API_ERROR_MESSAGES.STUDENT.REFRESH_ERROR_DESCRIPTION,
       duration: 5000
     });
     
@@ -145,23 +120,18 @@ export async function refreshStudentsFromAPI(): Promise<Student[]> {
 
 export async function deleteStudent(id: string): Promise<void> {
   try {
-    const response = await fetch(`/api/students/${id}`, {
-      method: 'DELETE'
+    await apiClient.delete(`/api/students/${id}`, {
+      showSuccessToast: true,
+      successMessage: API_ERROR_MESSAGES.STUDENT.DELETE_SUCCESS,
+      errorMessage: API_ERROR_MESSAGES.STUDENT.DELETE_ERROR,
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete student');
-    }
     
     if (studentsCache) {
       studentsCache = studentsCache.filter(s => s.id !== id);
       window.dispatchEvent(new CustomEvent('studentsUpdated'));
     }
-    
-    toast.success('Öğrenci silindi');
   } catch (error) {
     console.error('Error deleting student:', error);
-    toast.error('Öğrenci silinemedi');
     throw error;
   }
 }
