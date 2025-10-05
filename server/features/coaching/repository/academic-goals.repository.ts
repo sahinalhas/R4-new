@@ -1,4 +1,5 @@
 import getDatabase from '../../../lib/database.js';
+import { buildDynamicUpdate } from '../../../lib/database/repository-helpers.js';
 import type { AcademicGoal } from '../types/index.js';
 
 let statements: any = null;
@@ -80,18 +81,12 @@ export function updateAcademicGoal(id: string, updates: Partial<AcademicGoal>): 
     ensureInitialized();
     const db = getDatabase();
     
-    const allowedFields = ['title', 'description', 'targetScore', 'currentScore', 'examType', 'deadline', 'status'];
-    const fields = Object.keys(updates).filter(key => allowedFields.includes(key));
-    
-    if (fields.length === 0) {
-      throw new Error('No valid fields to update');
-    }
-    
-    const setClause = fields.map(field => `${field} = ?`).join(', ');
-    const values = fields.map(field => (updates as any)[field]);
-    values.push(id);
-    
-    db.prepare(`UPDATE academic_goals SET ${setClause} WHERE id = ?`).run(...values);
+    buildDynamicUpdate(db, {
+      tableName: 'academic_goals',
+      id,
+      updates,
+      allowedFields: ['title', 'description', 'targetScore', 'currentScore', 'examType', 'deadline', 'status']
+    });
   } catch (error) {
     console.error('Error updating academic goal:', error);
     throw error;

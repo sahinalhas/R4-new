@@ -1,4 +1,5 @@
 import getDatabase from '../../../lib/database.js';
+import { buildDynamicUpdate } from '../../../lib/database/repository-helpers.js';
 import type { FamilyParticipation } from '../types/index.js';
 
 let statements: any = null;
@@ -70,25 +71,15 @@ export function updateFamilyParticipation(id: string, updates: any): void {
     ensureInitialized();
     const db = getDatabase();
     
-    const updatesWithStringifiedArrays = { ...updates };
-    if (updates.participants) {
-      updatesWithStringifiedArrays.participants = JSON.stringify(updates.participants);
-    }
-    
-    const allowedFields = ['eventType', 'eventName', 'eventDate', 'participationStatus', 
-                          'participants', 'engagementLevel', 'communicationFrequency', 
-                          'preferredContactMethod', 'parentAvailability', 'notes'];
-    const fields = Object.keys(updatesWithStringifiedArrays).filter(key => allowedFields.includes(key));
-    
-    if (fields.length === 0) {
-      throw new Error('No valid fields to update');
-    }
-    
-    const setClause = fields.map(field => `${field} = ?`).join(', ');
-    const values = fields.map(field => updatesWithStringifiedArrays[field]);
-    values.push(id);
-    
-    db.prepare(`UPDATE family_participation SET ${setClause} WHERE id = ?`).run(...values);
+    buildDynamicUpdate(db, {
+      tableName: 'family_participation',
+      id,
+      updates,
+      allowedFields: ['eventType', 'eventName', 'eventDate', 'participationStatus', 
+                     'participants', 'engagementLevel', 'communicationFrequency', 
+                     'preferredContactMethod', 'parentAvailability', 'notes'],
+      jsonFields: ['participants']
+    });
   } catch (error) {
     console.error('Error updating family participation:', error);
     throw error;

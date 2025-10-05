@@ -1,4 +1,5 @@
 import getDatabase from '../../../lib/database.js';
+import { buildDynamicUpdate } from '../../../lib/database/repository-helpers.js';
 import type { ParentMeeting } from '../types/index.js';
 
 let statements: any = null;
@@ -74,31 +75,16 @@ export function updateParentMeeting(id: string, updates: any): void {
     ensureInitialized();
     const db = getDatabase();
     
-    const updatesWithStringifiedArrays = { ...updates };
-    if (updates.participants) {
-      updatesWithStringifiedArrays.participants = JSON.stringify(updates.participants);
-    }
-    if (updates.mainTopics) {
-      updatesWithStringifiedArrays.mainTopics = JSON.stringify(updates.mainTopics);
-    }
-    if (updates.followUpRequired !== undefined) {
-      updatesWithStringifiedArrays.followUpRequired = updates.followUpRequired ? 1 : 0;
-    }
-    
-    const allowedFields = ['date', 'time', 'type', 'participants', 'mainTopics', 'concerns', 
-                          'decisions', 'actionPlan', 'nextMeetingDate', 'parentSatisfaction', 
-                          'followUpRequired', 'notes'];
-    const fields = Object.keys(updatesWithStringifiedArrays).filter(key => allowedFields.includes(key));
-    
-    if (fields.length === 0) {
-      throw new Error('No valid fields to update');
-    }
-    
-    const setClause = fields.map(field => `${field} = ?`).join(', ');
-    const values = fields.map(field => updatesWithStringifiedArrays[field]);
-    values.push(id);
-    
-    db.prepare(`UPDATE parent_meetings SET ${setClause} WHERE id = ?`).run(...values);
+    buildDynamicUpdate(db, {
+      tableName: 'parent_meetings',
+      id,
+      updates,
+      allowedFields: ['date', 'time', 'type', 'participants', 'mainTopics', 'concerns', 
+                     'decisions', 'actionPlan', 'nextMeetingDate', 'parentSatisfaction', 
+                     'followUpRequired', 'notes'],
+      jsonFields: ['participants', 'mainTopics'],
+      booleanFields: ['followUpRequired']
+    });
   } catch (error) {
     console.error('Error updating parent meeting:', error);
     throw error;

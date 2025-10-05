@@ -135,3 +135,42 @@ export class RepositoryHelper {
 export function createRepositoryHelper(db: Database): RepositoryHelper {
   return new RepositoryHelper(db);
 }
+
+export interface DynamicUpdateConfig {
+  tableName: string;
+  id: string;
+  updates: Record<string, any>;
+  allowedFields: string[];
+  jsonFields?: string[];
+  booleanFields?: string[];
+}
+
+export function buildDynamicUpdate(db: Database, config: DynamicUpdateConfig): void {
+  const { tableName, id, updates, allowedFields, jsonFields = [], booleanFields = [] } = config;
+  
+  const processedUpdates = { ...updates };
+  
+  jsonFields.forEach(field => {
+    if (updates[field] !== undefined && updates[field] !== null) {
+      processedUpdates[field] = JSON.stringify(updates[field]);
+    }
+  });
+  
+  booleanFields.forEach(field => {
+    if (updates[field] !== undefined) {
+      processedUpdates[field] = updates[field] ? 1 : 0;
+    }
+  });
+  
+  const fields = Object.keys(processedUpdates).filter(key => allowedFields.includes(key));
+  
+  if (fields.length === 0) {
+    throw new Error('No valid fields to update');
+  }
+  
+  const setClause = fields.map(field => `${field} = ?`).join(', ');
+  const values = fields.map(field => processedUpdates[field]);
+  values.push(id);
+  
+  db.prepare(`UPDATE ${tableName} SET ${setClause} WHERE id = ?`).run(...values);
+}

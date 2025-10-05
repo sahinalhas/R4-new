@@ -1,4 +1,5 @@
 import getDatabase from '../../../lib/database.js';
+import { buildDynamicUpdate } from '../../../lib/database/repository-helpers.js';
 import type { CoachingRecommendation } from '../types/index.js';
 
 let statements: any = null;
@@ -64,23 +65,13 @@ export function updateCoachingRecommendation(id: string, updates: any): void {
     ensureInitialized();
     const db = getDatabase();
     
-    const updatesWithStringifiedArrays = { ...updates };
-    if (updates.implementationSteps) {
-      updatesWithStringifiedArrays.implementationSteps = JSON.stringify(updates.implementationSteps);
-    }
-    
-    const allowedFields = ['type', 'title', 'description', 'priority', 'status', 'implementationSteps'];
-    const fields = Object.keys(updatesWithStringifiedArrays).filter(key => allowedFields.includes(key));
-    
-    if (fields.length === 0) {
-      throw new Error('No valid fields to update');
-    }
-    
-    const setClause = fields.map(field => `${field} = ?`).join(', ');
-    const values = fields.map(field => updatesWithStringifiedArrays[field]);
-    values.push(id);
-    
-    db.prepare(`UPDATE coaching_recommendations SET ${setClause} WHERE id = ?`).run(...values);
+    buildDynamicUpdate(db, {
+      tableName: 'coaching_recommendations',
+      id,
+      updates,
+      allowedFields: ['type', 'title', 'description', 'priority', 'status', 'implementationSteps'],
+      jsonFields: ['implementationSteps']
+    });
   } catch (error) {
     console.error('Error updating coaching recommendation:', error);
     throw error;

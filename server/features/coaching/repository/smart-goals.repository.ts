@@ -1,4 +1,5 @@
 import getDatabase from '../../../lib/database.js';
+import { buildDynamicUpdate } from '../../../lib/database/repository-helpers.js';
 import type { SmartGoal } from '../types/index.js';
 
 let statements: any = null;
@@ -61,19 +62,13 @@ export function updateSmartGoal(id: string, updates: Partial<SmartGoal>): void {
     ensureInitialized();
     const db = getDatabase();
     
-    const allowedFields = ['title', 'specific', 'measurable', 'achievable', 'relevant', 'timeBound', 
-                          'category', 'status', 'progress', 'startDate', 'targetDate', 'notes'];
-    const fields = Object.keys(updates).filter(key => allowedFields.includes(key));
-    
-    if (fields.length === 0) {
-      throw new Error('No valid fields to update');
-    }
-    
-    const setClause = fields.map(field => `${field} = ?`).join(', ');
-    const values = fields.map(field => (updates as any)[field]);
-    values.push(id);
-    
-    db.prepare(`UPDATE smart_goals SET ${setClause} WHERE id = ?`).run(...values);
+    buildDynamicUpdate(db, {
+      tableName: 'smart_goals',
+      id,
+      updates,
+      allowedFields: ['title', 'specific', 'measurable', 'achievable', 'relevant', 'timeBound', 
+                     'category', 'status', 'progress', 'startDate', 'targetDate', 'notes']
+    });
   } catch (error) {
     console.error('Error updating smart goal:', error);
     throw error;
