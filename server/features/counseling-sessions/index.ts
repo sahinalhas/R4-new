@@ -4,6 +4,7 @@ import * as counselingSessionsRoutes from './routes/counseling-sessions.routes.j
 import * as remindersRoutes from './routes/reminders.routes.js';
 import * as followUpsRoutes from './routes/follow-ups.routes.js';
 import * as analyticsRoutes from './routes/analytics.routes.js';
+import * as outcomesRoutes from './routes/outcomes.routes.js';
 
 const router = Router();
 
@@ -20,13 +21,6 @@ router.get('/analytics/classes', simpleRateLimit(200, 15 * 60 * 1000), analytics
 router.get('/analytics/modes', simpleRateLimit(200, 15 * 60 * 1000), analyticsRoutes.getModes);
 router.get('/analytics/student/:studentId', simpleRateLimit(200, 15 * 60 * 1000), analyticsRoutes.getStudentStats);
 
-router.get('/:id', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.getCounselingSessionById);
-router.post('/', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.createCounselingSession);
-router.put('/:id/complete', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.completeCounselingSession);
-router.put('/:id/extend', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.extendCounselingSession);
-router.post('/auto-complete', simpleRateLimit(20, 15 * 60 * 1000), counselingSessionsRoutes.autoCompleteCounselingSessions);
-router.delete('/:id', simpleRateLimit(20, 15 * 60 * 1000), counselingSessionsRoutes.deleteCounselingSession);
-
 router.get('/reminders', simpleRateLimit(200, 15 * 60 * 1000), remindersRoutes.getAllReminders);
 router.get('/reminders/pending', simpleRateLimit(200, 15 * 60 * 1000), remindersRoutes.getPendingReminders);
 router.get('/reminders/:id', simpleRateLimit(200, 15 * 60 * 1000), remindersRoutes.getReminderById);
@@ -42,5 +36,20 @@ router.post('/follow-ups', simpleRateLimit(50, 15 * 60 * 1000), followUpsRoutes.
 router.put('/follow-ups/:id', simpleRateLimit(50, 15 * 60 * 1000), followUpsRoutes.updateFollowUp);
 router.put('/follow-ups/:id/status', simpleRateLimit(50, 15 * 60 * 1000), followUpsRoutes.updateFollowUpStatus);
 router.delete('/follow-ups/:id', simpleRateLimit(20, 15 * 60 * 1000), followUpsRoutes.deleteFollowUp);
+
+router.get('/outcomes', simpleRateLimit(200, 15 * 60 * 1000), outcomesRoutes.getAllOutcomes);
+router.get('/outcomes/follow-up-required', simpleRateLimit(200, 15 * 60 * 1000), outcomesRoutes.getOutcomesRequiringFollowUp);
+router.get('/outcomes/session/:sessionId', simpleRateLimit(200, 15 * 60 * 1000), outcomesRoutes.getOutcomeBySessionId);
+router.get('/outcomes/:id', simpleRateLimit(200, 15 * 60 * 1000), outcomesRoutes.getOutcomeById);
+router.post('/outcomes', simpleRateLimit(50, 15 * 60 * 1000), outcomesRoutes.createOutcome);
+router.put('/outcomes/:id', simpleRateLimit(50, 15 * 60 * 1000), outcomesRoutes.updateOutcome);
+router.delete('/outcomes/:id', simpleRateLimit(20, 15 * 60 * 1000), outcomesRoutes.deleteOutcome);
+
+router.post('/auto-complete', simpleRateLimit(20, 15 * 60 * 1000), counselingSessionsRoutes.autoCompleteCounselingSessions);
+router.post('/', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.createCounselingSession);
+router.put('/:id/complete', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.completeCounselingSession);
+router.put('/:id/extend', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.extendCounselingSession);
+router.get('/:id', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.getCounselingSessionById);
+router.delete('/:id', simpleRateLimit(20, 15 * 60 * 1000), counselingSessionsRoutes.deleteCounselingSession);
 
 export default router;
