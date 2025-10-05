@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Clock, CheckCircle2, FileText, Bell, BarChart3 } from "lucide-react";
+import { Plus, Clock, CheckCircle2, FileText, Bell, BarChart3, Download } from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ import SessionAnalytics from "@/components/counseling/SessionAnalytics";
 
 import { getCurrentClassHour, getElapsedTime, getSessionName } from "@/components/counseling/utils/sessionHelpers";
 import { exportSessionsToExcel } from "@/components/counseling/utils/sessionExport";
+import { generateSessionsPDF, generateOutcomesPDF, generateComprehensiveReport } from "@/components/counseling/utils/sessionReports";
+import ReportGenerationDialog, { type ReportOptions } from "@/components/counseling/ReportGenerationDialog";
 import type {
   CounselingSession,
   Student,
@@ -56,6 +58,7 @@ export default function CounselingSessions() {
   const [selectedOutcome, setSelectedOutcome] = useState<(CounselingOutcome & { session?: CounselingSession }) | null>(null);
   const [filters, setFilters] = useState<SessionFilters>({ status: 'all', sessionType: 'all' });
   const [appliedFilters, setAppliedFilters] = useState<SessionFilters>({});
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -764,6 +767,52 @@ export default function CounselingSessions() {
     });
   };
 
+  const handleGenerateReport = async (options: ReportOptions) => {
+    try {
+      let filteredSessions = sessions;
+      let filteredOutcomes = outcomes;
+
+      if (options.dateRange) {
+        const { start, end } = options.dateRange;
+        filteredSessions = sessions.filter(session => {
+          const sessionDate = new Date(session.sessionDate);
+          return sessionDate >= start && sessionDate <= end;
+        });
+
+        const sessionIds = new Set(filteredSessions.map(s => s.id));
+        filteredOutcomes = outcomes.filter(outcome => sessionIds.has(outcome.sessionId));
+      }
+
+      let result;
+      if (options.format === 'pdf') {
+        if (options.includeSessions && options.includeOutcomes) {
+          result = generateComprehensiveReport(filteredSessions, filteredOutcomes);
+        } else if (options.includeSessions) {
+          result = generateSessionsPDF(filteredSessions, [], { includeOutcomes: false });
+        } else if (options.includeOutcomes) {
+          result = generateOutcomesPDF(filteredOutcomes);
+        }
+      } else {
+        const exportedCount = exportSessionsToExcel(filteredSessions);
+        result = { success: true, sessionCount: exportedCount };
+      }
+
+      if (result?.success) {
+        toast({
+          title: "Rapor oluşturuldu",
+          description: `${options.format.toUpperCase()} raporu başarıyla indirildi.`,
+        });
+      }
+    } catch (error) {
+      console.error('Report generation error:', error);
+      toast({
+        title: "Hata",
+        description: "Rapor oluşturulurken bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -773,14 +822,25 @@ export default function CounselingSessions() {
             Öğrenci görüşmelerini yönetin ve takip edin
           </p>
         </div>
-        <Button 
-          onClick={() => setDialogOpen(true)}
-          size="lg"
-          className="gap-2"
-        >
-          <Plus className="h-5 w-5" />
-          Yeni Görüşme
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => setReportDialogOpen(true)}
+            size="lg"
+            variant="outline"
+            className="gap-2"
+          >
+            <Download className="h-5 w-5" />
+            Rapor Oluştur
+          </Button>
+          <Button 
+            onClick={() => setDialogOpen(true)}
+            size="lg"
+            className="gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            Yeni Görüşme
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -942,6 +1002,14 @@ export default function CounselingSessions() {
           followUpRequired: selectedOutcome.followUpRequired,
           followUpDate: selectedOutcome.followUpDate ? new Date(selectedOutcome.followUpDate) : undefined,
         } : undefined}
+      />
+
+      <ReportGenerationDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        onGenerate={handleGenerateReport}
+        sessionCount={sessions.length}
+        outcomeCount={outcomes.length}
       />
     </div>
   );

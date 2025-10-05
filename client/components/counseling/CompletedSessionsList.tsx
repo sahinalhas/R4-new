@@ -91,6 +91,7 @@ export default function CompletedSessionsList({ sessions, onAddOutcome }: Comple
                       Sonuç Ekle
                     </Button>
                   )}
+                </div>
               </div>
               <CardDescription className="flex items-center gap-4 mt-2">
                 <span className="flex items-center gap-1">
