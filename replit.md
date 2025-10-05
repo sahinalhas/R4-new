@@ -20,6 +20,13 @@ The application employs a modern full-stack architecture with a focus on modular
 - **System Design Choices**: The system is configured for Replit's autoscale deployment, with `npm run build` for client and server, and `npm start` for the production server.
 
 ## Recent Changes (October 2025)
+- **Lazy Loading Performance Optimization (October 5, 2025)**: Improved page navigation performance with modern lazy loading best practices:
+  - **Eager Layout Loading**: Moved Layout component from lazy loading to normal import in `client/App.tsx`, ensuring sidebar and header remain persistently visible during navigation
+  - **Nested Suspense Boundaries**: Implemented two-level Suspense architecture for optimal UX:
+    - Top-level Suspense around Routes for full-screen loading on layout-independent pages (PublicSurvey, NotFound)
+    - Inner Suspense around Outlet in Layout for granular loading confined to content area during intra-layout navigation
+  - **Enhanced Loading States**: Added modern spinner with Loader2 icon for better visual feedback
+  - **Benefits**: Significantly faster perceived page transitions, persistent UI shell (sidebar/header never unmount), smoother user experience with appropriate loading indicators per context
 - **Production Deployment & Database Optimization (October 5, 2025)**: Completed production deployment readiness:
   - **Database Index Fixes**: Systematically fixed all column name mismatches in `server/lib/database/indexes.ts`:
     - Updated students table indexes: `sinif`→`className`, `cinsiyet`→`gender`
