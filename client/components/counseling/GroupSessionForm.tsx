@@ -233,29 +233,45 @@ export default function GroupSessionForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="participantType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Katılımcı Tipi</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value || "öğrenci"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="participantType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Katılımcı Tipi</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value || "öğrenci"}>
+                    <FormControl>
+                      <SelectTrigger className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="öğrenci">Öğrenci</SelectItem>
+                      <SelectItem value="veli">Veli</SelectItem>
+                      <SelectItem value="öğretmen">Öğretmen</SelectItem>
+                      <SelectItem value="diğer">Diğer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sessionLocation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Konum *</FormLabel>
                   <FormControl>
-                    <SelectTrigger className="h-11">
-                      <SelectValue />
-                    </SelectTrigger>
+                    <Input {...field} placeholder="Rehberlik Servisi" className="h-11" />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="öğrenci">Öğrenci</SelectItem>
-                    <SelectItem value="veli">Veli</SelectItem>
-                    <SelectItem value="öğretmen">Öğretmen</SelectItem>
-                    <SelectItem value="diğer">Diğer</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {participantType === "veli" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
@@ -447,7 +463,7 @@ export default function GroupSessionForm({
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-3"
+                    className="grid grid-cols-3 gap-2"
                   >
                     <div>
                       <RadioGroupItem
@@ -457,10 +473,10 @@ export default function GroupSessionForm({
                       />
                       <Label
                         htmlFor="group_yuz_yuze"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                       >
-                        <UsersIcon className="mb-3 h-6 w-6" />
-                        <span className="text-sm font-medium">Yüz Yüze</span>
+                        <UsersIcon className="mb-2 h-5 w-5" />
+                        <span className="text-xs font-medium">Yüz Yüze</span>
                       </Label>
                     </div>
                     <div>
@@ -471,10 +487,10 @@ export default function GroupSessionForm({
                       />
                       <Label
                         htmlFor="group_online"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                       >
-                        <Video className="mb-3 h-6 w-6" />
-                        <span className="text-sm font-medium">Online</span>
+                        <Video className="mb-2 h-5 w-5" />
+                        <span className="text-xs font-medium">Online</span>
                       </Label>
                     </div>
                     <div>
@@ -485,31 +501,17 @@ export default function GroupSessionForm({
                       />
                       <Label
                         htmlFor="group_telefon"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                       >
-                        <svg className="mb-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="mb-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        <span className="text-sm font-medium">Telefon</span>
+                        <span className="text-xs font-medium">Telefon</span>
                       </Label>
                     </div>
                   </RadioGroup>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sessionLocation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Konum *</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Rehberlik Servisi" className="h-11" />
-                </FormControl>
-                <FormDescription>
+                <FormDescription className="text-xs">
                   {sessionMode === "online" 
                     ? "Online platform adı veya bağlantısı (örn: Zoom, Teams)"
                     : "Görüşmenin yapılacağı fiziksel konum"}

@@ -60,63 +60,151 @@ export default function IndividualSessionForm({
             <span>Katılımcı Bilgileri</span>
           </div>
           
+          <FormField
+            control={form.control}
+            name="studentId"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Öğrenci *</FormLabel>
+                <Popover open={studentSearchOpen} onOpenChange={setStudentSearchOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "justify-between h-11",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value
+                          ? students.find((s) => s.id === field.value)?.name
+                          : "Öğrenci seçin"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[400px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Öğrenci ara..." />
+                      <CommandList>
+                        <CommandEmpty>Öğrenci bulunamadı.</CommandEmpty>
+                        <CommandGroup>
+                          {students.map((student) => (
+                            <CommandItem
+                              key={student.id}
+                              value={student.name}
+                              onSelect={() => {
+                                field.onChange(student.id);
+                                setStudentSearchOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  field.value === student.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div>
+                                <p className="font-medium">{student.name}</p>
+                                <p className="text-sm text-muted-foreground">{student.className}</p>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="topic"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Görüşme Konusu *</FormLabel>
+                <Popover open={topicSearchOpen} onOpenChange={setTopicSearchOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "justify-between h-11",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <span className="truncate">{field.value || "Konu seçin"}</span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[500px] p-0">
+                    <Command shouldFilter={false}>
+                      <CommandInput 
+                        placeholder="Konu ara..." 
+                        value={topicSearch}
+                        onValueChange={setTopicSearch}
+                      />
+                      <CommandList className="max-h-[300px]">
+                        <CommandEmpty>Konu bulunamadı.</CommandEmpty>
+                        <CommandGroup>
+                          {filteredTopics.map((topic) => (
+                            <CommandItem
+                              key={topic.id}
+                              value={topic.title}
+                              onSelect={() => {
+                                field.onChange(topic.title);
+                                setTopicSearchOpen(false);
+                                setTopicSearch("");
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  field.value === topic.title ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div>
+                                <p className="font-medium">{topic.title}</p>
+                                <p className="text-xs text-muted-foreground">{topic.category}</p>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="studentId"
+              name="participantType"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Öğrenci *</FormLabel>
-                  <Popover open={studentSearchOpen} onOpenChange={setStudentSearchOpen}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "justify-between h-11",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value
-                            ? students.find((s) => s.id === field.value)?.name
-                            : "Öğrenci seçin"}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Öğrenci ara..." />
-                        <CommandList>
-                          <CommandEmpty>Öğrenci bulunamadı.</CommandEmpty>
-                          <CommandGroup>
-                            {students.map((student) => (
-                              <CommandItem
-                                key={student.id}
-                                value={student.name}
-                                onSelect={() => {
-                                  field.onChange(student.id);
-                                  setStudentSearchOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    field.value === student.id ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div>
-                                  <p className="font-medium">{student.name}</p>
-                                  <p className="text-sm text-muted-foreground">{student.className}</p>
-                                </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Katılımcı Tipi</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value || "öğrenci"}>
+                    <FormControl>
+                      <SelectTrigger className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="öğrenci">Öğrenci</SelectItem>
+                      <SelectItem value="veli">Veli</SelectItem>
+                      <SelectItem value="öğretmen">Öğretmen</SelectItem>
+                      <SelectItem value="diğer">Diğer</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -124,92 +212,18 @@ export default function IndividualSessionForm({
 
             <FormField
               control={form.control}
-              name="topic"
+              name="sessionLocation"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Görüşme Konusu *</FormLabel>
-                  <Popover open={topicSearchOpen} onOpenChange={setTopicSearchOpen}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "justify-between h-11",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          <span className="truncate">{field.value || "Konu seçin"}</span>
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[500px] p-0">
-                      <Command shouldFilter={false}>
-                        <CommandInput 
-                          placeholder="Konu ara..." 
-                          value={topicSearch}
-                          onValueChange={setTopicSearch}
-                        />
-                        <CommandList className="max-h-[300px]">
-                          <CommandEmpty>Konu bulunamadı.</CommandEmpty>
-                          <CommandGroup>
-                            {filteredTopics.map((topic) => (
-                              <CommandItem
-                                key={topic.id}
-                                value={topic.title}
-                                onSelect={() => {
-                                  field.onChange(topic.title);
-                                  setTopicSearchOpen(false);
-                                  setTopicSearch("");
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    field.value === topic.title ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div>
-                                  <p className="font-medium">{topic.title}</p>
-                                  <p className="text-xs text-muted-foreground">{topic.category}</p>
-                                </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Konum *</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Rehberlik Servisi" className="h-11" />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-
-          <FormField
-            control={form.control}
-            name="participantType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Katılımcı Tipi</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value || "öğrenci"}>
-                  <FormControl>
-                    <SelectTrigger className="h-11">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="öğrenci">Öğrenci</SelectItem>
-                    <SelectItem value="veli">Veli</SelectItem>
-                    <SelectItem value="öğretmen">Öğretmen</SelectItem>
-                    <SelectItem value="diğer">Diğer</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           {participantType === "veli" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
@@ -401,7 +415,7 @@ export default function IndividualSessionForm({
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-3"
+                    className="grid grid-cols-3 gap-2"
                   >
                     <div>
                       <RadioGroupItem
@@ -411,10 +425,10 @@ export default function IndividualSessionForm({
                       />
                       <Label
                         htmlFor="yuz_yuze"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                       >
-                        <UsersIcon className="mb-3 h-6 w-6" />
-                        <span className="text-sm font-medium">Yüz Yüze</span>
+                        <UsersIcon className="mb-2 h-5 w-5" />
+                        <span className="text-xs font-medium">Yüz Yüze</span>
                       </Label>
                     </div>
                     <div>
@@ -425,10 +439,10 @@ export default function IndividualSessionForm({
                       />
                       <Label
                         htmlFor="online"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                       >
-                        <Video className="mb-3 h-6 w-6" />
-                        <span className="text-sm font-medium">Online</span>
+                        <Video className="mb-2 h-5 w-5" />
+                        <span className="text-xs font-medium">Online</span>
                       </Label>
                     </div>
                     <div>
@@ -439,31 +453,17 @@ export default function IndividualSessionForm({
                       />
                       <Label
                         htmlFor="telefon"
-                        className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                       >
-                        <svg className="mb-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="mb-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        <span className="text-sm font-medium">Telefon</span>
+                        <span className="text-xs font-medium">Telefon</span>
                       </Label>
                     </div>
                   </RadioGroup>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sessionLocation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Konum *</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Rehberlik Servisi" className="h-11" />
-                </FormControl>
-                <FormDescription>
+                <FormDescription className="text-xs">
                   {sessionMode === "online" 
                     ? "Online platform adı veya bağlantısı (örn: Zoom, Teams)"
                     : "Görüşmenin yapılacağı fiziksel konum"}
