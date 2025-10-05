@@ -16,7 +16,9 @@ import NewSessionDialog from "@/components/counseling/NewSessionDialog";
 import CompleteSessionDialog from "@/components/counseling/CompleteSessionDialog";
 import ReminderDialog from "@/components/counseling/ReminderDialog";
 import FollowUpDialog from "@/components/counseling/FollowUpDialog";
+import SessionOutcomeDialog from "@/components/counseling/SessionOutcomeDialog";
 import RemindersTab from "@/components/counseling/RemindersTab";
+import OutcomesTab from "@/components/counseling/OutcomesTab";
 import SessionAnalytics from "@/components/counseling/SessionAnalytics";
 
 import { getCurrentClassHour, getElapsedTime, getSessionName } from "@/components/counseling/utils/sessionHelpers";
@@ -31,8 +33,10 @@ import type {
   CompleteSessionFormValues,
   CounselingReminder,
   CounselingFollowUp,
+  CounselingOutcome,
   ReminderFormValues,
   FollowUpFormValues,
+  OutcomeFormValues,
   SessionFilters,
 } from "@/components/counseling/types";
 
@@ -46,8 +50,10 @@ export default function CounselingSessions() {
   const [remindedSessions, setRemindedSessions] = useState<Set<string>>(new Set());
   const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
   const [followUpDialogOpen, setFollowUpDialogOpen] = useState(false);
+  const [outcomeDialogOpen, setOutcomeDialogOpen] = useState(false);
   const [selectedReminder, setSelectedReminder] = useState<CounselingReminder | null>(null);
   const [selectedFollowUp, setSelectedFollowUp] = useState<CounselingFollowUp | null>(null);
+  const [selectedOutcome, setSelectedOutcome] = useState<(CounselingOutcome & { session?: CounselingSession }) | null>(null);
   const [filters, setFilters] = useState<SessionFilters>({ status: 'all', sessionType: 'all' });
   const [appliedFilters, setAppliedFilters] = useState<SessionFilters>({});
   
@@ -111,6 +117,15 @@ export default function CounselingSessions() {
     queryFn: async () => {
       const response = await fetch('/api/counseling-sessions/follow-ups');
       if (!response.ok) throw new Error('Failed to fetch follow-ups');
+      return response.json();
+    },
+  });
+
+  const { data: outcomes = [] } = useQuery<(CounselingOutcome & { session?: CounselingSession })[]>({
+    queryKey: ['/api/counseling-sessions/outcomes'],
+    queryFn: async () => {
+      const response = await fetch('/api/counseling-sessions/outcomes');
+      if (!response.ok) throw new Error('Failed to fetch outcomes');
       return response.json();
     },
   });
@@ -477,6 +492,120 @@ export default function CounselingSessions() {
     },
   });
 
+  const createOutcomeMutation = useMutation({
+    mutationFn: async (data: OutcomeFormValues) => {
+      const followUpDate = data.followUpDate instanceof Date 
+        ? format(data.followUpDate, 'yyyy-MM-dd')
+        : data.followUpDate;
+      
+      const payload = {
+        id: `outcome_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...data,
+        followUpDate,
+      };
+
+      const response = await fetch('/api/counseling-sessions/outcomes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Sonuç kaydedilemedi');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions/outcomes'] });
+      toast({
+        title: "✅ Sonuç kaydedildi",
+        description: "Görüşme sonucu başarıyla kaydedildi.",
+      });
+      setOutcomeDialogOpen(false);
+      setSelectedOutcome(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "❌ Hata",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateOutcomeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: OutcomeFormValues }) => {
+      const followUpDate = data.followUpDate instanceof Date 
+        ? format(data.followUpDate, 'yyyy-MM-dd')
+        : data.followUpDate;
+      
+      const payload = {
+        ...data,
+        followUpDate,
+      };
+
+      const response = await fetch(`/api/counseling-sessions/outcomes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Sonuç güncellenemedi');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions/outcomes'] });
+      toast({
+        title: "✅ Sonuç güncellendi",
+        description: "Görüşme sonucu başarıyla güncellendi.",
+      });
+      setOutcomeDialogOpen(false);
+      setSelectedOutcome(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "❌ Hata",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteOutcomeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/counseling-sessions/outcomes/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Sonuç silinemedi');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions/outcomes'] });
+      toast({
+        title: "✅ Sonuç silindi",
+        description: "Görüşme sonucu başarıyla silindi.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "❌ Hata",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   useEffect(() => {
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions'] });
@@ -594,6 +723,30 @@ export default function CounselingSessions() {
     }
   };
 
+  const handleCreateOutcome = () => {
+    setSelectedOutcome(null);
+    setOutcomeDialogOpen(true);
+  };
+
+  const handleEditOutcome = (outcome: CounselingOutcome & { session?: CounselingSession }) => {
+    setSelectedOutcome(outcome);
+    setOutcomeDialogOpen(true);
+  };
+
+  const handleOutcomeSubmit = (data: OutcomeFormValues) => {
+    if (selectedOutcome) {
+      updateOutcomeMutation.mutate({ id: selectedOutcome.id, data });
+    } else {
+      createOutcomeMutation.mutate(data);
+    }
+  };
+
+  const handleDeleteOutcome = (id: string) => {
+    if (confirm('Bu sonucu silmek istediğinizden emin misiniz?')) {
+      deleteOutcomeMutation.mutate(id);
+    }
+  };
+
   const handleApplyFilters = () => {
     setAppliedFilters(filters);
     toast({ 
@@ -631,7 +784,7 @@ export default function CounselingSessions() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="active" className="gap-2">
             <Clock className="h-4 w-4" />
             Aktif Görüşmeler
@@ -646,6 +799,13 @@ export default function CounselingSessions() {
           <TabsTrigger value="reminders" className="gap-2">
             <Bell className="h-4 w-4" />
             Hatırlatmalar
+          </TabsTrigger>
+          <TabsTrigger value="outcomes" className="gap-2">
+            <CheckCircle2 className="h-4 w-4" />
+            Sonuçlar
+            {outcomes.length > 0 && (
+              <Badge variant="secondary" className="ml-2">{outcomes.length}</Badge>
+            )}
           </TabsTrigger>
           <TabsTrigger value="analytics" className="gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -683,6 +843,15 @@ export default function CounselingSessions() {
             onCancelReminder={(id) => updateReminderStatusMutation.mutate({ id, status: 'cancelled' })}
             onCompleteFollowUp={(id) => updateFollowUpStatusMutation.mutate({ id, status: 'completed' })}
             onProgressFollowUp={(id) => updateFollowUpStatusMutation.mutate({ id, status: 'in_progress' })}
+          />
+        </TabsContent>
+
+        <TabsContent value="outcomes" className="space-y-4">
+          <OutcomesTab
+            outcomes={outcomes}
+            onCreateOutcome={handleCreateOutcome}
+            onEditOutcome={handleEditOutcome}
+            onDeleteOutcome={handleDeleteOutcome}
           />
         </TabsContent>
 
@@ -753,6 +922,25 @@ export default function CounselingSessions() {
           priority: selectedFollowUp.priority,
           actionItems: selectedFollowUp.actionItems,
           notes: selectedFollowUp.notes,
+        } : undefined}
+      />
+
+      <SessionOutcomeDialog
+        open={outcomeDialogOpen}
+        onOpenChange={setOutcomeDialogOpen}
+        session={selectedOutcome?.session || null}
+        onSubmit={handleOutcomeSubmit}
+        isPending={createOutcomeMutation.isPending || updateOutcomeMutation.isPending}
+        initialData={selectedOutcome ? {
+          id: selectedOutcome.id,
+          sessionId: selectedOutcome.sessionId,
+          effectivenessRating: selectedOutcome.effectivenessRating,
+          progressNotes: selectedOutcome.progressNotes,
+          goalsAchieved: selectedOutcome.goalsAchieved,
+          nextSteps: selectedOutcome.nextSteps,
+          recommendations: selectedOutcome.recommendations,
+          followUpRequired: selectedOutcome.followUpRequired,
+          followUpDate: selectedOutcome.followUpDate ? new Date(selectedOutcome.followUpDate) : undefined,
         } : undefined}
       />
     </div>

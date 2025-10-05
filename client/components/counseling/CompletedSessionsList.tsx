@@ -1,12 +1,14 @@
-import { CheckCircle2, Calendar, Clock, User, Users } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, User, Users, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 import type { CounselingSession } from "./types";
 import { calculateSessionDuration } from "./utils/sessionHelpers";
 
 interface CompletedSessionsListProps {
   sessions: CounselingSession[];
+  onAddOutcome?: (session: CounselingSession) => void;
 }
 
 function getParticipantInfo(session: CounselingSession): string {
@@ -22,7 +24,7 @@ function getParticipantInfo(session: CounselingSession): string {
   return '';
 }
 
-export default function CompletedSessionsList({ sessions }: CompletedSessionsListProps) {
+export default function CompletedSessionsList({ sessions, onAddOutcome }: CompletedSessionsListProps) {
   if (sessions.length === 0) {
     return (
       <Card>
@@ -44,7 +46,7 @@ export default function CompletedSessionsList({ sessions }: CompletedSessionsLis
           <Card key={session.id} className="hover:shadow-sm transition-shadow">
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
                     {session.sessionType === 'individual' ? (
                       <User className="h-5 w-5 text-green-600" />
@@ -72,11 +74,23 @@ export default function CompletedSessionsList({ sessions }: CompletedSessionsLis
                     </p>
                   )}
                 </div>
-                {duration && (
-                  <Badge variant="secondary" className="text-sm">
-                    {duration} dakika
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {duration && (
+                    <Badge variant="secondary" className="text-sm">
+                      {duration} dakika
+                    </Badge>
+                  )}
+                  {onAddOutcome && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onAddOutcome(session)}
+                      className="gap-1"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Sonuç Ekle
+                    </Button>
+                  )}
               </div>
               <CardDescription className="flex items-center gap-4 mt-2">
                 <span className="flex items-center gap-1">
