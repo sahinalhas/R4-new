@@ -38,7 +38,14 @@ export default function GroupSessionForm({
 }: GroupSessionFormProps) {
   const [studentSearchOpen, setStudentSearchOpen] = useState(false);
   const [topicSearchOpen, setTopicSearchOpen] = useState(false);
+  const [topicSearch, setTopicSearch] = useState("");
   const participantType = form.watch("participantType");
+
+  const filteredTopics = topics.filter(topic => 
+    topicSearch.trim() === "" || 
+    topic.title.toLowerCase().includes(topicSearch.toLowerCase()) ||
+    topic.category.toLowerCase().includes(topicSearch.toLowerCase())
+  );
 
   return (
     <Form {...form}>
@@ -171,19 +178,23 @@ export default function GroupSessionForm({
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-[500px] p-0">
-                  <Command shouldFilter={true}>
-                    <CommandInput placeholder="Konu ara..." />
+                  <Command shouldFilter={false}>
+                    <CommandInput 
+                      placeholder="Konu ara..." 
+                      value={topicSearch}
+                      onValueChange={setTopicSearch}
+                    />
                     <CommandList className="max-h-[300px]">
                       <CommandEmpty>Konu bulunamadı.</CommandEmpty>
                       <CommandGroup>
-                        {topics.map((topic) => (
+                        {filteredTopics.map((topic) => (
                           <CommandItem
                             key={topic.id}
-                            value={topic.fullPath}
-                            keywords={[topic.title, topic.category]}
+                            value={topic.title}
                             onSelect={() => {
                               field.onChange(topic.title);
                               setTopicSearchOpen(false);
+                              setTopicSearch("");
                             }}
                           >
                             <Check
