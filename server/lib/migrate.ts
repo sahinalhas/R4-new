@@ -1,27 +1,22 @@
 import {
   loadStudents,
-  saveStudents,
-  type Student
+  saveStudents
 } from '../features/students/repository/students.repository.js';
+import type { Student } from '../features/students/types/students.types.js';
 
 import {
   loadSubjects,
   saveSubjects,
   loadTopics,
-  saveTopics,
-  type Subject,
-  type Topic
+  saveTopics
 } from '../features/subjects/repository/subjects.repository.js';
+import type { Subject, Topic } from '../features/subjects/types/subjects.types.js';
 
-import {
-  saveProgress,
-  type Progress
-} from '../features/progress/repository/progress.repository.js';
+import { saveProgress } from '../features/progress/repository/progress.repository.js';
+import type { Progress } from '../features/progress/types/progress.types.js';
 
-import {
-  upsertAcademicGoal,
-  type AcademicGoal
-} from '../features/coaching/repository/coaching.repository.js';
+import { upsertAcademicGoal } from '../features/coaching/repository/coaching.repository.js';
+import type { AcademicGoal } from '../features/coaching/types/index.js';
 
 export function migrateFromLocalStorage(localStorageData: any) {
   console.log('Starting migration from localStorage to SQLite...');

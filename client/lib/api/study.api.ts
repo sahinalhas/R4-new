@@ -259,21 +259,18 @@ export function loadProgress(): TopicProgress[] {
 }
 
 async function loadProgressAsync(): Promise<void> {
-  return createApiHandler(
-    async () => {
-      const json = await apiClient.get<any>('/api/progress', { showErrorToast: false });
-      const progress = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
-      progressCache = progress;
+  try {
+    const json = await apiClient.get<any>('/api/progress', { showErrorToast: false });
+    const progress = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+    progressCache = progress;
+    window.dispatchEvent(new CustomEvent('progressUpdated'));
+  } catch (error) {
+    console.error(API_ERROR_MESSAGES.STUDY.PROGRESS_LOAD_ERROR, error);
+    if (!progressCache || progressCache.length === 0) {
+      progressCache = [];
       window.dispatchEvent(new CustomEvent('progressUpdated'));
-    },
-    () => {
-      if (!progressCache || progressCache.length === 0) {
-        progressCache = [];
-        window.dispatchEvent(new CustomEvent('progressUpdated'));
-      }
-    },
-    API_ERROR_MESSAGES.STUDY.PROGRESS_LOAD_ERROR
-  )();
+    }
+  }
 }
 
 export async function saveProgress(v: TopicProgress[]): Promise<void> {
