@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Check, ChevronDown, Users as UsersIcon, Search } from "lucide-react";
+import { Check, ChevronDown, Users as UsersIcon, Search, UserCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
@@ -47,30 +47,30 @@ export default function ParticipantStep({
   const selectedStudent = selectedStudentId ? students.find(s => s.id === selectedStudentId) : null;
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-500">
+    <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
       {/* Section Header */}
-      <div className="flex items-center gap-3 pb-2 border-b">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <UsersIcon className="h-5 w-5 text-primary" />
+      <div className="flex items-center gap-3 pb-4 border-b-2">
+        <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 ring-2 ring-primary/20">
+          <UserCircle2 className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h3 className="font-semibold text-lg">Katılımcı Bilgileri</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-semibold text-xl">Katılımcı Bilgileri</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {sessionType === 'individual' ? 'Öğrenci ve görüşme konusu seçin' : 'Öğrencileri ve görüşme konusu seçin'}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left side - Form fields */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-6">
           {sessionType === 'individual' ? (
             <FormField
               control={form.control}
               name="studentId"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-base">Öğrenci *</FormLabel>
+                <FormItem className="flex flex-col animate-in fade-in-50 slide-in-from-left-4 duration-500">
+                  <FormLabel className="text-base font-semibold">Öğrenci *</FormLabel>
                   <Popover open={studentSearchOpen} onOpenChange={setStudentSearchOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -78,7 +78,7 @@ export default function ParticipantStep({
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            "justify-between h-12 text-left font-normal",
+                            "justify-between h-12 text-left font-normal transition-all hover:border-primary/50",
                             !field.value && "text-muted-foreground"
                           )}
                         >

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Calendar as CalendarIcon, Clock, MapPin, Video, Phone, Users as UsersIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, Video, Phone, Users as UsersIcon, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -24,36 +24,36 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
   const sessionMode = form.watch("sessionMode");
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-500">
+    <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
       {/* Section Header */}
-      <div className="flex items-center gap-3 pb-2 border-b">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <CalendarIcon className="h-5 w-5 text-primary" />
+      <div className="flex items-center gap-3 pb-4 border-b-2">
+        <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 ring-2 ring-primary/20">
+          <Settings2 className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h3 className="font-semibold text-lg">Görüşme Detayları</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-semibold text-xl">Görüşme Detayları</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Tarih, saat ve görüşme şeklini belirleyin
           </p>
         </div>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {/* Date and Time */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="sessionDate"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="text-base">Görüşme Tarihi *</FormLabel>
+              <FormItem className="flex flex-col animate-in fade-in-50 slide-in-from-left-4 duration-500">
+                <FormLabel className="text-base font-semibold">Görüşme Tarihi *</FormLabel>
                 <Popover open={dateOpen} onOpenChange={setDateOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal h-12",
+                          "justify-start text-left font-normal h-12 transition-all hover:border-primary/50",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -91,15 +91,15 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
             control={form.control}
             name="sessionTime"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="text-base">Başlangıç Saati *</FormLabel>
+              <FormItem className="flex flex-col animate-in fade-in-50 slide-in-from-right-4 duration-500">
+                <FormLabel className="text-base font-semibold">Başlangıç Saati *</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                     <Input 
                       type="time" 
                       {...field} 
-                      className="pl-10 h-12"
+                      className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </FormControl>
@@ -117,8 +117,8 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
           control={form.control}
           name="sessionMode"
           render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel className="text-base">Görüşme Şekli *</FormLabel>
+            <FormItem className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+              <FormLabel className="text-base font-semibold">Görüşme Şekli *</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
