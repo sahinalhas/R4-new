@@ -12,6 +12,8 @@ export const individualSessionSchema = z.object({
   otherParticipantDescription: z.string().optional(),
   sessionMode: z.string(),
   sessionLocation: z.string(),
+  sessionDate: z.date(),
+  sessionTime: z.string().min(1, "Görüşme saati seçilmelidir"),
   sessionDetails: z.string().optional(),
 }).refine((data) => {
   if (data.participantType === "veli") {
@@ -51,6 +53,8 @@ export const groupSessionSchema = z.object({
   otherParticipantDescription: z.string().optional(),
   sessionMode: z.string(),
   sessionLocation: z.string(),
+  sessionDate: z.date(),
+  sessionTime: z.string().min(1, "Görüşme saati seçilmelidir"),
   sessionDetails: z.string().optional(),
 }).refine((data) => {
   if (data.participantType === "veli") {
