@@ -1,322 +1,177 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Users } from "lucide-react";
-import { ParentMeeting, addParentMeeting } from "@/lib/storage";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { toast } from "sonner";
-
-const meetingTypes = ["YÜZ_YÜZE", "TELEFON", "ONLINE", "EV_ZİYARETİ"] as const;
-
-const parentMeetingSchema = z.object({
-  meetingDate: z.string().min(1, "Görüşme tarihi gereklidir"),
-  time: z.string().min(1, "Görüşme saati gereklidir"),
-  type: z.enum(meetingTypes),
-  participants: z.string().min(1, "Katılımcı bilgisi gereklidir"),
-  mainTopics: z.string().min(1, "Ana konular gereklidir"),
-  concerns: z.string().optional(),
-  decisions: z.string().optional(),
-  actionPlan: z.string().optional(),
-  nextMeetingDate: z.string().optional(),
-  parentSatisfaction: z.string().optional(),
-});
-
-type ParentMeetingFormValues = z.infer<typeof parentMeetingSchema>;
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { Plus, Users, Calendar, Clock, MessageSquare, Info } from "lucide-react";
+import { CounselingSession } from "@/components/counseling/types";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
 
 interface VeliGorusmeleriSectionProps {
   studentId: string;
-  parentMeetings: ParentMeeting[];
   onUpdate: () => void;
 }
 
-export default function VeliGorusmeleriSection({ studentId, parentMeetings, onUpdate }: VeliGorusmeleriSectionProps) {
-  const form = useForm<ParentMeetingFormValues>({
-    resolver: zodResolver(parentMeetingSchema),
-    defaultValues: {
-      meetingDate: new Date().toISOString().slice(0, 10),
-      time: "14:00",
-      type: "YÜZ_YÜZE",
-      participants: "",
-      mainTopics: "",
-      concerns: "",
-      decisions: "",
-      actionPlan: "",
-      nextMeetingDate: "",
-      parentSatisfaction: "",
+const sessionModeLabels: Record<string, string> = {
+  "YÜZ_YÜZE": "Yüz Yüze",
+  "yuz_yuze": "Yüz Yüze",
+  "TELEFON": "Telefon",
+  "telefon": "Telefon",
+  "ONLINE": "Online",
+  "online": "Online",
+};
+
+export default function VeliGorusmeleriSection({ studentId, onUpdate }: VeliGorusmeleriSectionProps) {
+  const { data: allSessions = [], isLoading } = useQuery<CounselingSession[]>({
+    queryKey: ['/api/counseling-sessions'],
+    queryFn: async () => {
+      const response = await fetch('/api/counseling-sessions');
+      if (!response.ok) throw new Error('Görüşmeler yüklenemedi');
+      return response.json();
     },
   });
 
-  const onSubmit = async (data: ParentMeetingFormValues) => {
-    try {
-      const parentMeeting: ParentMeeting = {
-        id: crypto.randomUUID(),
-        studentId,
-        meetingDate: data.meetingDate,
-        time: data.time,
-        type: data.type,
-        participants: data.participants.split(",").map(p => p.trim()).filter(Boolean),
-        mainTopics: data.mainTopics.split(",").map(t => t.trim()).filter(Boolean),
-        concerns: data.concerns || undefined,
-        decisions: data.decisions || undefined,
-        actionPlan: data.actionPlan || undefined,
-        nextMeetingDate: data.nextMeetingDate || undefined,
-        parentSatisfaction: data.parentSatisfaction ? Number(data.parentSatisfaction) : undefined,
-        followUpRequired: !!data.nextMeetingDate || !!data.actionPlan,
-        notes: undefined,
-        createdBy: "Sistem",
-        createdAt: new Date().toISOString(),
-      };
+  const parentMeetings = allSessions.filter(session => {
+    const isParentMeeting = session.participantType === 'veli';
+    const includesStudent = session.sessionType === 'individual' 
+      ? session.student?.id === studentId
+      : session.students?.some(s => s.id === studentId);
+    return isParentMeeting && includesStudent;
+  });
 
-      await addParentMeeting(parentMeeting);
-      toast.success("Veli görüşmesi kaydedildi");
-      form.reset();
-      onUpdate();
-    } catch (error) {
-      toast.error("Kayıt sırasında hata oluştu");
-      console.error("Error saving parent meeting:", error);
-    }
-  };
+  const sortedMeetings = [...parentMeetings].sort((a, b) => {
+    const dateA = new Date(`${a.sessionDate}T${a.entryTime}`);
+    const dateB = new Date(`${b.sessionDate}T${b.entryTime}`);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground">Veli görüşmeleri yükleniyor...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Veli Görüşme Kayıtları
-        </CardTitle>
-        <CardDescription>
-          Detaylı veli görüşme kayıtları ve takip planları
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <FormField
-                control={form.control}
-                name="meetingDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input type="date" placeholder="Görüşme Tarihi" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input type="time" placeholder="Görüşme Saati" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Görüşme Türü" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="YÜZ_YÜZE">Yüz Yüze</SelectItem>
-                        <SelectItem value="TELEFON">Telefon</SelectItem>
-                        <SelectItem value="ONLINE">Online</SelectItem>
-                        <SelectItem value="EV_ZİYARETİ">Ev Ziyareti</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="participants"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="Katılımcılar (virgülle ayırın)" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="mainTopics"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea placeholder="Ana konular (virgülle ayırın)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="concerns"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea placeholder="Endişeler ve sorunlar" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="decisions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea placeholder="Alınan kararlar" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="actionPlan"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea placeholder="Eylem planı" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <FormField
-                control={form.control}
-                name="nextMeetingDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input type="date" placeholder="Sonraki görüşme tarihi" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="parentSatisfaction"
-                render={({ field }) => (
-                  <FormItem>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Veli Memnuniyeti (1-10)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                          <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              <Users className="mr-2 h-4 w-4" />
-              {form.formState.isSubmitting ? "Kaydediliyor..." : "Veli Görüşmesi Kaydet"}
-            </Button>
-          </form>
-        </Form>
-
-        <div className="space-y-3 mt-6">
-          <h4 className="font-medium">Görüşme Geçmişi</h4>
-          {parentMeetings.length === 0 && (
-            <div className="text-sm text-muted-foreground">
-              Henüz veli görüşmesi kaydı yok.
-            </div>
-          )}
-          {parentMeetings.map((meeting) => (
-            <div
-              key={meeting.id}
-              className="border rounded-lg p-4 space-y-2"
-            >
-              <div className="flex items-center justify-between">
-                <div className="font-medium">
-                  {new Date(meeting.meetingDate).toLocaleDateString()} - {meeting.time}
-                </div>
-                <Badge variant="outline">{meeting.type}</Badge>
-              </div>
-              <div className="text-sm">
-                <strong>Katılımcılar:</strong> {meeting.participants.join(", ")}
-              </div>
-              <div className="text-sm">
-                <strong>Ana Konular:</strong> {meeting.mainTopics.join(", ")}
-              </div>
-              {meeting.concerns && (
-                <div className="text-sm text-muted-foreground">
-                  <strong>Endişeler:</strong> {meeting.concerns}
-                </div>
-              )}
-              {meeting.actionPlan && (
-                <div className="text-sm text-muted-foreground">
-                  <strong>Eylem Planı:</strong> {meeting.actionPlan}
-                </div>
-              )}
-              {meeting.parentSatisfaction && (
-                <div className="text-sm">
-                  <Badge variant="secondary">
-                    Memnuniyet: {meeting.parentSatisfaction}/10
-                  </Badge>
-                </div>
-              )}
-              <div className="text-xs text-muted-foreground">
-                Kaydeden: {meeting.createdBy}
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Veli Görüşmeleri Özeti
+            </CardTitle>
+            <CardDescription>
+              Ana görüşmeler sisteminden alınan veli görüşme kayıtları
+            </CardDescription>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/gorusmeler">
+              <Plus className="mr-2 h-4 w-4" />
+              Yeni Görüşme Ekle
+            </Link>
+          </Button>
         </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Veli görüşmelerini yönetmek için{" "}
+            <Link to="/gorusmeler" className="font-medium underline">
+              Ana Görüşmeler
+            </Link>{" "}
+            sayfasına gidin.
+          </AlertDescription>
+        </Alert>
+
+        {sortedMeetings.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
+            <p>Henüz veli görüşmesi kaydı yok</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {sortedMeetings.map((meeting) => (
+              <div
+                key={meeting.id}
+                className="border rounded-lg p-4 space-y-3 hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">
+                        {format(new Date(meeting.sessionDate), "d MMMM yyyy", { locale: tr })}
+                      </span>
+                      <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                      <span className="text-sm text-muted-foreground">
+                        {meeting.entryTime}
+                        {meeting.exitTime && ` - ${meeting.exitTime}`}
+                      </span>
+                    </div>
+                    {meeting.parentName && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{meeting.parentName}</span>
+                        {meeting.parentRelationship && (
+                          <Badge variant="outline" className="text-xs">
+                            {meeting.parentRelationship}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {meeting.sessionMode && (
+                      <Badge variant="secondary">
+                        {sessionModeLabels[meeting.sessionMode] || meeting.sessionMode}
+                      </Badge>
+                    )}
+                    <Badge variant={meeting.completed ? "default" : "outline"}>
+                      {meeting.completed ? "Tamamlandı" : "Devam Ediyor"}
+                    </Badge>
+                  </div>
+                </div>
+
+                {meeting.topic && (
+                  <div className="flex items-start gap-2">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Görüşme Konusu:</p>
+                      <p className="text-sm text-muted-foreground">{meeting.topic}</p>
+                    </div>
+                  </div>
+                )}
+
+                {meeting.sessionDetails && (
+                  <div className="text-sm">
+                    <p className="font-medium mb-1">Görüşme Detayları:</p>
+                    <p className="text-muted-foreground">{meeting.sessionDetails}</p>
+                  </div>
+                )}
+
+                {meeting.detailedNotes && (
+                  <div className="text-sm bg-muted/50 p-3 rounded-md">
+                    <p className="font-medium mb-1">Notlar:</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{meeting.detailedNotes}</p>
+                  </div>
+                )}
+
+                {meeting.sessionLocation && (
+                  <div className="text-xs text-muted-foreground">
+                    📍 {meeting.sessionLocation}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
