@@ -65,9 +65,9 @@ export default function CounselingSessions() {
   });
 
   const { data: topics = [] } = useQuery<CounselingTopic[]>({
-    queryKey: ['/api/counseling-topics'],
+    queryKey: ['/api/counseling-sessions/topics'],
     queryFn: async () => {
-      const response = await fetch('/api/counseling-topics');
+      const response = await fetch('/api/counseling-sessions/topics');
       if (!response.ok) throw new Error('Failed to fetch topics');
       return response.json();
     },
