@@ -70,14 +70,14 @@ export default function SessionFiltersComponent({
           <div>
             <Label htmlFor="topic">Konu</Label>
             <Select
-              value={filters.topic || ''}
+              value={filters.topic || 'all'}
               onValueChange={(value) => handleFilterChange('topic', value)}
             >
               <SelectTrigger id="topic">
                 <SelectValue placeholder="Tümü" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tümü</SelectItem>
+                <SelectItem value="all">Tümü</SelectItem>
                 {topics.map((topic) => (
                   <SelectItem key={topic.id} value={topic.title}>
                     {topic.title}
@@ -117,14 +117,14 @@ export default function SessionFiltersComponent({
           <div>
             <Label htmlFor="participantType">Katılımcı Tipi</Label>
             <Select
-              value={filters.participantType || ''}
+              value={filters.participantType || 'all'}
               onValueChange={(value) => handleFilterChange('participantType', value)}
             >
               <SelectTrigger id="participantType">
                 <SelectValue placeholder="Tümü" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tümü</SelectItem>
+                <SelectItem value="all">Tümü</SelectItem>
                 <SelectItem value="öğrenci">Öğrenci</SelectItem>
                 <SelectItem value="veli">Veli</SelectItem>
                 <SelectItem value="öğretmen">Öğretmen</SelectItem>
@@ -153,14 +153,14 @@ export default function SessionFiltersComponent({
           <div>
             <Label htmlFor="sessionMode">Görüşme Şekli</Label>
             <Select
-              value={filters.sessionMode || ''}
+              value={filters.sessionMode || 'all'}
               onValueChange={(value) => handleFilterChange('sessionMode', value)}
             >
               <SelectTrigger id="sessionMode">
                 <SelectValue placeholder="Tümü" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tümü</SelectItem>
+                <SelectItem value="all">Tümü</SelectItem>
                 <SelectItem value="yüz_yüze">Yüz yüze</SelectItem>
                 <SelectItem value="telefon">Telefon</SelectItem>
                 <SelectItem value="online">Online</SelectItem>

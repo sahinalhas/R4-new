@@ -1,0 +1,76 @@
+
+Beklenmeyen Bir Hata Oluştu
+Üzgünüz, bir şeyler ters gitti. Lütfen sayfayı yenilemeyi deneyin veya ana sayfaya geri dönün.
+Tekrar Dene
+Ana Sayfa
+Geliştirici Bilgileri:
+Hata:
+Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+Stack Trace:
+
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=43436644:848:7
+    at _c8 (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ui/select.tsx:122:60)
+    at div
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-TOI6R7DC.js?v=43436644:43:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-DP4GEOT5.js?v=43436644:79:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-DP4GEOT5.js?v=43436644:56:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-3IG6WGZZ.js?v=43436644:41:15
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=43436644:759:13
+    at div
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-DP4GEOT5.js?v=43436644:79:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-DP4GEOT5.js?v=43436644:56:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-3IG6WGZZ.js?v=43436644:41:15
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=43436644:304:58
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-DP4GEOT5.js?v=43436644:79:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-DP4GEOT5.js?v=43436644:56:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-TOI6R7DC.js?v=43436644:43:13
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-5JPBZRZE.js?v=43436644:261:22
+    at SelectPortal
+    at _c4 (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ui/select.tsx:73:63)
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at CollectionProvider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-3IG6WGZZ.js?v=43436644:31:13)
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at Popper (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-TFZYUOBF.js?v=43436644:1955:11)
+    at Select (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=43436644:90:5)
+    at div
+    at div
+    at div
+    at _c8 (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ui/card.tsx:48:61)
+    at div
+    at _c (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ui/card.tsx:4:53)
+    at SessionFiltersComponent (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/counseling/SessionFilters.tsx:8:51)
+    at div
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-TOI6R7DC.js?v=43436644:43:13
+    at Presence (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-2OYONVJB.js?v=43436644:24:11)
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=43436644:178:13
+    at _c4 (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ui/tabs.tsx:28:61)
+    at div
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-TOI6R7DC.js?v=43436644:43:13
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=43436644:55:7
+    at div
+    at CounselingSessions (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/pages/CounselingSessions.tsx:29:39)
+    at RenderedRoute (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=43436644:4088:5)
+    at Outlet (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=43436644:4494:26)
+    at div
+    at main
+    at _c8 (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ui/sidebar.tsx:303:62)
+    at div
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at TooltipProvider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=43436644:65:5)
+    at https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ui/sidebar.tsx:31:72
+    at Rehber360Layout (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/layout/Rehber360Layout.tsx:93:29)
+    at RenderedRoute (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=43436644:4088:5)
+    at Routes (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=43436644:4558:5)
+    at Router (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=43436644:4501:15)
+    at BrowserRouter (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=43436644:5247:5)
+    at Provider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/chunk-U4NED7UW.js?v=43436644:37:15)
+    at TooltipProvider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=43436644:65:5)
+    at AuthProvider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/lib/auth-context.tsx:86:32)
+    at QueryClientProvider (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=43436644:3016:3)
+    at ErrorBoundary (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/components/ErrorBoundary.tsx:208:5)
+    at App (https://d753a459-c25c-4aaf-85d3-9a2fa62062b4-00-1egnp0i2cygkx.kirk.replit.dev/client/App.tsx:36:5)
+Pzt
