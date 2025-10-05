@@ -122,15 +122,16 @@ export default function IndividualSessionForm({
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-[500px] p-0">
-                  <Command>
+                  <Command shouldFilter={true}>
                     <CommandInput placeholder="Konu ara..." />
-                    <CommandList>
+                    <CommandList className="max-h-[300px]">
                       <CommandEmpty>Konu bulunamadı.</CommandEmpty>
                       <CommandGroup>
                         {topics.map((topic) => (
                           <CommandItem
                             key={topic.id}
                             value={topic.fullPath}
+                            keywords={[topic.title, topic.category]}
                             onSelect={() => {
                               field.onChange(topic.title);
                               setTopicSearchOpen(false);
