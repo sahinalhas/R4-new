@@ -272,7 +272,7 @@ export function createParentMeeting(data: any): { success: boolean; id: string }
   const meeting: ParentMeeting = {
     id: data.id,
     studentId: sanitizeString(data.studentId),
-    date: data.date,
+    meetingDate: data.meetingDate || data.date,
     time: data.time,
     type: data.type ? sanitizeString(data.type) : undefined,
     participants: data.participants,
@@ -295,7 +295,7 @@ export function createParentMeeting(data: any): { success: boolean; id: string }
 export function updateParentMeeting(id: string, updates: any): { success: boolean } {
   const sanitizedUpdates: any = {};
   
-  if (updates.date) sanitizedUpdates.date = updates.date;
+  if (updates.meetingDate || updates.date) sanitizedUpdates.meetingDate = updates.meetingDate || updates.date;
   if (updates.time) sanitizedUpdates.time = updates.time;
   if (updates.type) sanitizedUpdates.type = sanitizeString(updates.type);
   if (updates.participants) sanitizedUpdates.participants = updates.participants;

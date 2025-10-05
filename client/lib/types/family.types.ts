@@ -1,7 +1,7 @@
 export type ParentMeeting = {
   id: string;
   studentId: string;
-  date: string;
+  meetingDate: string;
   time: string;
   type: "YÜZ_YÜZE" | "TELEFON" | "ONLINE" | "EV_ZİYARETİ";
   participants: string[];

@@ -11,9 +11,9 @@ function ensureInitialized(): void {
   const db = getDatabase();
   
   statements = {
-    getParentMeetingsByStudent: db.prepare('SELECT * FROM parent_meetings WHERE studentId = ? ORDER BY date DESC'),
+    getParentMeetingsByStudent: db.prepare('SELECT * FROM parent_meetings WHERE studentId = ? ORDER BY meetingDate DESC'),
     insertParentMeeting: db.prepare(`
-      INSERT INTO parent_meetings (id, studentId, date, time, type, participants, mainTopics, 
+      INSERT INTO parent_meetings (id, studentId, meetingDate, time, type, participants, mainTopics, 
                                    concerns, decisions, actionPlan, nextMeetingDate, parentSatisfaction, 
                                    followUpRequired, notes, createdBy, createdAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -49,7 +49,7 @@ export function insertParentMeeting(meeting: ParentMeeting): void {
     statements.insertParentMeeting.run(
       meeting.id,
       meeting.studentId,
-      meeting.date,
+      meeting.meetingDate,
       meeting.time,
       meeting.type,
       participantsJson,
@@ -79,7 +79,7 @@ export function updateParentMeeting(id: string, updates: any): void {
       tableName: 'parent_meetings',
       id,
       updates,
-      allowedFields: ['date', 'time', 'type', 'participants', 'mainTopics', 'concerns', 
+      allowedFields: ['meetingDate', 'time', 'type', 'participants', 'mainTopics', 'concerns', 
                      'decisions', 'actionPlan', 'nextMeetingDate', 'parentSatisfaction', 
                      'followUpRequired', 'notes'],
       jsonFields: ['participants', 'mainTopics'],

@@ -28,7 +28,7 @@ import { toast } from "sonner";
 const meetingTypes = ["YÜZ_YÜZE", "TELEFON", "ONLINE", "EV_ZİYARETİ"] as const;
 
 const parentMeetingSchema = z.object({
-  date: z.string().min(1, "Görüşme tarihi gereklidir"),
+  meetingDate: z.string().min(1, "Görüşme tarihi gereklidir"),
   time: z.string().min(1, "Görüşme saati gereklidir"),
   type: z.enum(meetingTypes),
   participants: z.string().min(1, "Katılımcı bilgisi gereklidir"),
@@ -52,7 +52,7 @@ export default function VeliGorusmeleriSection({ studentId, parentMeetings, onUp
   const form = useForm<ParentMeetingFormValues>({
     resolver: zodResolver(parentMeetingSchema),
     defaultValues: {
-      date: new Date().toISOString().slice(0, 10),
+      meetingDate: new Date().toISOString().slice(0, 10),
       time: "14:00",
       type: "YÜZ_YÜZE",
       participants: "",
@@ -70,7 +70,7 @@ export default function VeliGorusmeleriSection({ studentId, parentMeetings, onUp
       const parentMeeting: ParentMeeting = {
         id: crypto.randomUUID(),
         studentId,
-        date: data.date,
+        meetingDate: data.meetingDate,
         time: data.time,
         type: data.type,
         participants: data.participants.split(",").map(p => p.trim()).filter(Boolean),
@@ -113,7 +113,7 @@ export default function VeliGorusmeleriSection({ studentId, parentMeetings, onUp
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <FormField
                 control={form.control}
-                name="date"
+                name="meetingDate"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -284,7 +284,7 @@ export default function VeliGorusmeleriSection({ studentId, parentMeetings, onUp
             >
               <div className="flex items-center justify-between">
                 <div className="font-medium">
-                  {new Date(meeting.date).toLocaleDateString()} - {meeting.time}
+                  {new Date(meeting.meetingDate).toLocaleDateString()} - {meeting.time}
                 </div>
                 <Badge variant="outline">{meeting.type}</Badge>
               </div>

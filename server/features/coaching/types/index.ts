@@ -114,7 +114,7 @@ export interface SelfAssessment {
 export interface ParentMeeting {
   id: string;
   studentId: string;
-  date: string;
+  meetingDate: string;
   time?: string;
   type?: string;
   participants?: any[];
