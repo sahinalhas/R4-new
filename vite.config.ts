@@ -16,6 +16,11 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
+    minify: mode === 'production' ? 'esbuild' : false,
+    target: 'es2021',
+    cssCodeSplit: true,
+    cssMinify: mode === 'production',
+    assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -34,10 +39,23 @@ export default defineConfig(({ mode }) => ({
           'vendor-charts': ['recharts'],
           'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge'],
         },
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name?.split('.');
+          const ext = info?.[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) {
+            return `assets/images/[name]-[hash][extname]`;
+          } else if (/woff2?|ttf|eot/i.test(ext || '')) {
+            return `assets/fonts/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
     chunkSizeWarningLimit: 1000,
     sourcemap: mode === 'development',
+    reportCompressedSize: mode === 'production',
   },
   plugins: [react(), expressPlugin()],
   resolve: {

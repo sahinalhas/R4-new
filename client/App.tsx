@@ -18,7 +18,18 @@ const Placeholder = lazy(() => import("./pages/Placeholder"));
 const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0,
+      gcTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchOnMount: true,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <ErrorBoundary>
