@@ -1,10 +1,11 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { setupGlobalErrorHandlers } from "./lib/error-handler";
 
 const Layout = lazy(() => import("./layout/Rehber360Layout"));
 const Index = lazy(() => import("./pages/Index"));
@@ -31,15 +32,21 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Yükleniyor...</div>}>
-              <Routes>
+const App = () => {
+  useEffect(() => {
+    const cleanup = setupGlobalErrorHandlers();
+    return cleanup;
+  }, []);
+
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Yükleniyor...</div>}>
+                <Routes>
                 <Route element={<Layout />}>
                   <Route path="/" element={<Index />} />
                   <Route path="/ogrenci" element={<Students />} />
@@ -72,13 +79,14 @@ const App = () => (
                 </Route>
                 <Route path="/anket/:publicLink" element={<PublicSurvey />} />
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-        </BrowserRouter>
-      </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+                </Routes>
+              </Suspense>
+          </BrowserRouter>
+        </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;
