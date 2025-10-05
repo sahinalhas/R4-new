@@ -1,4 +1,4 @@
-import { lazy, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { setupGlobalErrorHandlers } from "./lib/error-handler";
+import { Loader2 } from "lucide-react";
 import Layout from "./layout/Rehber360Layout";
 
 const Index = lazy(() => import("./pages/Index"));
@@ -45,40 +46,51 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/ogrenci" element={<Students />} />
-                  <Route path="/ogrenci/:id" element={<StudentProfile />} />
-                  <Route
-                    path="/gorusmeler"
-                    element={<CounselingSessions />}
-                  />
-                  <Route
-                    path="/anketler"
-                    element={<Surveys />}
-                  />
-                  <Route
-                    path="/raporlar"
-                    element={<Reports />}
-                  />
-                  <Route
-                    path="/etkinlikler"
-                    element={<Placeholder title="Etkinlik Yönetimi" />}
-                  />
-                  <Route path="/ayarlar" element={<SettingsPage />} />
-                  <Route
-                    path="/risk"
-                    element={<Placeholder title="Risk ve Müdahale Takip" />}
-                  />
-                  <Route
-                    path="/istatistik"
-                    element={<Placeholder title="Performans & İstatistik" />}
-                  />
-                </Route>
-                <Route path="/anket/:publicLink" element={<PublicSurvey />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center min-h-screen">
+                    <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="text-sm font-medium">Yükleniyor...</p>
+                    </div>
+                  </div>
+                }
+              >
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/ogrenci" element={<Students />} />
+                    <Route path="/ogrenci/:id" element={<StudentProfile />} />
+                    <Route
+                      path="/gorusmeler"
+                      element={<CounselingSessions />}
+                    />
+                    <Route
+                      path="/anketler"
+                      element={<Surveys />}
+                    />
+                    <Route
+                      path="/raporlar"
+                      element={<Reports />}
+                    />
+                    <Route
+                      path="/etkinlikler"
+                      element={<Placeholder title="Etkinlik Yönetimi" />}
+                    />
+                    <Route path="/ayarlar" element={<SettingsPage />} />
+                    <Route
+                      path="/risk"
+                      element={<Placeholder title="Risk ve Müdahale Takip" />}
+                    />
+                    <Route
+                      path="/istatistik"
+                      element={<Placeholder title="Performans & İstatistik" />}
+                    />
+                  </Route>
+                  <Route path="/anket/:publicLink" element={<PublicSurvey />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
