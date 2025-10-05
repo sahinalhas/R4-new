@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Clock, CheckCircle2, FileText } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -78,17 +79,22 @@ export default function CounselingSessions() {
 
   const createSessionMutation = useMutation({
     mutationFn: async (data: IndividualSessionFormValues | GroupSessionFormValues) => {
-      const now = new Date();
       const currentClassHour = getCurrentClassHour(classHours);
+      
+      const sessionDate = data.sessionDate instanceof Date 
+        ? format(data.sessionDate, 'yyyy-MM-dd')
+        : data.sessionDate;
+      
+      const { sessionDate: _, sessionTime: __, ...restData } = data;
       
       const payload = {
         id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         sessionType,
         counselorId: "user_1",
-        sessionDate: now.toISOString().split('T')[0],
-        entryTime: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+        sessionDate,
+        entryTime: data.sessionTime,
         entryClassHourId: currentClassHour?.id,
-        ...data,
+        ...restData,
         studentIds: sessionType === 'individual' 
           ? [(data as IndividualSessionFormValues).studentId]
           : (data as GroupSessionFormValues).studentIds,
