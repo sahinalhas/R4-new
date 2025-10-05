@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,8 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { setupGlobalErrorHandlers } from "./lib/error-handler";
+import Layout from "./layout/Rehber360Layout";
 
-const Layout = lazy(() => import("./layout/Rehber360Layout"));
 const Index = lazy(() => import("./pages/Index"));
 const Students = lazy(() => import("./pages/Students"));
 const StudentProfile = lazy(() => import("./pages/StudentProfile"));
@@ -45,8 +45,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Yükleniyor...</div>}>
-                <Routes>
+              <Routes>
                 <Route element={<Layout />}>
                   <Route path="/" element={<Index />} />
                   <Route path="/ogrenci" element={<Students />} />
@@ -79,10 +78,9 @@ const App = () => {
                 </Route>
                 <Route path="/anket/:publicLink" element={<PublicSurvey />} />
                 <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
