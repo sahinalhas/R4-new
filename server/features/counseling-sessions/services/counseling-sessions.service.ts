@@ -193,7 +193,7 @@ export function getCounselingTopics(): CounselingTopic[] {
   }
   
   for (const tab of presentationSystem) {
-    if (tab.categories && tab.categories.length > 0) {
+    if (tab.title === 'Bireysel Çalışmalar' && tab.categories && tab.categories.length > 0) {
       extractTopics(tab.categories, tab.title);
     }
   }
