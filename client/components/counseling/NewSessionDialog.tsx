@@ -41,6 +41,9 @@ export default function NewSessionDialog({
   onSubmit,
   isPending,
 }: NewSessionDialogProps) {
+  const now = new Date();
+  const currentTime = now.toTimeString().slice(0, 5);
+
   const individualForm = useForm<IndividualSessionFormValues>({
     resolver: zodResolver(individualSessionSchema),
     defaultValues: {
@@ -50,6 +53,8 @@ export default function NewSessionDialog({
       relationshipType: "",
       sessionMode: "yüz_yüze",
       sessionLocation: "Rehberlik Servisi",
+      sessionDate: now,
+      sessionTime: currentTime,
       sessionDetails: "",
     },
   });
@@ -63,6 +68,8 @@ export default function NewSessionDialog({
       participantType: "öğrenci",
       sessionMode: "yüz_yüze",
       sessionLocation: "Rehberlik Servisi",
+      sessionDate: now,
+      sessionTime: currentTime,
       sessionDetails: "",
     },
   });
