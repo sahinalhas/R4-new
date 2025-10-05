@@ -1,0 +1,79 @@
+Skip to content
+Console
+Git
+Remote Updates
+origin/main•upstream
+last fetched 23 min ago
+2 commits to push
+Commit
+There are no changes to commit.
+Preview
+/
+
+IndividualSessionForm.tsx
+Connect new form structure
+6 / 10
+55 minutes ago
+Improve the visual appearance and user experience of the website
+5 minutes of work
+Çöz
+
+27 minutes ago
+24 minutes ago
+Update session filter default values to prevent errors
+2 minutes of work
+Yeni görüşme formu çok karışık dırıyor tasarımı daha modern ve zarif olmalı neler yapabiliriz
+
+22 minutes ago
+Başka ne olabilir
+
+18 minutes ago
+Tamam modüler ve temiz bir şekilde yap
+
+16 minutes ago
+Start building
+15 minutes ago
+15 minutes ago
+•
+Free
+Transitioned from Plan to Build mode
+Konu seçimi → Kategorilere göre gruplandırılmış bu olmasın zaten konular hiyerarşik olarak gruplanmış
+
+12 minutes ago
+Değiştirseydin nasıl oalcaktı ki
+
+11 minutes ago
+Peki konuları yeni mantığa göre mi gruplayacaksın yoksa sistemdeki gruplama mantığıyla mı olacak
+
+10 minutes ago
+Seçenek A: Mevcut Sistemi Koru
+
+8 minutes ago
+Başla her şeyi modüler ve temiz yap tüm görecler bitene kadar aralıksız çalış
+
+7 minutes ago
+Hemen başlıyorum! Modern, modüler ve temiz bir yapı oluşturuyorum. 🚀
+
+Şimdi modüler bileşenleri oluşturuyorum:
+
+Temel bileşenler oluşturuldu! Şimdi adım bileşenlerini oluşturuyorum:
+
+ParticipantStep oluşturuldu! Şimdi SessionDetailsStep ve NotesStep bileşenlerini oluşturuyorum:
+
+Mükemmel! Tüm modüler bileşenler oluşturuldu. Şimdi mevcut formları yeni stepper sistemiyle entegre ediyorum:
+
+Şimdi formları stepper sistemiyle entegre ediyorum:
+
+3 minutes ago
+Introduce a multi-step form for creating counseling sessions
+4 minutes of work
+Agent encountered an error while running, we are investigating the issue.
+
+Working.
+Upgrade to continue building
+You've reached your Starter usage limit. Upgrade to make, launch, and scale your apps.
+$25 Monthly credits for Replit Agent
+Publish and host your apps
+Access more powerful models
+Agent
+Agent can make changes, review its work, and debug itself automatically.
