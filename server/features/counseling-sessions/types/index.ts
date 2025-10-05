@@ -12,6 +12,11 @@ export interface CounselingSession {
   participantType: string;
   relationshipType?: string;
   otherParticipants?: string;
+  parentName?: string;
+  parentRelationship?: string;
+  teacherName?: string;
+  teacherBranch?: string;
+  otherParticipantDescription?: string;
   sessionMode: string;
   sessionLocation: string;
   disciplineStatus?: string;

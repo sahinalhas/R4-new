@@ -38,6 +38,7 @@ export default function GroupSessionForm({
 }: GroupSessionFormProps) {
   const [studentSearchOpen, setStudentSearchOpen] = useState(false);
   const [topicSearchOpen, setTopicSearchOpen] = useState(false);
+  const participantType = form.watch("participantType");
 
   return (
     <Form {...form}>
@@ -206,31 +207,128 @@ export default function GroupSessionForm({
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="participantType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Katılımcı Tipi</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value || "öğrenci"}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="öğrenci">Öğrenci</SelectItem>
+                  <SelectItem value="veli">Veli</SelectItem>
+                  <SelectItem value="öğretmen">Öğretmen</SelectItem>
+                  <SelectItem value="diğer">Diğer</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {participantType === "veli" && (
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="parentName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Veli Adı *</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Veli adını girin" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="parentRelationship"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Yakınlık Derecesi *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seçiniz" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Anne">Anne</SelectItem>
+                      <SelectItem value="Baba">Baba</SelectItem>
+                      <SelectItem value="Dede">Dede</SelectItem>
+                      <SelectItem value="Nine">Nine</SelectItem>
+                      <SelectItem value="Amca">Amca</SelectItem>
+                      <SelectItem value="Teyze">Teyze</SelectItem>
+                      <SelectItem value="Diğer">Diğer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        {participantType === "öğretmen" && (
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="teacherName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Öğretmen Adı *</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Öğretmen adını girin" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="teacherBranch"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Branş</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Örn: Matematik" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        {participantType === "diğer" && (
           <FormField
             control={form.control}
-            name="participantType"
+            name="otherParticipantDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Katılımcı Tipi</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="öğrenci">Öğrenci</SelectItem>
-                    <SelectItem value="veli">Veli</SelectItem>
-                    <SelectItem value="öğretmen">Öğretmen</SelectItem>
-                    <SelectItem value="diğer">Diğer</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Katılımcı Açıklaması *</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="Katılımcı hakkında bilgi girin..."
+                    rows={2}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+        )}
 
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="sessionMode"
@@ -253,21 +351,21 @@ export default function GroupSessionForm({
               </FormItem>
             )}
           />
-        </div>
 
-        <FormField
-          control={form.control}
-          name="sessionLocation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Görüşme Yeri</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Rehberlik Servisi" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="sessionLocation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Görüşme Yeri</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Rehberlik Servisi" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}

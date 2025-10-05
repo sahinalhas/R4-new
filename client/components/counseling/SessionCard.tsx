@@ -16,9 +16,23 @@ interface SessionCardProps {
   extendPending: boolean;
 }
 
+function getParticipantInfo(session: CounselingSession): string {
+  if (session.participantType === "veli" && session.parentName) {
+    return `Veli: ${session.parentName} (${session.parentRelationship || 'Veli'})`;
+  }
+  if (session.participantType === "öğretmen" && session.teacherName) {
+    return `Öğretmen: ${session.teacherName}${session.teacherBranch ? ` - ${session.teacherBranch}` : ''}`;
+  }
+  if (session.participantType === "diğer" && session.otherParticipantDescription) {
+    return `Katılımcı: ${session.otherParticipantDescription}`;
+  }
+  return '';
+}
+
 export default function SessionCard({ session, onComplete, onExtend, extendPending }: SessionCardProps) {
   const elapsed = getElapsedTime(session.entryTime, session.sessionDate);
   const timerColor = getTimerColor(elapsed, session.extensionGranted);
+  const participantInfo = getParticipantInfo(session);
   
   return (
     <motion.div
@@ -48,6 +62,11 @@ export default function SessionCard({ session, onComplete, onExtend, extendPendi
               {session.sessionType === 'group' && session.students && (
                 <p className="text-sm text-muted-foreground">
                   {session.students.map(s => s.name).join(', ')}
+                </p>
+              )}
+              {participantInfo && (
+                <p className="text-sm text-muted-foreground italic">
+                  {participantInfo}
                 </p>
               )}
             </div>

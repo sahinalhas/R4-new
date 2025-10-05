@@ -10,6 +10,15 @@ export function exportSessionsToExcel(sessions: CounselingSession[]) {
       ? session.student?.name 
       : session.students?.map(s => s.name).join(', ') || session.groupName;
     
+    let participantInfo = '';
+    if (session.participantType === "veli" && session.parentName) {
+      participantInfo = `${session.parentName} (${session.parentRelationship || 'Veli'})`;
+    } else if (session.participantType === "öğretmen" && session.teacherName) {
+      participantInfo = `${session.teacherName}${session.teacherBranch ? ` - ${session.teacherBranch}` : ''}`;
+    } else if (session.participantType === "diğer" && session.otherParticipantDescription) {
+      participantInfo = session.otherParticipantDescription;
+    }
+    
     return {
       'Tarih': new Date(session.sessionDate).toLocaleDateString('tr-TR'),
       'Başlangıç Saati': session.entryTime,
@@ -17,6 +26,8 @@ export function exportSessionsToExcel(sessions: CounselingSession[]) {
       'Öğrenci(ler)': studentNames,
       'Sınıf': session.sessionType === 'individual' ? session.student?.className : '-',
       'Görüşme Tipi': session.sessionType === 'individual' ? 'Bireysel' : 'Grup',
+      'Katılımcı Tipi': session.participantType || 'öğrenci',
+      'Katılımcı Bilgisi': participantInfo || '-',
       'Konu': session.topic,
       'Görüşme Şekli': session.sessionMode,
       'Konum': session.sessionLocation,

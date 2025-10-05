@@ -34,10 +34,11 @@ function ensureInitialized(): void {
     insertSession: db.prepare(`
       INSERT INTO counseling_sessions (
         id, sessionType, groupName, counselorId, sessionDate, entryTime, entryClassHourId,
-        topic, participantType, relationshipType, otherParticipants, sessionMode,
-        sessionLocation, disciplineStatus, institutionalCooperation, sessionDetails,
-        completed
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        topic, participantType, relationshipType, otherParticipants, parentName,
+        parentRelationship, teacherName, teacherBranch, otherParticipantDescription,
+        sessionMode, sessionLocation, disciplineStatus, institutionalCooperation,
+        sessionDetails, completed
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
     insertSessionStudent: db.prepare(`
       INSERT INTO counseling_session_students (sessionId, studentId)
@@ -124,6 +125,11 @@ export function createSession(session: CounselingSession, studentIds: string[]):
       session.participantType,
       session.relationshipType || null,
       session.otherParticipants || null,
+      session.parentName || null,
+      session.parentRelationship || null,
+      session.teacherName || null,
+      session.teacherBranch || null,
+      session.otherParticipantDescription || null,
       session.sessionMode,
       session.sessionLocation,
       session.disciplineStatus || null,

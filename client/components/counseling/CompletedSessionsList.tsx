@@ -9,6 +9,19 @@ interface CompletedSessionsListProps {
   sessions: CounselingSession[];
 }
 
+function getParticipantInfo(session: CounselingSession): string {
+  if (session.participantType === "veli" && session.parentName) {
+    return `Veli: ${session.parentName} (${session.parentRelationship || 'Veli'})`;
+  }
+  if (session.participantType === "öğretmen" && session.teacherName) {
+    return `Öğretmen: ${session.teacherName}${session.teacherBranch ? ` - ${session.teacherBranch}` : ''}`;
+  }
+  if (session.participantType === "diğer" && session.otherParticipantDescription) {
+    return `Katılımcı: ${session.otherParticipantDescription}`;
+  }
+  return '';
+}
+
 export default function CompletedSessionsList({ sessions }: CompletedSessionsListProps) {
   if (sessions.length === 0) {
     return (
@@ -25,6 +38,7 @@ export default function CompletedSessionsList({ sessions }: CompletedSessionsLis
     <div className="grid gap-4">
       {sessions.map((session) => {
         const duration = calculateSessionDuration(session.entryTime, session.exitTime || '');
+        const participantInfo = getParticipantInfo(session);
         
         return (
           <Card key={session.id} className="hover:shadow-sm transition-shadow">
@@ -50,6 +64,11 @@ export default function CompletedSessionsList({ sessions }: CompletedSessionsLis
                   {session.sessionType === 'group' && session.students && (
                     <p className="text-sm text-muted-foreground">
                       {session.students.map(s => s.name).join(', ')}
+                    </p>
+                  )}
+                  {participantInfo && (
+                    <p className="text-sm text-muted-foreground italic">
+                      {participantInfo}
                     </p>
                   )}
                 </div>

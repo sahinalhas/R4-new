@@ -11,6 +11,19 @@ interface SessionsTableProps {
   onExport: () => void;
 }
 
+function getParticipantInfo(session: CounselingSession): string {
+  if (session.participantType === "veli" && session.parentName) {
+    return `${session.parentName} (${session.parentRelationship || 'Veli'})`;
+  }
+  if (session.participantType === "öğretmen" && session.teacherName) {
+    return `${session.teacherName}${session.teacherBranch ? ` - ${session.teacherBranch}` : ''}`;
+  }
+  if (session.participantType === "diğer" && session.otherParticipantDescription) {
+    return session.otherParticipantDescription;
+  }
+  return '';
+}
+
 export default function SessionsTable({ sessions, onExport }: SessionsTableProps) {
   return (
     <Card>
@@ -48,6 +61,7 @@ export default function SessionsTable({ sessions, onExport }: SessionsTableProps
                   <th className="text-left px-4 py-3">Bitiş</th>
                   <th className="text-left px-4 py-3">Öğrenci(ler)</th>
                   <th className="text-left px-4 py-3">Tip</th>
+                  <th className="text-left px-4 py-3">Katılımcı</th>
                   <th className="text-left px-4 py-3">Konu</th>
                   <th className="text-left px-4 py-3">Süre</th>
                   <th className="text-left px-4 py-3">Durum</th>
@@ -60,6 +74,7 @@ export default function SessionsTable({ sessions, onExport }: SessionsTableProps
                   const studentNames = session.sessionType === 'individual'
                     ? session.student?.name
                     : session.students?.map(s => s.name).join(', ') || session.groupName;
+                  const participantInfo = getParticipantInfo(session);
 
                   return (
                     <tr key={session.id} className="border-b hover:bg-muted/50 transition-colors">
@@ -73,6 +88,9 @@ export default function SessionsTable({ sessions, onExport }: SessionsTableProps
                         <Badge variant={session.sessionType === 'individual' ? 'default' : 'secondary'} className="text-xs">
                           {session.sessionType === 'individual' ? 'Bireysel' : 'Grup'}
                         </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate">
+                        {participantInfo || '-'}
                       </td>
                       <td className="px-4 py-3 text-sm max-w-xs truncate">{session.topic}</td>
                       <td className="px-4 py-3 text-sm">{duration ? `${duration} dk` : '-'}</td>
