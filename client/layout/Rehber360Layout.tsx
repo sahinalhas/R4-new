@@ -54,8 +54,9 @@ import {
   FolderKanban,
   Download,
   Search,
+  Loader2,
 } from "lucide-react";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, Suspense, useEffect, useMemo, useState } from "react";
 import { loadSettings, updateSettings, SETTINGS_KEY, AppSettings } from "@/lib/app-settings";
 import {
   CommandDialog,
@@ -389,7 +390,18 @@ export default function Rehber360Layout() {
               </CommandGroup>
             </CommandList>
           </CommandDialog>
-          <Outlet />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm font-medium">Yükleniyor...</p>
+                </div>
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </div>
       </SidebarInset>
     </SidebarProvider>
