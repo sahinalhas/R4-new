@@ -106,11 +106,31 @@ export const followUpSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const outcomeSchema = z.object({
+  sessionId: z.string().min(1, "Görüşme ID gereklidir"),
+  effectivenessRating: z.number().min(1, "En az 1 puan").max(5, "En fazla 5 puan").optional(),
+  progressNotes: z.string().optional(),
+  goalsAchieved: z.string().optional(),
+  nextSteps: z.string().optional(),
+  recommendations: z.string().optional(),
+  followUpRequired: z.boolean().default(false),
+  followUpDate: z.date().optional(),
+}).refine((data) => {
+  if (data.followUpRequired && !data.followUpDate) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Takip gerekiyorsa takip tarihi belirtilmelidir",
+  path: ["followUpDate"],
+});
+
 export type IndividualSessionFormValues = z.infer<typeof individualSessionSchema>;
 export type GroupSessionFormValues = z.infer<typeof groupSessionSchema>;
 export type CompleteSessionFormValues = z.infer<typeof completeSessionSchema>;
 export type ReminderFormValues = z.infer<typeof reminderSchema>;
 export type FollowUpFormValues = z.infer<typeof followUpSchema>;
+export type OutcomeFormValues = z.infer<typeof outcomeSchema>;
 
 export interface Student {
   id: string;
@@ -192,6 +212,20 @@ export interface CounselingFollowUp {
   actionItems: string;
   notes?: string;
   completedDate?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CounselingOutcome {
+  id: string;
+  sessionId: string;
+  effectivenessRating?: number;
+  progressNotes?: string;
+  goalsAchieved?: string;
+  nextSteps?: string;
+  recommendations?: string;
+  followUpRequired: boolean;
+  followUpDate?: string;
   created_at: string;
   updated_at: string;
 }
