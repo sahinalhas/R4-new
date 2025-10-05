@@ -3,7 +3,14 @@ import * as service from '../services/counseling-sessions.service.js';
 
 export function getAllCounselingSessions(req: Request, res: Response) {
   try {
-    const sessions = service.getAllSessionsWithStudents();
+    const filters = req.query;
+    
+    if (Object.keys(filters).length === 0) {
+      const sessions = service.getAllSessionsWithStudents();
+      return res.json(sessions);
+    }
+    
+    const sessions = service.getFilteredSessionsWithStudents(filters);
     res.json(sessions);
   } catch (error) {
     console.error('Error fetching counseling sessions:', error);

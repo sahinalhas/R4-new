@@ -1,6 +1,6 @@
 import * as repository from '../repository/counseling-sessions.repository.js';
 import { sanitizeString } from '../../../middleware/validation.js';
-import type { CounselingSession, CounselingSessionWithStudents, ClassHour, CounselingTopic } from '../types/index.js';
+import type { CounselingSession, CounselingSessionWithStudents, ClassHour, CounselingTopic, SessionFilters } from '../types/index.js';
 
 export function getAllSessionsWithStudents(): CounselingSessionWithStudents[] {
   const sessions = repository.getAllSessions();
@@ -199,4 +199,56 @@ export function getCounselingTopics(): CounselingTopic[] {
   }
   
   return topics;
+}
+
+export function getFilteredSessionsWithStudents(filters: any): CounselingSessionWithStudents[] {
+  const sanitizedFilters: SessionFilters = {};
+  
+  if (filters.startDate && typeof filters.startDate === 'string' && filters.startDate.trim() !== '') {
+    sanitizedFilters.startDate = sanitizeString(filters.startDate);
+  }
+  
+  if (filters.endDate && typeof filters.endDate === 'string' && filters.endDate.trim() !== '') {
+    sanitizedFilters.endDate = sanitizeString(filters.endDate);
+  }
+  
+  if (filters.topic && typeof filters.topic === 'string' && filters.topic.trim() !== '') {
+    sanitizedFilters.topic = sanitizeString(filters.topic);
+  }
+  
+  if (filters.className && typeof filters.className === 'string' && filters.className.trim() !== '') {
+    sanitizedFilters.className = sanitizeString(filters.className);
+  }
+  
+  if (filters.status && (filters.status === 'completed' || filters.status === 'active' || filters.status === 'all')) {
+    sanitizedFilters.status = filters.status;
+  }
+  
+  if (filters.participantType && typeof filters.participantType === 'string' && filters.participantType.trim() !== '') {
+    sanitizedFilters.participantType = sanitizeString(filters.participantType);
+  }
+  
+  if (filters.sessionType && (filters.sessionType === 'individual' || filters.sessionType === 'group' || filters.sessionType === 'all')) {
+    sanitizedFilters.sessionType = filters.sessionType;
+  }
+  
+  if (filters.sessionMode && typeof filters.sessionMode === 'string' && filters.sessionMode.trim() !== '') {
+    sanitizedFilters.sessionMode = sanitizeString(filters.sessionMode);
+  }
+  
+  if (filters.studentId && typeof filters.studentId === 'string' && filters.studentId.trim() !== '') {
+    sanitizedFilters.studentId = sanitizeString(filters.studentId);
+  }
+  
+  const sessions = repository.getFilteredSessions(sanitizedFilters);
+  
+  return sessions.map((session) => {
+    if (session.sessionType === 'group') {
+      const students = repository.getStudentsBySessionId(session.id);
+      return { ...session, students };
+    } else {
+      const student = repository.getStudentBySessionId(session.id);
+      return { ...session, student };
+    }
+  });
 }

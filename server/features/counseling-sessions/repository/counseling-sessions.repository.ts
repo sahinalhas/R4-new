@@ -1,5 +1,5 @@
 import getDatabase from '../../../lib/database.js';
-import type { CounselingSession, CounselingSessionWithStudents } from '../types/index.js';
+import type { CounselingSession, CounselingSessionWithStudents, SessionFilters } from '../types/index.js';
 
 let statements: any = null;
 let isInitialized = false;
@@ -198,4 +198,72 @@ export function getAppSettings(): any {
   ensureInitialized();
   const row = statements.getAppSettings.get();
   return row;
+}
+
+export function getFilteredSessions(filters: SessionFilters): CounselingSession[] {
+  const db = getDatabase();
+  
+  let query = 'SELECT DISTINCT cs.* FROM counseling_sessions cs';
+  const params: any[] = [];
+  const whereConditions: string[] = [];
+  
+  if (filters.className || filters.studentId) {
+    query += ' LEFT JOIN counseling_session_students css ON cs.id = css.sessionId';
+    query += ' LEFT JOIN students s ON css.studentId = s.id';
+  }
+  
+  if (filters.startDate && filters.startDate.trim() !== '') {
+    whereConditions.push('cs.sessionDate >= ?');
+    params.push(filters.startDate);
+  }
+  
+  if (filters.endDate && filters.endDate.trim() !== '') {
+    whereConditions.push('cs.sessionDate <= ?');
+    params.push(filters.endDate);
+  }
+  
+  if (filters.topic && filters.topic.trim() !== '') {
+    whereConditions.push('LOWER(cs.topic) LIKE LOWER(?)');
+    params.push(`%${filters.topic}%`);
+  }
+  
+  if (filters.className && filters.className.trim() !== '') {
+    whereConditions.push('s.className = ?');
+    params.push(filters.className);
+  }
+  
+  if (filters.status === 'completed') {
+    whereConditions.push('cs.completed = 1');
+  } else if (filters.status === 'active') {
+    whereConditions.push('cs.completed = 0');
+  }
+  
+  if (filters.participantType && filters.participantType.trim() !== '') {
+    whereConditions.push('cs.participantType = ?');
+    params.push(filters.participantType);
+  }
+  
+  if (filters.sessionType && filters.sessionType !== 'all' && filters.sessionType.trim() !== '') {
+    whereConditions.push('cs.sessionType = ?');
+    params.push(filters.sessionType);
+  }
+  
+  if (filters.sessionMode && filters.sessionMode.trim() !== '') {
+    whereConditions.push('cs.sessionMode = ?');
+    params.push(filters.sessionMode);
+  }
+  
+  if (filters.studentId && filters.studentId.trim() !== '') {
+    whereConditions.push('css.studentId = ?');
+    params.push(filters.studentId);
+  }
+  
+  if (whereConditions.length > 0) {
+    query += ' WHERE ' + whereConditions.join(' AND ');
+  }
+  
+  query += ' ORDER BY cs.sessionDate DESC, cs.entryTime DESC';
+  
+  const stmt = db.prepare(query);
+  return stmt.all(...params) as CounselingSession[];
 }

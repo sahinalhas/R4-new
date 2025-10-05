@@ -87,9 +87,30 @@ export const completeSessionSchema = z.object({
   detailedNotes: z.string().optional(),
 });
 
+export const reminderSchema = z.object({
+  sessionId: z.string().optional(),
+  reminderType: z.enum(["planned_session", "follow_up", "parent_meeting"]),
+  reminderDate: z.date(),
+  reminderTime: z.string().min(1, "Saat gereklidir"),
+  title: z.string().min(1, "Başlık gereklidir"),
+  description: z.string().optional(),
+  studentIds: z.array(z.string()).min(1, "En az bir öğrenci seçilmelidir"),
+});
+
+export const followUpSchema = z.object({
+  sessionId: z.string().optional(),
+  followUpDate: z.date(),
+  assignedTo: z.string().min(1, "Atanan kişi gereklidir"),
+  priority: z.enum(["low", "medium", "high", "urgent"]),
+  actionItems: z.string().min(1, "Yapılacaklar gereklidir"),
+  notes: z.string().optional(),
+});
+
 export type IndividualSessionFormValues = z.infer<typeof individualSessionSchema>;
 export type GroupSessionFormValues = z.infer<typeof groupSessionSchema>;
 export type CompleteSessionFormValues = z.infer<typeof completeSessionSchema>;
+export type ReminderFormValues = z.infer<typeof reminderSchema>;
+export type FollowUpFormValues = z.infer<typeof followUpSchema>;
 
 export interface Student {
   id: string;
@@ -143,4 +164,90 @@ export interface CounselingSession {
   updated_at: string;
   student?: Student;
   students?: Student[];
+}
+
+export interface CounselingReminder {
+  id: string;
+  sessionId?: string;
+  reminderType: 'planned_session' | 'follow_up' | 'parent_meeting';
+  reminderDate: string;
+  reminderTime: string;
+  title: string;
+  description?: string;
+  studentIds: string;
+  status: 'pending' | 'completed' | 'cancelled';
+  notificationSent: boolean;
+  created_at: string;
+  updated_at: string;
+  students?: Student[];
+}
+
+export interface CounselingFollowUp {
+  id: string;
+  sessionId?: string;
+  followUpDate: string;
+  assignedTo: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'pending' | 'in_progress' | 'completed';
+  actionItems: string;
+  notes?: string;
+  completedDate?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OverallStats {
+  totalSessions: number;
+  activeSessions: number;
+  completedSessions: number;
+  thisMonthSessions: number;
+  thisWeekSessions: number;
+  todaySessions: number;
+  avgDuration: number;
+  longestDuration: number;
+  shortestDuration: number;
+  individualPercentage: number;
+  groupPercentage: number;
+}
+
+export interface TimeSeriesData {
+  date: string;
+  count: number;
+  completed: number;
+  active: number;
+}
+
+export interface TopicAnalysis {
+  topic: string;
+  count: number;
+  avgDuration: number;
+}
+
+export interface ParticipantAnalysis {
+  type: string;
+  count: number;
+  percentage: number;
+}
+
+export interface ClassAnalysis {
+  className: string;
+  count: number;
+}
+
+export interface SessionModeAnalysis {
+  mode: string;
+  count: number;
+  percentage: number;
+}
+
+export interface SessionFilters {
+  startDate?: string;
+  endDate?: string;
+  topic?: string;
+  className?: string;
+  status?: 'completed' | 'active' | 'all';
+  participantType?: string;
+  sessionType?: 'individual' | 'group' | 'all';
+  sessionMode?: string;
+  studentId?: string;
 }
