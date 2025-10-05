@@ -75,4 +75,24 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_attendance_student_date ON attendance(studentId, date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exam_results_student_date ON exam_results(studentId, examDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exam_results_type ON exam_results(examType)');
+  
+  db.exec('CREATE INDEX IF NOT EXISTS idx_meeting_notes_student_date ON meeting_notes(studentId, date)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_interventions_student_date ON interventions(studentId, date)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_behavior_incidents_student_date ON behavior_incidents(studentId, incidentDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_parent_meetings_student_date ON parent_meetings(studentId, meetingDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_home_visits_student_date ON home_visits(studentId, date)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_study_assignments_student_due ON study_assignments(studentId, dueDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_study_sessions_student_date ON study_sessions(studentId, sessionDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_coaching_recommendations_student_date ON coaching_recommendations(studentId, createdAt)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_student_date ON risk_factors(studentId, assessmentDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_family_participation_student_date ON family_participation(studentId, eventDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_self_assessments_student_date ON self_assessments(studentId, assessmentDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_evaluations_360_student_date ON evaluations_360(studentId, evaluationDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_multiple_intelligence_student_date ON multiple_intelligence(studentId, assessmentDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_learning_styles_student_date ON learning_styles(studentId, assessmentDate)');
+  
+  db.exec('CREATE INDEX IF NOT EXISTS idx_parent_meetings_date ON parent_meetings(meetingDate)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_home_visits_date ON home_visits(date)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_academic_goals_deadline ON academic_goals(deadline)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_smart_goals_deadline ON smart_goals(targetDate)');
 }
