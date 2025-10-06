@@ -338,13 +338,27 @@ export default function Students() {
       }
 
       const isCsv = ext === "csv";
-      const data = isCsv
-        ? new TextEncoder().encode(await file.text())
-        : await file.arrayBuffer();
+      let data: ArrayBuffer | Uint8Array;
+      
+      if (isCsv) {
+        const buffer = await file.arrayBuffer();
+        let decodedText: string;
+        
+        try {
+          decodedText = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+        } catch (utfError) {
+          console.log('UTF-8 decode failed, trying Windows-1254 for Turkish characters');
+          decodedText = new TextDecoder('windows-1254').decode(buffer);
+        }
+        
+        data = new TextEncoder().encode(decodedText);
+      } else {
+        data = await file.arrayBuffer();
+      }
       
       let wb, ws, rows;
       try {
-        wb = XLSX.read(data, { type: isCsv ? "array" : "array" });
+        wb = XLSX.read(data, { type: "array" });
       } catch (parseError) {
         console.error('Error parsing file:', parseError);
         alert("Dosya okunamadı. Dosyanın bozuk olmadığından veya doğru formatta olduğundan emin olun.");
