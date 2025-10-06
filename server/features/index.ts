@@ -17,6 +17,7 @@ import riskAssessmentRouter from './risk-assessment/index.js';
 import behaviorRouter from './behavior/index.js';
 import counselingSessionsRouter from './counseling-sessions/index.js';
 import authRouter from './auth/index.js';
+import usersRouter from './users/index.js';
 
 /**
  * Feature Registry
@@ -122,5 +123,6 @@ featureRegistry.use('/', documentsRouter);
 // =================== SYSTEM DOMAIN ===================
 featureRegistry.use('/', settingsRouter);
 featureRegistry.use('/session', authRouter);
+featureRegistry.use('/users', usersRouter);
 
 export default featureRegistry;
