@@ -74,42 +74,6 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
-// =================== MOCK USERS ===================
-
-const MOCK_USERS: User[] = [
-  {
-    id: 'admin1',
-    name: 'Sistem Yöneticisi',
-    email: 'admin@okul.edu.tr',
-    role: 'admin',
-    permissions: ROLE_PERMISSIONS.admin,
-    institution: 'Rehber360 Test Okulu'
-  },
-  {
-    id: 'counselor1',
-    name: 'Rehber Öğretmen',
-    email: 'rehber@okul.edu.tr',
-    role: 'counselor',
-    permissions: ROLE_PERMISSIONS.counselor,
-    institution: 'Rehber360 Test Okulu'
-  },
-  {
-    id: 'teacher1',
-    name: 'Sınıf Öğretmeni',
-    email: 'ogretmen@okul.edu.tr',
-    role: 'teacher',
-    permissions: ROLE_PERMISSIONS.teacher,
-    institution: 'Rehber360 Test Okulu'
-  },
-  {
-    id: 'observer1',
-    name: 'Gözlemci',
-    email: 'gozlemci@okul.edu.tr',
-    role: 'observer',
-    permissions: ROLE_PERMISSIONS.observer,
-    institution: 'Rehber360 Test Okulu'
-  }
-];
 
 // =================== PROVIDER ===================
 
@@ -152,35 +116,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in production this would be an API call
-    const foundUser = MOCK_USERS.find(u => u.email === email);
-    
-    // More secure demo password validation
-    const validPasswords = ['demo', 'test', '123456']; // Multiple demo passwords
-    if (foundUser && validPasswords.includes(password.toLowerCase())) {
-      setUser(foundUser);
-      setIsAuthenticated(true);
-      setIsLoading(false);
-      
-      // Save to SQLite
-      try {
-        await fetch('/api/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: 'demo-user',
-            userData: foundUser,
-            demoNoticeSeen: true
-          })
-        });
-      } catch (error) {
-        console.error('Failed to save session:', error);
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.user) {
+        const userWithPermissions = {
+          ...result.user,
+          permissions: ROLE_PERMISSIONS[result.user.role] || []
+        };
+        
+        setUser(userWithPermissions);
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        
+        try {
+          await fetch('/api/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: result.user.id,
+              userData: userWithPermissions,
+              demoNoticeSeen: true
+            })
+          });
+        } catch (error) {
+          console.error('Failed to save session:', error);
+        }
+        
+        return true;
       }
       
-      return true;
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    
-    return false;
   };
 
   const logout = async () => {
@@ -201,25 +177,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dismissDemoNotice = async () => {
     setShowDemoNotice(false);
     
-    // Auto-login when demo notice is dismissed
-    const defaultUser = MOCK_USERS.find(u => u.role === 'counselor')!;
-    setUser(defaultUser);
-    setIsAuthenticated(true);
-    setIsLoading(false);
+    const success = await login('rehber@okul.edu.tr', 'demo');
     
-    // Save to SQLite
-    try {
-      await fetch('/api/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 'demo-user',
-          userData: defaultUser,
-          demoNoticeSeen: true
-        })
-      });
-    } catch (error) {
-      console.error('Failed to save session:', error);
+    if (!success) {
+      console.error('Auto-login failed');
     }
   };
 
