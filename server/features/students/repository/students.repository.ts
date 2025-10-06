@@ -13,12 +13,12 @@ function ensureInitialized(): void {
     getStudents: db.prepare('SELECT * FROM students ORDER BY name'),
     getStudent: db.prepare('SELECT * FROM students WHERE id = ?'),
     insertStudent: db.prepare(`
-      INSERT INTO students (id, name, email, phone, birthDate, address, className, enrollmentDate, status, avatar, parentContact, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO students (id, name, email, phone, birthDate, address, className, enrollmentDate, status, avatar, parentContact, notes, gender)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
     upsertStudent: db.prepare(`
-      INSERT INTO students (id, name, email, phone, birthDate, address, className, enrollmentDate, status, avatar, parentContact, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO students (id, name, email, phone, birthDate, address, className, enrollmentDate, status, avatar, parentContact, notes, gender)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         email = excluded.email,
@@ -29,11 +29,12 @@ function ensureInitialized(): void {
         status = excluded.status,
         avatar = excluded.avatar,
         parentContact = excluded.parentContact,
-        notes = excluded.notes
+        notes = excluded.notes,
+        gender = excluded.gender
     `),
     updateStudent: db.prepare(`
       UPDATE students SET name = ?, email = ?, phone = ?, birthDate = ?, address = ?, className = ?, 
-                         status = ?, avatar = ?, parentContact = ?, notes = ?
+                         status = ?, avatar = ?, parentContact = ?, notes = ?, gender = ?
       WHERE id = ?
     `),
     deleteStudent: db.prepare('DELETE FROM students WHERE id = ?'),
@@ -100,7 +101,7 @@ export function saveStudents(students: Student[]): void {
             student.id, student.name, student.email, student.phone,
             student.birthDate, student.address, student.className,
             student.enrollmentDate, student.status, student.avatar,
-            student.parentContact, student.notes
+            student.parentContact, student.notes, student.gender
           );
         }
       } catch (transactionError) {
@@ -131,7 +132,7 @@ export function saveStudent(student: Student): void {
       statements.updateStudent.run(
         student.name, student.email, student.phone, student.birthDate,
         student.address, student.className, student.status,
-        student.avatar, student.parentContact, student.notes,
+        student.avatar, student.parentContact, student.notes, student.gender,
         student.id
       );
     } else {
@@ -139,7 +140,7 @@ export function saveStudent(student: Student): void {
         student.id, student.name, student.email, student.phone,
         student.birthDate, student.address, student.className,
         student.enrollmentDate, student.status, student.avatar,
-        student.parentContact, student.notes
+        student.parentContact, student.notes, student.gender
       );
     }
   } catch (error) {

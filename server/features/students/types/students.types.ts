@@ -11,6 +11,7 @@ export interface Student {
   avatar?: string;
   parentContact?: string;
   notes?: string;
+  gender?: 'K' | 'E';
 }
 
 export interface AcademicRecord {

@@ -94,14 +94,14 @@ export default function ParticipantStep({
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
                       <Command>
-                        <CommandInput placeholder="Öğrenci ara..." />
+                        <CommandInput placeholder="Öğrenci ara (No veya Ad)..." />
                         <CommandList>
                           <CommandEmpty>Öğrenci bulunamadı.</CommandEmpty>
                           <CommandGroup>
                             {students.map((student) => (
                               <CommandItem
                                 key={student.id}
-                                value={student.name}
+                                value={`${student.id} ${student.name}`}
                                 onSelect={() => {
                                   field.onChange(student.id);
                                   setStudentSearchOpen(false);
@@ -115,7 +115,7 @@ export default function ParticipantStep({
                                 />
                                 <div>
                                   <p className="font-medium">{student.name}</p>
-                                  <p className="text-sm text-muted-foreground">{student.className}</p>
+                                  <p className="text-sm text-muted-foreground">No: {student.id} • {student.className}</p>
                                 </div>
                               </CommandItem>
                             ))}
@@ -161,7 +161,7 @@ export default function ParticipantStep({
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0">
                       <Command>
-                        <CommandInput placeholder="Öğrenci ara..." />
+                        <CommandInput placeholder="Öğrenci ara (No veya Ad)..." />
                         <CommandList>
                           <CommandEmpty>Öğrenci bulunamadı.</CommandEmpty>
                           <CommandGroup>
@@ -170,7 +170,7 @@ export default function ParticipantStep({
                               return (
                                 <CommandItem
                                   key={student.id}
-                                  value={student.name}
+                                  value={`${student.id} ${student.name}`}
                                   onSelect={() => {
                                     if (!onSelectedStudentsChange) return;
                                     
@@ -190,7 +190,7 @@ export default function ParticipantStep({
                                   />
                                   <div>
                                     <p className="font-medium">{student.name}</p>
-                                    <p className="text-sm text-muted-foreground">{student.className}</p>
+                                    <p className="text-sm text-muted-foreground">No: {student.id} • {student.className}</p>
                                   </div>
                                 </CommandItem>
                               );
