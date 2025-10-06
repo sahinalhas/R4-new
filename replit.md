@@ -20,6 +20,14 @@ The application employs a modern full-stack architecture with a focus on modular
 - **System Design Choices**: The system is configured for Replit's autoscale deployment, with `npm run build` for client and server, and `npm start` for the production server.
 
 ## Recent Changes (October 2025)
+- **Reports Page Performance Optimization (October 6, 2025)**: Optimized analytics page loading for better performance:
+  - **Lazy Tab Loading**: Replaced `TabsContent` with conditional rendering based on `activeTab` - analytics components only mount when their tab is active
+  - **Batch Processing**: Implemented batch processing (15 students per batch) in `generateRiskProfiles()` to prevent overwhelming API with hundreds of concurrent requests
+  - **Error Resilience**: Added per-student error handling with try-catch blocks and null filtering to ensure batch processing continues even if individual student data fails
+  - **Enhanced Loading States**: Improved loading indicators in `EarlyWarningSystem` with detailed progress messages
+  - **Key-based Remounting**: Added `key={refreshKey}` to analytics components for proper remounting on refresh
+  - **Files Updated**: `client/pages/Reports.tsx`, `client/components/analytics/EarlyWarningSystem.tsx`
+  - **Benefits**: Significantly reduced initial page load time, prevented API overload, improved user experience with responsive tab switching
 - **Turkish Character Support for Excel/CSV (October 6, 2025)**: Enhanced all Excel and CSV import/export operations with proper UTF-8 encoding:
   - **Excel Import**: Added `codepage: 65001` (UTF-8) to all `XLSX.read()` operations for proper Turkish character support
   - **Excel Export**: Added `codepage: 65001` and `bookSST: true` to all `XLSX.write()` and `XLSX.writeFile()` operations
