@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { Student, loadStudents, saveStudents, refreshStudentsFromAPI, upsertStudent } from "@/lib/storage";
+import { frontendToBackend } from "@/lib/types/student.types";
 
 function useDebounced<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -486,11 +487,28 @@ export default function Students() {
       });
     });
 
-    saveStudents(updatedStudents);
-    
-    await refreshStudentsFromAPI();
-    
-    alert(`${imported.length} öğrenci başarıyla içe aktarıldı.`);
+    try {
+      const backendStudents = updatedStudents.map(s => frontendToBackend(s));
+      
+      const response = await fetch('/api/students/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(backendStudents)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Backend kaydetme başarısız');
+      }
+      
+      await refreshStudentsFromAPI();
+      setStudents(updatedStudents);
+      
+      alert(`${imported.length} öğrenci başarıyla içe aktarıldı.`);
+    } catch (error) {
+      console.error('Backend save error:', error);
+      alert(`Öğrenciler backend'e kaydedilemedi: ${error instanceof Error ? error.message : String(error)}`);
+    }
     
     } catch (error) {
       console.error('File import error:', error);
