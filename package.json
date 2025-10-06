@@ -35,6 +35,8 @@
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.13.12",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.2",
     "better-sqlite3": "^12.4.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
