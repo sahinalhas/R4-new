@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Calendar as CalendarIcon, Clock, MapPin, Video, Phone, Users as UsersIcon, Settings2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, Video, Phone, Users as UsersIcon, Settings2, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { IndividualSessionFormValues, GroupSessionFormValues } from "../types";
 
@@ -216,25 +217,36 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
           )}
         />
 
-        {/* Quick time presets */}
-        <div className="p-4 rounded-lg bg-muted/30 border border-muted">
-          <p className="text-sm font-medium mb-3">Hızlı Saat Seçimi</p>
-          <div className="flex flex-wrap gap-2">
-            {['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'].map((time) => (
-              <Button
-                key={time}
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => form.setValue('sessionTime', time)}
-                className="h-9"
-              >
-                <Clock className="h-3 w-3 mr-1" />
-                {time}
-              </Button>
-            ))}
-          </div>
-        </div>
+        {/* Discipline/Student Behavior Evaluation */}
+        <FormField
+          control={form.control}
+          name="disciplineStatus"
+          render={({ field }) => (
+            <FormItem className="animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+              <FormLabel className="text-base flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4" />
+                Disiplin / Öğrenci Davranış Değerlendirme Görüşmeleri
+              </FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Seçiniz" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Seçiniz</SelectItem>
+                  <SelectItem value="kurulu_sevk">Kurulu sevk edilen öğrenci</SelectItem>
+                  <SelectItem value="gorusu_alinan">Olayla ilgili görüşü alınan öğrenci / şahit</SelectItem>
+                  <SelectItem value="akran_gorusmesi">Akran Görüşmesi</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Görüşmenin disiplin veya davranış değerlendirmesi kapsamında olup olmadığını belirtin
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );
