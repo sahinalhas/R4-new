@@ -7,6 +7,7 @@ import { migration005 } from './005-add-topic-fields';
 import { migration006 } from './006-add-unique-constraint';
 import { migration007 } from './007-add-topic-planning-fields';
 import { migration008 } from './008-add-participant-fields';
+import { migration009 } from './009-add-default-users';
 
 const migrations = [
   migration001,
@@ -16,7 +17,8 @@ const migrations = [
   migration005,
   migration006,
   migration007,
-  migration008
+  migration008,
+  migration009
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {
