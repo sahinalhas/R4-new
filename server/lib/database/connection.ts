@@ -21,6 +21,7 @@ export function getDatabase(): Database.Database {
       try {
         db.pragma('journal_mode = WAL');
         db.pragma('foreign_keys = ON');
+        db.pragma('encoding = "UTF-8"');
       } catch (pragmaError) {
         console.error('Failed to set database pragmas:', pragmaError);
         db.close();
