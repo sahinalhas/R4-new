@@ -687,65 +687,77 @@ export default function Reports() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
-          <OverviewDashboard setActiveTab={setActiveTab} />
-        </TabsContent>
+        {activeTab === "overview" && (
+          <div className="mt-4">
+            <OverviewDashboard setActiveTab={setActiveTab} />
+          </div>
+        )}
 
-        <TabsContent value="predictive">
-          <PermissionGuard 
-            permission="view_predictive_analysis"
-            fallback={
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
-              </div>
-            }
-          >
-            <PredictiveAnalysis />
-          </PermissionGuard>
-        </TabsContent>
+        {activeTab === "predictive" && (
+          <div className="mt-4">
+            <PermissionGuard 
+              permission="view_predictive_analysis"
+              fallback={
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
+                </div>
+              }
+            >
+              <PredictiveAnalysis key={refreshKey} />
+            </PermissionGuard>
+          </div>
+        )}
 
-        <TabsContent value="comparative">
-          <PermissionGuard 
-            permission="view_comparative_reports"
-            fallback={
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
-              </div>
-            }
-          >
-            <ComparativeReports />
-          </PermissionGuard>
-        </TabsContent>
+        {activeTab === "comparative" && (
+          <div className="mt-4">
+            <PermissionGuard 
+              permission="view_comparative_reports"
+              fallback={
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
+                </div>
+              }
+            >
+              <ComparativeReports key={refreshKey} />
+            </PermissionGuard>
+          </div>
+        )}
 
-        <TabsContent value="progress">
-          <PermissionGuard 
-            permission="view_progress_charts"
-            fallback={
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
-              </div>
-            }
-          >
-            <ProgressCharts />
-          </PermissionGuard>
-        </TabsContent>
+        {activeTab === "progress" && (
+          <div className="mt-4">
+            <PermissionGuard 
+              permission="view_progress_charts"
+              fallback={
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
+                </div>
+              }
+            >
+              <ProgressCharts key={refreshKey} />
+            </PermissionGuard>
+          </div>
+        )}
 
-        <TabsContent value="warnings">
-          <PermissionGuard 
-            permission="view_early_warnings"
-            fallback={
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
-              </div>
-            }
-          >
-            <EarlyWarningSystem />
-          </PermissionGuard>
-        </TabsContent>
+        {activeTab === "warnings" && (
+          <div className="mt-4">
+            <PermissionGuard 
+              permission="view_early_warnings"
+              fallback={
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Bu özelliğe erişim yetkiniz bulunmamaktadır.</p>
+                </div>
+              }
+            >
+              <EarlyWarningSystem key={refreshKey} />
+            </PermissionGuard>
+          </div>
+        )}
 
-        <TabsContent value="settings">
-          <ExportSettings />
-        </TabsContent>
+        {activeTab === "settings" && (
+          <div className="mt-4">
+            <ExportSettings />
+          </div>
+        )}
       </Tabs>
 
       {/* Filtreler Dialog */}

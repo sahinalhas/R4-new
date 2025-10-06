@@ -50,8 +50,6 @@ import {
 import { cn } from "@/lib/utils";
 import { RISK_BADGE_COLORS, STATUS_SURFACE_COLORS } from "@/lib/config/theme.config";
 
-// =================== TYP TANIMLARI ===================
-
 interface RiskProfile {
   studentId: string;
   studentName: string;
@@ -68,7 +66,6 @@ interface RiskProfile {
   lastUpdated: string;
 }
 
-
 interface InterventionPlan {
   studentId: string;
   warningType: string;
@@ -83,81 +80,89 @@ interface InterventionPlan {
   monitoringFrequency: "günlük" | "haftalık" | "aylık";
 }
 
-// =================== VERİ İŞLEME FONKSİYONLARI ===================
-
 async function generateRiskProfiles(): Promise<RiskProfile[]> {
   const students = loadStudents();
   
-  const profiles = await Promise.all(students.map(async (student) => {
-    const data = await getStudentPerformanceData(student.id);
-    const riskScore = await calculateRiskScore(student.id);
-    
-    // Risk faktörlerini hesapla
-    const attendanceRate = calculateAttendanceRate(data.attendance);
-    const academicTrend = calculateAcademicTrend(data.academics);
-    const studyConsistency = calculateStudyConsistency(data.studySessions);
-    
-    // Davranışsal risk (anket sonuçları ve hedefler bazında)
-    const recentSurveys = data.surveys.slice(-3);
-    const avgSurveyScore = recentSurveys.length > 0 
-      ? recentSurveys.reduce((sum, s) => sum + (s.score || 0), 0) / recentSurveys.length
-      : 50;
-    const behavioralScore = avgSurveyScore / 100;
-
-    const riskFactors = {
-      attendance: { 
-        score: attendanceRate, 
-        risk: attendanceRate < 0.8 
-      },
-      academic: { 
-        score: Math.max(0, (academicTrend + 1) / 2), 
-        risk: academicTrend < -0.3 
-      },
-      study: { 
-        score: studyConsistency, 
-        risk: studyConsistency < 0.5 
-      },
-      behavioral: { 
-        score: behavioralScore, 
-        risk: behavioralScore < 0.6 
-      },
-    };
-
-    // Risk seviyesi
-    let riskLevel: RiskProfile["riskLevel"];
-    if (riskScore < 0.3) riskLevel = "Düşük";
-    else if (riskScore < 0.5) riskLevel = "Orta";
-    else if (riskScore < 0.7) riskLevel = "Yüksek";
-    else riskLevel = "Kritik";
-
-    // Eylem planı
-    const actionPlan: string[] = [];
-    if (riskFactors.attendance.risk) {
-      actionPlan.push("Devamsızlık izleme ve veli görüşmesi");
-    }
-    if (riskFactors.academic.risk) {
-      actionPlan.push("Akademik destek ve bireysel takip");
-    }
-    if (riskFactors.study.risk) {
-      actionPlan.push("Çalışma tekniklerinde rehberlik");
-    }
-    if (riskFactors.behavioral.risk) {
-      actionPlan.push("Psikolojik destek ve motivasyon");
-    }
-
-    return {
-      studentId: student.id,
-      studentName: `${student.ad} ${student.soyad}`,
-      className: student.sinif || "Belirtilmemiş",
-      riskScore,
-      riskLevel,
-      riskFactors,
-      actionPlan,
-      lastUpdated: new Date().toISOString(),
-    };
-  }));
+  const profiles: RiskProfile[] = [];
+  const BATCH_SIZE = 15;
   
-  return profiles;
+  for (let i = 0; i < students.length; i += BATCH_SIZE) {
+    const batch = students.slice(i, i + BATCH_SIZE);
+    
+    const batchProfiles = await Promise.all(batch.map(async (student) => {
+      try {
+        const data = await getStudentPerformanceData(student.id);
+        const riskScore = await calculateRiskScore(student.id);
+        
+        const attendanceRate = calculateAttendanceRate(data.attendance);
+        const academicTrend = calculateAcademicTrend(data.academics);
+        const studyConsistency = calculateStudyConsistency(data.studySessions);
+        
+        const recentSurveys = data.surveys.slice(-3);
+        const avgSurveyScore = recentSurveys.length > 0 
+          ? recentSurveys.reduce((sum, s) => sum + (s.score || 0), 0) / recentSurveys.length
+          : 50;
+        const behavioralScore = avgSurveyScore / 100;
+
+        const riskFactors = {
+          attendance: { 
+            score: attendanceRate, 
+            risk: attendanceRate < 0.8 
+          },
+          academic: { 
+            score: Math.max(0, (academicTrend + 1) / 2), 
+            risk: academicTrend < -0.3 
+          },
+          study: { 
+            score: studyConsistency, 
+            risk: studyConsistency < 0.5 
+          },
+          behavioral: { 
+            score: behavioralScore, 
+            risk: behavioralScore < 0.6 
+          },
+        };
+
+        let riskLevel: RiskProfile["riskLevel"];
+        if (riskScore < 0.3) riskLevel = "Düşük";
+        else if (riskScore < 0.5) riskLevel = "Orta";
+        else if (riskScore < 0.7) riskLevel = "Yüksek";
+        else riskLevel = "Kritik";
+
+        const actionPlan: string[] = [];
+        if (riskFactors.attendance.risk) {
+          actionPlan.push("Devamsızlık izleme ve veli görüşmesi");
+        }
+        if (riskFactors.academic.risk) {
+          actionPlan.push("Akademik destek ve bireysel takip");
+        }
+        if (riskFactors.study.risk) {
+          actionPlan.push("Çalışma tekniklerinde rehberlik");
+        }
+        if (riskFactors.behavioral.risk) {
+          actionPlan.push("Psikolojik destek ve motivasyon");
+        }
+
+        return {
+          studentId: student.id,
+          studentName: `${student.ad} ${student.soyad}`,
+          className: student.sinif || "Belirtilmemiş",
+          riskScore,
+          riskLevel,
+          riskFactors,
+          actionPlan,
+          lastUpdated: new Date().toISOString(),
+        };
+      } catch (error) {
+        console.error(`Error processing student ${student.id}:`, error);
+        return null;
+      }
+    }));
+    
+    profiles.push(...batchProfiles.filter((p): p is RiskProfile => p !== null));
+  }
+  
+  return profiles.sort((a, b) => b.riskScore - a.riskScore);
 }
 
 function generateInterventionPlan(warning: EarlyWarning): InterventionPlan {
@@ -204,8 +209,6 @@ function generateInterventionPlan(warning: EarlyWarning): InterventionPlan {
                         warning.severity === "yüksek" ? "haftalık" : "aylık"
   };
 }
-
-// =================== BİLEŞENLER ===================
 
 export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
   const [filterRisk, setFilterRisk] = useState<string>("all");
@@ -257,130 +260,127 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {filteredProfiles.map(profile => (
-            <div key={profile.studentId} className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="font-medium">{profile.studentName}</h3>
-                  <p className="text-sm text-muted-foreground">{profile.className}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className={cn(RISK_BADGE_COLORS[profile.riskLevel])}>
-                    {profile.riskLevel}
-                  </Badge>
-                  <span className="text-sm font-medium">
-                    %{Math.round(profile.riskScore * 100)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Risk Faktörleri */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
-                <div className="text-center">
-                  <div className={cn(
-                    "text-sm font-medium",
-                    profile.riskFactors.attendance.risk ? "text-red-600" : "text-green-600"
-                  )}>
-                    {profile.riskFactors.attendance.risk ? (
-                      <XCircle className="h-4 w-4 mx-auto mb-1" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 mx-auto mb-1" />
-                    )}
-                    Devam
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    %{Math.round(profile.riskFactors.attendance.score * 100)}
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <div className={cn(
-                    "text-sm font-medium",
-                    profile.riskFactors.academic.risk ? "text-red-600" : "text-green-600"
-                  )}>
-                    {profile.riskFactors.academic.risk ? (
-                      <XCircle className="h-4 w-4 mx-auto mb-1" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 mx-auto mb-1" />
-                    )}
-                    Akademik
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    %{Math.round(profile.riskFactors.academic.score * 100)}
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <div className={cn(
-                    "text-sm font-medium",
-                    profile.riskFactors.study.risk ? "text-red-600" : "text-green-600"
-                  )}>
-                    {profile.riskFactors.study.risk ? (
-                      <XCircle className="h-4 w-4 mx-auto mb-1" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 mx-auto mb-1" />
-                    )}
-                    Çalışma
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    %{Math.round(profile.riskFactors.study.score * 100)}
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <div className={cn(
-                    "text-sm font-medium",
-                    profile.riskFactors.behavioral.risk ? "text-red-600" : "text-green-600"
-                  )}>
-                    {profile.riskFactors.behavioral.risk ? (
-                      <XCircle className="h-4 w-4 mx-auto mb-1" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 mx-auto mb-1" />
-                    )}
-                    Davranış
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    %{Math.round(profile.riskFactors.behavioral.score * 100)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Eylem Planı */}
-              {profile.actionPlan.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Önerilen Eylemler:</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    {profile.actionPlan.map((action, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="mr-1">•</span>
-                        {action}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {filteredProfiles.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>Filtrelere uygun risk profili bulunamadı.</p>
             </div>
-          ))}
-        </div>
+          ) : (
+            filteredProfiles.map(profile => (
+              <div key={profile.studentId} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="font-medium">{profile.studentName}</h3>
+                    <p className="text-sm text-muted-foreground">{profile.className}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={cn(RISK_BADGE_COLORS[profile.riskLevel])}>
+                      {profile.riskLevel}
+                    </Badge>
+                    <span className="text-sm font-medium">
+                      %{Math.round(profile.riskScore * 100)}
+                    </span>
+                  </div>
+                </div>
 
-        {filteredProfiles.length === 0 && (
-          <div className="text-center text-muted-foreground py-8">
-            <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>Seçilen kriterlere uygun risk profili bulunamadı</p>
-          </div>
-        )}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                  <div className="text-center">
+                    <div className={cn(
+                      "text-sm font-medium",
+                      profile.riskFactors.attendance.risk ? "text-red-600" : "text-green-600"
+                    )}>
+                      {profile.riskFactors.attendance.risk ? (
+                        <XCircle className="h-4 w-4 mx-auto mb-1" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mx-auto mb-1" />
+                      )}
+                      Devam
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      %{Math.round(profile.riskFactors.attendance.score * 100)}
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className={cn(
+                      "text-sm font-medium",
+                      profile.riskFactors.academic.risk ? "text-red-600" : "text-green-600"
+                    )}>
+                      {profile.riskFactors.academic.risk ? (
+                        <XCircle className="h-4 w-4 mx-auto mb-1" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mx-auto mb-1" />
+                      )}
+                      Akademik
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      %{Math.round(profile.riskFactors.academic.score * 100)}
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className={cn(
+                      "text-sm font-medium",
+                      profile.riskFactors.study.risk ? "text-red-600" : "text-green-600"
+                    )}>
+                      {profile.riskFactors.study.risk ? (
+                        <XCircle className="h-4 w-4 mx-auto mb-1" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mx-auto mb-1" />
+                      )}
+                      Çalışma
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      %{Math.round(profile.riskFactors.study.score * 100)}
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className={cn(
+                      "text-sm font-medium",
+                      profile.riskFactors.behavioral.risk ? "text-red-600" : "text-green-600"
+                    )}>
+                      {profile.riskFactors.behavioral.risk ? (
+                        <XCircle className="h-4 w-4 mx-auto mb-1" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mx-auto mb-1" />
+                      )}
+                      Davranış
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      %{Math.round(profile.riskFactors.behavioral.score * 100)}
+                    </div>
+                  </div>
+                </div>
+
+                {profile.actionPlan.length > 0 && (
+                  <div className="pt-3 border-t">
+                    <h4 className="text-sm font-medium mb-2">Önerilen Eylemler:</h4>
+                    <ul className="text-sm space-y-1">
+                      {profile.actionPlan.map((action, idx) => (
+                        <li key={idx} className="flex items-start">
+                          <span className="mr-2 text-primary">•</span>
+                          {action}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-export function InterventionPlanning({ warning }: { warning: EarlyWarning }) {
-  const plan = useMemo(() => generateInterventionPlan(warning), [warning]);
+export function InterventionPlanCard({ warning }: { warning: EarlyWarning }) {
+  const plan = generateInterventionPlan(warning);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <Activity className="h-5 w-5" />
           Müdahale Planı: {warning.studentName}
         </CardTitle>
@@ -486,11 +486,10 @@ export default function EarlyWarningSystem() {
     async function loadData() {
       setIsLoading(true);
       try {
-        const [warningsData, profilesData] = await Promise.all([
-          generateEarlyWarnings(),
-          generateRiskProfiles()
-        ]);
+        const warningsData = await generateEarlyWarnings();
         setWarnings(warningsData);
+        
+        const profilesData = await generateRiskProfiles();
         setRiskProfiles(profilesData);
       } catch (error) {
         console.error('Error loading early warning data:', error);
@@ -507,7 +506,6 @@ export default function EarlyWarningSystem() {
     return true;
   });
 
-  // İstatistikler
   const stats = useMemo(() => {
     const total = warnings.length;
     const critical = warnings.filter(w => w.severity === "kritik").length;
@@ -517,11 +515,16 @@ export default function EarlyWarningSystem() {
     return { total, critical, high, highRisk };
   }, [warnings, riskProfiles]);
 
-  // Risk dağılımı
   const riskDistribution = useMemo(() => {
-    const counts = { "Düşük": 0, "Orta": 0, "Yüksek": 0, "Kritik": 0 };
+    const counts = {
+      "Düşük": 0,
+      "Orta": 0,
+      "Yüksek": 0,
+      "Kritik": 0,
+    };
+
     riskProfiles.forEach(profile => {
-      counts[profile.riskLevel]++;
+      counts[profile.riskLevel] = (counts[profile.riskLevel] || 0) + 1;
     });
     
     return [
@@ -562,6 +565,7 @@ export default function EarlyWarningSystem() {
         <div className="text-center space-y-2">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="text-muted-foreground">Erken uyarı sistemi yükleniyor...</p>
+          <p className="text-xs text-muted-foreground">Risk profilleri hesaplanıyor...</p>
         </div>
       </div>
     );
@@ -601,7 +605,6 @@ export default function EarlyWarningSystem() {
         </div>
       </div>
 
-      {/* Özet İstatistikler */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <SuccessMetricCard
           title="Toplam Uyarı"
@@ -633,20 +636,24 @@ export default function EarlyWarningSystem() {
         />
       </div>
 
-      <Tabs defaultValue="warnings" className="space-y-4">
+      <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="warnings">Aktif Uyarılar</TabsTrigger>
-          <TabsTrigger value="profiles">Risk Profilleri</TabsTrigger>
-          <TabsTrigger value="intervention">Müdahale Planı</TabsTrigger>
-          <TabsTrigger value="auto-intervention">Otomatik Müdahaleler</TabsTrigger>
-          <TabsTrigger value="overview">Genel Durum</TabsTrigger>
+          <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
+          <TabsTrigger value="warnings">Uyarılar ({warnings.length})</TabsTrigger>
+          <TabsTrigger value="profiles">Risk Profilleri ({riskProfiles.length})</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RiskDistributionChart data={riskDistribution} />
+          </div>
+        </TabsContent>
+
         <TabsContent value="warnings" className="space-y-4">
-          <div className="flex gap-4">
+          <div className="flex gap-4 mb-4">
             <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Önem seviyesi..." />
+                <SelectValue placeholder="Önem derecesi..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tüm Seviyeler</SelectItem>
@@ -659,14 +666,14 @@ export default function EarlyWarningSystem() {
             
             <Select value={selectedType} onValueChange={setSelectedType}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Uyarı türü..." />
+                <SelectValue placeholder="Uyarı tipi..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tüm Türler</SelectItem>
+                <SelectItem value="all">Tüm Tipler</SelectItem>
                 <SelectItem value="attendance">Devamsızlık</SelectItem>
                 <SelectItem value="academic">Akademik</SelectItem>
                 <SelectItem value="behavioral">Davranışsal</SelectItem>
-                <SelectItem value="wellbeing">Genel Durum</SelectItem>
+                <SelectItem value="wellbeing">Refah</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -676,88 +683,6 @@ export default function EarlyWarningSystem() {
 
         <TabsContent value="profiles" className="space-y-4">
           <RiskProfilesTable profiles={riskProfiles} />
-        </TabsContent>
-
-        <TabsContent value="intervention" className="space-y-4">
-          {filteredWarnings.length > 0 ? (
-            <div className="space-y-4">
-              {filteredWarnings.slice(0, 3).map((warning, index) => (
-                <InterventionPlanning key={index} warning={warning} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center text-muted-foreground py-8">
-              <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Müdahale gerektiren aktif uyarı bulunmuyor</p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="auto-intervention" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-orange-500" />
-                Otomatik Müdahale Sistemi
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {autoInterventionResults.length > 0 ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Son otomatik müdahale kontrolü sonuçları
-                  </p>
-                  {autoInterventionResults.map((result, index) => (
-                    <div 
-                      key={index} 
-                      className={cn(
-                        "p-3 rounded-lg border",
-                        result.interventionCreated 
-                          ? STATUS_SURFACE_COLORS.success 
-                          : STATUS_SURFACE_COLORS.neutral
-                      )}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="font-medium">{result.studentName}</div>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            Risk Seviyesi: <Badge variant={
-                              result.riskLevel === "Kritik" ? "destructive" :
-                              result.riskLevel === "Yüksek" ? "default" : "secondary"
-                            }>{result.riskLevel}</Badge>
-                          </div>
-                          {result.reason && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {result.reason}
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          {result.interventionCreated ? (
-                            <CheckCircle className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <XCircle className="h-5 w-5 text-gray-400" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center text-muted-foreground py-8">
-                  <Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>Henüz otomatik müdahale kontrolü yapılmadı</p>
-                  <p className="text-sm mt-1">Üstteki butonu kullanarak otomatik müdahale oluşturabilirsiniz</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RiskDistributionChart data={riskDistribution} />
-          </div>
         </TabsContent>
       </Tabs>
     </div>
