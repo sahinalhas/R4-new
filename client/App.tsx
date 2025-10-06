@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,22 +6,24 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { setupGlobalErrorHandlers } from "./lib/error-handler";
+import { Loader2 } from "lucide-react";
 import Layout from "./layout/Rehber360Layout";
 import Index from "./pages/Index";
 import Students from "./pages/Students";
 import StudentProfile from "./pages/StudentProfile";
-import CounselingSessions from "./pages/CounselingSessions";
-import Surveys from "./pages/Surveys";
-import Reports from "./pages/Reports";
-import SettingsPage from "./pages/Settings";
-import Placeholder from "./pages/Placeholder";
-import PublicSurvey from "./pages/PublicSurvey";
-import NotFound from "./pages/NotFound";
+
+const CounselingSessions = lazy(() => import("./pages/CounselingSessions"));
+const Surveys = lazy(() => import("./pages/Surveys"));
+const Reports = lazy(() => import("./pages/Reports"));
+const SettingsPage = lazy(() => import("./pages/Settings"));
+const Placeholder = lazy(() => import("./pages/Placeholder"));
+const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,
+      staleTime: 30 * 1000,
       gcTime: 5 * 60 * 1000,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
@@ -37,6 +39,12 @@ const App = () => {
     return cleanup;
   }, []);
 
+  const LoadingFallback = () => (
+    <div className="flex items-center justify-center h-screen">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    </div>
+  );
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -51,32 +59,32 @@ const App = () => {
                   <Route path="/ogrenci/:id" element={<StudentProfile />} />
                   <Route
                     path="/gorusmeler"
-                    element={<CounselingSessions />}
+                    element={<Suspense fallback={<LoadingFallback />}><CounselingSessions /></Suspense>}
                   />
                   <Route
                     path="/anketler"
-                    element={<Surveys />}
+                    element={<Suspense fallback={<LoadingFallback />}><Surveys /></Suspense>}
                   />
                   <Route
                     path="/raporlar"
-                    element={<Reports />}
+                    element={<Suspense fallback={<LoadingFallback />}><Reports /></Suspense>}
                   />
                   <Route
                     path="/etkinlikler"
-                    element={<Placeholder title="Etkinlik Yönetimi" />}
+                    element={<Suspense fallback={<LoadingFallback />}><Placeholder title="Etkinlik Yönetimi" /></Suspense>}
                   />
-                  <Route path="/ayarlar" element={<SettingsPage />} />
+                  <Route path="/ayarlar" element={<Suspense fallback={<LoadingFallback />}><SettingsPage /></Suspense>} />
                   <Route
                     path="/risk"
-                    element={<Placeholder title="Risk ve Müdahale Takip" />}
+                    element={<Suspense fallback={<LoadingFallback />}><Placeholder title="Risk ve Müdahale Takip" /></Suspense>}
                   />
                   <Route
                     path="/istatistik"
-                    element={<Placeholder title="Performans & İstatistik" />}
+                    element={<Suspense fallback={<LoadingFallback />}><Placeholder title="Performans & İstatistik" /></Suspense>}
                   />
                 </Route>
-                <Route path="/anket/:publicLink" element={<PublicSurvey />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />
+                <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>

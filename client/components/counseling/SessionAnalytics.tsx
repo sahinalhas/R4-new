@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, subDays } from "date-fns";
 import { tr } from "date-fns/locale";
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -52,6 +53,8 @@ export default function SessionAnalytics() {
       if (!response.ok) throw new Error('Failed to fetch overview stats');
       return response.json();
     },
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: timeSeriesData, isLoading: timeSeriesLoading } = useQuery<TimeSeriesData[]>({
@@ -63,6 +66,8 @@ export default function SessionAnalytics() {
       if (!response.ok) throw new Error('Failed to fetch time series data');
       return response.json();
     },
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: topicData, isLoading: topicLoading } = useQuery<TopicAnalysis[]>({
@@ -72,6 +77,8 @@ export default function SessionAnalytics() {
       if (!response.ok) throw new Error('Failed to fetch topic data');
       return response.json();
     },
+    staleTime: 1 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: participantData, isLoading: participantLoading } = useQuery<ParticipantAnalysis[]>({
@@ -81,6 +88,8 @@ export default function SessionAnalytics() {
       if (!response.ok) throw new Error('Failed to fetch participant data');
       return response.json();
     },
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: classData, isLoading: classLoading } = useQuery<ClassAnalysis[]>({
@@ -90,6 +99,8 @@ export default function SessionAnalytics() {
       if (!response.ok) throw new Error('Failed to fetch class data');
       return response.json();
     },
+    staleTime: 1 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: modeData, isLoading: modeLoading } = useQuery<SessionModeAnalysis[]>({
@@ -99,6 +110,8 @@ export default function SessionAnalytics() {
       if (!response.ok) throw new Error('Failed to fetch mode data');
       return response.json();
     },
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   if (statsLoading || timeSeriesLoading || topicLoading || participantLoading || classLoading || modeLoading) {
@@ -109,11 +122,21 @@ export default function SessionAnalytics() {
     );
   }
 
-  const topTopics = topicData?.slice(0, 10) || [];
-  const formattedTimeSeriesData = timeSeriesData?.map(item => ({
-    ...item,
-    date: format(new Date(item.date), 'dd MMM', { locale: tr }),
-  })) || [];
+  const topTopics = useMemo(() => {
+    return (topicData || []).slice(0, 10);
+  }, [topicData]);
+
+  const formattedTimeSeriesData = useMemo(() => {
+    const data = timeSeriesData || [];
+    return data.map(item => ({
+      ...item,
+      date: format(new Date(item.date), 'dd MMM', { locale: tr }),
+    }));
+  }, [timeSeriesData]);
+
+  const optimizedClassData = useMemo(() => 
+    classData || []
+  , [classData]);
 
   return (
     <div className="space-y-6">
@@ -361,9 +384,9 @@ export default function SessionAnalytics() {
             <CardTitle>Sınıf Dağılımı</CardTitle>
           </CardHeader>
           <CardContent>
-            {classData && classData.length > 0 ? (
+            {optimizedClassData && optimizedClassData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={classData}>
+                <BarChart data={optimizedClassData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="className" />
                   <YAxis />

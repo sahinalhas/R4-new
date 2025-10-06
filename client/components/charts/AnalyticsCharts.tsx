@@ -1,3 +1,4 @@
+react";
 import {
   LineChart,
   Line,
@@ -23,6 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertTriangle, TrendingUp, TrendingDown, Users, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CHART_COLORS, RISK_COLORS, PERFORMANCE_COLORS } from "@/lib/config/theme.config";
+import { optimizeChartData } from "@/lib/analytics-cache";
 
 // =================== TİP TANIMLARI ===================
 
@@ -101,7 +103,7 @@ export function SuccessMetricCard({
   );
 }
 
-export function RiskDistributionChart({ data }: { data: ChartDataPoint[] }) {
+export const RiskDistributionChart = React.memo(({ data }: { data: ChartDataPoint[] }) => {
   return (
     <Card>
       <CardHeader>
@@ -121,6 +123,7 @@ export function RiskDistributionChart({ data }: { data: ChartDataPoint[] }) {
               outerRadius={80}
               paddingAngle={5}
               dataKey="value"
+              isAnimationActive={false}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={RISK_COLORS[entry.name as keyof typeof RISK_COLORS]} />
@@ -135,9 +138,9 @@ export function RiskDistributionChart({ data }: { data: ChartDataPoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function PerformanceTrendChart({ 
+export const PerformanceTrendChart = React.memo(({ 
   data, 
   title = "Performans Trendi",
   dataKey = "value",
@@ -147,7 +150,11 @@ export function PerformanceTrendChart({
   title?: string;
   dataKey?: string;
   color?: string;
-}) {
+}) => {
+  const hasTarget = React.useMemo(() => 
+    data.some(d => d.target)
+  , [data]);
+
   return (
     <Card>
       <CardHeader>
@@ -169,14 +176,16 @@ export function PerformanceTrendChart({
               stroke={color} 
               strokeWidth={2}
               dot={{ fill: color, strokeWidth: 2, r: 4 }}
+              isAnimationActive={false}
             />
-            {data.some(d => d.target) && (
+            {hasTarget && (
               <Line 
                 type="monotone" 
                 dataKey="target" 
                 stroke={CHART_COLORS.muted}
                 strokeDasharray="5 5"
                 dot={false}
+                isAnimationActive={false}
               />
             )}
           </LineChart>
@@ -184,9 +193,13 @@ export function PerformanceTrendChart({
       </CardContent>
     </Card>
   );
-}
+});
 
-export function ClassComparisonChart({ data }: { data: ComparisonData[] }) {
+export const ClassComparisonChart = React.memo(({ data }: { data: ComparisonData[] }) => {
+  const hasTarget = React.useMemo(() => 
+    data.some(d => d.target)
+  , [data]);
+
   return (
     <Card>
       <CardHeader>
@@ -203,17 +216,17 @@ export function ClassComparisonChart({ data }: { data: ComparisonData[] }) {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="current" fill={CHART_COLORS.primary} name="Mevcut Dönem" />
-            <Bar dataKey="previous" fill={CHART_COLORS.muted} name="Önceki Dönem" />
-            {data.some(d => d.target) && (
-              <Bar dataKey="target" fill={CHART_COLORS.success} name="Hedef" />
+            <Bar dataKey="current" fill={CHART_COLORS.primary} name="Mevcut Dönem" isAnimationActive={false} />
+            <Bar dataKey="previous" fill={CHART_COLORS.muted} name="Önceki Dönem" isAnimationActive={false} />
+            {hasTarget && (
+              <Bar dataKey="target" fill={CHART_COLORS.success} name="Hedef" isAnimationActive={false} />
             )}
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
   );
-}
+});
 
 export function SuccessPredictionGauge({ 
   value, 
@@ -318,7 +331,7 @@ export function SuccessPredictionGauge({
   );
 }
 
-export function ProgressTimeline({ 
+export const ProgressTimeline = React.memo(({ 
   data,
   title = "İlerleme Zaman Çizelgesi",
   categories = ["academic", "attendance", "study"]
@@ -330,7 +343,7 @@ export function ProgressTimeline({
   }>;
   title?: string;
   categories?: string[];
-}) {
+}) => {
   const categoryColors = {
     academic: CHART_COLORS.primary,
     attendance: CHART_COLORS.success,
@@ -345,19 +358,20 @@ export function ProgressTimeline({
     wellbeing: "Genel Durum",
   };
 
-  // Verileri tarih bazında grupla
-  const groupedData = data.reduce((acc, item) => {
-    const existing = acc.find(d => d.date === item.date);
-    if (existing) {
-      existing[item.type] = item.value;
-    } else {
-      acc.push({
-        date: item.date,
-        [item.type]: item.value,
-      });
-    }
-    return acc;
-  }, [] as any[]);
+  const groupedData = React.useMemo(() => {
+    return data.reduce((acc, item) => {
+      const existing = acc.find(d => d.date === item.date);
+      if (existing) {
+        existing[item.type] = item.value;
+      } else {
+        acc.push({
+          date: item.date,
+          [item.type]: item.value,
+        });
+      }
+      return acc;
+    }, [] as any[]);
+  }, [data]);
 
   return (
     <Card>
@@ -387,6 +401,7 @@ export function ProgressTimeline({
                 fill={categoryColors[category as keyof typeof categoryColors]}
                 fillOpacity={0.6}
                 name={categoryLabels[category as keyof typeof categoryLabels]}
+                isAnimationActive={false}
               />
             ))}
           </AreaChart>
@@ -394,7 +409,7 @@ export function ProgressTimeline({
       </CardContent>
     </Card>
   );
-}
+});
 
 export function EarlyWarningIndicator({ 
   warnings,

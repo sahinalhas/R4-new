@@ -25,19 +25,15 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-query': ['@tanstack/react-query', '@tanstack/react-virtual'],
-          'vendor-forms': ['react-hook-form', 'zod', '@hookform/resolvers'],
+          'vendor-query': ['@tanstack/react-query'],
           'vendor-ui': [
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
             '@radix-ui/react-select',
             '@radix-ui/react-tabs',
             '@radix-ui/react-toast',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-accordion',
           ],
           'vendor-charts': ['recharts'],
-          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge'],
         },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.');

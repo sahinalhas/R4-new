@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -199,22 +199,22 @@ export default function Index() {
     }
   }, [role, stats]);
 
-  const weeklyMeetingData = [
+  const weeklyMeetingData = useMemo(() => [
     { day: "Pzt", this: stats.meetingCount > 0 ? Math.floor(stats.meetingCount * 0.18) : 8, prev: 5 },
     { day: "Sal", this: stats.meetingCount > 0 ? Math.floor(stats.meetingCount * 0.16) : 6, prev: 7 },
     { day: "Çar", this: stats.meetingCount > 0 ? Math.floor(stats.meetingCount * 0.20) : 7, prev: 6 },
     { day: "Per", this: stats.meetingCount > 0 ? Math.floor(stats.meetingCount * 0.24) : 9, prev: 5 },
     { day: "Cum", this: stats.meetingCount > 0 ? Math.floor(stats.meetingCount * 0.22) : 6, prev: 4 },
-  ];
+  ], [stats.meetingCount]);
 
-  const riskChartData = [
+  const riskChartData = useMemo(() => [
     { name: "Düşük", value: riskDistribution.low, color: "#22c55e" },
     { name: "Orta", value: riskDistribution.medium, color: "#f59e0b" },
     { name: "Yüksek", value: riskDistribution.high, color: "#ef4444" },
     { name: "Değerlendirilmemiş", value: riskDistribution.none, color: "#94a3b8" },
-  ];
+  ], [riskDistribution]);
 
-  const toggleWidget = (widgetId: string) => {
+  const toggleWidget = useCallback((widgetId: string) => {
     setHiddenWidgets(prev => {
       const newSet = new Set(prev);
       if (newSet.has(widgetId)) {
@@ -224,9 +224,9 @@ export default function Index() {
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const handleQuickAction = (action: string, studentId?: string) => {
+  const handleQuickAction = useCallback((action: string, studentId?: string) => {
     switch (action) {
       case 'view-student':
         if (studentId) navigate(`/ogrenci/${studentId}`);
@@ -240,7 +240,7 @@ export default function Index() {
       default:
         break;
     }
-  };
+  }, [navigate]);
 
   if (isLoading) {
     return (
