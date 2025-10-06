@@ -80,29 +80,83 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
   
   useEffect(() => {
     const loadData = async () => {
-      const { loadStudentsAsync } = await import('@/lib/api/students.api');
-      await loadStudentsAsync();
-      const loadedStudents = loadStudents();
-      setStudents(loadedStudents);
+      try {
+        const { loadStudentsAsync } = await import('@/lib/api/students.api');
+        await loadStudentsAsync();
+        const loadedStudents = loadStudents();
+        setStudents(loadedStudents);
+        
+        // Öğrenciler yüklendikten sonra sınıf karşılaştırmalarını hesapla
+        calculateClassComparisons(loadedStudents);
+      } catch (error) {
+        console.error('Error loading students:', error);
+      }
     };
     
     const loadWarnings = async () => {
-      const endTimer = performanceMonitor.startTiming('generateEarlyWarnings');
-      const result = await optimizedGenerateEarlyWarnings();
-      endTimer();
-      setWarnings(result);
+      try {
+        const endTimer = performanceMonitor.startTiming('generateEarlyWarnings');
+        const result = await optimizedGenerateEarlyWarnings();
+        endTimer();
+        setWarnings(result);
+      } catch (error) {
+        console.error('Error loading warnings:', error);
+        setWarnings([]);
+      }
     };
     
-    const loadComparisons = async () => {
-      const endTimer = performanceMonitor.startTiming('generateClassComparisons');
-      const result = await optimizedGenerateClassComparisons();
-      endTimer();
-      setClassComparisons(result);
+    const calculateClassComparisons = (studentsList: typeof students) => {
+      if (studentsList.length === 0) return;
+      
+      // API limitleri nedeniyle doğrudan risk bazlı hesaplama kullan
+      const classMap = new Map<string, any[]>();
+      
+      studentsList.forEach(student => {
+        const className = student.sinif || "Belirtilmemiş";
+        if (!classMap.has(className)) {
+          classMap.set(className, []);
+        }
+        classMap.get(className)!.push(student);
+      });
+      
+      // Risk bazlı tahminler - API çağrısı yok
+      const comparisons = Array.from(classMap.entries()).map(([className, students]) => {
+        const riskBasedGPA = students.reduce((sum, s) => {
+          const score = s.risk === "Düşük" ? 3.5 : s.risk === "Orta" ? 2.8 : s.risk === "Yüksek" ? 2.0 : 1.5;
+          return sum + score;
+        }, 0) / students.length;
+        
+        const riskBasedAttendance = students.reduce((sum, s) => {
+          const score = s.risk === "Düşük" ? 0.95 : s.risk === "Orta" ? 0.85 : s.risk === "Yüksek" ? 0.70 : 0.60;
+          return sum + score;
+        }, 0) / students.length;
+        
+        return {
+          className,
+          studentCount: students.length,
+          averageGPA: parseFloat(riskBasedGPA.toFixed(2)),
+          attendanceRate: parseFloat(riskBasedAttendance.toFixed(2)),
+          riskDistribution: {
+            düşük: students.filter(s => s.risk === "Düşük").length,
+            orta: students.filter(s => s.risk === "Orta").length,
+            yüksek: students.filter(s => s.risk === "Yüksek").length,
+          },
+          topPerformers: students
+            .filter(s => s.risk === "Düşük")
+            .map(s => `${s.ad} ${s.soyad}`)
+            .slice(0, 3),
+          atRiskStudents: students
+            .filter(s => s.risk === "Yüksek" || s.risk === "Kritik")
+            .map(s => `${s.ad} ${s.soyad}`)
+            .slice(0, 3),
+        };
+      });
+      
+      setClassComparisons(comparisons);
     };
     
     loadData();
     loadWarnings();
-    loadComparisons();
   }, []);
 
   // Genel istatistikler
@@ -123,22 +177,54 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
       
       const totalStudents = students.length;
       
-      // Basit istatistikler - API çağrısı olmadan
-      const averageSuccessRate = 0;
-      const highSuccessCount = 0;
-      const atRiskCount = 0;
+      // Örnekleme yaparak başarı tahminlerini hesapla (tüm öğrenciler için API çağrısı yapmak yerine)
+      const sampleSize = Math.min(20, students.length);
+      const sampleStudents = [...students] // Array kopyası oluştur (mutation önlemek için)
+        .sort(() => 0.5 - Math.random()) // Rastgele sırala
+        .slice(0, sampleSize);
       
-      const criticalWarnings = warnings.filter(w => w.severity === "kritik").length;
-      const activeWarnings = warnings.length;
-      
-      setOverallStats({
-        totalStudents,
-        averageSuccessRate,
-        highSuccessCount,
-        atRiskCount,
-        criticalWarnings,
-        activeWarnings,
-      });
+      try {
+        const successPredictions = await Promise.all(
+          sampleStudents.map(s => optimizedPredictStudentSuccess(s.id))
+        );
+        
+        const avgSampleSuccess = successPredictions.reduce((sum, p) => sum + p, 0) / successPredictions.length;
+        const averageSuccessRate = Math.round(avgSampleSuccess * 100);
+        
+        // Tüm öğrenciler için risk bazlı sayımlar
+        const highSuccessCount = students.filter(s => s.risk === "Düşük").length;
+        const atRiskCount = students.filter(s => s.risk === "Yüksek" || s.risk === "Kritik").length;
+        
+        const criticalWarnings = warnings.filter(w => w.severity === "kritik").length;
+        const activeWarnings = warnings.length;
+        
+        setOverallStats({
+          totalStudents,
+          averageSuccessRate,
+          highSuccessCount,
+          atRiskCount,
+          criticalWarnings,
+          activeWarnings,
+        });
+      } catch (error) {
+        console.error('Error calculating stats:', error);
+        // Hata durumunda risk bazlı tahmin kullan
+        const riskBasedAvg = students.reduce((sum, s) => {
+          if (s.risk === "Düşük") return sum + 90;
+          if (s.risk === "Orta") return sum + 60;
+          if (s.risk === "Yüksek") return sum + 30;
+          return sum + 50;
+        }, 0) / students.length;
+        
+        setOverallStats({
+          totalStudents,
+          averageSuccessRate: Math.round(riskBasedAvg),
+          highSuccessCount: students.filter(s => s.risk === "Düşük").length,
+          atRiskCount: students.filter(s => s.risk === "Yüksek" || s.risk === "Kritik").length,
+          criticalWarnings: warnings.filter(w => w.severity === "kritik").length,
+          activeWarnings: warnings.length,
+        });
+      }
     };
     
     calculateStats();
@@ -162,12 +248,13 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
   }, [students]);
 
   // Sınıf karşılaştırması için veri
-  const classComparisonData = classComparisons.map(cls => ({
-    category: cls.className,
-    current: cls.averageGPA,
-    previous: cls.averageGPA * 0.95, // Simülasyon için
-    target: 3.5,
-  }));
+  const classComparisonData = useMemo(() => 
+    classComparisons.map(cls => ({
+      category: cls.className,
+      current: cls.averageGPA,
+      previous: cls.averageGPA * 0.95, // Simülasyon için
+      target: 3.5,
+    })), [classComparisons]);
 
   return (
     <div className="space-y-6">
