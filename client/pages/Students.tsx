@@ -461,28 +461,35 @@ export default function Students() {
       alert("Dosyadan hiçbir geçerli öğrenci verisi bulunamadı.");
       return;
     }
-    setStudents((prev) => {
-      const map = new Map(prev.map((s) => [s.id, s] as const));
-      const byNumeric = new Map<string, string>();
-      for (const [key] of map) {
-        const num = key.replace(/\D/g, "");
-        if (num) byNumeric.set(num, key);
-      }
-      for (const s of imported) {
-        const existingKey =
-          byNumeric.get(s.id) || (map.has(s.id) ? s.id : undefined);
-        if (existingKey) {
-          map.set(existingKey, { ...map.get(existingKey)!, ...s });
-        } else {
-          map.set(s.id, s);
-          byNumeric.set(s.id, s.id);
+
+    const updatedStudents = await new Promise<Student[]>((resolve) => {
+      setStudents((prev) => {
+        const map = new Map(prev.map((s) => [s.id, s] as const));
+        const byNumeric = new Map<string, string>();
+        for (const [key] of map) {
+          const num = key.replace(/\D/g, "");
+          if (num) byNumeric.set(num, key);
         }
-      }
-      return Array.from(map.values());
+        for (const s of imported) {
+          const existingKey =
+            byNumeric.get(s.id) || (map.has(s.id) ? s.id : undefined);
+          if (existingKey) {
+            map.set(existingKey, { ...map.get(existingKey)!, ...s });
+          } else {
+            map.set(s.id, s);
+            byNumeric.set(s.id, s.id);
+          }
+        }
+        const result = Array.from(map.values());
+        resolve(result);
+        return result;
+      });
     });
 
-    // Trigger update event
-    window.dispatchEvent(new CustomEvent('studentsUpdated'));
+    saveStudents(updatedStudents);
+    
+    await refreshStudentsFromAPI();
+    
     alert(`${imported.length} öğrenci başarıyla içe aktarıldı.`);
     
     } catch (error) {
