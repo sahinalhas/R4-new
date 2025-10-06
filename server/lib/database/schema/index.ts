@@ -5,8 +5,10 @@ import { createSurveysTables } from './surveys.schema';
 import { createCounselingTables } from './counseling.schema';
 import { createCoachingTables } from './coaching.schema';
 import { createSettingsTables } from './settings.schema';
+import { createUsersTable } from './users.schema';
 
 export function initializeDatabaseSchema(db: Database.Database): void {
+  createUsersTable(db);
   createStudentsTables(db);
   createAcademicTables(db);
   createSurveysTables(db);
