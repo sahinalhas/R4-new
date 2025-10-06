@@ -91,11 +91,12 @@ export default function Index() {
   const [earlyWarnings, setEarlyWarnings] = useState<EarlyWarning[]>([]);
 
   useEffect(() => {
-    async function fetchWarnings() {
-      if (students.length === 0) {
-        setEarlyWarnings([]);
-        return;
-      }
+    if (students.length === 0) {
+      setEarlyWarnings([]);
+      return;
+    }
+    
+    const fetchWarnings = async () => {
       try {
         const warnings = await generateEarlyWarnings();
         setEarlyWarnings(warnings.slice(0, 10));
@@ -103,8 +104,9 @@ export default function Index() {
         console.error('Failed to generate early warnings:', error);
         setEarlyWarnings([]);
       }
-    }
-    fetchWarnings();
+    };
+    
+    setTimeout(() => fetchWarnings(), 500);
   }, [students]);
 
   const criticalWarnings = useMemo(() => {
@@ -132,20 +134,6 @@ export default function Index() {
             none: studentsData.filter((s: Student) => !s.risk).length,
           };
           setRiskDistribution(riskCount);
-
-          let totalInterventions = 0;
-          for (const student of studentsData.slice(0, 20)) {
-            try {
-              const interventionsRes = await fetch(`/api/students/${student.id}/interventions`);
-              if (interventionsRes.ok) {
-                const interventions: Intervention[] = await interventionsRes.json();
-                totalInterventions += interventions.filter(i => i.status !== "Tamamlandı").length;
-              }
-            } catch (error) {
-              console.error(`Failed to fetch interventions for student ${student.id}:`, error);
-            }
-          }
-          setStats(prev => ({ ...prev, openInterventionCount: totalInterventions }));
         }
 
         if (distributionsRes.ok) {
@@ -154,8 +142,6 @@ export default function Index() {
           setStats(prev => ({ ...prev, activeSurveyCount: activeCount }));
         }
 
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
         setStats(prev => ({ ...prev, meetingCount: Math.floor(Math.random() * 20) + 15 }));
 
       } catch (error) {
@@ -166,6 +152,33 @@ export default function Index() {
     }
 
     fetchDashboardData();
+    
+    async function fetchInterventionsInBackground() {
+      try {
+        const studentsRes = await fetch('/api/students');
+        if (!studentsRes.ok) return;
+        
+        const studentsData = await studentsRes.json();
+        let totalInterventions = 0;
+        
+        for (const student of studentsData.slice(0, 20)) {
+          try {
+            const interventionsRes = await fetch(`/api/students/${student.id}/interventions`);
+            if (interventionsRes.ok) {
+              const interventions: Intervention[] = await interventionsRes.json();
+              totalInterventions += interventions.filter(i => i.status !== "Tamamlandı").length;
+            }
+          } catch (error) {
+            console.error(`Failed to fetch interventions for student ${student.id}:`, error);
+          }
+        }
+        setStats(prev => ({ ...prev, openInterventionCount: totalInterventions }));
+      } catch (error) {
+        console.error('Failed to fetch interventions:', error);
+      }
+    }
+    
+    setTimeout(() => fetchInterventionsInBackground(), 100);
   }, []);
 
   const displayStats = useMemo(() => {

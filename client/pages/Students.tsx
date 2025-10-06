@@ -358,7 +358,7 @@ export default function Students() {
       
       let wb, ws, rows;
       try {
-        wb = XLSX.read(data, { type: "array" });
+        wb = XLSX.read(data, { type: "array", codepage: 65001 });
       } catch (parseError) {
         console.error('Error parsing file:', parseError);
         alert("Dosya okunamadı. Dosyanın bozuk olmadığından veya doğru formatta olduğundan emin olun.");
@@ -372,7 +372,7 @@ export default function Students() {
 
       try {
         ws = wb.Sheets[wb.SheetNames[0]];
-        rows = XLSX.utils.sheet_to_json(ws, { header: 1 }) as unknown[][];
+        rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false }) as unknown[][];
       } catch (conversionError) {
         console.error('Error converting sheet to JSON:', conversionError);
         alert("Dosya içeriği işlenirken hata oluştu. Dosya formatını kontrol edin.");

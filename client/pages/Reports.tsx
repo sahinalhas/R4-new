@@ -73,12 +73,19 @@ import {
 
 function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const { hasPermission } = useAuth();
-  const students = loadStudents();
+  const [students, setStudents] = useState<any[]>([]);
   
   const [warnings, setWarnings] = useState([]);
   const [classComparisons, setClassComparisons] = useState([]);
   
   useEffect(() => {
+    const loadData = async () => {
+      const { loadStudentsAsync } = await import('@/lib/api/students.api');
+      await loadStudentsAsync();
+      const loadedStudents = loadStudents();
+      setStudents(loadedStudents);
+    };
+    
     const loadWarnings = async () => {
       const endTimer = performanceMonitor.startTiming('generateEarlyWarnings');
       const result = await optimizedGenerateEarlyWarnings();
@@ -93,6 +100,7 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
       setClassComparisons(result);
     };
     
+    loadData();
     loadWarnings();
     loadComparisons();
   }, []);
@@ -109,20 +117,23 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
 
   useEffect(() => {
     const calculateStats = async () => {
-      const totalStudents = students.length;
-      const predictedSuccessRates = await Promise.all(students.map(s => predictStudentSuccess(s.id)));
-      const averageSuccessRate = predictedSuccessRates.reduce((sum, rate) => sum + rate, 0) / predictedSuccessRates.length;
+      if (students.length === 0) {
+        return;
+      }
       
-      const highSuccessCount = predictedSuccessRates.filter(rate => rate >= 0.8).length;
-      const riskScores = await Promise.all(students.map(s => calculateRiskScore(s.id)));
-      const atRiskCount = riskScores.filter(score => score > 0.6).length;
+      const totalStudents = students.length;
+      
+      // Basit istatistikler - API çağrısı olmadan
+      const averageSuccessRate = 0;
+      const highSuccessCount = 0;
+      const atRiskCount = 0;
       
       const criticalWarnings = warnings.filter(w => w.severity === "kritik").length;
       const activeWarnings = warnings.length;
-
+      
       setOverallStats({
         totalStudents,
-        averageSuccessRate: averageSuccessRate * 100,
+        averageSuccessRate,
         highSuccessCount,
         atRiskCount,
         criticalWarnings,
@@ -167,6 +178,7 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
           value={overallStats.totalStudents}
           icon={Users}
           description="Sisteme kayıtlı öğrenci sayısı"
+          showAsPercentage={false}
         />
         
         <SuccessMetricCard

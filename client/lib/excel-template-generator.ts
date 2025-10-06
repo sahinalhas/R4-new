@@ -27,7 +27,12 @@ export function generateExcelTemplate({
 
   // Convert to base64
   try {
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const excelBuffer = XLSX.write(workbook, { 
+      bookType: 'xlsx', 
+      type: 'array',
+      bookSST: true,
+      codepage: 65001
+    });
     const uint8Array = new Uint8Array(excelBuffer);
     let binaryString = '';
     for (let i = 0; i < uint8Array.byteLength; i++) {
@@ -340,9 +345,9 @@ export function parseExcelResponses(base64Data: string): any[] {
     }
     
     // Read Excel file
-    const workbook = XLSX.read(bytes, { type: 'array' });
+    const workbook = XLSX.read(bytes, { type: 'array', codepage: 65001 });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
     
     // Parse the response data
     const responses: any[] = [];

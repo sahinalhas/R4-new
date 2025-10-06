@@ -56,7 +56,8 @@ export function SuccessMetricCard({
   total, 
   trend, 
   icon: Icon,
-  description 
+  description,
+  showAsPercentage = true
 }: {
   title: string;
   value: number;
@@ -64,8 +65,9 @@ export function SuccessMetricCard({
   trend?: "up" | "down" | "stable";
   icon?: any;
   description?: string;
+  showAsPercentage?: boolean;
 }) {
-  const percentage = total ? Math.round((value / total) * 100) : Math.round(value * 100);
+  const percentage = total ? Math.round((value / total) * 100) : value;
   
   return (
     <Card>
@@ -74,7 +76,9 @@ export function SuccessMetricCard({
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{total ? `${value}/${total}` : `%${percentage}`}</div>
+        <div className="text-2xl font-bold">
+          {total ? `${value}/${total}` : showAsPercentage ? `%${percentage}` : value}
+        </div>
         {description && (
           <p className="text-xs text-muted-foreground">{description}</p>
         )}

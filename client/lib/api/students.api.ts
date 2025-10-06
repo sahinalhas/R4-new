@@ -30,7 +30,7 @@ export function loadStudents(): Student[] {
   return [];
 }
 
-async function loadStudentsAsync(): Promise<void> {
+export async function loadStudentsAsync(): Promise<void> {
   try {
     const backendStudents = await fetchStudentsFromAPI();
     const frontendStudents = backendStudents.map(backendToFrontend);

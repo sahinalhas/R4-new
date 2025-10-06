@@ -9,6 +9,8 @@ export function createAchievementsTable(db: Database.Database): void {
       description TEXT,
       category TEXT,
       date TEXT NOT NULL,
+      earnedAt TEXT,
+      points INTEGER DEFAULT 0,
       evidence TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE

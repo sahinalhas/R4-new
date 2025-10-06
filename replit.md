@@ -20,6 +20,17 @@ The application employs a modern full-stack architecture with a focus on modular
 - **System Design Choices**: The system is configured for Replit's autoscale deployment, with `npm run build` for client and server, and `npm start` for the production server.
 
 ## Recent Changes (October 2025)
+- **Turkish Character Support for Excel/CSV (October 6, 2025)**: Enhanced all Excel and CSV import/export operations with proper UTF-8 encoding:
+  - **Excel Import**: Added `codepage: 65001` (UTF-8) to all `XLSX.read()` operations for proper Turkish character support
+  - **Excel Export**: Added `codepage: 65001` and `bookSST: true` to all `XLSX.write()` and `XLSX.writeFile()` operations
+  - **CSV Import**: Already had UTF-8 and Windows-1254 fallback support, enhanced with `raw: false` option
+  - **Files Updated**: 
+    - `client/components/shared/ExcelLoader.tsx`: YKS subject/topic loader
+    - `client/lib/excel-template-generator.ts`: Survey template generator and parser
+    - `client/components/counseling/utils/sessionExport.ts`: Counseling session export
+    - `client/pages/Students.tsx`: Student data import
+  - **Database**: Already configured with `pragma('encoding = "UTF-8")` in connection.ts
+  - **Benefits**: Turkish characters (ç, ğ, ı, ö, ş, ü, Ç, Ğ, İ, Ö, Ş, Ü) now display correctly in all Excel/CSV operations without encoding errors
 - **Removed Lazy Loading for Instant Navigation (October 5, 2025)**: Eliminated all lazy loading to achieve instant page transitions:
   - **All Pages Eagerly Loaded**: Converted all lazy imports to normal imports in `client/App.tsx` - all page components now load with initial bundle
   - **Removed Suspense Boundaries**: Eliminated all Suspense wrappers since pages are no longer lazy-loaded

@@ -62,7 +62,11 @@ export function exportSessionsToExcel(sessions: CounselingSession[]) {
   ws['!cols'] = colWidths;
   
   const today = new Date().toISOString().split('T')[0];
-  XLSX.writeFile(wb, `Gorusme_Defteri_${today}.xlsx`);
+  XLSX.writeFile(wb, `Gorusme_Defteri_${today}.xlsx`, { 
+    bookType: 'xlsx',
+    bookSST: true,
+    codepage: 65001
+  });
   
   return sessions.length;
 }
