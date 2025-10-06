@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,14 +16,16 @@ import {
   EarlyWarningIndicator,
 } from "../charts/AnalyticsCharts";
 import {
-  predictStudentSuccess,
-  calculateRiskScore,
-  generateEarlyWarnings,
   calculateAttendanceRate,
   calculateAcademicTrend,
   calculateStudyConsistency,
   getStudentPerformanceData,
 } from "@/lib/analytics";
+import {
+  optimizedPredictStudentSuccess,
+  optimizedCalculateRiskScore,
+  optimizedGenerateEarlyWarnings,
+} from "@/lib/analytics-cache";
 import { loadStudents } from "@/lib/storage";
 import { 
   Brain, 
@@ -75,8 +77,8 @@ async function calculateDetailedPrediction(studentId: string): Promise<Predictio
   if (!student) throw new Error("Öğrenci bulunamadı");
 
   const data = await getStudentPerformanceData(studentId);
-  const successProbability = await predictStudentSuccess(studentId);
-  const riskScore = await calculateRiskScore(studentId);
+  const successProbability = await optimizedPredictStudentSuccess(studentId);
+  const riskScore = await optimizedCalculateRiskScore(studentId);
   
   // Anahtar faktörleri hesapla
   const attendanceRate = calculateAttendanceRate(data.attendance);
@@ -168,7 +170,7 @@ async function generateClassPredictions(): Promise<ClassPrediction[]> {
   const classPredictions: ClassPrediction[] = [];
 
   for (const [className, studentIds] of classGroups.entries()) {
-    const predictions = await Promise.all(studentIds.map(id => predictStudentSuccess(id)));
+    const predictions = await Promise.all(studentIds.map(id => optimizedPredictStudentSuccess(id)));
     
     const highSuccessProbability = predictions.filter(p => p >= 0.8).length;
     const mediumSuccessProbability = predictions.filter(p => p >= 0.5 && p < 0.8).length;
@@ -527,7 +529,7 @@ export function ClassPredictionOverview() {
   );
 }
 
-export default function PredictiveAnalysis() {
+const PredictiveAnalysis = React.memo(function PredictiveAnalysis() {
   const [selectedStudent, setSelectedStudent] = useState<string>("");
   const [warnings, setWarnings] = useState<any[]>([]);
   const [successProbability, setSuccessProbability] = useState<number>(0);
@@ -535,7 +537,7 @@ export default function PredictiveAnalysis() {
 
   useEffect(() => {
     async function loadWarnings() {
-      const data = await generateEarlyWarnings();
+      const data = await optimizedGenerateEarlyWarnings();
       setWarnings(data);
     }
     loadWarnings();
@@ -544,7 +546,7 @@ export default function PredictiveAnalysis() {
   useEffect(() => {
     async function loadSuccessProbability() {
       if (selectedStudent) {
-        const prob = await predictStudentSuccess(selectedStudent);
+        const prob = await optimizedPredictStudentSuccess(selectedStudent);
         setSuccessProbability(prob);
       }
     }
@@ -618,4 +620,6 @@ export default function PredictiveAnalysis() {
       </Tabs>
     </div>
   );
-}
+});
+
+export default PredictiveAnalysis;

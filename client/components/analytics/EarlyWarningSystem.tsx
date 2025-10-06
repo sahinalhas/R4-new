@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,14 +17,16 @@ import {
   RiskDistributionChart,
 } from "../charts/AnalyticsCharts";
 import {
-  generateEarlyWarnings,
-  calculateRiskScore,
   calculateAttendanceRate,
   calculateAcademicTrend,
   calculateStudyConsistency,
   getStudentPerformanceData,
   type EarlyWarning,
 } from "@/lib/analytics";
+import {
+  optimizedGenerateEarlyWarnings,
+  optimizedCalculateRiskScore,
+} from "@/lib/analytics-cache";
 import { loadStudents } from "@/lib/storage";
 import { 
   checkAndCreateAutomaticInterventions, 
@@ -92,7 +94,7 @@ async function generateRiskProfiles(): Promise<RiskProfile[]> {
     const batchProfiles = await Promise.all(batch.map(async (student) => {
       try {
         const data = await getStudentPerformanceData(student.id);
-        const riskScore = await calculateRiskScore(student.id);
+        const riskScore = await optimizedCalculateRiskScore(student.id);
         
         const attendanceRate = calculateAttendanceRate(data.attendance);
         const academicTrend = calculateAcademicTrend(data.academics);
@@ -473,7 +475,7 @@ export function InterventionPlanCard({ warning }: { warning: EarlyWarning }) {
   );
 }
 
-export default function EarlyWarningSystem() {
+const EarlyWarningSystem = React.memo(function EarlyWarningSystem() {
   const [selectedSeverity, setSelectedSeverity] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [warnings, setWarnings] = useState<EarlyWarning[]>([]);
@@ -486,7 +488,7 @@ export default function EarlyWarningSystem() {
     async function loadData() {
       setIsLoading(true);
       try {
-        const warningsData = await generateEarlyWarnings();
+        const warningsData = await optimizedGenerateEarlyWarnings();
         setWarnings(warningsData);
         
         const profilesData = await generateRiskProfiles();
@@ -687,4 +689,6 @@ export default function EarlyWarningSystem() {
       </Tabs>
     </div>
   );
-}
+});
+
+export default EarlyWarningSystem;

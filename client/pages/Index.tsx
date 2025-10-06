@@ -43,7 +43,8 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { generateEarlyWarnings, type EarlyWarning } from "@/lib/analytics";
+import { type EarlyWarning } from "@/lib/analytics";
+import { optimizedGenerateEarlyWarnings } from "@/lib/analytics-cache";
 import type { Student, Intervention } from "@/lib/storage";
 import { useNavigate } from "react-router-dom";
 
@@ -98,7 +99,7 @@ export default function Index() {
     
     const fetchWarnings = async () => {
       try {
-        const warnings = await generateEarlyWarnings();
+        const warnings = await optimizedGenerateEarlyWarnings();
         setEarlyWarnings(warnings.slice(0, 10));
       } catch (error) {
         console.error('Failed to generate early warnings:', error);

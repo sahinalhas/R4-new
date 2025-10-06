@@ -151,9 +151,13 @@ export const PerformanceTrendChart = React.memo(({
   dataKey?: string;
   color?: string;
 }) => {
-  const hasTarget = React.useMemo(() => 
-    data.some(d => d.target)
+  const optimizedData = React.useMemo(() => 
+    optimizeChartData(data, 100)
   , [data]);
+
+  const hasTarget = React.useMemo(() => 
+    optimizedData.some(d => d.target)
+  , [optimizedData]);
 
   return (
     <Card>
@@ -162,7 +166,7 @@ export const PerformanceTrendChart = React.memo(({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <LineChart data={optimizedData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
@@ -196,9 +200,13 @@ export const PerformanceTrendChart = React.memo(({
 });
 
 export const ClassComparisonChart = React.memo(({ data }: { data: ComparisonData[] }) => {
-  const hasTarget = React.useMemo(() => 
-    data.some(d => d.target)
+  const optimizedData = React.useMemo(() => 
+    optimizeChartData(data, 50)
   , [data]);
+
+  const hasTarget = React.useMemo(() => 
+    optimizedData.some(d => d.target)
+  , [optimizedData]);
 
   return (
     <Card>
@@ -210,7 +218,7 @@ export const ClassComparisonChart = React.memo(({ data }: { data: ComparisonData
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data}>
+          <BarChart data={optimizedData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="category" />
             <YAxis />
@@ -359,7 +367,7 @@ export const ProgressTimeline = React.memo(({
   };
 
   const groupedData = React.useMemo(() => {
-    return data.reduce((acc, item) => {
+    const grouped = data.reduce((acc, item) => {
       const existing = acc.find(d => d.date === item.date);
       if (existing) {
         existing[item.type] = item.value;
@@ -371,6 +379,7 @@ export const ProgressTimeline = React.memo(({
       }
       return acc;
     }, [] as any[]);
+    return optimizeChartData(grouped, 100);
   }, [data]);
 
   return (

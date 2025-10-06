@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,14 @@ import {
   SuccessMetricCard,
 } from "../charts/AnalyticsCharts";
 import {
-  generateClassComparisons,
   calculateAttendanceRate,
-  predictStudentSuccess,
-  calculateRiskScore,
   getStudentPerformanceData,
 } from "@/lib/analytics";
+import {
+  optimizedGenerateClassComparisons,
+  optimizedPredictStudentSuccess,
+  optimizedCalculateRiskScore,
+} from "@/lib/analytics-cache";
 import { loadStudents } from "@/lib/storage";
 import { 
   BarChart3, 
@@ -79,7 +81,7 @@ async function generateDemographicComparisons(): Promise<DemographicComparison[]
 
   for (const [genderName, groupStudents] of genderGroups.entries()) {
     const studentIds = groupStudents.map(s => s.id);
-    const successRates = await Promise.all(studentIds.map(id => predictStudentSuccess(id)));
+    const successRates = await Promise.all(studentIds.map(id => optimizedPredictStudentSuccess(id)));
     const performanceData = await Promise.all(studentIds.map(id => getStudentPerformanceData(id)));
     const attendanceRates = performanceData.map(data => calculateAttendanceRate(data.attendance));
     
@@ -112,7 +114,7 @@ async function generateDemographicComparisons(): Promise<DemographicComparison[]
   comparisons.push(genderComparison);
 
   // Sınıfa göre karşılaştırma
-  const classComparisons = await generateClassComparisons();
+  const classComparisons = await optimizedGenerateClassComparisons();
   const classComparison: DemographicComparison = {
     category: "Sınıf",
     groups: classComparisons.map(cls => ({
@@ -131,7 +133,7 @@ async function generateDemographicComparisons(): Promise<DemographicComparison[]
 }
 
 async function generatePerformanceMetrics(): Promise<PerformanceMetrics[]> {
-  const classComparisons = await generateClassComparisons();
+  const classComparisons = await optimizedGenerateClassComparisons();
   
   return [
     {
@@ -166,7 +168,7 @@ async function generateBenchmarkData(): Promise<BenchmarkData[]> {
   const totalStudents = students.length;
 
   // Genel başarı oranı
-  const successRates = await Promise.all(students.map(s => predictStudentSuccess(s.id)));
+  const successRates = await Promise.all(students.map(s => optimizedPredictStudentSuccess(s.id)));
   const averageSuccess = successRates.reduce((sum, rate) => sum + rate, 0) / successRates.length;
 
   // Devam oranı
@@ -175,7 +177,7 @@ async function generateBenchmarkData(): Promise<BenchmarkData[]> {
   const averageAttendance = attendanceRates.reduce((sum, rate) => sum + rate, 0) / attendanceRates.length;
 
   // Risk dağılımı
-  const riskScores = await Promise.all(students.map(s => calculateRiskScore(s.id)));
+  const riskScores = await Promise.all(students.map(s => optimizedCalculateRiskScore(s.id)));
   const highRiskCount = riskScores.filter(score => score > 0.6).length;
   const riskPercentage = (highRiskCount / totalStudents) * 100;
 
@@ -400,7 +402,7 @@ export function BenchmarkComparison({ benchmarks }: { benchmarks: BenchmarkData[
   );
 }
 
-export default function ComparativeReports() {
+const ComparativeReports = React.memo(function ComparativeReports() {
   const [demographicComparisons, setDemographicComparisons] = useState<DemographicComparison[]>([]);
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics[]>([]);
   const [benchmarkData, setBenchmarkData] = useState<BenchmarkData[]>([]);
@@ -410,7 +412,7 @@ export default function ComparativeReports() {
     generateDemographicComparisons().then(setDemographicComparisons);
     generatePerformanceMetrics().then(setPerformanceMetrics);
     generateBenchmarkData().then(setBenchmarkData);
-    generateClassComparisons().then(setClassComparisons);
+    optimizedGenerateClassComparisons().then(setClassComparisons);
   }, []);
 
   // Risk dağılımı için veri hazırlama
@@ -535,4 +537,6 @@ export default function ComparativeReports() {
       </Tabs>
     </div>
   );
-}
+});
+
+export default ComparativeReports;
