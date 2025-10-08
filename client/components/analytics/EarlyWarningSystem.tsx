@@ -1,4 +1,5 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -215,6 +216,7 @@ function generateInterventionPlan(warning: EarlyWarning): InterventionPlan {
 export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
   const [filterRisk, setFilterRisk] = useState<string>("all");
   const [filterClass, setFilterClass] = useState<string>("all");
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const filteredProfiles = profiles.filter(profile => {
     if (filterRisk !== "all" && profile.riskLevel !== filterRisk) return false;
@@ -224,12 +226,19 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
 
   const classes = Array.from(new Set(profiles.map(p => p.className)));
 
+  const virtualizer = useVirtualizer({
+    count: filteredProfiles.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 200,
+    overscan: 5,
+  });
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Risk Profilleri
+          Risk Profilleri ({filteredProfiles.length})
         </CardTitle>
         <div className="flex gap-4">
           <Select value={filterRisk} onValueChange={setFilterRisk}>
@@ -261,15 +270,36 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {filteredProfiles.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Filtrelere uygun risk profili bulunamadı.</p>
-            </div>
-          ) : (
-            filteredProfiles.map(profile => (
-              <div key={profile.studentId} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
+        {filteredProfiles.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <p>Filtrelere uygun risk profili bulunamadı.</p>
+          </div>
+        ) : (
+          <div ref={parentRef} className="h-[600px] overflow-auto">
+            <div
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualRow) => {
+                const profile = filteredProfiles[virtualRow.index];
+                return (
+                  <div
+                    key={virtualRow.index}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    className="px-2"
+                  >
+                    <div className="border rounded-lg p-4 bg-card mb-4">
+                      <div className="flex items-center justify-between mb-3">
                   <div>
                     <h3 className="font-medium">{profile.studentName}</h3>
                     <p className="text-sm text-muted-foreground">{profile.className}</p>
@@ -354,23 +384,26 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
                   </div>
                 </div>
 
-                {profile.actionPlan.length > 0 && (
-                  <div className="pt-3 border-t">
-                    <h4 className="text-sm font-medium mb-2">Önerilen Eylemler:</h4>
-                    <ul className="text-sm space-y-1">
-                      {profile.actionPlan.map((action, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <span className="mr-2 text-primary">•</span>
-                          {action}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+                        {profile.actionPlan.length > 0 && (
+                          <div className="pt-3 border-t">
+                            <h4 className="text-sm font-medium mb-2">Önerilen Eylemler:</h4>
+                            <ul className="text-sm space-y-1">
+                              {profile.actionPlan.map((action, idx) => (
+                                <li key={idx} className="flex items-start">
+                                  <span className="mr-2 text-primary">•</span>
+                                  {action}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
