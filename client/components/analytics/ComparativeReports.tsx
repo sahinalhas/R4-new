@@ -407,13 +407,36 @@ const ComparativeReports = React.memo(function ComparativeReports() {
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics[]>([]);
   const [benchmarkData, setBenchmarkData] = useState<BenchmarkData[]>([]);
   const [classComparisons, setClassComparisons] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("demographic");
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
+  // İlk yükleme - sadece özet veriler
   useEffect(() => {
-    generateDemographicComparisons().then(setDemographicComparisons);
-    generatePerformanceMetrics().then(setPerformanceMetrics);
-    generateBenchmarkData().then(setBenchmarkData);
     optimizedGenerateClassComparisons().then(setClassComparisons);
   }, []);
+
+  // Progressive loading - sekme değiştiğinde detayları yükle
+  useEffect(() => {
+    if (activeTab === "demographic" && demographicComparisons.length === 0) {
+      setIsLoadingDetails(true);
+      generateDemographicComparisons().then((data) => {
+        setDemographicComparisons(data);
+        setIsLoadingDetails(false);
+      });
+    } else if (activeTab === "performance" && performanceMetrics.length === 0) {
+      setIsLoadingDetails(true);
+      generatePerformanceMetrics().then((data) => {
+        setPerformanceMetrics(data);
+        setIsLoadingDetails(false);
+      });
+    } else if (activeTab === "benchmark" && benchmarkData.length === 0) {
+      setIsLoadingDetails(true);
+      generateBenchmarkData().then((data) => {
+        setBenchmarkData(data);
+        setIsLoadingDetails(false);
+      });
+    }
+  }, [activeTab, demographicComparisons.length, performanceMetrics.length, benchmarkData.length]);
 
   // Risk dağılımı için veri hazırlama
   const riskDistributionData = useMemo(() => {
@@ -493,7 +516,7 @@ const ComparativeReports = React.memo(function ComparativeReports() {
         />
       </div>
 
-      <Tabs defaultValue="demographic" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="demographic">Demografik Karşılaştırma</TabsTrigger>
           <TabsTrigger value="performance">Performans Metrikleri</TabsTrigger>
@@ -502,19 +525,46 @@ const ComparativeReports = React.memo(function ComparativeReports() {
         </TabsList>
 
         <TabsContent value="demographic" className="space-y-4">
-          <div className="space-y-4">
-            {demographicComparisons.map((comparison, index) => (
-              <DemographicComparisonView key={index} comparison={comparison} />
-            ))}
-          </div>
+          {isLoadingDetails ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                <p className="text-muted-foreground">Demografik karşılaştırmalar yükleniyor...</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {demographicComparisons.map((comparison, index) => (
+                <DemographicComparisonView key={index} comparison={comparison} />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-4">
-          <PerformanceMetricsTable metrics={performanceMetrics} />
+          {isLoadingDetails ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                <p className="text-muted-foreground">Performans metrikleri hesaplanıyor...</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <PerformanceMetricsTable metrics={performanceMetrics} />
+          )}
         </TabsContent>
 
         <TabsContent value="benchmark" className="space-y-4">
-          <BenchmarkComparison benchmarks={benchmarkData} />
+          {isLoadingDetails ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                <p className="text-muted-foreground">Benchmark verileri analiz ediliyor...</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <BenchmarkComparison benchmarks={benchmarkData} />
+          )}
         </TabsContent>
 
         <TabsContent value="charts" className="space-y-4">

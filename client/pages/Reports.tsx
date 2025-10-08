@@ -72,9 +72,10 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
   const { data: reportsData, isLoading: loading, error } = useQuery({
     queryKey: ['reports-overview'],
     queryFn: getReportsOverview,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 10 * 60 * 1000, // 10 dakika - daha uzun cache
+    gcTime: 60 * 60 * 1000, // 1 saat - daha uzun garbage collection
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Tekrar mount olduğunda yeniden yükleme
   });
 
   const overallStats = useMemo(() => {
