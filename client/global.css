@@ -13,88 +13,81 @@
   */
   :root {
     --background: 0 0% 100%;
-    --foreground: 224 71% 4%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 270 77% 48%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 262 80% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 224 71% 4%;
+    --secondary: 220 13% 95%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 220 14% 96%;
+    --muted: 220 13% 95%;
     --muted-foreground: 220 9% 46%;
 
-    --accent: 292 91% 73%;
+    --accent: 270 95% 75%;
     --accent-foreground: 270 100% 15%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 270 77% 48%;
+    --ring: 262 80% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 224 71% 4%;
-
-    --sidebar-primary: 270 77% 48%;
-
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 262 80% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-
-    --sidebar-accent: 220 14% 96%;
-
-    --sidebar-accent-foreground: 224 71% 4%;
-
+    --sidebar-accent: 220 13% 95%;
+    --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 270 77% 48%;
+    --sidebar-ring: 262 80% 45%;
   }
 
   .dark {
-    --background: 224 71% 4%;
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
-    --card: 224 71% 4%;
+    --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 224 71% 4%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 270 77% 60%;
-    --primary-foreground: 224 71% 4%;
+    --primary: 262 75% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 16%;
+    --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 14% 16%;
-    --muted-foreground: 220 9% 65%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 292 91% 73%;
+    --accent: 270 95% 75%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 14% 15%;
-    --input: 220 14% 15%;
-    --ring: 270 77% 60%;
-    --sidebar-background: 224 71% 4%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 262 75% 55%;
+    --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 270 77% 60%;
+    --sidebar-primary: 262 75% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 16%;
+    --sidebar-accent: 217 33% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 220 14% 15%;
-    --sidebar-ring: 270 77% 60%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 262 75% 55%;
   }
 }
 
@@ -103,8 +96,48 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+    font-weight: 600;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+    letter-spacing: -0.015em;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   body::before {
@@ -114,13 +147,18 @@
     pointer-events: none;
     background:
       radial-gradient(
-        600px 200px at 10% 0%,
-        hsl(var(--primary) / 0.08),
-        transparent 60%
+        circle 800px at 20% 10%,
+        hsl(var(--primary) / 0.05),
+        transparent 50%
       ),
       radial-gradient(
-        800px 300px at 90% -10%,
-        hsl(var(--accent) / 0.08),
+        circle 600px at 80% 20%,
+        hsl(var(--accent) / 0.04),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle 1000px at 50% 100%,
+        hsl(var(--primary) / 0.03),
         transparent 60%
       );
     z-index: -1;
