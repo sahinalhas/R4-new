@@ -6,6 +6,7 @@ import { createCounselingTables } from './counseling.schema';
 import { createCoachingTables } from './coaching.schema';
 import { createSettingsTables } from './settings.schema';
 import { createUsersTable } from './users.schema';
+import { createAnalyticsCacheTable } from './analytics-cache.schema';
 
 export function initializeDatabaseSchema(db: Database.Database): void {
   createUsersTable(db);
@@ -15,4 +16,5 @@ export function initializeDatabaseSchema(db: Database.Database): void {
   createCounselingTables(db);
   createCoachingTables(db);
   createSettingsTables(db);
+  createAnalyticsCacheTable(db);
 }

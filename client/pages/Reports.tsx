@@ -38,19 +38,13 @@ import {
 // Analytics Functions
 import { 
   exportAnalyticsData,
-  predictStudentSuccess,
-  calculateRiskScore,
 } from "@/lib/analytics";
 
 import { 
-  performanceMonitor,
-  optimizedGenerateEarlyWarnings,
-  optimizedGenerateClassComparisons,
-  optimizedPredictStudentSuccess,
-  optimizedCalculateRiskScore,
-} from "@/lib/analytics-cache";
-
-import { loadStudents } from "@/lib/storage";
+  getReportsOverview,
+  invalidateAnalyticsCache,
+  type ReportsOverview,
+} from "@/lib/api/analytics.api";
 
 import { 
   BarChart3, 
@@ -73,188 +67,96 @@ import {
 
 function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const { hasPermission } = useAuth();
-  const [students, setStudents] = useState<any[]>([]);
-  
-  const [warnings, setWarnings] = useState([]);
-  const [classComparisons, setClassComparisons] = useState([]);
+  const [reportsData, setReportsData] = useState<ReportsOverview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    const loadData = async () => {
+    const loadReportsData = async () => {
       try {
-        const { loadStudentsAsync } = await import('@/lib/api/students.api');
-        await loadStudentsAsync();
-        const loadedStudents = loadStudents();
-        setStudents(loadedStudents);
-        
-        // Öğrenciler yüklendikten sonra sınıf karşılaştırmalarını hesapla
-        calculateClassComparisons(loadedStudents);
+        setLoading(true);
+        setError(null);
+        const data = await getReportsOverview();
+        setReportsData(data);
       } catch (error) {
-        console.error('Error loading students:', error);
+        console.error('Error loading reports overview:', error);
+        setError('Rapor verileri yüklenirken bir hata oluştu');
+      } finally {
+        setLoading(false);
       }
     };
     
-    const loadWarnings = async () => {
-      try {
-        const endTimer = performanceMonitor.startTiming('generateEarlyWarnings');
-        const result = await optimizedGenerateEarlyWarnings();
-        endTimer();
-        setWarnings(result);
-      } catch (error) {
-        console.error('Error loading warnings:', error);
-        setWarnings([]);
-      }
-    };
-    
-    const calculateClassComparisons = (studentsList: typeof students) => {
-      if (studentsList.length === 0) return;
-      
-      // API limitleri nedeniyle doğrudan risk bazlı hesaplama kullan
-      const classMap = new Map<string, any[]>();
-      
-      studentsList.forEach(student => {
-        const className = student.sinif || "Belirtilmemiş";
-        if (!classMap.has(className)) {
-          classMap.set(className, []);
-        }
-        classMap.get(className)!.push(student);
-      });
-      
-      // Risk bazlı tahminler - API çağrısı yok
-      const comparisons = Array.from(classMap.entries()).map(([className, students]) => {
-        const riskBasedGPA = students.reduce((sum, s) => {
-          const score = s.risk === "Düşük" ? 3.5 : s.risk === "Orta" ? 2.8 : s.risk === "Yüksek" ? 2.0 : 1.5;
-          return sum + score;
-        }, 0) / students.length;
-        
-        const riskBasedAttendance = students.reduce((sum, s) => {
-          const score = s.risk === "Düşük" ? 0.95 : s.risk === "Orta" ? 0.85 : s.risk === "Yüksek" ? 0.70 : 0.60;
-          return sum + score;
-        }, 0) / students.length;
-        
-        return {
-          className,
-          studentCount: students.length,
-          averageGPA: parseFloat(riskBasedGPA.toFixed(2)),
-          attendanceRate: parseFloat(riskBasedAttendance.toFixed(2)),
-          riskDistribution: {
-            düşük: students.filter(s => s.risk === "Düşük").length,
-            orta: students.filter(s => s.risk === "Orta").length,
-            yüksek: students.filter(s => s.risk === "Yüksek").length,
-          },
-          topPerformers: students
-            .filter(s => s.risk === "Düşük")
-            .map(s => `${s.ad} ${s.soyad}`)
-            .slice(0, 3),
-          atRiskStudents: students
-            .filter(s => s.risk === "Yüksek" || s.risk === "Kritik")
-            .map(s => `${s.ad} ${s.soyad}`)
-            .slice(0, 3),
-        };
-      });
-      
-      setClassComparisons(comparisons);
-    };
-    
-    loadData();
-    loadWarnings();
+    loadReportsData();
   }, []);
 
-  // Genel istatistikler
-  const [overallStats, setOverallStats] = useState({
-    totalStudents: 0,
-    averageSuccessRate: 0,
-    highSuccessCount: 0,
-    atRiskCount: 0,
-    criticalWarnings: 0,
-    activeWarnings: 0,
-  });
-
-  useEffect(() => {
-    const calculateStats = async () => {
-      if (students.length === 0) {
-        return;
-      }
-      
-      const totalStudents = students.length;
-      
-      // Örnekleme yaparak başarı tahminlerini hesapla (tüm öğrenciler için API çağrısı yapmak yerine)
-      const sampleSize = Math.min(20, students.length);
-      const sampleStudents = [...students] // Array kopyası oluştur (mutation önlemek için)
-        .sort(() => 0.5 - Math.random()) // Rastgele sırala
-        .slice(0, sampleSize);
-      
-      try {
-        const successPredictions = await Promise.all(
-          sampleStudents.map(s => optimizedPredictStudentSuccess(s.id))
-        );
-        
-        const avgSampleSuccess = successPredictions.reduce((sum, p) => sum + p, 0) / successPredictions.length;
-        const averageSuccessRate = Math.round(avgSampleSuccess * 100);
-        
-        // Tüm öğrenciler için risk bazlı sayımlar
-        const highSuccessCount = students.filter(s => s.risk === "Düşük").length;
-        const atRiskCount = students.filter(s => s.risk === "Yüksek" || s.risk === "Kritik").length;
-        
-        const criticalWarnings = warnings.filter(w => w.severity === "kritik").length;
-        const activeWarnings = warnings.length;
-        
-        setOverallStats({
-          totalStudents,
-          averageSuccessRate,
-          highSuccessCount,
-          atRiskCount,
-          criticalWarnings,
-          activeWarnings,
-        });
-      } catch (error) {
-        console.error('Error calculating stats:', error);
-        // Hata durumunda risk bazlı tahmin kullan
-        const riskBasedAvg = students.reduce((sum, s) => {
-          if (s.risk === "Düşük") return sum + 90;
-          if (s.risk === "Orta") return sum + 60;
-          if (s.risk === "Yüksek") return sum + 30;
-          return sum + 50;
-        }, 0) / students.length;
-        
-        setOverallStats({
-          totalStudents,
-          averageSuccessRate: Math.round(riskBasedAvg),
-          highSuccessCount: students.filter(s => s.risk === "Düşük").length,
-          atRiskCount: students.filter(s => s.risk === "Yüksek" || s.risk === "Kritik").length,
-          criticalWarnings: warnings.filter(w => w.severity === "kritik").length,
-          activeWarnings: warnings.length,
-        });
-      }
-    };
+  const overallStats = useMemo(() => {
+    if (!reportsData) {
+      return {
+        totalStudents: 0,
+        averageSuccessRate: 0,
+        highSuccessCount: 0,
+        atRiskCount: 0,
+        criticalWarnings: 0,
+        activeWarnings: 0,
+      };
+    }
     
-    calculateStats();
-  }, [students, warnings]);
+    const avgSuccess = reportsData.studentAnalytics.length > 0
+      ? reportsData.studentAnalytics.reduce((sum, s) => sum + s.successProbability, 0) / reportsData.studentAnalytics.length
+      : 0;
+    
+    return {
+      totalStudents: reportsData.totalStudents,
+      averageSuccessRate: Math.round(avgSuccess),
+      highSuccessCount: reportsData.riskDistribution.düşük,
+      atRiskCount: reportsData.riskDistribution.yüksek + reportsData.riskDistribution.kritik,
+      criticalWarnings: reportsData.topWarnings.filter(w => w.severity === 'kritik').length,
+      activeWarnings: reportsData.topWarnings.length,
+    };
+  }, [reportsData]);
 
-  // Risk dağılımı
   const riskDistribution = useMemo(() => {
-    const counts = { "Düşük": 0, "Orta": 0, "Yüksek": 0 };
-    students.forEach(student => {
-      const risk = student.risk || "Düşük";
-      if (risk in counts) {
-        counts[risk as keyof typeof counts]++;
-      }
-    });
+    if (!reportsData) return [];
     
     return [
-      { name: "Düşük", value: counts["Düşük"] },
-      { name: "Orta", value: counts["Orta"] },
-      { name: "Yüksek", value: counts["Yüksek"] },
+      { name: "Düşük", value: reportsData.riskDistribution.düşük },
+      { name: "Orta", value: reportsData.riskDistribution.orta },
+      { name: "Yüksek", value: reportsData.riskDistribution.yüksek + reportsData.riskDistribution.kritik },
     ];
-  }, [students]);
+  }, [reportsData]);
 
-  // Sınıf karşılaştırması için veri
-  const classComparisonData = useMemo(() => 
-    classComparisons.map(cls => ({
+  const classComparisonData = useMemo(() => {
+    if (!reportsData) return [];
+    
+    return reportsData.classComparisons.map(cls => ({
       category: cls.className,
       current: cls.averageGPA,
-      previous: cls.averageGPA * 0.95, // Simülasyon için
+      previous: cls.averageGPA * 0.95,
       target: 3.5,
-    })), [classComparisons]);
+    }));
+  }, [reportsData]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Raporlar yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-2" />
+          <p className="text-destructive">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -332,7 +234,9 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
       </div>
 
       {/* Son Uyarılar */}
-      <EarlyWarningIndicator warnings={warnings} maxDisplay={5} />
+      {reportsData && reportsData.topWarnings.length > 0 && (
+        <EarlyWarningIndicator warnings={reportsData.topWarnings} maxDisplay={5} />
+      )}
     </div>
   );
 }
@@ -362,11 +266,9 @@ function ExportSettings() {
     }
     
     try {
-      const endTimer = performanceMonitor.startTiming('exportAnalyticsData');
       const rawData = await exportAnalyticsData({
         includePersonalData: includePersonalData && hasPermission('view_sensitive_data'),
       });
-      endTimer();
       
       const dataString = exportFormat === "json" 
         ? JSON.stringify(rawData, null, 2)

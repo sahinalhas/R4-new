@@ -18,6 +18,7 @@ import behaviorRouter from './behavior/index.js';
 import counselingSessionsRouter from './counseling-sessions/index.js';
 import authRouter from './auth/index.js';
 import usersRouter from './users/index.js';
+import analyticsRouter from './analytics/index.js';
 
 /**
  * Feature Registry
@@ -124,5 +125,8 @@ featureRegistry.use('/', documentsRouter);
 featureRegistry.use('/', settingsRouter);
 featureRegistry.use('/session', authRouter);
 featureRegistry.use('/users', usersRouter);
+
+// =================== ANALYTICS DOMAIN ===================
+featureRegistry.use('/analytics', analyticsRouter);
 
 export default featureRegistry;
