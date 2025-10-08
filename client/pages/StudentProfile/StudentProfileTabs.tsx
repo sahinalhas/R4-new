@@ -240,7 +240,6 @@ export function StudentProfileTabs({
           <TabsContent value="veli-gorusmeleri">
             <VeliGorusmeleriSection
               studentId={studentId}
-              parentMeetings={data.parentMeetings}
               onUpdate={onUpdate}
             />
           </TabsContent>
