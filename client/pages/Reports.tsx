@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth, PermissionGuard, getExportPermissions } from "@/lib/auth-context";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,27 +68,14 @@ import {
 
 function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const { hasPermission } = useAuth();
-  const [reportsData, setReportsData] = useState<ReportsOverview | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
-  useEffect(() => {
-    const loadReportsData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getReportsOverview();
-        setReportsData(data);
-      } catch (error) {
-        console.error('Error loading reports overview:', error);
-        setError('Rapor verileri yüklenirken bir hata oluştu');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadReportsData();
-  }, []);
+  const { data: reportsData, isLoading: loading, error } = useQuery({
+    queryKey: ['reports-overview'],
+    queryFn: getReportsOverview,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   const overallStats = useMemo(() => {
     if (!reportsData) {
@@ -152,7 +140,7 @@ function OverviewDashboard({ setActiveTab }: { setActiveTab: (tab: string) => vo
       <div className="flex items-center justify-center p-12">
         <div className="text-center">
           <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-2" />
-          <p className="text-destructive">{error}</p>
+          <p className="text-destructive">Rapor verileri yüklenirken bir hata oluştu</p>
         </div>
       </div>
     );

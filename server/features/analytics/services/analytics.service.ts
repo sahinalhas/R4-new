@@ -4,7 +4,7 @@ import { getAttendanceByStudent } from '../../attendance/repository/attendance.r
 import { getStudentSessionStats } from '../../counseling-sessions/services/analytics.service.js';
 import { getCachedData, setCachedData, cleanupExpiredCache } from '../repository/cache.repository.js';
 
-interface StudentAnalytics {
+export interface StudentAnalytics {
   studentId: string;
   studentName: string;
   className: string;
@@ -17,7 +17,7 @@ interface StudentAnalytics {
   earlyWarnings: EarlyWarning[];
 }
 
-interface EarlyWarning {
+export interface EarlyWarning {
   studentName: string;
   warningType: 'attendance' | 'academic' | 'behavioral';
   severity: 'düşük' | 'orta' | 'yüksek' | 'kritik';
@@ -25,7 +25,7 @@ interface EarlyWarning {
   priority: number;
 }
 
-interface ReportsOverview {
+export interface ReportsOverview {
   totalStudents: number;
   riskDistribution: {
     düşük: number;
@@ -38,7 +38,7 @@ interface ReportsOverview {
   studentAnalytics: StudentAnalytics[];
 }
 
-interface ClassComparison {
+export interface ClassComparison {
   className: string;
   studentCount: number;
   averageGPA: number;

@@ -71,6 +71,15 @@ function expressPlugin(): Plugin {
 
       // Add Express app as middleware to Vite dev server
       server.middlewares.use(app);
+      
+      // Start analytics scheduler in development mode
+      import('./server/features/analytics/services/analytics-scheduler.service.js')
+        .then(({ startAnalyticsScheduler }) => {
+          startAnalyticsScheduler();
+        })
+        .catch((error) => {
+          console.error('Failed to start analytics scheduler:', error);
+        });
     },
   };
 }

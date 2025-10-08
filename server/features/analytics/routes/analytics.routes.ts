@@ -1,12 +1,13 @@
 import express from 'express';
-import { getReportsOverview, getStudentAnalytics, invalidateAnalyticsCache } from '../services/analytics.service.js';
+import { getReportsOverviewOptimized, getStudentAnalyticsOptimized, forceRefreshAnalytics } from '../services/analytics-optimized.service.js';
+import { invalidateAnalyticsCache } from '../services/analytics.service.js';
 import { getCacheStats } from '../repository/cache.repository.js';
 
 const router = express.Router();
 
 router.get('/reports-overview', async (req, res) => {
   try {
-    const data = await getReportsOverview();
+    const data = await getReportsOverviewOptimized();
     res.json(data);
   } catch (error) {
     console.error('Error fetching reports overview:', error);
@@ -17,7 +18,7 @@ router.get('/reports-overview', async (req, res) => {
 router.get('/student/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
-    const data = await getStudentAnalytics(studentId);
+    const data = await getStudentAnalyticsOptimized(studentId);
     
     if (!data) {
       return res.status(404).json({ error: 'Öğrenci bulunamadı' });
@@ -33,7 +34,8 @@ router.get('/student/:studentId', async (req, res) => {
 router.post('/invalidate-cache', (req, res) => {
   try {
     invalidateAnalyticsCache();
-    res.json({ message: 'Cache başarıyla temizlendi' });
+    const count = forceRefreshAnalytics();
+    res.json({ message: `Cache temizlendi ve ${count} öğrenci için analitikler yenilendi` });
   } catch (error) {
     console.error('Error invalidating cache:', error);
     res.status(500).json({ error: 'Cache temizlenemedi' });
