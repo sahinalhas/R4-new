@@ -435,11 +435,18 @@ function ExportSettings() {
 export default function Reports() {
   const { user, hasPermission } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set(["overview"]));
   const [refreshKey, setRefreshKey] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setLoadedTabs(prev => new Set(prev).add(tab));
+  };
+
   const handleRefresh = () => {
     setRefreshKey(prev => prev + 1);
+    setLoadedTabs(new Set([activeTab])); // Sadece aktif sekmeyi yenile
   };
 
   const exportPermissions = useMemo(() => {
@@ -549,7 +556,7 @@ export default function Reports() {
       </div>
 
       {/* Ana İçerik */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4" key={refreshKey}>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview" className="gap-2">
             <Eye className="h-4 w-4" />
@@ -593,7 +600,7 @@ export default function Reports() {
                 </div>
               }
             >
-              <PredictiveAnalysis key={refreshKey} />
+              {loadedTabs.has("predictive") && <PredictiveAnalysis key={refreshKey} />}
             </PermissionGuard>
           </div>
         )}
@@ -608,7 +615,7 @@ export default function Reports() {
                 </div>
               }
             >
-              <ComparativeReports key={refreshKey} />
+              {loadedTabs.has("comparative") && <ComparativeReports key={refreshKey} />}
             </PermissionGuard>
           </div>
         )}
@@ -623,7 +630,7 @@ export default function Reports() {
                 </div>
               }
             >
-              <ProgressCharts key={refreshKey} />
+              {loadedTabs.has("progress") && <ProgressCharts key={refreshKey} />}
             </PermissionGuard>
           </div>
         )}
@@ -638,7 +645,7 @@ export default function Reports() {
                 </div>
               }
             >
-              <EarlyWarningSystem key={refreshKey} />
+              {loadedTabs.has("warnings") && <EarlyWarningSystem key={refreshKey} />}
             </PermissionGuard>
           </div>
         )}
