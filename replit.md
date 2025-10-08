@@ -20,6 +20,20 @@ The application employs a modern full-stack architecture with a focus on modular
 - **System Design Choices**: The system is configured for Replit's autoscale deployment, with `npm run build` for client and server, and `npm start` for the production server.
 
 ## Recent Changes (October 2025)
+- **Server-Side Analytics with Caching (October 8, 2025)**: Migrated heavy analytics calculations from client to server with intelligent caching:
+  - **Backend Analytics Cache System**: Created `analytics_cache` database table with 30-minute TTL for computed results
+  - **Server-Side Processing**: All risk scoring, predictions, and early warnings now calculated on backend in `analytics.service.ts`
+  - **Unified API Endpoint**: New `/api/analytics/reports-overview` endpoint returns all report data in single call
+  - **Cache Repository**: Implemented `cache.repository.ts` with `getCachedData`, `setCachedData`, and `cleanupExpiredCache` functions
+  - **Frontend Optimization**: Reports page now makes single API call instead of performing heavy client-side calculations
+  - **Performance**: Handles 200+ students efficiently with automatic cache invalidation and cleanup
+  - **Files Created**: 
+    - `server/features/analytics/services/analytics.service.ts`: Core analytics logic
+    - `server/features/analytics/repository/cache.repository.ts`: Cache data access
+    - `server/features/analytics/routes/analytics.routes.ts`: API endpoints
+    - `server/lib/database/schema/analytics-cache.schema.ts`: Cache table schema
+  - **Files Updated**: `client/pages/Reports.tsx`, `client/lib/api/analytics.api.ts`
+  - **Benefits**: Dramatically reduced client-side processing, improved page load time, automatic cache management, scalable architecture
 - **Reports Page Performance Optimization (October 6, 2025)**: Optimized analytics page loading for better performance:
   - **Lazy Tab Loading**: Replaced `TabsContent` with conditional rendering based on `activeTab` - analytics components only mount when their tab is active
   - **Batch Processing**: Implemented batch processing (15 students per batch) in `generateRiskProfiles()` to prevent overwhelming API with hundreds of concurrent requests
