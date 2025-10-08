@@ -1,8 +1,8 @@
 import { Student, upsertStudent } from "@/lib/storage";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -22,6 +22,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import {
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  GraduationCap,
+  Users,
+  AlertCircle,
+  Calendar,
+  Hash,
+  UserCheck,
+  Shield,
+  Tag,
+} from "lucide-react";
 
 const basicInfoSchema = z.object({
   ad: z.string().min(1, "Ad zorunludur"),
@@ -37,8 +51,6 @@ const basicInfoSchema = z.object({
   rehberOgretmen: z.string().optional(),
   risk: z.enum(["Düşük", "Orta", "Yüksek"]).optional(),
   etiketler: z.string().optional(),
-  kanGrubu: z.string().optional(),
-  saglikNotu: z.string().optional(),
   veliAdi: z.string().optional(),
   veliTelefon: z.string().optional(),
   acilKisi: z.string().optional(),
@@ -69,8 +81,6 @@ export default function BasicInfoSection({ student, onUpdate }: BasicInfoSection
       rehberOgretmen: student.rehberOgretmen || "",
       risk: student.risk,
       etiketler: (student.etiketler || []).join(", "),
-      kanGrubu: student.kanGrubu || "",
-      saglikNotu: student.saglikNotu || "",
       veliAdi: student.veliAdi || "",
       veliTelefon: student.veliTelefon || "",
       acilKisi: student.acilKisi || "",
@@ -99,305 +109,394 @@ export default function BasicInfoSection({ student, onUpdate }: BasicInfoSection
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 md:grid-cols-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Öğrenci Bilgileri</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              Kişisel Bilgiler
+            </CardTitle>
+            <CardDescription>Öğrencinin temel kimlik ve iletişim bilgileri</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <FormField
-              control={form.control}
-              name="ad"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Ad" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="soyad"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Soyad" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="sinif"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Sınıf (örn. 9/A)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="cinsiyet"
-              render={({ field }) => (
-                <FormItem>
-                  <Select onValueChange={field.onChange} value={field.value}>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="ad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Ad
+                    </FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Cinsiyet" />
-                      </SelectTrigger>
+                      <Input {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="K">Kız</SelectItem>
-                      <SelectItem value="E">Erkek</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div>
-              <Input
-                value={student.id}
-                placeholder="Öğrenci No"
-                readOnly
-                className="bg-gray-50"
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="soyad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Soyad
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Hash className="h-4 w-4" />
+                  Öğrenci No
+                </FormLabel>
+                <Input
+                  value={student.id}
+                  readOnly
+                  className="bg-muted"
+                />
+              </FormItem>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="cinsiyet"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Cinsiyet
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seçiniz" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="K">Kız</SelectItem>
+                        <SelectItem value="E">Erkek</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="dogumTarihi"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Doğum Tarihi
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sinif"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4" />
+                      Sınıf
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="örn. 9/A" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            
-            <FormField
-              control={form.control}
-              name="dogumTarihi"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input type="date" placeholder="Doğum Tarihi" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="telefon"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Telefon" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="eposta"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="E-posta" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="il"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="İl" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="ilce"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="İlçe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="adres"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Adres" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="rehberOgretmen"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Rehber Öğretmen" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="risk"
-              render={({ field }) => (
-                <FormItem>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Risk" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Düşük">Düşük</SelectItem>
-                      <SelectItem value="Orta">Orta</SelectItem>
-                      <SelectItem value="Yüksek">Yüksek</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="etiketler"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Etiketler (virgülle)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="kanGrubu"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Kan Grubu (ops.)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="saglikNotu"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormControl>
-                    <Textarea placeholder="Sağlık Notu (ops.)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="md:col-span-2">
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Kaydediliyor..." : "Kaydet"}
-              </Button>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <Phone className="h-4 w-4 text-primary" />
+                İletişim Bilgileri
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="telefon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        Telefon
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="555 123 45 67" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="eposta"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        E-posta
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="ornek@mail.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                Adres Bilgileri
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="il"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>İl</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="ilce"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>İlçe</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="adres"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adres</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
-            <CardTitle>Veli & Acil Durum</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              Okul Bilgileri
+            </CardTitle>
+            <CardDescription>Rehberlik ve takip bilgileri</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <FormField
-              control={form.control}
-              name="veliAdi"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Veli Adı" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="veliTelefon"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Veli Telefon" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="acilKisi"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Acil Durum Kişisi" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="acilTelefon"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Acil Durum Telefon" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="md:col-span-2">
-              <Button type="submit" variant="outline" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Kaydediliyor..." : "Kaydet"}
-              </Button>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="rehberOgretmen"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <UserCheck className="h-4 w-4" />
+                      Rehber Öğretmen
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="risk"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Risk Durumu
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seçiniz" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Düşük">Düşük</SelectItem>
+                        <SelectItem value="Orta">Orta</SelectItem>
+                        <SelectItem value="Yüksek">Yüksek</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="etiketler"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      Etiketler
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="virgülle ayırın" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Veli & Acil Durum Bilgileri
+            </CardTitle>
+            <CardDescription>İletişim kurulacak kişiler</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                Veli Bilgileri
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="veliAdi"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Veli Adı</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="veliTelefon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Veli Telefon</FormLabel>
+                      <FormControl>
+                        <Input placeholder="555 123 45 67" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                Acil Durum
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="acilKisi"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Acil Durum Kişisi</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="acilTelefon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Acil Durum Telefon</FormLabel>
+                      <FormControl>
+                        <Input placeholder="555 123 45 67" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end gap-3">
+          <Button 
+            type="submit" 
+            disabled={form.formState.isSubmitting}
+            className="min-w-32"
+          >
+            {form.formState.isSubmitting ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
