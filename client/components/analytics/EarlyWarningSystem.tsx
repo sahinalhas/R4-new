@@ -216,6 +216,8 @@ function generateInterventionPlan(warning: EarlyWarning): InterventionPlan {
 export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
   const [filterRisk, setFilterRisk] = useState<string>("all");
   const [filterClass, setFilterClass] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20; // Sayfa başına 20 öğrenci
   const parentRef = useRef<HTMLDivElement>(null);
 
   const filteredProfiles = profiles.filter(profile => {
@@ -225,9 +227,21 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
   });
 
   const classes = Array.from(new Set(profiles.map(p => p.className)));
+  
+  // Sayfalama
+  const totalPages = Math.ceil(filteredProfiles.length / itemsPerPage);
+  const paginatedProfiles = filteredProfiles.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Filtre değiştiğinde sayfayı sıfırla
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterRisk, filterClass]);
 
   const virtualizer = useVirtualizer({
-    count: filteredProfiles.length,
+    count: paginatedProfiles.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 200,
     overscan: 5,
@@ -284,7 +298,7 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
               }}
             >
               {virtualizer.getVirtualItems().map((virtualRow) => {
-                const profile = filteredProfiles[virtualRow.index];
+                const profile = paginatedProfiles[virtualRow.index];
                 return (
                   <div
                     key={virtualRow.index}
@@ -401,6 +415,33 @@ export function RiskProfilesTable({ profiles }: { profiles: RiskProfile[] }) {
                     </div>
                   );
                 })}
+            </div>
+          </div>
+        )}
+        
+        {/* Sayfalama Kontrolleri */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t pt-4 mt-4">
+            <div className="text-sm text-muted-foreground">
+              Toplam {filteredProfiles.length} öğrenci - Sayfa {currentPage} / {totalPages}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Önceki
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Sonraki
+              </Button>
             </div>
           </div>
         )}
