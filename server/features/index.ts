@@ -21,6 +21,7 @@ import usersRouter from './users/index.js';
 import analyticsRouter from './analytics/index.js';
 import earlyWarningRouter from './early-warning/index.js';
 import holisticProfileRouter from './holistic-profile/index.js';
+import standardizedProfileRouter from './standardized-profile/routes/standardized-profile.routes.js';
 
 /**
  * Feature Registry
@@ -119,6 +120,7 @@ featureRegistry.use('/behavior-incidents', behaviorRouter);
 featureRegistry.use('/counseling-sessions', counselingSessionsRouter);
 featureRegistry.use('/early-warning', earlyWarningRouter);
 featureRegistry.use('/holistic-profile', holisticProfileRouter);
+featureRegistry.use('/standardized-profile', standardizedProfileRouter);
 
 // =================== COMMUNICATION DOMAIN ===================
 featureRegistry.use('/', surveysRouter);
