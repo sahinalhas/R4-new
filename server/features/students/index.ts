@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { simpleRateLimit } from '../../middleware/validation.js';
 import * as studentsRoutes from './routes/students.routes.js';
+import * as unifiedProfileRoutes from './routes/unified-profile.routes.js';
 
 const router = Router();
 
@@ -13,5 +14,11 @@ router.post("/academics", simpleRateLimit(50, 15 * 60 * 1000), studentsRoutes.ad
 router.get("/:id/progress", simpleRateLimit(200, 15 * 60 * 1000), studentsRoutes.getStudentProgress);
 router.get("/:id/interventions", simpleRateLimit(200, 15 * 60 * 1000), studentsRoutes.getStudentInterventions);
 router.post("/interventions", simpleRateLimit(50, 15 * 60 * 1000), studentsRoutes.addStudentIntervention);
+
+// Unified Profile Routes - Birleşik Profil API
+router.get("/:id/unified-profile", simpleRateLimit(100, 15 * 60 * 1000), unifiedProfileRoutes.getUnifiedProfile);
+router.post("/:id/initialize-profiles", simpleRateLimit(20, 15 * 60 * 1000), unifiedProfileRoutes.initializeProfiles);
+router.post("/:id/recalculate-scores", simpleRateLimit(50, 15 * 60 * 1000), unifiedProfileRoutes.recalculateScores);
+router.get("/:id/quality-report", simpleRateLimit(100, 15 * 60 * 1000), unifiedProfileRoutes.getQualityReport);
 
 export default router;
