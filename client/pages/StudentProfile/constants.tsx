@@ -20,6 +20,7 @@ import {
   ClipboardList,
   BarChart2,
   Briefcase,
+  Sparkles,
 } from "lucide-react";
 
 export const MAIN_TABS = [
@@ -110,6 +111,11 @@ export const MESLEKI_TABS = [
 ] as const;
 
 export const KISISEL_PSIKOSOSYAL_TABS = [
+  {
+    value: "butuncul-profil",
+    label: "Bütüncül Profil",
+    icon: Sparkles,
+  },
   {
     value: "kisilik-profil",
     label: "Kişilik Profili",

@@ -30,6 +30,13 @@ import RiskDegerlendirmeSection from "@/components/student-profile/sections/Risk
 import DavranisTakibiSection from "@/components/student-profile/sections/DavranisTakibiSection";
 import SinavSonuclariSection from "@/components/student-profile/sections/SinavSonuclariSection";
 
+import StrengthsSection from "@/components/student-profile/holistic-sections/StrengthsSection";
+import SocialRelationsSection from "@/components/student-profile/holistic-sections/SocialRelationsSection";
+import InterestsSection from "@/components/student-profile/holistic-sections/InterestsSection";
+import FutureVisionSection from "@/components/student-profile/holistic-sections/FutureVisionSection";
+import SELCompetenciesSection from "@/components/student-profile/holistic-sections/SELCompetenciesSection";
+import SocioeconomicSection from "@/components/student-profile/holistic-sections/SocioeconomicSection";
+
 interface StudentProfileTabsProps {
   student: Student;
   studentId: string;
@@ -168,7 +175,7 @@ export function StudentProfileTabs({
       </TabsContent>
 
       <TabsContent value="kisisel-psikososyal">
-        <Tabs defaultValue="kisilik-profil" className="space-y-4">
+        <Tabs defaultValue="butuncul-profil" className="space-y-4">
           <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
             {KISISEL_PSIKOSOSYAL_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
@@ -176,6 +183,17 @@ export function StudentProfileTabs({
               </TabsTrigger>
             ))}
           </TabsList>
+
+          <TabsContent value="butuncul-profil">
+            <div className="space-y-6">
+              <StrengthsSection studentId={studentId} onUpdate={onUpdate} />
+              <SocialRelationsSection studentId={studentId} onUpdate={onUpdate} />
+              <InterestsSection studentId={studentId} onUpdate={onUpdate} />
+              <FutureVisionSection studentId={studentId} onUpdate={onUpdate} />
+              <SELCompetenciesSection studentId={studentId} onUpdate={onUpdate} />
+              <SocioeconomicSection studentId={studentId} onUpdate={onUpdate} />
+            </div>
+          </TabsContent>
 
           <TabsContent value="kisilik-profil">
             <KisilikProfiliSection
