@@ -63,16 +63,18 @@ export default function StandardizedTalentsSection({
     setIsSubmitting(true);
     try {
       const payload = {
-        id: talentsData?.id || crypto.randomUUID(),
+        id: talentsData?.id || self.crypto.randomUUID(),
         studentId,
         ...data,
-        creativeTalents: JSON.stringify(data.creativeTalents),
-        physicalTalents: JSON.stringify(data.physicalTalents),
-        primaryInterests: JSON.stringify(data.primaryInterests),
-        exploratoryInterests: JSON.stringify(data.exploratoryInterests),
-        clubMemberships: JSON.stringify(data.clubMemberships),
-        competitionsParticipated: JSON.stringify(data.competitionsParticipated),
       };
+
+      const response = await fetch(`/api/standardized-profile/${studentId}/talents-interests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Failed to save');
 
       toast.success("Yetenek ve ilgi alanları kaydedildi");
       onUpdate();

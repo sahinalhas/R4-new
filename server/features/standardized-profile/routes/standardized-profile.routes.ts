@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'crypto';
 import { StandardizedProfileRepository } from '../repository/standardized-profile.repository';
 import getDatabase from '@/server/lib/database';
 
@@ -27,7 +28,7 @@ router.post('/:studentId/academic', (req, res) => {
     const profile = {
       ...req.body,
       studentId,
-      id: req.body.id || crypto.randomUUID(),
+      id: req.body.id || randomUUID(),
     };
     
     repo.upsertAcademicProfile(profile);
@@ -61,7 +62,7 @@ router.post('/:studentId/social-emotional', (req, res) => {
     const profile = {
       ...req.body,
       studentId,
-      id: req.body.id || crypto.randomUUID(),
+      id: req.body.id || randomUUID(),
     };
     
     repo.upsertSocialEmotionalProfile(profile);
@@ -95,7 +96,7 @@ router.post('/:studentId/talents-interests', (req, res) => {
     const profile = {
       ...req.body,
       studentId,
-      id: req.body.id || crypto.randomUUID(),
+      id: req.body.id || randomUUID(),
     };
     
     repo.upsertTalentsInterestsProfile(profile);
@@ -129,7 +130,7 @@ router.post('/:studentId/health', (req, res) => {
     const profile = {
       ...req.body,
       studentId,
-      id: req.body.id || crypto.randomUUID(),
+      id: req.body.id || randomUUID(),
     };
     
     repo.upsertStandardizedHealthProfile(profile);
@@ -163,7 +164,7 @@ router.post('/:studentId/interventions', (req, res) => {
     const intervention = {
       ...req.body,
       studentId,
-      id: req.body.id || crypto.randomUUID(),
+      id: req.body.id || randomUUID(),
     };
     
     repo.insertStandardizedIntervention(intervention);
@@ -197,7 +198,7 @@ router.post('/:studentId/behavior-incidents', (req, res) => {
     const incident = {
       ...req.body,
       studentId,
-      id: req.body.id || crypto.randomUUID(),
+      id: req.body.id || randomUUID(),
     };
     
     repo.insertStandardizedBehaviorIncident(incident);
