@@ -11,6 +11,8 @@ import { migration009 } from './009-add-default-users';
 import { migration010 } from './010-add-student-analytics-snapshot';
 import { migration011 } from './011-early-warning-system';
 import { migration012 } from './012-student-holistic-profile';
+import { migration013 } from './013-fix-schema-columns';
+import { migration014 } from './014-fix-additional-schema-columns';
 
 const migrations = [
   migration001,
@@ -24,7 +26,9 @@ const migrations = [
   migration009,
   migration010,
   migration011,
-  migration012
+  migration012,
+  migration013,
+  migration014
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {
