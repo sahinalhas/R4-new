@@ -19,6 +19,7 @@ import counselingSessionsRouter from './counseling-sessions/index.js';
 import authRouter from './auth/index.js';
 import usersRouter from './users/index.js';
 import analyticsRouter from './analytics/index.js';
+import earlyWarningRouter from './early-warning/index.js';
 
 /**
  * Feature Registry
@@ -115,6 +116,7 @@ featureRegistry.use('/special-education', specialEducationRouter);
 featureRegistry.use('/risk-factors', riskAssessmentRouter);
 featureRegistry.use('/behavior-incidents', behaviorRouter);
 featureRegistry.use('/counseling-sessions', counselingSessionsRouter);
+featureRegistry.use('/early-warning', earlyWarningRouter);
 
 // =================== COMMUNICATION DOMAIN ===================
 featureRegistry.use('/', surveysRouter);
