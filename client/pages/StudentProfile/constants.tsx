@@ -83,6 +83,11 @@ export const EGITSEL_TABS = [
     icon: CalendarDays,
   },
   {
+    value: "calisma-programi",
+    label: "Çalışma Programı",
+    icon: BookOpen,
+  },
+  {
     value: "sinavlar",
     label: "Sınavlar",
     icon: BarChart2,
