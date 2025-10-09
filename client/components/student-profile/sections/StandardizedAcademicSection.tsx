@@ -68,14 +68,18 @@ export default function StandardizedAcademicSection({
     setIsSubmitting(true);
     try {
       const payload = {
-        id: academicData?.id || crypto.randomUUID(),
+        id: academicData?.id || self.crypto.randomUUID(),
         studentId,
         ...data,
-        strongSubjects: JSON.stringify(data.strongSubjects),
-        weakSubjects: JSON.stringify(data.weakSubjects),
-        strongSkills: JSON.stringify(data.strongSkills),
-        weakSkills: JSON.stringify(data.weakSkills),
       };
+
+      const response = await fetch(`/api/standardized-profile/${studentId}/academic`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Failed to save');
 
       toast.success("Akademik profil kaydedildi");
       onUpdate();
