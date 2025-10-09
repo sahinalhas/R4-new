@@ -4,6 +4,7 @@
  */
 
 export * from './types/early-warning.types';
+export * from './types/holistic-profile.types';
 
 /**
  * Health information for students

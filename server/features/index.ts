@@ -20,6 +20,7 @@ import authRouter from './auth/index.js';
 import usersRouter from './users/index.js';
 import analyticsRouter from './analytics/index.js';
 import earlyWarningRouter from './early-warning/index.js';
+import holisticProfileRouter from './holistic-profile/index.js';
 
 /**
  * Feature Registry
@@ -117,6 +118,7 @@ featureRegistry.use('/risk-factors', riskAssessmentRouter);
 featureRegistry.use('/behavior-incidents', behaviorRouter);
 featureRegistry.use('/counseling-sessions', counselingSessionsRouter);
 featureRegistry.use('/early-warning', earlyWarningRouter);
+featureRegistry.use('/holistic-profile', holisticProfileRouter);
 
 // =================== COMMUNICATION DOMAIN ===================
 featureRegistry.use('/', surveysRouter);
