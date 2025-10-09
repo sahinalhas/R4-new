@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface StandardFieldProps {
   label: string;
@@ -26,7 +27,13 @@ export function StandardField({
   required = false,
   description,
 }: StandardFieldProps) {
-  const [showDetail, setShowDetail] = useState(!!detailValue);
+  const [showDetail, setShowDetail] = useState(false);
+
+  useEffect(() => {
+    if (detailValue && detailValue.trim()) {
+      setShowDetail(true);
+    }
+  }, [detailValue]);
 
   return (
     <div className="space-y-2">
@@ -45,10 +52,18 @@ export function StandardField({
           variant={showDetail ? "secondary" : "ghost"}
           size="sm"
           onClick={() => setShowDetail(!showDetail)}
-          className="shrink-0"
+          className="shrink-0 relative"
           title={showDetail ? "Detayı gizle" : "Detay ekle"}
         >
           <MessageSquare className="h-4 w-4" />
+          {detailValue && detailValue.trim() && !showDetail && (
+            <Badge 
+              variant="default" 
+              className="absolute -top-1 -right-1 h-2 w-2 p-0 rounded-full bg-blue-500"
+            >
+              <span className="sr-only">Detay mevcut</span>
+            </Badge>
+          )}
           {showDetail ? (
             <ChevronUp className="h-3 w-3 ml-1" />
           ) : (
