@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { StandardizedProfileRepository } from '../repository/standardized-profile.repository';
 import { AggregateScoreCalculator } from '../services/aggregate-score-calculator.service';
-import getDatabase from '@/server/lib/database';
+import getDatabase from '../../../lib/database';
 
 const router = Router();
 

@@ -16,7 +16,7 @@ import {
   CHRONIC_DISEASES,
   ALLERGIES,
   MEDICATION_TYPES
-} from "@/shared/constants/student-profile-taxonomy";
+} from "@shared/constants/student-profile-taxonomy";
 
 const healthProfileSchema = z.object({
   bloodType: z.string().optional(),

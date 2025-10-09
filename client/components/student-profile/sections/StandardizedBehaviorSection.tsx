@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 import { AlertTriangle, Plus, Trash2 } from "lucide-react";
-import { BEHAVIOR_CATEGORIES } from "@/shared/constants/student-profile-taxonomy";
+import { BEHAVIOR_CATEGORIES } from "@shared/constants/student-profile-taxonomy";
 
 const behaviorIncidentSchema = z.object({
   incidentDate: z.string(),

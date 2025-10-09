@@ -15,7 +15,7 @@ import {
   CREATIVE_TALENTS, 
   PHYSICAL_TALENTS,
   INTEREST_AREAS 
-} from "@/shared/constants/student-profile-taxonomy";
+} from "@shared/constants/student-profile-taxonomy";
 
 const talentsInterestsSchema = z.object({
   assessmentDate: z.string(),

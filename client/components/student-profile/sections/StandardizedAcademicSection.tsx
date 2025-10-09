@@ -16,7 +16,7 @@ import {
   ACADEMIC_SUBJECTS, 
   ACADEMIC_SKILLS,
   LEARNING_STYLES 
-} from "@/shared/constants/student-profile-taxonomy";
+} from "@shared/constants/student-profile-taxonomy";
 
 const academicProfileSchema = z.object({
   assessmentDate: z.string(),

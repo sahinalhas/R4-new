@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 import { Heart } from "lucide-react";
-import { SOCIAL_SKILLS } from "@/shared/constants/student-profile-taxonomy";
+import { SOCIAL_SKILLS } from "@shared/constants/student-profile-taxonomy";
 
 const socialEmotionalSchema = z.object({
   assessmentDate: z.string(),
