@@ -324,4 +324,24 @@ export class StandardizedProfileRepository {
       incident.additionalNotes
     );
   }
+
+  getMotivationProfile(studentId: string): MotivationProfile | null {
+    const stmt = this.db.prepare(`
+      SELECT * FROM motivation_profiles 
+      WHERE studentId = ? 
+      ORDER BY assessmentDate DESC 
+      LIMIT 1
+    `);
+    return stmt.get(studentId) as MotivationProfile | null;
+  }
+
+  getRiskProtectiveProfile(studentId: string): RiskProtectiveProfile | null {
+    const stmt = this.db.prepare(`
+      SELECT * FROM risk_protective_profiles 
+      WHERE studentId = ? 
+      ORDER BY assessmentDate DESC 
+      LIMIT 1
+    `);
+    return stmt.get(studentId) as RiskProtectiveProfile | null;
+  }
 }
