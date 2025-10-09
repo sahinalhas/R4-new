@@ -27,54 +27,49 @@ import {
 
 export const MAIN_TABS = [
   {
-    value: "temel",
-    label: "Temel Bilgiler",
+    value: "genel",
+    label: "Genel Bilgiler",
     icon: User,
   },
   {
-    value: "egitsel-rehberlik",
+    value: "egitsel",
     label: "Eğitsel Rehberlik",
     icon: GraduationCap,
   },
   {
-    value: "mesleki-rehberlik",
-    label: "Mesleki Rehberlik",
-    icon: Briefcase,
-  },
-  {
-    value: "kisisel-psikososyal",
-    label: "Kişisel/Psikososyal Rehberlik",
+    value: "kisisel-gelisim",
+    label: "Kişisel Gelişim",
     icon: Brain,
   },
   {
-    value: "aile-iletisimi",
-    label: "Aile İletişimi",
-    icon: Heart,
-  },
-  {
-    value: "standartlastirilmis-profil",
-    label: "Standartlaştırılmış Profil",
-    icon: Database,
+    value: "mesleki",
+    label: "Mesleki Rehberlik",
+    icon: Briefcase,
   },
 ] as const;
 
-export const TEMEL_TABS = [
+export const GENEL_TABS = [
   {
-    value: "ogrenci-bilgileri",
-    label: "Öğrenci Bilgileri",
+    value: "ogrenci",
+    label: "Öğrenci",
     icon: User,
   },
   {
     value: "saglik",
-    label: "Sağlık Bilgileri",
+    label: "Sağlık",
     icon: Activity,
+  },
+  {
+    value: "aile",
+    label: "Aile & İletişim",
+    icon: Heart,
   },
 ] as const;
 
 export const EGITSEL_TABS = [
   {
-    value: "akademik-performans",
-    label: "Akademik Performans",
+    value: "akademik",
+    label: "Akademik",
     icon: TrendingUp,
   },
   {
@@ -103,13 +98,13 @@ export const EGITSEL_TABS = [
     icon: ShieldAlert,
   },
   {
-    value: "ilerleme-takip",
-    label: "İlerleme Takibi",
+    value: "ilerleme",
+    label: "İlerleme",
     icon: Trophy,
   },
   {
     value: "anketler",
-    label: "Anket/Test",
+    label: "Anketler",
     icon: PieChart,
   },
 ] as const;
@@ -117,31 +112,31 @@ export const EGITSEL_TABS = [
 export const MESLEKI_TABS = [
   {
     value: "hedefler",
-    label: "Hedefler & Planlama",
+    label: "Hedefler & Motivasyon",
     icon: Target,
+  },
+  {
+    value: "kariyer",
+    label: "Kariyer Planı",
+    icon: Star,
   },
 ] as const;
 
-export const KISISEL_PSIKOSOSYAL_TABS = [
+export const KISISEL_GELISIM_TABS = [
   {
-    value: "butuncul-profil",
-    label: "Bütüncül Profil",
-    icon: Sparkles,
+    value: "sosyal-duygusal",
+    label: "Sosyal-Duygusal",
+    icon: Heart,
   },
   {
-    value: "kisilik-profil",
-    label: "Kişilik Profili",
-    icon: Brain,
+    value: "davranis",
+    label: "Davranış",
+    icon: ClipboardList,
   },
   {
-    value: "dijital-kocluk",
-    label: "Dijital Koçluk",
-    icon: Zap,
-  },
-  {
-    value: "360-degerlendirme",
-    label: "360° Değerlendirme",
-    icon: Users,
+    value: "risk",
+    label: "Risk & Koruyucu",
+    icon: AlertTriangle,
   },
   {
     value: "gorusmeler",
@@ -149,14 +144,19 @@ export const KISISEL_PSIKOSOSYAL_TABS = [
     icon: MessageCircle,
   },
   {
-    value: "risk-degerlendirme",
-    label: "Risk Değerlendirme",
-    icon: AlertTriangle,
+    value: "kisilik",
+    label: "Kişilik",
+    icon: Brain,
   },
   {
-    value: "davranis",
-    label: "Davranış Takibi",
-    icon: ClipboardList,
+    value: "kocluk",
+    label: "Koçluk",
+    icon: Zap,
+  },
+  {
+    value: "360-degerlendirme",
+    label: "360° Değerlendirme",
+    icon: Users,
   },
 ] as const;
 
@@ -175,43 +175,5 @@ export const AILE_TABS = [
     value: "aile-katilim",
     label: "Aile Katılımı",
     icon: Star,
-  },
-] as const;
-
-export const STANDARDIZED_TABS = [
-  {
-    value: "akademik-profil",
-    label: "Akademik Profil",
-    icon: GraduationCap,
-  },
-  {
-    value: "sosyal-duygusal",
-    label: "Sosyal-Duygusal",
-    icon: Heart,
-  },
-  {
-    value: "yetenek-ilgi",
-    label: "Yetenek & İlgi",
-    icon: Star,
-  },
-  {
-    value: "saglik-profil",
-    label: "Sağlık Profili",
-    icon: Activity,
-  },
-  {
-    value: "davranis-abc",
-    label: "Davranış (ABC)",
-    icon: AlertTriangle,
-  },
-  {
-    value: "motivasyon",
-    label: "Motivasyon",
-    icon: Target,
-  },
-  {
-    value: "risk-koruyucu",
-    label: "Risk & Koruyucu",
-    icon: Shield,
   },
 ] as const;
