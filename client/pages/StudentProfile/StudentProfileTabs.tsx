@@ -13,6 +13,7 @@ import { Student } from "@/lib/storage";
 
 import BasicInfoSection from "@/components/student-profile/sections/BasicInfoSection";
 import DevamsizlikSection from "@/components/student-profile/sections/DevamsizlikSection";
+import CalismaProgramiSection from "@/components/student-profile/sections/CalismaProgramiSection";
 import DijitalCoclukSection from "@/components/student-profile/sections/DijitalCoclukSection";
 import AkademikPerformansSection from "@/components/student-profile/sections/AkademikPerformansSection";
 import MudahalelerSection from "@/components/student-profile/sections/MudahalelerSection";
@@ -117,6 +118,10 @@ export function StudentProfileTabs({
               attendanceRecords={data.attendanceRecords}
               onUpdate={onUpdate}
             />
+          </TabsContent>
+
+          <TabsContent value="calisma-programi">
+            <CalismaProgramiSection studentId={studentId} />
           </TabsContent>
 
           <TabsContent value="sinavlar">
