@@ -6,6 +6,7 @@ import {
   MESLEKI_TABS,
   KISISEL_PSIKOSOSYAL_TABS,
   AILE_TABS,
+  STANDARDIZED_TABS,
 } from "./constants";
 import { StudentData } from "@/hooks/student-profile";
 import { Student } from "@/lib/storage";
@@ -36,6 +37,14 @@ import InterestsSection from "@/components/student-profile/holistic-sections/Int
 import FutureVisionSection from "@/components/student-profile/holistic-sections/FutureVisionSection";
 import SELCompetenciesSection from "@/components/student-profile/holistic-sections/SELCompetenciesSection";
 import SocioeconomicSection from "@/components/student-profile/holistic-sections/SocioeconomicSection";
+
+import StandardizedAcademicSection from "@/components/student-profile/sections/StandardizedAcademicSection";
+import StandardizedSocialEmotionalSection from "@/components/student-profile/sections/StandardizedSocialEmotionalSection";
+import StandardizedTalentsSection from "@/components/student-profile/sections/StandardizedTalentsSection";
+import StandardizedHealthSection from "@/components/student-profile/sections/StandardizedHealthSection";
+import StandardizedBehaviorSection from "@/components/student-profile/sections/StandardizedBehaviorSection";
+import MotivationProfileSection from "@/components/student-profile/sections/MotivationProfileSection";
+import RiskProtectiveProfileSection from "@/components/student-profile/sections/RiskProtectiveProfileSection";
 
 interface StudentProfileTabsProps {
   student: Student;
@@ -274,6 +283,67 @@ export function StudentProfileTabs({
             <AileKatilimiSection
               studentId={studentId}
               familyParticipation={data.familyParticipation}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      <TabsContent value="standartlastirilmis-profil">
+        <Tabs defaultValue="akademik-profil" className="space-y-4">
+          <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
+            {STANDARDIZED_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
+                <Icon className="h-3 w-3" /> {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="akademik-profil">
+            <StandardizedAcademicSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="sosyal-duygusal">
+            <StandardizedSocialEmotionalSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="yetenek-ilgi">
+            <StandardizedTalentsSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="saglik-profil">
+            <StandardizedHealthSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="davranis-abc">
+            <StandardizedBehaviorSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="motivasyon">
+            <MotivationProfileSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="risk-koruyucu">
+            <RiskProtectiveProfileSection
+              studentId={studentId}
               onUpdate={onUpdate}
             />
           </TabsContent>

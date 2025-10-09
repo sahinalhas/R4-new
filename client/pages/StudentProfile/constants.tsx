@@ -21,6 +21,8 @@ import {
   BarChart2,
   Briefcase,
   Sparkles,
+  Database,
+  Shield,
 } from "lucide-react";
 
 export const MAIN_TABS = [
@@ -48,6 +50,11 @@ export const MAIN_TABS = [
     value: "aile-iletisimi",
     label: "Aile İletişimi",
     icon: Heart,
+  },
+  {
+    value: "standartlastirilmis-profil",
+    label: "Standartlaştırılmış Profil",
+    icon: Database,
   },
 ] as const;
 
@@ -163,5 +170,43 @@ export const AILE_TABS = [
     value: "aile-katilim",
     label: "Aile Katılımı",
     icon: Star,
+  },
+] as const;
+
+export const STANDARDIZED_TABS = [
+  {
+    value: "akademik-profil",
+    label: "Akademik Profil",
+    icon: GraduationCap,
+  },
+  {
+    value: "sosyal-duygusal",
+    label: "Sosyal-Duygusal",
+    icon: Heart,
+  },
+  {
+    value: "yetenek-ilgi",
+    label: "Yetenek & İlgi",
+    icon: Star,
+  },
+  {
+    value: "saglik-profil",
+    label: "Sağlık Profili",
+    icon: Activity,
+  },
+  {
+    value: "davranis-abc",
+    label: "Davranış (ABC)",
+    icon: AlertTriangle,
+  },
+  {
+    value: "motivasyon",
+    label: "Motivasyon",
+    icon: Target,
+  },
+  {
+    value: "risk-koruyucu",
+    label: "Risk & Koruyucu",
+    icon: Shield,
   },
 ] as const;
