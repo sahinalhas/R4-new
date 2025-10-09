@@ -47,6 +47,7 @@ import { type EarlyWarning } from "@/lib/analytics";
 import { optimizedGenerateEarlyWarnings } from "@/lib/analytics-cache";
 import type { Student, Intervention } from "@/lib/storage";
 import { useNavigate } from "react-router-dom";
+import RiskSummaryWidget from "@/components/RiskSummaryWidget";
 
 interface DashboardStats {
   studentCount: number;
@@ -629,6 +630,8 @@ export default function Index() {
                 </CardContent>
               </Card>
             )}
+
+            <RiskSummaryWidget />
 
             {!hiddenWidgets.has('weekly-focus') && (
               <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">

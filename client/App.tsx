@@ -19,6 +19,7 @@ const SettingsPage = lazy(() => import("./pages/Settings"));
 const Placeholder = lazy(() => import("./pages/Placeholder"));
 const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const RiskDashboard = lazy(() => import("./pages/RiskDashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,7 +77,7 @@ const App = () => {
                   <Route path="/ayarlar" element={<Suspense fallback={<LoadingFallback />}><SettingsPage /></Suspense>} />
                   <Route
                     path="/risk"
-                    element={<Suspense fallback={<LoadingFallback />}><Placeholder title="Risk ve Müdahale Takip" /></Suspense>}
+                    element={<Suspense fallback={<LoadingFallback />}><RiskDashboard /></Suspense>}
                   />
                   <Route
                     path="/istatistik"

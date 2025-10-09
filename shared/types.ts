@@ -3,6 +3,8 @@
  * These types represent the common data structures used across the application
  */
 
+export * from './types/early-warning.types';
+
 /**
  * Health information for students
  */
