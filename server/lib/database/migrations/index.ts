@@ -13,6 +13,7 @@ import { migration011 } from './011-early-warning-system';
 import { migration012 } from './012-student-holistic-profile';
 import { migration013 } from './013-fix-schema-columns';
 import { migration014 } from './014-fix-additional-schema-columns';
+import { migration015 } from './015-fix-remaining-columns';
 
 const migrations = [
   migration001,
@@ -28,7 +29,8 @@ const migrations = [
   migration011,
   migration012,
   migration013,
-  migration014
+  migration014,
+  migration015
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {

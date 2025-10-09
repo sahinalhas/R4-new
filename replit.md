@@ -7,6 +7,38 @@ Rehber360 is a comprehensive Turkish-language student guidance and management sy
 I prefer simple language and clear, concise explanations. I want iterative development with frequent, small updates. Ask before making major architectural changes or introducing new external dependencies. Do not make changes to the folder `node_modules` and `dist`. Do not make changes to the file `replit.nix` and `.replit`.
 
 ## Recent Changes
+
+**October 9, 2025 - Schema Maintenance & Çalışma Programı Status**:
+### ✅ Çalışma Programı (Work Schedule) Tab Status
+- **CONFIRMED OPERATIONAL**: The tab is properly configured and accessible in the UI
+- **Location**: `client/pages/StudentProfile/constants.tsx` (lines 81-84) and `StudentProfileTabs.tsx` (lines 162-164)
+- **Component**: `CalismaProgramiSection` renders `WeeklySchedule` and `TopicPlanner` components
+- **Tab Label**: "Çalışma Programı" with BookOpen icon in "Eğitsel Rehberlik" section
+
+### ⚠️ Critical Database Schema Issues Identified
+**Problem**: Systemic schema-repository column mismatches causing 500 errors throughout the application
+- **Root Cause**: Repositories query tables using `SELECT *` but table schemas don't match expected columns
+- **Key Issue**: `risk_factors` and `risk_protective_profiles` tables have overlapping purposes but different schemas, causing continuous column mismatch errors
+
+**Migrations Created**:
+- **Migration 013**: Fixed `special_education` and `coaching_recommendations` tables (successful)
+- **Migration 014**: Added 30+ missing columns to `parent_meetings`, `multiple_intelligence`, `home_visits`, `evaluations_360`, and `risk_factors`
+- **Migration 015**: Added additional columns: `attendanceRiskLevel`, `socialEmotionalRiskLevel`, `dropoutRisk`, etc. to `risk_factors`
+- **Manual Fixes**: Added 10+ additional columns (`attendanceFactors`, `interventionsNeeded`, `createdBy`, `notes`, `resources`, `followUpActions`, etc.)
+
+**Tables with Schema Issues** (as of Oct 9, 2025):
+1. `risk_factors`: Missing ~15 columns expected by repository (attendanceRiskLevel, socialEmotionalRiskLevel, dropoutRisk, academicFactors, behavioralFactors, socialFactors, familyFactors, protectiveFactors, interventionsNeeded, attendanceFactors, etc.)
+2. `multiple_intelligence`: Missing naturalistic column
+3. `parent_meetings`: Missing followUpRequired, notes, createdBy columns
+4. `home_visits`: Missing concerns, resources, followUpActions columns
+5. `evaluations_360`: Missing notes column
+
+**Architect Recommendation**: 
+- Current piecemeal migration approach is brittle and prone to regressions
+- Need systematic inventory of all schema vs repository mismatches
+- Should implement automated validation (CI check or startup assertion) to prevent future drift
+- Consider consolidating `risk_factors` and `risk_protective_profiles` tables to eliminate redundancy
+
 **October 9, 2025**: Complete Student Profile Standardization System implemented - objective, data-driven student evaluation with automatic profile creation:
 
 ### Unified Data Processing Architecture
