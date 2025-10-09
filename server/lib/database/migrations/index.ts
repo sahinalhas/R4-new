@@ -9,6 +9,7 @@ import { migration007 } from './007-add-topic-planning-fields';
 import { migration008 } from './008-add-participant-fields';
 import { migration009 } from './009-add-default-users';
 import { migration010 } from './010-add-student-analytics-snapshot';
+import { migration011 } from './011-early-warning-system';
 
 const migrations = [
   migration001,
@@ -20,7 +21,8 @@ const migrations = [
   migration007,
   migration008,
   migration009,
-  migration010
+  migration010,
+  migration011
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {
