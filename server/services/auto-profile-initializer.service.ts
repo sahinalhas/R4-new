@@ -273,11 +273,10 @@ export class AutoProfileInitializer {
   ): Promise<void> {
     const stmt = this.db.prepare(`
       INSERT INTO motivation_profiles (
-        id, studentId, assessmentDate, goalClarityLevel, intrinsicMotivationLevel,
-        extrinsicMotivationLevel, persistenceLevel, futureOrientationLevel,
-        primaryMotivators, careerAspirations, academicGoals, personalGoals,
-        barriersToMotivation, supportNeeded, additionalNotes, assessedBy
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, studentId, assessmentDate, goalClarityLevel, intrinsicMotivation,
+        extrinsicMotivation, hasShortTermGoals, hasLongTermGoals,
+        primaryMotivationSources, careerAspirations, assessedBy
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     stmt.run(
@@ -285,17 +284,12 @@ export class AutoProfileInitializer {
       studentId,
       date,
       5, // goalClarityLevel
-      5, // intrinsicMotivationLevel
-      5, // extrinsicMotivationLevel
-      5, // persistenceLevel
-      5, // futureOrientationLevel
+      5, // intrinsicMotivation
+      5, // extrinsicMotivation
+      0, // hasShortTermGoals
+      0, // hasLongTermGoals
       JSON.stringify([]),
       JSON.stringify([]),
-      JSON.stringify([]),
-      JSON.stringify([]),
-      JSON.stringify([]),
-      'İlk profil oluşturuldu. Motivasyon değerlendirmesi bekleniyor.',
-      'İlk profil oluşturuldu.',
       assessedBy
     );
   }
@@ -307,31 +301,22 @@ export class AutoProfileInitializer {
   ): Promise<void> {
     const stmt = this.db.prepare(`
       INSERT INTO risk_protective_profiles (
-        id, studentId, assessmentDate, overallRiskLevel, academicRiskLevel,
-        behavioralRiskLevel, emotionalRiskLevel, socialRiskLevel,
-        identifiedRiskFactors, protectiveFactors, familySupport, peerSupport,
-        schoolEngagement, resilienceLevel, copingSkills, interventionPriority,
-        additionalNotes, assessedBy
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, studentId, assessmentDate, overallRiskScore, academicRiskLevel,
+        behavioralRiskLevel, protectiveFactors, interventionsNeeded, 
+        status, notes, assessedBy
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     stmt.run(
       randomUUID(),
       studentId,
       date,
-      5, // overallRiskLevel
-      5, // academicRiskLevel
-      5, // behavioralRiskLevel
-      5, // emotionalRiskLevel
-      5, // socialRiskLevel
+      50, // overallRiskScore
+      'DÜŞÜK', // academicRiskLevel
+      'DÜŞÜK', // behavioralRiskLevel
       JSON.stringify([]),
       JSON.stringify([]),
-      5, // familySupport
-      5, // peerSupport
-      5, // schoolEngagement
-      5, // resilienceLevel
-      5, // copingSkills
-      'DÜŞÜK',
+      'INITIAL', // status
       'İlk profil oluşturuldu. Risk değerlendirmesi bekleniyor.',
       assessedBy
     );

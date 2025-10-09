@@ -12,14 +12,19 @@ import getDatabase from '../lib/database.js';
 
 export class UnifiedScoringEngine {
   private scoreCalculator: AggregateScoreCalculator;
-  private profileRepo: StandardizedProfileRepository;
+  private profileRepo: StandardizedProfileRepository | null = null;
 
   constructor() {
     this.scoreCalculator = new AggregateScoreCalculator();
-    const db = getDatabase();
-    // @ts-ignore - Repository will be imported properly
-    const { StandardizedProfileRepository: Repo } = require('../features/standardized-profile/repository/standardized-profile.repository.js');
-    this.profileRepo = new Repo(db);
+  }
+
+  private async initializeRepo() {
+    if (!this.profileRepo) {
+      const db = getDatabase();
+      const { StandardizedProfileRepository: Repo } = await import('../features/standardized-profile/repository/standardized-profile.repository.js');
+      this.profileRepo = new Repo(db);
+    }
+    return this.profileRepo;
   }
 
   /**
@@ -27,14 +32,17 @@ export class UnifiedScoringEngine {
    * Öğrenci için tüm skorları hesapla
    */
   async calculateUnifiedScores(studentId: string): Promise<UnifiedStudentScores> {
+    // Initialize repository
+    const repo = await this.initializeRepo();
+    
     // Tüm profil verilerini al
-    const academic = this.profileRepo.getAcademicProfile(studentId);
-    const socialEmotional = this.profileRepo.getSocialEmotionalProfile(studentId);
-    const talentsInterests = this.profileRepo.getTalentsInterestsProfile(studentId);
-    const health = this.profileRepo.getStandardizedHealthProfile(studentId);
-    const behaviorIncidents = this.profileRepo.getStandardizedBehaviorIncidents(studentId);
-    const motivation = this.profileRepo.getMotivationProfile(studentId);
-    const riskProtective = this.profileRepo.getRiskProtectiveProfile(studentId);
+    const academic = repo.getAcademicProfile(studentId);
+    const socialEmotional = repo.getSocialEmotionalProfile(studentId);
+    const talentsInterests = repo.getTalentsInterestsProfile(studentId);
+    const health = repo.getStandardizedHealthProfile(studentId);
+    const behaviorIncidents = repo.getStandardizedBehaviorIncidents(studentId);
+    const motivation = repo.getMotivationProfile(studentId);
+    const riskProtective = repo.getRiskProtectiveProfile(studentId);
 
     // Aggregate skorları hesapla
     const aggregateScores = this.scoreCalculator.calculateAggregateScores({
@@ -85,12 +93,14 @@ export class UnifiedScoringEngine {
    * Calculate profile completeness for all sections
    * Tüm bölümler için profil tamlık oranını hesapla
    */
-  calculateProfileCompleteness(studentId: string): ProfileCompleteness {
-    const academic = this.profileRepo.getAcademicProfile(studentId);
-    const socialEmotional = this.profileRepo.getSocialEmotionalProfile(studentId);
-    const talentsInterests = this.profileRepo.getTalentsInterestsProfile(studentId);
-    const health = this.profileRepo.getStandardizedHealthProfile(studentId);
-    const behaviorIncidents = this.profileRepo.getStandardizedBehaviorIncidents(studentId);
+  async calculateProfileCompleteness(studentId: string): Promise<ProfileCompleteness> {
+    const repo = await this.initializeRepo();
+    
+    const academic = repo.getAcademicProfile(studentId);
+    const socialEmotional = repo.getSocialEmotionalProfile(studentId);
+    const talentsInterests = repo.getTalentsInterestsProfile(studentId);
+    const health = repo.getStandardizedHealthProfile(studentId);
+    const behaviorIncidents = repo.getStandardizedBehaviorIncidents(studentId);
 
     const scores = {
       akademikProfil: this.calculateAcademicProfileCompleteness(academic),
