@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { StandardizedProfileRepository } from '../repository/standardized-profile.repository';
+import { AggregateScoreCalculator } from '../services/aggregate-score-calculator.service';
 import getDatabase from '@/server/lib/database';
 
 const router = Router();
@@ -189,7 +190,7 @@ router.get('/:studentId/behavior-incidents', (req, res) => {
   }
 });
 
-router.post('/:studentId/behavior-incidents', (req, res) => {
+router.post('/:studentId/behavior-incident', (req, res) => {
   try {
     const { studentId } = req.params;
     const db = getDatabase();
@@ -206,6 +207,149 @@ router.post('/:studentId/behavior-incidents', (req, res) => {
   } catch (error) {
     console.error('Error saving behavior incident:', error);
     res.status(500).json({ error: 'Failed to save behavior incident' });
+  }
+});
+
+router.delete('/:studentId/behavior-incident/:incidentId', (req, res) => {
+  try {
+    const { incidentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    
+    repo.deleteStandardizedBehaviorIncident(incidentId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting behavior incident:', error);
+    res.status(500).json({ error: 'Failed to delete behavior incident' });
+  }
+});
+
+router.get('/:studentId/aggregate', (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    const calculator = new AggregateScoreCalculator();
+    
+    const academic = repo.getAcademicProfile(studentId);
+    const socialEmotional = repo.getSocialEmotionalProfile(studentId);
+    const talentsInterests = repo.getTalentsInterestsProfile(studentId);
+    const health = repo.getHealthProfile(studentId);
+    const behaviorIncidents = repo.getStandardizedBehaviorIncidents(studentId);
+    const motivation = repo.getMotivationProfile(studentId);
+    const riskProtective = repo.getRiskProtectiveProfile(studentId);
+    const interventions = repo.getStandardizedInterventions(studentId);
+    
+    const aggregateScores = calculator.calculateAggregateScores({
+      academic,
+      socialEmotional,
+      talentsInterests,
+      health,
+      behaviorIncidents,
+      motivation,
+      riskProtective
+    });
+    
+    const aiReadyProfile = {
+      studentId,
+      profiles: {
+        academic,
+        socialEmotional,
+        talentsInterests,
+        health,
+        behaviorIncidents,
+        motivation,
+        riskProtective,
+        interventions
+      },
+      aggregateScores,
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        profileCompleteness: {
+          academic: !!academic,
+          socialEmotional: !!socialEmotional,
+          talentsInterests: !!talentsInterests,
+          health: !!health,
+          behavior: behaviorIncidents.length > 0,
+          motivation: !!motivation,
+          riskProtective: !!riskProtective,
+          interventions: interventions.length > 0
+        }
+      }
+    };
+    
+    res.json(aiReadyProfile);
+  } catch (error) {
+    console.error('Error generating aggregate profile:', error);
+    res.status(500).json({ error: 'Failed to generate aggregate profile' });
+  }
+});
+
+router.post('/:studentId/motivation', (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    
+    const profile = {
+      ...req.body,
+      studentId,
+      id: req.body.id || randomUUID(),
+    };
+    
+    repo.upsertMotivationProfile(profile);
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error('Error saving motivation profile:', error);
+    res.status(500).json({ error: 'Failed to save motivation profile' });
+  }
+});
+
+router.get('/:studentId/motivation', (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    const profile = repo.getMotivationProfile(studentId);
+    
+    res.json(profile || {});
+  } catch (error) {
+    console.error('Error fetching motivation profile:', error);
+    res.status(500).json({ error: 'Failed to fetch motivation profile' });
+  }
+});
+
+router.post('/:studentId/risk-protective', (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    
+    const profile = {
+      ...req.body,
+      studentId,
+      id: req.body.id || randomUUID(),
+    };
+    
+    repo.upsertRiskProtectiveProfile(profile);
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error('Error saving risk/protective profile:', error);
+    res.status(500).json({ error: 'Failed to save risk/protective profile' });
+  }
+});
+
+router.get('/:studentId/risk-protective', (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    const profile = repo.getRiskProtectiveProfile(studentId);
+    
+    res.json(profile || {});
+  } catch (error) {
+    console.error('Error fetching risk/protective profile:', error);
+    res.status(500).json({ error: 'Failed to fetch risk/protective profile' });
   }
 });
 
