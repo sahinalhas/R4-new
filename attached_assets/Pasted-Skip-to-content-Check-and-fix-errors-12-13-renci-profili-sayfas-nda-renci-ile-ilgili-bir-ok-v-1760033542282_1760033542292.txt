@@ -1,0 +1,56 @@
+Skip to content
+Check and fix errors
+12 / 13
+Öğrenci profili sayfasında öğrenci ile ilgili bir çok veri girişi var ben veri girişinin mantıklı tutarlı ve evrensel anlam içermesi için ölçülebilir olmasını istiyorum mesela öğrenici ile ilgili verileri girerken hazır etiketler mi kullanmak lazım ki analizlerin mantıklımolması için
+
+2 hours ago
+En mantıklı şekilde yap ileride yapay zeka ile değerlendirmesi mümkün standar veriler olmalı ki genel geçer bir öğrenci profili çıkarabileyim
+
+2 hours ago
+Bana en kapsamlı şekilde hepsini tamamla görev bitene kadar durmadan çalış sağlam ve kapsamlı olsı
+
+2 hours ago
+Anladım! Yapay zeka ile analiz edilebilir, kapsamlı bir standartlaştırma sistemi kuruyorum. Şimdi başlıyorum ve tamamlanana kadar durmadan çalışacağım.
+
+Başlıyorum! Önce kapsamlı taxonomy ve standart sabitleri oluşturuyorum.
+
+Harika! Kapsamlı taxonomy sistemi oluşturdum. Şimdi UI bileşenlerini ve type güncellemelerini yapıyorum:
+
+Devam ediyorum. Şimdi database schema'ları ve daha fazla type güncellemesi yapıyorum:
+
+Harika! Database schema ve type sistemini kurdum. Şimdi form bileşenlerini güncelliyorum:
+
+Şimdi standartlaştırılmış form bileşenleri oluşturuyorum:
+
+Devam ediyorum, daha fazla standart form bileşeni oluşturuyorum:
+
+Şimdi API endpoints ve repository katmanını oluşturuyorum:
+
+Şimdi API route'ları ana server'a ekliyorum ve dokümantasyonu güncelliyorum:
+
+Dokümantasyonu güncelliyorum ve ardından test edeceğim:
+
+Dokümantasyon güncellendi! Şimdi logları kontrol edip architect review yapıyorum:
+
+Logları kontrol ediyorum ve architect review yapacağım:
+
+Checked system logs
+Tamam, şimdi architect review yapıyorum. Tüm yapılan değişiklikleri gözden geçireceğim:
+
+Task
+Verify the AI-Ready Standardized Student Profile System implementation, checking architecture, database schema, type definitions, API endpoints, UI components, and documentation for adherence to standards and best practices.
+Thinking…
+1 hour ago
+Implement standardized student profiling system for AI analysis
+13 minutes of work
+Working..
+Upgrade to continue building
+You've reached your Starter usage limit. Upgrade to make, launch, and scale your apps.
+$25 Monthly credits for Replit Agent
+Publish and host your apps
+Access more powerful models
+Preview
+Preview your app here
+The app is running, but there's no webpage to preview right now.
+Agent
+Agent can make changes, review its work, and debug itself automatically.
