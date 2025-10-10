@@ -311,12 +311,12 @@ export default function AileKatilimiSection({ studentId, familyParticipation, on
 
         <div className="space-y-3 mt-6">
           <h4 className="font-medium">Katılım Geçmişi</h4>
-          {familyParticipation.length === 0 && (
+          {(!familyParticipation || familyParticipation.length === 0) && (
             <div className="text-sm text-muted-foreground">
               Henüz katılım kaydı yok.
             </div>
           )}
-          {familyParticipation.map((participation) => (
+          {familyParticipation?.map((participation) => (
             <div
               key={participation.id}
               className="border rounded-lg p-4 space-y-2"
