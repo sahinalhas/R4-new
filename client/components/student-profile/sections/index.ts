@@ -1,7 +1,6 @@
 export { default as BasicInfoSection } from './BasicInfoSection';
 export { default as CalismaProgramiSection } from './CalismaProgramiSection';
 export { default as DijitalCoclukSection } from './DijitalCoclukSection';
-export { default as AkademikPerformansSection } from './AkademikPerformansSection';
 export { default as MudahalelerSection } from './MudahalelerSection';
 export { default as KisilikProfiliSection } from './KisilikProfiliSection';
 export { default as HedeflerPlanlamaSection } from './HedeflerPlanlamaSection';
@@ -16,4 +15,3 @@ export { default as SaglikBilgileriSection } from './SaglikBilgileriSection';
 export { default as OzelEgitimSection } from './OzelEgitimSection';
 export { default as RiskDegerlendirmeSection } from './RiskDegerlendirmeSection';
 export { default as DavranisTakibiSection } from './DavranisTakibiSection';
-export { default as SinavSonuclariSection } from './SinavSonuclariSection';

@@ -13,7 +13,6 @@ import { Student } from "@/lib/storage";
 import BasicInfoSection from "@/components/student-profile/sections/BasicInfoSection";
 import CalismaProgramiSection from "@/components/student-profile/sections/CalismaProgramiSection";
 import DijitalCoclukSection from "@/components/student-profile/sections/DijitalCoclukSection";
-import AkademikPerformansSection from "@/components/student-profile/sections/AkademikPerformansSection";
 import MudahalelerSection from "@/components/student-profile/sections/MudahalelerSection";
 import KisilikProfiliSection from "@/components/student-profile/sections/KisilikProfiliSection";
 import HedeflerPlanlamaSection from "@/components/student-profile/sections/HedeflerPlanlamaSection";
@@ -27,7 +26,6 @@ import AileKatilimiSection from "@/components/student-profile/sections/AileKatil
 import OzelEgitimSection from "@/components/student-profile/sections/OzelEgitimSection";
 import RiskDegerlendirmeSection from "@/components/student-profile/sections/RiskDegerlendirmeSection";
 import DavranisTakibiSection from "@/components/student-profile/sections/DavranisTakibiSection";
-import SinavSonuclariSection from "@/components/student-profile/sections/SinavSonuclariSection";
 
 import StandardizedAcademicSection from "@/components/student-profile/sections/StandardizedAcademicSection";
 import StandardizedSocialEmotionalSection from "@/components/student-profile/sections/StandardizedSocialEmotionalSection";
@@ -129,29 +127,14 @@ export function StudentProfileTabs({
           </TabsList>
 
           <TabsContent value="akademik">
-            <div className="space-y-6">
-              <AkademikPerformansSection
-                studentId={studentId}
-                academicRecords={data.academicRecords}
-                onUpdate={onUpdate}
-              />
-              <StandardizedAcademicSection
-                studentId={studentId}
-                onUpdate={onUpdate}
-              />
-            </div>
+            <StandardizedAcademicSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
           </TabsContent>
 
           <TabsContent value="calisma-programi">
             <CalismaProgramiSection studentId={studentId} />
-          </TabsContent>
-
-          <TabsContent value="sinavlar">
-            <SinavSonuclariSection
-              studentId={studentId}
-              examResults={data.examResults}
-              onUpdate={onUpdate}
-            />
           </TabsContent>
 
           <TabsContent value="ozel-egitim">
