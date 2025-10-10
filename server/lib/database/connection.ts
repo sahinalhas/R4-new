@@ -6,7 +6,7 @@ let db: Database.Database | null = null;
 export function getDatabase(): Database.Database {
   if (!db) {
     try {
-      const dbPath = path.join(process.cwd(), 'data.db');
+      const dbPath = path.join(process.cwd(), 'data', 'data.db');
       db = new Database(dbPath);
       
       try {
