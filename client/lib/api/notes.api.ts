@@ -1,4 +1,4 @@
-import type { MeetingNote } from "../types/common.types";
+import type { MeetingNote } from "@shared/types/meeting-notes.types";
 import { apiClient, createApiHandler } from "./api-client";
 import { API_ERROR_MESSAGES } from "../constants/messages.constants";
 

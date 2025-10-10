@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { getStudentSessionHistory } from "@/lib/api/counseling.api";
 import { getNotesByStudent } from "@/lib/api/notes.api";
-import type { MeetingNote } from "@/lib/types/common.types";
+import type { MeetingNote } from "@shared/types/meeting-notes.types";
 
 interface PastMeetingHistoryProps {
   studentId: string;

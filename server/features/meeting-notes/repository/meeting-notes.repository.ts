@@ -1,5 +1,5 @@
 import getDatabase from '../../../lib/database.js';
-import type { MeetingNote } from '../types/index.js';
+import type { MeetingNote } from '../../../../shared/types/meeting-notes.types.js';
 
 let statements: any = null;
 let isInitialized = false;

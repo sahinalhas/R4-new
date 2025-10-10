@@ -1,12 +1,3 @@
-export type MeetingNote = {
-  id: string;
-  studentId: string;
-  date: string;
-  type: "Bireysel" | "Grup" | "Veli";
-  note: string;
-  plan?: string;
-};
-
 export type StudentDoc = {
   id: string;
   studentId: string;

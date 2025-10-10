@@ -1,5 +1,5 @@
 import * as repository from '../repository/meeting-notes.repository.js';
-import type { MeetingNote } from '../types/index.js';
+import type { MeetingNote } from '../../../../shared/types/meeting-notes.types.js';
 
 export function validateMeetingNote(note: any): { valid: boolean; error?: string } {
   if (!note || typeof note !== 'object') {

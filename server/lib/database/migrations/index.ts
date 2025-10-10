@@ -3,7 +3,6 @@ import { migration001 } from './001-add-gender-column';
 import { migration002 } from './002-add-category-column';
 import { migration003 } from './003-migrate-user-sessions';
 import { migration004 } from './004-fix-interventions-schema';
-import { migration005 } from './005-add-topic-fields';
 import { migration006 } from './006-add-unique-constraint';
 import { migration007 } from './007-add-topic-planning-fields';
 import { migration008 } from './008-add-participant-fields';
@@ -20,7 +19,6 @@ const migrations = [
   migration002,
   migration003,
   migration004,
-  migration005,
   migration006,
   migration007,
   migration008,
