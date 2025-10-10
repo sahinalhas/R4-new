@@ -22,7 +22,6 @@ import {
   getFamilyParticipationByStudent,
 } from './family.api';
 import {
-  getHealthInfoByStudent,
   getSpecialEducationByStudent,
   getLatestRiskFactors,
   getBehaviorIncidentsByStudent,
@@ -45,7 +44,6 @@ import type {
   ParentMeeting,
   HomeVisit,
   FamilyParticipation,
-  HealthInfo,
   SpecialEducation,
   RiskFactors,
   BehaviorIncident,
@@ -58,7 +56,6 @@ export interface StudentProfileData {
   attendanceRecords: AttendanceRecord[];
   academicRecords: AcademicRecord[];
   interventions: Intervention[];
-  healthInfo: HealthInfo | null;
   specialEducation: SpecialEducation[];
   riskFactors: RiskFactors | null;
   behaviorIncidents: BehaviorIncident[];
@@ -83,7 +80,6 @@ export const initialStudentProfileData: StudentProfileData = {
   attendanceRecords: [],
   academicRecords: [],
   interventions: [],
-  healthInfo: null,
   specialEducation: [],
   riskFactors: null,
   behaviorIncidents: [],
@@ -109,7 +105,6 @@ export async function getStudentProfileData(studentId: string): Promise<StudentP
     attendanceRecords,
     academicRecords,
     interventions,
-    healthInfo,
     specialEducation,
     riskFactors,
     behaviorIncidents,
@@ -132,7 +127,6 @@ export async function getStudentProfileData(studentId: string): Promise<StudentP
     getAttendanceByStudent(studentId),
     getAcademicsByStudent(studentId),
     getInterventionsByStudent(studentId),
-    getHealthInfoByStudent(studentId),
     getSpecialEducationByStudent(studentId),
     getLatestRiskFactors(studentId),
     getBehaviorIncidentsByStudent(studentId),
@@ -157,7 +151,6 @@ export async function getStudentProfileData(studentId: string): Promise<StudentP
     attendanceRecords,
     academicRecords,
     interventions,
-    healthInfo,
     specialEducation,
     riskFactors,
     behaviorIncidents,

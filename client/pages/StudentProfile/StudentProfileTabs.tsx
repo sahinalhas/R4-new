@@ -25,7 +25,6 @@ import AnketlerSection from "@/components/student-profile/sections/AnketlerSecti
 import VeliGorusmeleriSection from "@/components/student-profile/sections/VeliGorusmeleriSection";
 import EvZiyaretleriSection from "@/components/student-profile/sections/EvZiyaretleriSection";
 import AileKatilimiSection from "@/components/student-profile/sections/AileKatilimiSection";
-import SaglikBilgileriSection from "@/components/student-profile/sections/SaglikBilgileriSection";
 import OzelEgitimSection from "@/components/student-profile/sections/OzelEgitimSection";
 import RiskDegerlendirmeSection from "@/components/student-profile/sections/RiskDegerlendirmeSection";
 import DavranisTakibiSection from "@/components/student-profile/sections/DavranisTakibiSection";
@@ -77,17 +76,10 @@ export function StudentProfileTabs({
           </TabsContent>
 
           <TabsContent value="saglik">
-            <div className="space-y-6">
-              <SaglikBilgileriSection
-                studentId={studentId}
-                healthInfo={data.healthInfo}
-                onUpdate={onUpdate}
-              />
-              <StandardizedHealthSection
-                studentId={studentId}
-                onUpdate={onUpdate}
-              />
-            </div>
+            <StandardizedHealthSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
           </TabsContent>
 
           <TabsContent value="aile">
