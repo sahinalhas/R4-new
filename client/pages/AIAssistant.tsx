@@ -213,12 +213,12 @@ export default function AIAssistant() {
               <label className="text-sm font-medium mb-2 block">
                 Öğrenci Seç
               </label>
-              <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+              <Select value={selectedStudent || "none"} onValueChange={(val) => setSelectedStudent(val === "none" ? "" : val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seçiniz..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tüm Öğrenciler</SelectItem>
+                  <SelectItem value="none">Tüm Öğrenciler</SelectItem>
                   {studentsData?.students?.map((student: any) => (
                     <SelectItem key={student.id} value={student.id}>
                       {student.name}
@@ -253,7 +253,6 @@ export default function AIAssistant() {
               className="w-full"
               onClick={() => {
                 setMessages([]);
-                setSelectedStudent('');
                 toast.success('Sohbet sıfırlandı');
               }}
             >

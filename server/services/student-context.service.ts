@@ -167,7 +167,7 @@ export class StudentContextService {
    */
   private async getAcademicContext(studentId: string): Promise<StudentContext['academic']> {
     const academic = this.db.prepare(
-      'SELECT * FROM academic_profile WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
+      'SELECT * FROM academic_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
     ).get(studentId) as any;
 
     const exams = this.db.prepare(
@@ -192,7 +192,7 @@ export class StudentContextService {
    */
   private async getSocialEmotionalContext(studentId: string): Promise<StudentContext['socialEmotional']> {
     const sel = this.db.prepare(
-      'SELECT * FROM social_emotional_profile WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
+      'SELECT * FROM social_emotional_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
     ).get(studentId) as any;
 
     if (!sel) {
@@ -295,7 +295,7 @@ export class StudentContextService {
     `).all(studentId) as any[];
 
     const riskProfile = this.db.prepare(
-      'SELECT * FROM risk_protective_profile WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
+      'SELECT * FROM risk_protective_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
     ).get(studentId) as any;
 
     return {
@@ -350,7 +350,7 @@ export class StudentContextService {
    */
   private async getTalentsInterestsContext(studentId: string): Promise<StudentContext['talentsInterests']> {
     const profile = this.db.prepare(
-      'SELECT * FROM talents_interests_profile WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
+      'SELECT * FROM talents_interests_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
     ).get(studentId) as any;
 
     if (!profile) {
@@ -370,7 +370,7 @@ export class StudentContextService {
    */
   private async getHealthContext(studentId: string): Promise<StudentContext['health']> {
     const health = this.db.prepare(
-      'SELECT * FROM standardized_health_profile WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
+      'SELECT * FROM standardized_health_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
     ).get(studentId) as any;
 
     if (!health) {
