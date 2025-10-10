@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { 
   TrendingUp, 
   Brain, 
@@ -12,8 +13,12 @@ import {
   Activity,
   Sparkles,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Bot,
+  Loader2
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { 
   RadarChart, 
   PolarGrid, 
@@ -95,6 +100,35 @@ export function ProfileDashboard({
   completeness,
   isLoading 
 }: ProfileDashboardProps) {
+  const navigate = useNavigate();
+  const [analyzingRisk, setAnalyzingRisk] = useState(false);
+
+  const handleAIAnalysis = async () => {
+    navigate(`/ai-asistan?student=${studentId}`);
+  };
+
+  const handleRiskAnalysis = async () => {
+    setAnalyzingRisk(true);
+    try {
+      const response = await fetch('/api/ai-assistant/analyze-risk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId })
+      });
+
+      if (!response.ok) throw new Error('Risk analizi başarısız');
+
+      const data = await response.json();
+      toast.success('Risk analizi tamamlandı');
+      
+      navigate(`/ai-asistan?student=${studentId}&action=risk`);
+    } catch (error: any) {
+      toast.error(error.message || 'Risk analizi yapılamadı');
+    } finally {
+      setAnalyzingRisk(false);
+    }
+  };
+
   const radarData = useMemo(() => {
     if (!scores) return [];
     
@@ -166,6 +200,33 @@ export function ProfileDashboard({
 
   return (
     <div className="space-y-4">
+      {/* AI Action Buttons */}
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          variant="default"
+          size="sm"
+          onClick={handleAIAnalysis}
+          className="gap-2"
+        >
+          <Bot className="h-4 w-4" />
+          AI ile Konuş
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRiskAnalysis}
+          disabled={analyzingRisk}
+          className="gap-2"
+        >
+          {analyzingRisk ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Shield className="h-4 w-4" />
+          )}
+          Risk Analizi
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>

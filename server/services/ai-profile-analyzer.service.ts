@@ -3,10 +3,11 @@
  * Deterministik ve ölçülebilir öğrenci profil analizi
  * 
  * Bu servis her zaman aynı veriler için aynı sonucu verir (deterministik)
- * OpenAI'yi sabit bir prompt yapısı ile kullanır
+ * OpenAI veya Ollama ile çalışır
  */
 
 import type { UnifiedStudentScores, ProfileCompleteness } from '../../shared/types/student.types.js';
+import { AIProviderService } from './ai-provider.service.js';
 
 export interface AIProfileAnalysis {
   studentId: string;
@@ -62,10 +63,10 @@ export interface AIProfileAnalysis {
 }
 
 export class AIProfileAnalyzerService {
-  private openAIKey: string | undefined;
+  private aiProvider: AIProviderService;
 
   constructor() {
-    this.openAIKey = process.env.OPENAI_API_KEY;
+    this.aiProvider = AIProviderService.getInstance();
   }
 
   /**
@@ -77,43 +78,33 @@ export class AIProfileAnalyzerService {
     completeness: ProfileCompleteness,
     additionalContext?: string
   ): Promise<AIProfileAnalysis> {
-    if (!this.openAIKey) {
+    // Check if AI is available
+    const isAvailable = await this.aiProvider.isAvailable();
+    if (!isAvailable) {
       return this.generateFallbackAnalysis(scores, completeness);
     }
 
     try {
       const prompt = this.buildDeterministicPrompt(scores, completeness, additionalContext);
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.openAIKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          temperature: 0, // Deterministik için temperature=0
-          messages: [
-            {
-              role: 'system',
-              content: `Sen bir eğitim psikoloğu ve rehberlik uzmanısın. Öğrenci profillerini nesnel, ölçülebilir ve standart kriterlere göre analiz edersin. Her zaman yapıcı, çözüm odaklı ve bilimsel temelli öneriler sunarsın. Yanıtlarını Türkçe ver ve JSON formatında döndür.`
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          response_format: { type: "json_object" }
-        })
+      const systemPrompt = `Sen bir eğitim psikoloğu ve rehberlik uzmanısın. Öğrenci profillerini nesnel, ölçülebilir ve standart kriterlere göre analiz edersin. Her zaman yapıcı, çözüm odaklı ve bilimsel temelli öneriler sunarsın. Yanıtlarını Türkçe ver ve JSON formatında döndür.`;
+
+      const response = await this.aiProvider.chat({
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0,
+        format: 'json'
       });
 
-      if (!response.ok) {
-        console.error('OpenAI API error:', response.status);
-        return this.generateFallbackAnalysis(scores, completeness);
-      }
-
-      const data = await response.json();
-      const analysis = JSON.parse(data.choices[0].message.content);
+      const analysis = JSON.parse(response);
       
       return {
         studentId: scores.studentId,

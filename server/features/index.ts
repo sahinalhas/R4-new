@@ -21,6 +21,7 @@ import earlyWarningRouter from './early-warning/index.js';
 import holisticProfileRouter from './holistic-profile/index.js';
 import standardizedProfileRouter from './standardized-profile/routes/standardized-profile.routes.js';
 import studentProfileAIRouter from '../routes/student-profile-ai.routes.js';
+import aiAssistantRouter from './ai-assistant/index.js';
 
 /**
  * Feature Registry
@@ -132,5 +133,8 @@ featureRegistry.use('/users', usersRouter);
 
 // =================== ANALYTICS DOMAIN ===================
 featureRegistry.use('/analytics', analyticsRouter);
+
+// =================== AI FEATURES ===================
+featureRegistry.use('/ai-assistant', aiAssistantRouter);
 
 export default featureRegistry;

@@ -20,6 +20,7 @@ const Placeholder = lazy(() => import("./pages/Placeholder"));
 const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const RiskDashboard = lazy(() => import("./pages/RiskDashboard"));
+const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +83,10 @@ const App = () => {
                   <Route
                     path="/istatistik"
                     element={<Suspense fallback={<LoadingFallback />}><Placeholder title="Performans & İstatistik" /></Suspense>}
+                  />
+                  <Route
+                    path="/ai-asistan"
+                    element={<Suspense fallback={<LoadingFallback />}><AIAssistant /></Suspense>}
                   />
                 </Route>
                 <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />
