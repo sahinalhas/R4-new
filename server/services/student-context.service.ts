@@ -3,10 +3,12 @@
  * Öğrenci Bağlam Servisi
  * 
  * Tüm öğrenci verilerini toplar ve AI için anlamlı bağlam oluşturur
+ * Pattern recognition ve deep insights ile zenginleştirilmiş
  */
 
 import getDatabase from '../lib/database.js';
 import type { UnifiedStudentScores, ProfileCompleteness } from '../../shared/types/student.types.js';
+import { PatternAnalysisService, type PatternInsight } from './pattern-analysis.service.js';
 
 export interface StudentContext {
   // Temel Bilgiler
@@ -101,17 +103,23 @@ export interface StudentContext {
   // Skorlar
   scores?: UnifiedStudentScores;
   completeness?: ProfileCompleteness;
+
+  // Pattern Analysis ve Deep Insights (YENİ!)
+  patternInsights?: PatternInsight[];
 }
 
 export class StudentContextService {
   private db: ReturnType<typeof getDatabase>;
+  private patternAnalyzer: PatternAnalysisService;
 
   constructor() {
     this.db = getDatabase();
+    this.patternAnalyzer = new PatternAnalysisService();
   }
 
   /**
    * Get complete student context for AI
+   * Now includes deep pattern analysis and insights!
    */
   async getStudentContext(studentId: string): Promise<StudentContext> {
     const context: StudentContext = {
@@ -123,7 +131,9 @@ export class StudentContextService {
       risk: await this.getRiskContext(studentId),
       interventions: await this.getInterventionContext(studentId),
       talentsInterests: await this.getTalentsInterestsContext(studentId),
-      health: await this.getHealthContext(studentId)
+      health: await this.getHealthContext(studentId),
+      // DERİN PATTERN ANALİZİ - YENİ!
+      patternInsights: await this.patternAnalyzer.analyzeStudentPatterns(studentId)
     };
 
     return context;
@@ -497,6 +507,17 @@ export class StudentContextService {
       if (context.talentsInterests.careerGoals && context.talentsInterests.careerGoals.length > 0) {
         text += `- Kariyer Hedefleri: ${context.talentsInterests.careerGoals.join(', ')}\n`;
       }
+    }
+
+    // DERİN PATTERN ANALİZİ VE ÇIKARIMLAR - BU AI'nın GÜÇLÜ OLMASINI SAĞLAYAN BÖLÜM!
+    if (context.patternInsights && context.patternInsights.length > 0) {
+      text += `\n═══════════════════════════════════════════════════════\n`;
+      text += `## 🔍 DERİN ANALİZ: PATTERN'LER VE ÇIKARIMLAR\n`;
+      text += `═══════════════════════════════════════════════════════\n\n`;
+      text += `Bu bölüm öğrencinin verilerinden otomatik olarak çıkarılan\n`;
+      text += `trendler, pattern'ler, korelasyonlar ve öngörüler içerir.\n`;
+      text += `Bu bilgiler, yüzeysel verilerin ötesinde derin içgörüler sunar.\n\n`;
+      text += this.patternAnalyzer.formatInsightsForAI(context.patternInsights);
     }
 
     return text;

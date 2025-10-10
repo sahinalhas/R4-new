@@ -43,9 +43,26 @@ Preferred communication style: Simple, everyday language.
 
 ### AI and Analytics System
 
-**AI Assistant:** A virtual guidance counselor supporting both OpenAI and Ollama.
-- **Architecture:** `AI Provider Service` abstraction, `Ollama Integration`, `Student Context Service` for data aggregation, `AI Assistant Routes` for chat and analysis.
-- **Features:** Streaming chat, risk analysis, meeting summaries, runtime model selection (OpenAI GPT-4 or Ollama Llama 3.1), and full Turkish language support.
+**AI Assistant:** A professional-grade virtual guidance counselor with deep psychological and pedagogical expertise.
+- **Architecture:** 
+  - `AI Provider Service` (Singleton pattern) - Unified abstraction for OpenAI and Ollama
+  - `AI Prompt Builder Service` - Professional counselor prompts with 15+ years expertise simulation
+  - `Pattern Analysis Service` - Automatic pattern recognition, trend analysis, and correlation detection
+  - `Student Context Service` - Comprehensive data aggregation with deep insights
+  - `AI Assistant Routes` - Chat, streaming, risk analysis, and meeting summaries
+- **Deep Analysis Capabilities:**
+  - **Pattern Recognition:** Identifies behavioral patterns, academic trends, temporal cycles, and correlations
+  - **Proactive Insights:** Automatically detects critical findings without being asked
+  - **Psychological Depth:** Analyzes motivation, emotional regulation, resilience, and developmental factors
+  - **Evidence-Based Recommendations:** Provides SMART goals, intervention strategies, and follow-up plans
+  - **Contextual Awareness:** Considers family, peers, school climate, and cultural factors
+- **Features:** 
+  - Real-time streaming chat for immediate responses
+  - 9 comprehensive quick-action analyses (profile, risk, patterns, interventions, parent meeting prep, strengths, learning, social-emotional, proactive insights)
+  - Risk analysis with multi-factor assessment
+  - Professional meeting summaries with action items
+  - Runtime model selection (OpenAI GPT-4 or Ollama Llama 3.1)
+  - Full Turkish language support with educational terminology
 - **Security:** Singleton pattern for provider usage, no API keys in frontend, local Ollama for privacy.
 
 **Unified Scoring Engine:** Calculates 8 standardized scores (0-100) per student: Academic, Social-Emotional, Behavioral Risk, Attendance, Motivation, Health & Wellness, Overall Risk, and Protective Factors.

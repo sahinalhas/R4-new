@@ -7,6 +7,7 @@ import express from 'express';
 import { AIProviderService } from '../../../services/ai-provider.service.js';
 import { StudentContextService } from '../../../services/student-context.service.js';
 import { OllamaAPIService } from '../../../services/ollama-api.service.js';
+import AIPromptBuilder from '../../../services/ai-prompt-builder.service.js';
 
 const router = express.Router();
 const aiProvider = AIProviderService.getInstance();
@@ -115,27 +116,17 @@ router.post('/chat', async (req, res) => {
       });
     }
 
-    let systemPrompt = `Sen Rehber360 sisteminde çalışan profesyonel bir rehber öğretmen asistanısın. Türkçe konuşuyorsun.
-
-Görevlerin:
-- Öğrencileri tanımak ve anlamak
-- Risk durumlarını tespit etmek
-- Müdahale planları önermek
-- Görüşme notları hazırlamak
-- Veli görüşmeleri için öneriler sunmak
-- Öğretmenlere rehberlik sağlamak
-
-Her zaman:
-- Profesyonel ve empatik ol
-- Bilimsel ve etik kurallara uy
-- Çözüm odaklı düşün
-- Öğrencinin yararını ön planda tut`;
-
-    // Öğrenci bağlamını ekle
+    // Professional counselor system prompt
+    let systemPrompt: string;
+    
     if (studentId) {
+      // Öğrenci bağlamını ekle ve bağlamsal prompt oluştur
       const context = await contextService.getStudentContext(studentId);
       const contextText = contextService.formatContextForAI(context);
-      systemPrompt += `\n\n${contextText}`;
+      systemPrompt = AIPromptBuilder.buildContextualSystemPrompt(contextText);
+    } else {
+      // Genel rehber öğretmen prompt'u
+      systemPrompt = AIPromptBuilder.buildCounselorSystemPrompt();
     }
 
     const messages: any[] = [
@@ -187,27 +178,17 @@ router.post('/chat-stream', async (req, res) => {
       });
     }
 
-    let systemPrompt = `Sen Rehber360 sisteminde çalışan profesyonel bir rehber öğretmen asistanısın. Türkçe konuşuyorsun.
-
-Görevlerin:
-- Öğrencileri tanımak ve anlamak
-- Risk durumlarını tespit etmek
-- Müdahale planları önermek
-- Görüşme notları hazırlamak
-- Veli görüşmeleri için öneriler sunmak
-- Öğretmenlere rehberlik sağlamak
-
-Her zaman:
-- Profesyonel ve empatik ol
-- Bilimsel ve etik kurallara uy
-- Çözüm odaklı düşün
-- Öğrencinin yararını ön planda tut`;
-
-    // Öğrenci bağlamını ekle
+    // Professional counselor system prompt
+    let systemPrompt: string;
+    
     if (studentId) {
+      // Öğrenci bağlamını ekle ve bağlamsal prompt oluştur
       const context = await contextService.getStudentContext(studentId);
       const contextText = contextService.formatContextForAI(context);
-      systemPrompt += `\n\n${contextText}`;
+      systemPrompt = AIPromptBuilder.buildContextualSystemPrompt(contextText);
+    } else {
+      // Genel rehber öğretmen prompt'u
+      systemPrompt = AIPromptBuilder.buildCounselorSystemPrompt();
     }
 
     const messages: any[] = [
@@ -266,23 +247,13 @@ router.post('/generate-meeting-summary', async (req, res) => {
       });
     }
 
-    const prompt = `Aşağıdaki ${meetingType || 'görüşme'} notlarından profesyonel bir özet çıkar:
-
-NOTLAR:
-${notes}
-
-ÖZET FORMATI:
-1. Görüşmenin Ana Konusu
-2. Önemli Noktalar (3-5 madde)
-3. Alınan Kararlar
-4. Öneriler ve Sonraki Adımlar
-
-Kısa, net ve profesyonel bir dille yaz.`;
+    // Use professional meeting summary prompt
+    const prompt = AIPromptBuilder.buildMeetingSummaryPrompt(notes, meetingType);
 
     const messages = [
       {
         role: 'system' as const,
-        content: 'Sen profesyonel bir rehber öğretmensin. Görüşme notlarından özet çıkarıyorsun.'
+        content: AIPromptBuilder.buildCounselorSystemPrompt()
       },
       {
         role: 'user' as const,
@@ -326,37 +297,18 @@ router.post('/analyze-risk', async (req, res) => {
     const context = await contextService.getStudentContext(studentId);
     const contextText = contextService.formatContextForAI(context);
 
-    const prompt = `${contextText}
-
-Yukarıdaki öğrenci profiline göre:
-
-1. Risk Analizi yap (Akademik, Davranışsal, Sosyal-Duygusal)
-2. Acil müdahale gerektiren durumları belirt
-3. Öncelikli müdahale önerileri sun (3-5 madde)
-4. Uzun vadeli destek planı öner
-
-JSON formatında yanıt ver:
-{
-  "riskSeviyesi": "DÜŞÜK|ORTA|YÜKSEK|ÇOK_YÜKSEK",
-  "acilDurumlar": ["durum1", "durum2"],
-  "oncelikliMudahaleler": [
-    {
-      "baslik": "...",
-      "aciklama": "...",
-      "oncelik": "YÜKSEK|ORTA|DÜŞÜK"
-    }
-  ],
-  "uzunVadeliPlan": "..."
-}`;
+    // Use deep risk analysis prompt
+    const systemPrompt = AIPromptBuilder.buildContextualSystemPrompt(contextText);
+    const riskPrompt = AIPromptBuilder.buildRiskAnalysisPrompt();
 
     const messages = [
       {
         role: 'system' as const,
-        content: 'Sen profesyonel bir rehber öğretmen ve risk değerlendirme uzmanısın. Yanıtlarını JSON formatında ver.'
+        content: systemPrompt
       },
       {
         role: 'user' as const,
-        content: prompt
+        content: riskPrompt
       }
     ];
 

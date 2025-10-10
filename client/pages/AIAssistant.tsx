@@ -39,7 +39,84 @@ export default function AIAssistant() {
     queryKey: ['/api/students']
   });
 
-  // Chat mutation
+  // Streaming chat implementation
+  const handleStreamingChat = async (message: string) => {
+    try {
+      setIsStreaming(true);
+      
+      // Add user message immediately
+      setMessages(prev => [...prev, { role: 'user', content: message }]);
+
+      // Start assistant message (empty at first)
+      const assistantMessageIndex = messages.length + 1;
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      const response = await fetch('/api/ai-assistant/chat-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message,
+          studentId: selectedStudent || undefined,
+          conversationHistory: messages
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Streaming chat başarısız');
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('Stream okunamadı');
+      }
+
+      let accumulatedContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                accumulatedContent += parsed.content;
+                
+                // Update the assistant message in real-time
+                setMessages(prev => {
+                  const newMessages = [...prev];
+                  newMessages[assistantMessageIndex] = {
+                    role: 'assistant',
+                    content: accumulatedContent
+                  };
+                  return newMessages;
+                });
+              }
+            } catch (e) {
+              console.error('Parse error:', e);
+            }
+          }
+        }
+      }
+
+      setIsStreaming(false);
+    } catch (error: any) {
+      setIsStreaming(false);
+      toast.error(error.message || 'Streaming chat hatası');
+    }
+  };
+
+  // Non-streaming chat fallback
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
       const response = await fetch('/api/ai-assistant/chat', {
@@ -68,13 +145,13 @@ export default function AIAssistant() {
   });
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isStreaming) return;
 
     const userMessage = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
 
-    chatMutation.mutate(userMessage);
+    // Use streaming for better UX
+    await handleStreamingChat(userMessage);
   };
 
   const scrollToBottom = () => {
@@ -206,36 +283,85 @@ export default function AIAssistant() {
                     Öğrencileriniz hakkında sorular sorun, risk analizi yapın, 
                     görüşme özetleri oluşturun veya rehberlik önerileri alın.
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-6 w-full max-w-2xl">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-6 w-full max-w-3xl">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setInput('Bu öğrencinin risk durumunu analiz et')}
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Bu öğrencinin kapsamlı bir profilini çıkar. Akademik, sosyal-duygusal, davranışsal tüm boyutları değerlendir. Güçlü yönler, riskler ve öneriler sun.')}
                     >
-                      Risk Analizi Yap
+                      📊 Kapsamlı Profil Analizi
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setInput('Öğrenci için müdahale planı öner')}
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Bu öğrencinin risklerini derinlemesine analiz et. Akademik, davranışsal, sosyal-duygusal risk faktörlerini belirle. Erken uyarı sinyallerini ve koruyucu faktörleri göster. Acil müdahale gerekiyor mu?')}
                     >
-                      Müdahale Planı
+                      ⚠️ Derin Risk Analizi
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setInput('Veli görüşmesi için öneriler sun')}
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Son 6 aydaki verilerden pattern\'leri çıkar. Akademik trendler, davranış döngüleri, devamsızlık patternleri neler? Hangi faktörler birbirleriyle ilişkili? Gelecek için öngörülerin neler?')}
                     >
-                      Veli Görüşmesi
+                      🔍 Pattern ve Trend Analizi
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setInput('Öğrencinin güçlü yönlerini listele')}
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Bu öğrenci için kanıta dayalı, somut, adım adım müdahale planı hazırla. Kısa, orta ve uzun vadeli hedefler belirle. Kimin ne yapacağını netleştir. İzleme stratejisi öner.')}
                     >
-                      Güçlü Yönler
+                      📋 Müdahale Planı Oluştur
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Veli görüşmesi için detaylı hazırlık notları hazırla. Hangi konular görüşülmeli? Aileden neler öğrenmeliyiz? İşbirliği önerileri neler? Hassas konulara nasıl yaklaşmalıyız?')}
+                    >
+                      👨‍👩‍👧 Veli Görüşmesi Hazırlığı
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Öğrencinin güçlü yönlerini, yeteneklerini, ilgi alanlarını vurgula. Bu güçlü yönler nasıl daha fazla kullanılabilir? Motivasyon kaynakları neler? Potansiyelini nasıl geliştirebiliriz?')}
+                    >
+                      ✨ Güçlü Yönler ve Potansiyel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Bu öğrencinin öğrenme stilini, öğrenme güçlüklerini ve akademik ihtiyaçlarını analiz et. Öğretmenlere hangi stratejileri önerirsin? Farklılaştırılmış öğretim nasıl uygulanır?')}
+                    >
+                      🎓 Öğrenme Analizi
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Öğrencinin sosyal-duygusal gelişimini değerlendir. Akran ilişkileri nasıl? Duygu düzenleme becerileri? Empati ve iletişim? Sosyal beceri desteği gerekli mi?')}
+                    >
+                      💝 Sosyal-Duygusal Değerlendirme
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!selectedStudent}
+                      onClick={() => setInput('Bu öğrenci hakkında dikkat etmem gereken ama belki fark etmediğim önemli noktalar var mı? Gözden kaçan detaylar, ilişkiler, çıkarımlar neler?')}
+                    >
+                      🔎 Proaktif İçgörüler
                     </Button>
                   </div>
+                  {!selectedStudent && (
+                    <p className="text-sm text-muted-foreground mt-4">
+                      👆 Bu analizleri kullanmak için önce bir öğrenci seçin
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -287,9 +413,9 @@ export default function AIAssistant() {
               />
               <Button
                 onClick={handleSend}
-                disabled={!input.trim() || chatMutation.isPending}
+                disabled={!input.trim() || isStreaming}
               >
-                {chatMutation.isPending ? (
+                {isStreaming ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Send className="h-4 w-4" />
