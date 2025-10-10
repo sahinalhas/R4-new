@@ -22,6 +22,8 @@ import holisticProfileRouter from './holistic-profile/index.js';
 import standardizedProfileRouter from './standardized-profile/routes/standardized-profile.routes.js';
 import studentProfileAIRouter from '../routes/student-profile-ai.routes.js';
 import aiAssistantRouter from './ai-assistant/index.js';
+import dailyInsightsRouter from './daily-insights/index.js';
+import deepAnalysisRouter from './deep-analysis/index.js';
 
 /**
  * Feature Registry
@@ -136,5 +138,11 @@ featureRegistry.use('/analytics', analyticsRouter);
 
 // =================== AI FEATURES ===================
 featureRegistry.use('/ai-assistant', aiAssistantRouter);
+
+// =================== DAILY INSIGHTS & PROACTIVE ALERTS ===================
+featureRegistry.use('/daily-insights', dailyInsightsRouter);
+
+// =================== DEEP ANALYSIS ENGINE ===================
+featureRegistry.use('/deep-analysis', deepAnalysisRouter);
 
 export default featureRegistry;

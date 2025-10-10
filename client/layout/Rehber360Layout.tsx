@@ -55,6 +55,7 @@ import {
   Download,
   Search,
   Bot,
+  Brain,
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { loadSettings, updateSettings, SETTINGS_KEY, AppSettings } from "@/lib/app-settings";
@@ -101,6 +102,7 @@ function useBreadcrumbs() {
       risk: "Risk Takip",
       istatistik: "İstatistikler",
       "ai-asistan": "AI Rehber Asistan",
+      "ai-insights": "AI Günlük Insights",
     };
     const parts = location.pathname.split("/").filter(Boolean);
     return parts.map((p, i) => ({
@@ -226,6 +228,13 @@ export default function Rehber360Layout() {
                   <SidebarMenuButton asChild tooltip="AI Rehber Asistan">
                     <NavLink to="/ai-asistan">
                       <Bot /> <span>AI Asistan</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="AI Günlük Insights">
+                    <NavLink to="/ai-insights">
+                      <Brain /> <span>AI Insights</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

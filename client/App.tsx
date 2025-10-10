@@ -21,6 +21,7 @@ const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const RiskDashboard = lazy(() => import("./pages/RiskDashboard"));
 const AIAssistant = lazy(() => import("./pages/AIAssistant"));
+const AIInsightsDashboard = lazy(() => import("./pages/AIInsightsDashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +88,10 @@ const App = () => {
                   <Route
                     path="/ai-asistan"
                     element={<Suspense fallback={<LoadingFallback />}><AIAssistant /></Suspense>}
+                  />
+                  <Route
+                    path="/ai-insights"
+                    element={<Suspense fallback={<LoadingFallback />}><AIInsightsDashboard /></Suspense>}
                   />
                 </Route>
                 <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />

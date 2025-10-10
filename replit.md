@@ -65,6 +65,36 @@ Preferred communication style: Simple, everyday language.
   - Full Turkish language support with educational terminology
 - **Security:** Singleton pattern for provider usage, no API keys in frontend, local Ollama for privacy.
 
+**Advanced AI Features (October 2025):**
+1. **Daily Insights Service** (`server/features/daily-insights/`)
+   - Automated daily/weekly/monthly reports for all students
+   - Real-time student status tracking with change detection
+   - AI-powered pattern analysis and trend detection
+   - Proactive alert generation (academic decline, behavioral issues, attendance problems, social isolation)
+   - Priority action recommendations for counselors
+   - Database: `daily_insights`, `student_daily_status`, `proactive_alerts` tables
+
+2. **Deep Analysis Engine** (`server/features/deep-analysis/`)
+   - Comprehensive student trajectory prediction (1-3 month outlook)
+   - Multi-dimensional risk assessment (academic, social-emotional, behavioral, attendance)
+   - Personalized intervention planning with evidence-based strategies
+   - Comparative analysis (peer comparison, historical trends)
+   - Batch processing for multiple students
+
+3. **Smart Recommendation Engine** (`server/features/ai-assistant/routes/recommendations.routes.ts`)
+   - Priority student identification with automated scoring
+   - Intervention effectiveness prediction
+   - Resource recommendation system (academic, social-emotional, behavioral, family support)
+   - Implementation guides for counselors
+
+4. **Meeting Prep Assistant** (`server/features/ai-assistant/routes/meeting-prep.routes.ts`)
+   - Parent meeting briefing generation
+   - Teacher collaboration planning
+   - Evidence-based intervention plan creation
+   - Automated meeting documentation
+
+**AI Dashboard:** New `/ai-insights` route provides daily insights visualization, critical alerts, positive updates, and recommended actions.
+
 **Unified Scoring Engine:** Calculates 8 standardized scores (0-100) per student: Academic, Social-Emotional, Behavioral Risk, Attendance, Motivation, Health & Wellness, Overall Risk, and Protective Factors.
 
 **Deterministic Profile Analysis:** `AI Profile Analyzer` uses fixed prompts with OpenAI (temperature=0) to generate strengths, areas for growth, risk levels, and intervention recommendations, ensuring consistent analysis.
@@ -84,6 +114,30 @@ Preferred communication style: Simple, everyday language.
 **Deployment Target:** Configured for Replit VM, running `dist/server/production.mjs` on port 3000.
 **Database:** File-based SQLite (`data/data.db`) with automatic backups and schema migrations.
 **Environment Variables:** Optional `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables.
+
+## Recent Changes
+
+### October 10, 2025 - Advanced AI Features
+- ✅ Implemented Daily Insights Service with automated reporting
+- ✅ Added Proactive Alert System for real-time pattern detection
+- ✅ Built Deep Analysis Engine with trajectory predictions
+- ✅ Created Smart Recommendation Engine for prioritization
+- ✅ Developed Meeting Prep Assistant for counselor support
+- ✅ Added AI Insights Dashboard at `/ai-insights`
+- ✅ Database Migration 017: Added `daily_insights`, `student_daily_status`, `proactive_alerts` tables
+- ✅ Fixed UNIQUE constraint bug in daily insights UPSERT operations
+- ✅ Configured Vite HMR for Replit environment (WSS protocol)
+
+**API Endpoints Added:**
+- `POST /api/daily-insights/generate` - Generate daily insights
+- `GET /api/daily-insights/today` - Get today's insights
+- `GET /api/daily-insights/alerts` - Get proactive alerts
+- `POST /api/deep-analysis/:studentId` - Generate deep analysis
+- `POST /api/deep-analysis/batch` - Batch analysis
+- `GET /api/ai-assistant/recommendations/priority-students` - Priority list
+- `GET /api/ai-assistant/recommendations/interventions` - Intervention recommendations
+- `POST /api/ai-assistant/meeting-prep/parent` - Parent meeting prep
+- `POST /api/ai-assistant/meeting-prep/teacher` - Teacher meeting prep
 
 ## External Dependencies
 
