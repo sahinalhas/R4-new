@@ -11,7 +11,6 @@ import documentsRouter from './documents/index.js';
 import coachingRouter from './coaching/index.js';
 import examsRouter from './exams/index.js';
 import sessionsRouter from './sessions/index.js';
-import healthRouter from './health/index.js';
 import specialEducationRouter from './special-education/index.js';
 import riskAssessmentRouter from './risk-assessment/index.js';
 import behaviorRouter from './behavior/index.js';
@@ -113,7 +112,6 @@ featureRegistry.use('/study-sessions', sessionsRouter);
 featureRegistry.use('/', studyRouter);
 
 // =================== STUDENT SUPPORT DOMAIN ===================
-featureRegistry.use('/health-info', healthRouter);
 featureRegistry.use('/special-education', specialEducationRouter);
 featureRegistry.use('/risk-factors', riskAssessmentRouter);
 featureRegistry.use('/behavior-incidents', behaviorRouter);

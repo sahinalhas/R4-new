@@ -28,7 +28,6 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_weekly_slots_studentId ON weekly_slots(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_surveys_studentId ON surveys(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_survey_responses_studentId ON survey_responses(studentId)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_health_info_studentId ON health_info(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_special_education_studentId ON special_education(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_studentId ON risk_factors(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_behavior_incidents_studentId ON behavior_incidents(studentId)');

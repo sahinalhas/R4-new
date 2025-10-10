@@ -106,14 +106,6 @@ export function setupDatabaseTriggers(db: Database.Database): void {
   `);
 
   db.exec(`
-    CREATE TRIGGER IF NOT EXISTS update_health_info_timestamp 
-    AFTER UPDATE ON health_info 
-    BEGIN 
-      UPDATE health_info SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id; 
-    END;
-  `);
-
-  db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_special_education_timestamp 
     AFTER UPDATE ON special_education 
     BEGIN 
