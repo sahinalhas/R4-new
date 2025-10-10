@@ -8,7 +8,6 @@ export const migration014 = {
     const multipleIntelligenceCols = db.prepare('PRAGMA table_info(multiple_intelligence)').all() as { name: string }[];
     const homeVisitsCols = db.prepare('PRAGMA table_info(home_visits)').all() as { name: string }[];
     const evaluations360Cols = db.prepare('PRAGMA table_info(evaluations_360)').all() as { name: string }[];
-    const riskFactorsCols = db.prepare('PRAGMA table_info(risk_factors)').all() as { name: string }[];
 
     const hasColumn = (cols: { name: string }[], colName: string) => 
       cols.some((col) => col.name === colName);
@@ -93,19 +92,6 @@ export const migration014 = {
     }
     if (!hasColumn(evaluations360Cols, 'actionPlan')) {
       db.exec('ALTER TABLE evaluations_360 ADD COLUMN actionPlan TEXT');
-    }
-
-    if (!hasColumn(riskFactorsCols, 'overallRiskScore')) {
-      db.exec('ALTER TABLE risk_factors ADD COLUMN overallRiskScore INTEGER DEFAULT 0');
-    }
-    if (!hasColumn(riskFactorsCols, 'academicRiskLevel')) {
-      db.exec('ALTER TABLE risk_factors ADD COLUMN academicRiskLevel TEXT');
-    }
-    if (!hasColumn(riskFactorsCols, 'behavioralRiskLevel')) {
-      db.exec('ALTER TABLE risk_factors ADD COLUMN behavioralRiskLevel TEXT');
-    }
-    if (!hasColumn(riskFactorsCols, 'environmentalRiskLevel')) {
-      db.exec('ALTER TABLE risk_factors ADD COLUMN environmentalRiskLevel TEXT');
     }
   }
 };

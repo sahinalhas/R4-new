@@ -34,37 +34,7 @@ export const migration012 = {
       );
     `);
 
-    // 2. Sosyal İlişkiler & Akran Etkileşimi
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS student_social_relations (
-        id TEXT PRIMARY KEY,
-        studentId TEXT NOT NULL,
-        assessmentDate TEXT NOT NULL,
-        friendCircleSize TEXT CHECK (friendCircleSize IN ('YOK', 'AZ', 'ORTA', 'GENİŞ')),
-        friendCircleQuality TEXT CHECK (friendCircleQuality IN ('ZAYIF', 'ORTA', 'İYİ', 'ÇOK_İYİ')),
-        socialRole TEXT CHECK (socialRole IN ('LİDER', 'AKTİF_ÜYE', 'TAKİPÇİ', 'GÖZLEMCİ', 'İZOLE')),
-        peerRelationshipQuality TEXT CHECK (peerRelationshipQuality IN ('SORUNLU', 'ZAYIF', 'ORTA', 'İYİ', 'ÇOK_İYİ')),
-        socialSkillsLevel TEXT CHECK (socialSkillsLevel IN ('ZAYIF', 'GELİŞMEKTE', 'YETERLİ', 'İYİ', 'İLERİ')),
-        conflictResolutionSkills TEXT CHECK (conflictResolutionSkills IN ('ZAYIF', 'GELİŞMEKTE', 'YETERLİ', 'İYİ', 'İLERİ')),
-        leadershipQualities TEXT,
-        teamworkAbility TEXT CHECK (teamworkAbility IN ('SORUNLU', 'ZAYIF', 'ORTA', 'İYİ', 'ÇOK_İYİ')),
-        bullyingStatus TEXT CHECK (bullyingStatus IN ('YOK', 'MAĞDUR', 'FAİL', 'HER_İKİSİ', 'GÖZLEMCİ')),
-        bullyingDetails TEXT,
-        socialGroupDynamics TEXT,
-        peerInfluence TEXT CHECK (peerInfluence IN ('OLUMSUZ', 'NÖTR', 'OLUMLU', 'ÇOK_OLUMLU')),
-        inclusionStatus TEXT CHECK (inclusionStatus IN ('DIŞLANMIŞ', 'KISITLI', 'KABUL_EDİLMİŞ', 'POPÜLER')),
-        communicationStyle TEXT,
-        socialAnxietyLevel TEXT CHECK (socialAnxietyLevel IN ('YOK', 'DÜŞÜK', 'ORTA', 'YÜKSEK')),
-        extracurricularSocialActivities TEXT,
-        notes TEXT,
-        assessedBy TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE
-      );
-    `);
-
-    // 3. İlgi Alanları & Yetenekler
+    // 2. İlgi Alanları & Yetenekler
     db.exec(`
       CREATE TABLE IF NOT EXISTS student_interests (
         id TEXT PRIMARY KEY,
@@ -225,9 +195,6 @@ export const migration012 = {
     db.exec(`
       CREATE INDEX IF NOT EXISTS idx_student_strengths_student 
       ON student_strengths(studentId, assessmentDate DESC);
-      
-      CREATE INDEX IF NOT EXISTS idx_student_social_relations_student 
-      ON student_social_relations(studentId, assessmentDate DESC);
       
       CREATE INDEX IF NOT EXISTS idx_student_interests_student 
       ON student_interests(studentId, assessmentDate DESC);
