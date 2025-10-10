@@ -5,7 +5,6 @@ import {
   MessageCircle,
   Heart,
   Activity,
-  CalendarDays,
   BookOpen,
   Zap,
   TrendingUp,
@@ -71,11 +70,6 @@ export const EGITSEL_TABS = [
     value: "akademik",
     label: "Akademik",
     icon: TrendingUp,
-  },
-  {
-    value: "devamsizlik",
-    label: "Devamsızlık",
-    icon: CalendarDays,
   },
   {
     value: "calisma-programi",

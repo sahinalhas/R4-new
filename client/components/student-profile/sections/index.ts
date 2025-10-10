@@ -1,5 +1,4 @@
 export { default as BasicInfoSection } from './BasicInfoSection';
-export { default as DevamsizlikSection } from './DevamsizlikSection';
 export { default as CalismaProgramiSection } from './CalismaProgramiSection';
 export { default as DijitalCoclukSection } from './DijitalCoclukSection';
 export { default as AkademikPerformansSection } from './AkademikPerformansSection';

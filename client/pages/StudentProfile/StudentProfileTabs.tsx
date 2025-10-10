@@ -11,7 +11,6 @@ import { StudentData } from "@/hooks/student-profile";
 import { Student } from "@/lib/storage";
 
 import BasicInfoSection from "@/components/student-profile/sections/BasicInfoSection";
-import DevamsizlikSection from "@/components/student-profile/sections/DevamsizlikSection";
 import CalismaProgramiSection from "@/components/student-profile/sections/CalismaProgramiSection";
 import DijitalCoclukSection from "@/components/student-profile/sections/DijitalCoclukSection";
 import AkademikPerformansSection from "@/components/student-profile/sections/AkademikPerformansSection";
@@ -141,14 +140,6 @@ export function StudentProfileTabs({
                 onUpdate={onUpdate}
               />
             </div>
-          </TabsContent>
-
-          <TabsContent value="devamsizlik">
-            <DevamsizlikSection
-              studentId={studentId}
-              attendanceRecords={data.attendanceRecords}
-              onUpdate={onUpdate}
-            />
           </TabsContent>
 
           <TabsContent value="calisma-programi">
