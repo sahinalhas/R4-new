@@ -78,40 +78,40 @@ export function StudentProfileTabs({
               onUpdate={onUpdate}
             />
           </TabsContent>
+        </Tabs>
+      </TabsContent>
 
-          <TabsContent value="aile">
-            <Tabs defaultValue="veli-gorusmeleri" className="space-y-4">
-              <TabsList>
-                {AILE_TABS.map(({ value, label, icon: Icon }) => (
-                  <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
-                    <Icon className="h-3 w-3" /> {label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+      <TabsContent value="aile">
+        <Tabs defaultValue="veli-gorusmeleri" className="space-y-4">
+          <TabsList>
+            {AILE_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
+                <Icon className="h-3 w-3" /> {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-              <TabsContent value="veli-gorusmeleri">
-                <VeliGorusmeleriSection
-                  studentId={studentId}
-                  onUpdate={onUpdate}
-                />
-              </TabsContent>
+          <TabsContent value="veli-gorusmeleri">
+            <VeliGorusmeleriSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
 
-              <TabsContent value="ev-ziyaretleri">
-                <EvZiyaretleriSection
-                  studentId={studentId}
-                  homeVisits={data.homeVisits}
-                  onUpdate={onUpdate}
-                />
-              </TabsContent>
+          <TabsContent value="ev-ziyaretleri">
+            <EvZiyaretleriSection
+              studentId={studentId}
+              homeVisits={data.homeVisits}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
 
-              <TabsContent value="aile-katilim">
-                <AileKatilimiSection
-                  studentId={studentId}
-                  familyParticipation={data.familyParticipation}
-                  onUpdate={onUpdate}
-                />
-              </TabsContent>
-            </Tabs>
+          <TabsContent value="aile-katilim">
+            <AileKatilimiSection
+              studentId={studentId}
+              familyParticipation={data.familyParticipation}
+              onUpdate={onUpdate}
+            />
           </TabsContent>
         </Tabs>
       </TabsContent>

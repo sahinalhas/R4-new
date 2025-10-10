@@ -31,6 +31,11 @@ export const MAIN_TABS = [
     icon: User,
   },
   {
+    value: "aile",
+    label: "Aile & İletişim",
+    icon: Heart,
+  },
+  {
     value: "egitsel",
     label: "Eğitsel Rehberlik",
     icon: GraduationCap,
@@ -57,11 +62,6 @@ export const GENEL_TABS = [
     value: "saglik",
     label: "Sağlık",
     icon: Activity,
-  },
-  {
-    value: "aile",
-    label: "Aile & İletişim",
-    icon: Heart,
   },
 ] as const;
 
