@@ -1,20 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { useStudentProfile, useStudentData } from "@/hooks/student-profile";
 import { StudentHeader, StudentStats } from "./components";
+import { ProfileDashboard } from "./components/ProfileDashboard";
 import { StudentProfileTabs } from "./StudentProfileTabs";
 
 export default function StudentProfile() {
   const { id } = useParams();
   const [refresh, setRefresh] = useState(0);
+  const [scoresData, setScoresData] = useState<any>(null);
+  const [loadingScores, setLoadingScores] = useState(false);
   
   const { student, studentId, isLoading, error } = useStudentProfile(id);
   const { data } = useStudentData(studentId, refresh);
 
   const handleUpdate = () => setRefresh((x) => x + 1);
+
+  // Fetch standardized scores and profile completeness
+  useEffect(() => {
+    if (!studentId) return;
+    
+    setLoadingScores(true);
+    fetch(`/api/student-profile/${studentId}/scores`)
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          setScoresData(result.data);
+        }
+      })
+      .catch(err => console.error('Error loading scores:', err))
+      .finally(() => setLoadingScores(false));
+  }, [studentId, refresh]);
 
   if (isLoading) {
     return (
@@ -68,11 +87,11 @@ export default function StudentProfile() {
     <div className="space-y-4">
       <StudentHeader student={student} />
       
-      <StudentStats
-        student={student}
-        attendanceRecords={data.attendanceRecords}
-        surveyResults={data.surveyResults}
-        interventions={data.interventions}
+      <ProfileDashboard
+        studentId={studentId as string}
+        scores={scoresData?.scores}
+        completeness={scoresData?.completeness}
+        isLoading={loadingScores}
       />
 
       <StudentProfileTabs
