@@ -23,7 +23,6 @@ import AnketlerSection from "@/components/student-profile/sections/AnketlerSecti
 import VeliGorusmeleriSection from "@/components/student-profile/sections/VeliGorusmeleriSection";
 import EvZiyaretleriSection from "@/components/student-profile/sections/EvZiyaretleriSection";
 import AileKatilimiSection from "@/components/student-profile/sections/AileKatilimiSection";
-import OzelEgitimSection from "@/components/student-profile/sections/OzelEgitimSection";
 import RiskDegerlendirmeSection from "@/components/student-profile/sections/RiskDegerlendirmeSection";
 import DavranisTakibiSection from "@/components/student-profile/sections/DavranisTakibiSection";
 
@@ -135,14 +134,6 @@ export function StudentProfileTabs({
 
           <TabsContent value="calisma-programi">
             <CalismaProgramiSection studentId={studentId} />
-          </TabsContent>
-
-          <TabsContent value="ozel-egitim">
-            <OzelEgitimSection
-              studentId={studentId}
-              specialEducation={data.specialEducation}
-              onUpdate={onUpdate}
-            />
           </TabsContent>
 
           <TabsContent value="mudahaleler">

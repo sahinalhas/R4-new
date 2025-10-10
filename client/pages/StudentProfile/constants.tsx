@@ -77,11 +77,6 @@ export const EGITSEL_TABS = [
     icon: BookOpen,
   },
   {
-    value: "ozel-egitim",
-    label: "Özel Eğitim",
-    icon: FileText,
-  },
-  {
     value: "mudahaleler",
     label: "Müdahaleler",
     icon: ShieldAlert,
