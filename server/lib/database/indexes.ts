@@ -30,7 +30,6 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_survey_responses_studentId ON survey_responses(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_special_education_studentId ON special_education(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_studentId ON risk_factors(studentId)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_behavior_incidents_studentId ON behavior_incidents(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exam_results_studentId ON exam_results(studentId)');
   
   db.exec('CREATE INDEX IF NOT EXISTS idx_counseling_sessions_counselorId ON counseling_sessions(counselorId)');
@@ -54,7 +53,6 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_interventions_date ON interventions(date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_assessmentDate ON risk_factors(assessmentDate)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_behavior_incidents_incidentDate ON behavior_incidents(incidentDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exam_results_examDate ON exam_results(examDate)');
   
   db.exec('CREATE INDEX IF NOT EXISTS idx_progress_student_topic ON progress(studentId, topicId)');
@@ -64,7 +62,6 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   
   db.exec('CREATE INDEX IF NOT EXISTS idx_meeting_notes_student_date ON meeting_notes(studentId, date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_interventions_student_date ON interventions(studentId, date)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_behavior_incidents_student_date ON behavior_incidents(studentId, incidentDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_parent_meetings_student_date ON parent_meetings(studentId, meetingDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_home_visits_student_date ON home_visits(studentId, visitDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_study_assignments_student_due ON study_assignments(studentId, dueDate)');

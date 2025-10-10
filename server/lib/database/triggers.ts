@@ -122,14 +122,6 @@ export function setupDatabaseTriggers(db: Database.Database): void {
   `);
 
   db.exec(`
-    CREATE TRIGGER IF NOT EXISTS update_behavior_incidents_timestamp 
-    AFTER UPDATE ON behavior_incidents 
-    BEGIN 
-      UPDATE behavior_incidents SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id; 
-    END;
-  `);
-
-  db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_exam_results_timestamp 
     AFTER UPDATE ON exam_results 
     BEGIN 
