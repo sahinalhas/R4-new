@@ -1,6 +1,5 @@
 export { default as BasicInfoSection } from './BasicInfoSection';
 export { default as CalismaProgramiSection } from './CalismaProgramiSection';
-export { default as DijitalCoclukSection } from './DijitalCoclukSection';
 export { default as MudahalelerSection } from './MudahalelerSection';
 export { default as KisilikProfiliSection } from './KisilikProfiliSection';
 export { default as HedeflerPlanlamaSection } from './HedeflerPlanlamaSection';

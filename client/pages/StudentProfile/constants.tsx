@@ -6,7 +6,6 @@ import {
   Heart,
   Activity,
   BookOpen,
-  Zap,
   TrendingUp,
   ShieldAlert,
   Target,
@@ -136,11 +135,6 @@ export const KISISEL_GELISIM_TABS = [
     value: "kisilik",
     label: "Kişilik",
     icon: Brain,
-  },
-  {
-    value: "kocluk",
-    label: "Koçluk",
-    icon: Zap,
   },
   {
     value: "360-degerlendirme",

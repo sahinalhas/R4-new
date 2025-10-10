@@ -12,7 +12,6 @@ import { Student } from "@/lib/storage";
 
 import BasicInfoSection from "@/components/student-profile/sections/BasicInfoSection";
 import CalismaProgramiSection from "@/components/student-profile/sections/CalismaProgramiSection";
-import DijitalCoclukSection from "@/components/student-profile/sections/DijitalCoclukSection";
 import MudahalelerSection from "@/components/student-profile/sections/MudahalelerSection";
 import KisilikProfiliSection from "@/components/student-profile/sections/KisilikProfiliSection";
 import HedeflerPlanlamaSection from "@/components/student-profile/sections/HedeflerPlanlamaSection";
@@ -236,14 +235,6 @@ export function StudentProfileTabs({
             <KisilikProfiliSection
               studentId={studentId}
               multipleIntelligence={data.multipleIntelligence}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-
-          <TabsContent value="kocluk">
-            <DijitalCoclukSection
-              studentId={studentId}
-              coachingRecommendations={data.coachingRecommendations}
               onUpdate={onUpdate}
             />
           </TabsContent>
