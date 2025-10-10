@@ -4,7 +4,6 @@ import { createUserSessionsTable } from './user-sessions.schema';
 import { createSchemaMigrationsTable } from './schema-migrations.schema';
 import { createWeeklySlotsTable } from './weekly-slots.schema';
 import { createSpecialEducationTable } from './special-education.schema';
-import { createRiskFactorsTable } from './risk.schema';
 
 export function createSettingsTables(db: Database.Database): void {
   createAppSettingsTable(db);
@@ -12,5 +11,4 @@ export function createSettingsTables(db: Database.Database): void {
   createSchemaMigrationsTable(db);
   createWeeklySlotsTable(db);
   createSpecialEducationTable(db);
-  createRiskFactorsTable(db);
 }

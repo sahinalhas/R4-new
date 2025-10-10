@@ -29,7 +29,6 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_surveys_studentId ON surveys(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_survey_responses_studentId ON survey_responses(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_special_education_studentId ON special_education(studentId)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_studentId ON risk_factors(studentId)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exam_results_studentId ON exam_results(studentId)');
   
   db.exec('CREATE INDEX IF NOT EXISTS idx_counseling_sessions_counselorId ON counseling_sessions(counselorId)');
@@ -52,7 +51,6 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_meeting_notes_date ON meeting_notes(date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_interventions_date ON interventions(date)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_assessmentDate ON risk_factors(assessmentDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_exam_results_examDate ON exam_results(examDate)');
   
   db.exec('CREATE INDEX IF NOT EXISTS idx_progress_student_topic ON progress(studentId, topicId)');
@@ -67,7 +65,6 @@ export function setupDatabaseIndexes(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_study_assignments_student_due ON study_assignments(studentId, dueDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_study_sessions_student_date ON study_sessions(studentId, startTime)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_coaching_recommendations_student_date ON coaching_recommendations(studentId, created_at)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_risk_factors_student_date ON risk_factors(studentId, assessmentDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_family_participation_student_date ON family_participation(studentId, eventDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_self_assessments_student_date ON self_assessments(studentId, assessmentDate)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_evaluations_360_student_date ON evaluations_360(studentId, evaluationDate)');
