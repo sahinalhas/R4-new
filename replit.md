@@ -1,238 +1,80 @@
 # Rehber360 - Student Guidance System
 
 ## Overview
-
-Rehber360 is a comprehensive Turkish-language student guidance and management system for educational institutions. It offers tools for student tracking, counseling, risk assessment, behavioral monitoring, and academic performance analysis. A core feature is its AI-powered profile analysis, which generates standardized student profiles from diverse data sources like academic records, attendance, and surveys. The system also includes an AI Assistant for local, AI-powered student counseling, supporting both OpenAI and Ollama (Llama 3.1) models. Built as a full-stack TypeScript application with React, Express.js, and SQLite, it emphasizes data standardization and evidence-based interventions for student success.
+Rehber360 is a comprehensive Turkish-language student guidance and management system for educational institutions. It provides tools for student tracking, counseling, risk assessment, behavioral monitoring, and academic performance analysis. A key feature is its AI-powered profile analysis, which generates standardized student profiles from diverse data sources. The system also includes an AI Assistant for local, AI-powered student counseling, supporting both OpenAI and Ollama (Llama 3.1) models. Built as a full-stack TypeScript application with React, Express.js, and SQLite, Rehber360 aims to drive data standardization and evidence-based interventions for student success.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
+### Frontend
+- **Technology Stack:** React 18, TypeScript, Vite, Radix UI, Tailwind CSS, TanStack React Query, React Hook Form + Zod, React Router DOM, Framer Motion, Recharts.
+- **Key Decisions:** Feature-based organization with lazy loading, global error boundaries, mobile-first and accessible design (WCAG AAA), React Query for server state, Context API for authentication, and various performance optimizations (memoization, background processing, virtual scrolling).
 
-**Technology Stack:** React 18 with TypeScript, Vite, Radix UI, Tailwind CSS, TanStack React Query, React Hook Form + Zod, React Router DOM, Framer Motion, Recharts.
-
-**Architecture Decisions:**
-- **Feature-based organization** with lazy loading and code splitting.
-- **Global error boundaries** and responsive mobile-first design.
-- **Accessibility** is a priority (WCAG AAA compliant color contrast).
-- **State Management:** React Query for server state, Context API for authentication, local component state. No global client-side state managers like Redux.
-- **Performance Optimizations:** Memoization, background processing for analytics, chart data point limiting, virtual scrolling, and asset optimization.
-
-### Backend Architecture
-
-**Technology Stack:** Express.js v5, SQLite with `better-sqlite3`, TypeScript, Zod.
-
-**Feature-Based Modular Architecture:** Organized into `server/features/<feature-name>/`, each containing `routes/`, `services/`, `repository/`, and `types/`. Key feature modules include core domains (students, surveys), academic data, student support, administrative functions, and AI features (holistic-profile, standardized-profile, student-profile-ai, ai-assistant).
-
-**Key Architectural Decisions:**
-- **Database Layer:** SQLite for simplicity, prepared statements for security.
-- **Repository Pattern:** Isolates data access, returning DTOs.
-- **Service Layer:** Handles business logic, validation, and orchestration.
-- **Type Safety:** Shared types (`shared/types/`) ensure consistency.
-- **Security:** Input sanitization, prepared statements, CORS, security headers, rate limiting.
-- **Error Handling:** Centralized error messages and structured error responses.
+### Backend
+- **Technology Stack:** Express.js v5, SQLite with `better-sqlite3`, TypeScript, Zod.
+- **Key Decisions:** Modular architecture (`server/features/<feature-name>/`), Repository Pattern for data access, Service Layer for business logic, shared type safety, robust security measures (input sanitization, prepared statements, CORS, rate limiting), and centralized error handling.
+- **Core Features:** Students, Surveys, Academic Data, Student Support, Administrative Functions, and AI features (holistic-profile, standardized-profile, student-profile-ai, ai-assistant).
 
 ### Data Architecture
-
-**Database Schema:** Normalized relational schema in `data/data.db` with tables for students, academic/social-emotional/health profiles, behavior incidents, attendance, surveys, counseling sessions, and interventions.
-
-**Data Standardization:** Utilizes a comprehensive taxonomy (`shared/constants/student-profile-taxonomy.ts`) for standardized values across academic subjects, social-emotional competencies, behavioral categories, and risk factors, ensuring deterministic AI analysis.
+- **Database:** Normalized relational schema in `data/data.db` for student profiles, behavior, attendance, surveys, counseling, and interventions.
+- **Data Standardization:** Utilizes a comprehensive taxonomy (`shared/constants/student-profile-taxonomy.ts`) for consistent values across academic, social-emotional, and behavioral data, enabling deterministic AI analysis.
 
 ### AI and Analytics System
-
-**AI Assistant:** A professional-grade virtual guidance counselor with deep psychological and pedagogical expertise.
-- **Architecture:** 
-  - `AI Provider Service` (Singleton pattern) - Unified abstraction for OpenAI and Ollama
-  - `AI Prompt Builder Service` - Professional counselor prompts with 15+ years expertise simulation
-  - `Pattern Analysis Service` - Automatic pattern recognition, trend analysis, and correlation detection
-  - `Student Context Service` - Comprehensive data aggregation with deep insights
-  - `AI Assistant Routes` - Chat, streaming, risk analysis, and meeting summaries
-- **Deep Analysis Capabilities:**
-  - **Pattern Recognition:** Identifies behavioral patterns, academic trends, temporal cycles, and correlations
-  - **Proactive Insights:** Automatically detects critical findings without being asked
-  - **Psychological Depth:** Analyzes motivation, emotional regulation, resilience, and developmental factors
-  - **Evidence-Based Recommendations:** Provides SMART goals, intervention strategies, and follow-up plans
-  - **Contextual Awareness:** Considers family, peers, school climate, and cultural factors
-- **Features:** 
-  - Real-time streaming chat for immediate responses
-  - 9 comprehensive quick-action analyses (profile, risk, patterns, interventions, parent meeting prep, strengths, learning, social-emotional, proactive insights)
-  - Risk analysis with multi-factor assessment
-  - Professional meeting summaries with action items
-  - Runtime model selection (OpenAI GPT-4 or Ollama Llama 3.1)
-  - Full Turkish language support with educational terminology
-- **Security:** Singleton pattern for provider usage, no API keys in frontend, local Ollama for privacy.
-
-**Advanced AI Features (October 2025):**
-1. **Daily Insights Service** (`server/features/daily-insights/`)
-   - Automated daily/weekly/monthly reports for all students
-   - Real-time student status tracking with change detection
-   - AI-powered pattern analysis and trend detection
-   - Proactive alert generation (academic decline, behavioral issues, attendance problems, social isolation)
-   - Priority action recommendations for counselors
-   - Database: `daily_insights`, `student_daily_status`, `proactive_alerts` tables
-
-**Ultra-Advanced AI Features (Latest - 2025):**
-1. **Psychological Depth Analysis** (`server/services/psychological-depth-analysis.service.ts`)
-   - Deep motivational profiling (intrinsic/extrinsic motivation, learning orientation)
-   - Comprehensive family dynamics analysis (parental involvement, socioeconomic factors, cultural context)
-   - Detailed peer relationship assessment (social integration, bullying indicators, SEL competencies)
-   - Developmental factors analysis (age-appropriateness, critical needs, transitions)
-   - Holistic wellbeing planning with evidence-based therapeutic approaches
-
-2. **Predictive Risk Timeline** (`server/services/predictive-risk-timeline.service.ts`)
-   - 24-48-72 hour and 1-week risk predictions with probability scores
-   - Behavior pattern detection (academic, behavioral, social, emotional, attendance)
-   - Predictive alerts with action deadlines and responsible parties
-   - Causal analysis (root causes, contributing factors, cascade effects)
-   - Early intervention opportunities with impact assessment
-   - Comprehensive monitoring plans with escalation triggers
-
-3. **Hourly Action Planner** (`server/services/hourly-action-planner.service.ts`)
-   - Detailed daily action plans for counselors with hourly schedules
-   - Morning briefing with urgent matters and priority students
-   - Action categorization (meetings, monitoring, intervention, documentation, family communication, emergency)
-   - Priority-based task organization (critical, high, medium, low)
-   - Flexibility recommendations with buffer times and contingency plans
-   - End-of-day checklists and next-day preparation tasks
-
-4. **Student Timeline Analyzer** (`server/services/student-timeline-analyzer.service.ts`)
-   - Chronological event collection from all student data sources
-   - Pattern clustering (recurring events, triggers, outcomes, intervention points)
-   - Causal relationship mapping (direct, indirect, probable, correlation)
-   - Turning point identification with before/after state analysis
-   - Trend analysis (academic, behavioral, social trajectories)
-   - Success moment tracking with replication strategies
-
-5. **Comparative Multi-Student Analysis** (`server/services/comparative-multi-student-analysis.service.ts`)
-   - Class-level pattern detection and analysis
-   - Risk correlation identification across student populations
-   - Group dynamics analysis (positive groups, risk groups, isolated students, leadership opportunities)
-   - Student comparison metrics (academic/behavior scores, intervention priorities)
-   - Class-level insights (strengths, challenges, inequities, systemic issues)
-   - Prioritized recommendations (class-wide, group-based, individual interventions)
-
-**Notification & Automation System (October 11, 2025):**
-1. **Automated Notification Engine** (`server/features/notifications/`)
-   - Multi-channel notifications (EMAIL, SMS, PUSH, IN_APP)
-   - Template-based messaging with variable substitution
-   - Rule-based notification triggers (risk alerts, interventions, progress updates)
-   - Parent dashboard access links with secure tokens
-   - Notification preferences and quiet hours
-   - Delivery tracking and retry mechanism
-   - Database: `notification_logs`, `notification_preferences`, `notification_templates`, `parent_access_tokens`, `scheduled_tasks`
-
-2. **Intervention Effectiveness Tracking** (`server/features/intervention-tracking/`)
-   - Pre/post intervention metrics comparison
-   - AI-powered effectiveness analysis
-   - Impact measurement (academic, behavioral, attendance, social-emotional)
-   - Success pattern identification
-   - Similar intervention recommendations
-   - Lessons learned database
-   - Database: `intervention_effectiveness`, `parent_feedback`
-
-3. **Intelligent Escalation System** (`server/features/intervention-tracking/`)
-   - Automated escalation chain (Counselor → Assistant Principal → Principal)
-   - Response time tracking
-   - Risk-based escalation priorities (critical < 2h, normal < 24h)
-   - Multi-level notification system
-   - Escalation metrics and analytics
-   - Database: `escalation_logs`
-
-2. **Deep Analysis Engine** (`server/features/deep-analysis/`)
-   - Comprehensive student trajectory prediction (1-3 month outlook)
-   - Multi-dimensional risk assessment (academic, social-emotional, behavioral, attendance)
-   - Personalized intervention planning with evidence-based strategies
-   - Comparative analysis (peer comparison, historical trends)
-   - Batch processing for multiple students
-
-3. **Smart Recommendation Engine** (`server/features/ai-assistant/routes/recommendations.routes.ts`)
-   - Priority student identification with automated scoring
-   - Intervention effectiveness prediction
-   - Resource recommendation system (academic, social-emotional, behavioral, family support)
-   - Implementation guides for counselors
-
-4. **Meeting Prep Assistant** (`server/features/ai-assistant/routes/meeting-prep.routes.ts`)
-   - Parent meeting briefing generation
-   - Teacher collaboration planning
-   - Evidence-based intervention plan creation
-   - Automated meeting documentation
-
-**AI Dashboard:** New `/ai-insights` route provides daily insights visualization, critical alerts, positive updates, and recommended actions.
-
-**Unified Scoring Engine:** Calculates 8 standardized scores (0-100) per student: Academic, Social-Emotional, Behavioral Risk, Attendance, Motivation, Health & Wellness, Overall Risk, and Protective Factors.
-
-**Deterministic Profile Analysis:** `AI Profile Analyzer` uses fixed prompts with OpenAI (temperature=0) to generate strengths, areas for growth, risk levels, and intervention recommendations, ensuring consistent analysis.
-
-**Early Warning System:** Risk assessment pipeline that calculates aggregate scores, applies weighted thresholds, generates prioritized alerts, and recommends evidence-based interventions.
-
-**Analytics Caching:** In-memory caching with configurable TTL, background processing, and memoization for performance optimization.
+- **AI Assistant:** A professional-grade virtual guidance counselor with deep psychological and pedagogical expertise.
+    - **Architecture:** Unified `AI Provider Service` (OpenAI/Ollama), `AI Prompt Builder Service`, `Pattern Analysis Service`, `Student Context Service`.
+    - **Capabilities:** Pattern recognition, proactive insights, psychological depth analysis, evidence-based recommendations, contextual awareness, real-time streaming chat, 9 quick-action analyses, risk analysis, meeting summaries, runtime model selection, full Turkish language support.
+- **Advanced AI Features:**
+    - **Daily Insights Service:** Automated daily/weekly/monthly reports, real-time student status tracking, AI-powered pattern detection, proactive alerts (academic decline, behavioral issues, attendance, social isolation), priority action recommendations.
+    - **Psychological Depth Analysis:** Motivational profiling, family dynamics, peer relationships, developmental factors, holistic wellbeing planning.
+    - **Predictive Risk Timeline:** 24-hour to 1-week risk predictions with probability scores, behavior pattern detection, causal analysis, early intervention opportunities.
+    - **Hourly Action Planner:** Detailed daily action plans for counselors, morning briefings, priority-based task organization.
+    - **Student Timeline Analyzer:** Chronological event collection, pattern clustering, causal relationship mapping, turning point identification.
+    - **Comparative Multi-Student Analysis:** Class-level pattern detection, risk correlation across students, group dynamics analysis, prioritized recommendations.
+- **Notification & Automation System:**
+    - **Automated Notification Engine:** Multi-channel notifications (EMAIL, SMS, PUSH, IN_APP), template-based messaging, rule-based triggers, parent dashboard access, delivery tracking.
+    - **Intervention Effectiveness Tracking:** Pre/post metrics comparison, AI-powered effectiveness analysis, impact measurement, success pattern identification.
+    - **Intelligent Escalation System:** Automated escalation chains, response time tracking, risk-based priorities, multi-level notifications.
+- **Deep Analysis Engine:** Comprehensive student trajectory prediction, multi-dimensional risk assessment, personalized intervention planning, comparative analysis.
+- **Smart Recommendation Engine:** Priority student identification, intervention effectiveness prediction, resource recommendation system.
+- **Meeting Prep Assistant:** Parent meeting briefing, teacher collaboration planning, evidence-based intervention plan creation, automated meeting documentation.
+- **AI Dashboard:** Visualizes daily insights, critical alerts, positive updates, and recommended actions.
+- **Unified Scoring Engine:** Calculates 8 standardized scores (0-100) per student (Academic, Social-Emotional, Behavioral Risk, Attendance, Motivation, Health & Wellness, Overall Risk, Protective Factors).
+- **Deterministic Profile Analysis:** Consistent AI analysis using fixed prompts and zero temperature.
+- **Early Warning System:** Risk assessment pipeline, weighted thresholds, prioritized alerts, evidence-based interventions.
+- **Analytics Caching:** In-memory caching with configurable TTL and background processing.
 
 ### Authentication and Authorization
-
-**Role-Based Access Control (RBAC):** Four roles (Admin, Counselor, Teacher, Observer) with hierarchical permissions, defined in `client/lib/auth-context.tsx`.
-**Security:** Password hashing (bcryptjs), session-based authentication (via context), and permission guards on routes and components.
+- **Role-Based Access Control (RBAC):** Four roles (Admin, Counselor, Teacher, Observer) with hierarchical permissions.
+- **Security:** Password hashing (bcryptjs), session-based authentication, and permission guards.
 
 ### Build and Deployment
-
-**Build Process:** Two-stage build (client and server) using Vite, producing optimized bundles in `dist/`.
-**Deployment Target:** Configured for Replit VM, running `dist/server/production.mjs` on port 3000.
-**Database:** File-based SQLite (`data/data.db`) with automatic backups and schema migrations.
-**Environment Variables:** Optional `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables.
-
-## Recent Changes
-
-### October 10, 2025 - Advanced AI Features
-- ✅ Implemented Daily Insights Service with automated reporting
-- ✅ Added Proactive Alert System for real-time pattern detection
-- ✅ Built Deep Analysis Engine with trajectory predictions
-- ✅ Created Smart Recommendation Engine for prioritization
-- ✅ Developed Meeting Prep Assistant for counselor support
-- ✅ Added AI Insights Dashboard at `/ai-insights`
-- ✅ Database Migration 017: Added `daily_insights`, `student_daily_status`, `proactive_alerts` tables
-- ✅ Fixed UNIQUE constraint bug in daily insights UPSERT operations
-- ✅ Configured Vite HMR for Replit environment (WSS protocol)
-
-**API Endpoints Added:**
-- `POST /api/daily-insights/generate` - Generate daily insights
-- `GET /api/daily-insights/today` - Get today's insights
-- `GET /api/daily-insights/alerts` - Get proactive alerts
-- `POST /api/deep-analysis/:studentId` - Generate deep analysis
-- `POST /api/deep-analysis/batch` - Batch analysis
-- `GET /api/ai-assistant/recommendations/priority-students` - Priority list
-- `GET /api/ai-assistant/recommendations/interventions` - Intervention recommendations
-- `POST /api/ai-assistant/meeting-prep/parent` - Parent meeting prep
-- `POST /api/ai-assistant/meeting-prep/teacher` - Teacher meeting prep
+- **Build Process:** Two-stage build (client and server) using Vite.
+- **Deployment Target:** Replit VM, running `dist/server/production.mjs` on port 3000.
+- **Database:** File-based SQLite (`data/data.db`) with automatic backups and schema migrations.
+- **Environment Variables:** Supports `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables.
 
 ## External Dependencies
 
-### Core Runtime Dependencies
-
-**Frontend:** `react`, `react-router-dom`, `@tanstack/react-query`, `@tanstack/react-virtual`, Radix UI components.
-**Backend:** `express`, `better-sqlite3`, `bcryptjs`, `cors`, `dotenv`.
-**Shared:** `zod`, `xlsx`, `jspdf`.
+### Core Runtime
+- **Frontend:** `react`, `react-router-dom`, `@tanstack/react-query`, `@tanstack/react-virtual`, Radix UI.
+- **Backend:** `express`, `better-sqlite3`, `bcryptjs`, `cors`, `dotenv`.
+- **Shared:** `zod`, `xlsx`, `jspdf`.
 
 ### Third-Party Services
-
-1.  **OpenAI API:** Optional integration for AI features; requires `OPENAI_API_KEY`.
-2.  **Ollama:** Recommended for local, privacy-focused AI; runs on `localhost:11434`.
-3.  **MEB Integration (placeholder):** Configurable, not actively implemented.
-4.  **e-Okul API (placeholder):** Configurable, not actively implemented.
+- **OpenAI API:** Optional integration for AI features.
+- **Ollama:** Recommended for local, privacy-focused AI.
+- **MEB Integration:** Placeholder for future integration.
+- **e-Okul API:** Placeholder for future integration.
 
 ### Database
-
--   **SQLite Database:** `data/data.db`, uses `better-sqlite3` driver. Features automatic schema migrations, scheduled backups, and database triggers.
+- **SQLite Database:** `data/data.db` using `better-sqlite3` driver.
 
 ### Development Tools
-
--   **Vitest:** Unit testing.
--   **ESLint, Prettier:** Code quality and formatting.
--   **TypeScript:** Static type checking.
+- **Vitest, ESLint, Prettier, TypeScript.**
 
 ### Asset Management
-
--   **Fonts:** Inter (Google Fonts).
--   **Icons:** Lucide React.
--   **Charts:** Recharts.
+- **Fonts:** Inter.
+- **Icons:** Lucide React.
+- **Charts:** Recharts.
