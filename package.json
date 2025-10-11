@@ -46,6 +46,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "jspdf": "^3.0.3",
+    "openai": "^6.3.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.6",
     "rehype-raw": "^7.0.0",
