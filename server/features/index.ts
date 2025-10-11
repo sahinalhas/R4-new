@@ -29,6 +29,8 @@ import parentCommunicationRouter from './parent-communication/index.js';
 import reportsRouter from './reports/index.js';
 import notificationsRouter from './notifications/index.js';
 import interventionTrackingRouter from './intervention-tracking/index.js';
+import advancedReportsRouter from './advanced-reports/index.js';
+import backupRouter from './backup/routes/backup.routes.js';
 
 /**
  * Feature Registry
@@ -140,6 +142,7 @@ featureRegistry.use('/users', usersRouter);
 
 // =================== ANALYTICS DOMAIN ===================
 featureRegistry.use('/analytics', analyticsRouter);
+featureRegistry.use('/advanced-reports', advancedReportsRouter);
 
 // =================== AI FEATURES ===================
 featureRegistry.use('/ai-assistant', aiAssistantRouter);
@@ -160,5 +163,8 @@ featureRegistry.use('/reports', reportsRouter);
 // =================== NOTIFICATION & AUTOMATION ===================
 featureRegistry.use('/notifications', notificationsRouter);
 featureRegistry.use('/intervention-tracking', interventionTrackingRouter);
+
+// =================== DATA SECURITY & BACKUP ===================
+featureRegistry.use('/backup', backupRouter);
 
 export default featureRegistry;

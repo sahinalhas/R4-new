@@ -29,6 +29,8 @@ const StudyAssignments = lazy(() => import("./pages/StudyAssignments"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const InterventionTracking = lazy(() => import("./pages/InterventionTracking"));
 const ParentAccess = lazy(() => import("./pages/ParentAccess"));
+const SchoolDashboard = lazy(() => import("./pages/SchoolDashboard"));
+const BackupManagement = lazy(() => import("./pages/BackupManagement"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,6 +129,14 @@ const App = () => {
                   <Route
                     path="/veli-erisim"
                     element={<Suspense fallback={<LoadingFallback />}><ParentAccess /></Suspense>}
+                  />
+                  <Route
+                    path="/okul-dashboard"
+                    element={<Suspense fallback={<LoadingFallback />}><SchoolDashboard /></Suspense>}
+                  />
+                  <Route
+                    path="/yedekleme"
+                    element={<Suspense fallback={<LoadingFallback />}><BackupManagement /></Suspense>}
                   />
                 </Route>
                 <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />
