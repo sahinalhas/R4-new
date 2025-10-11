@@ -132,11 +132,21 @@ export default function AIAssistant() {
 
   const { data: modelsData } = useQuery<AIModelsResponse>({
     queryKey: ['/api/ai-assistant/models'],
+    queryFn: async () => {
+      const res = await fetch('/api/ai-assistant/models');
+      if (!res.ok) throw new Error('Failed to fetch models');
+      return res.json();
+    },
     refetchInterval: 10000
   });
 
   const { data: studentsData } = useQuery<{ students: any[] }>({
-    queryKey: ['/api/students']
+    queryKey: ['/api/students'],
+    queryFn: async () => {
+      const res = await fetch('/api/students');
+      if (!res.ok) throw new Error('Failed to fetch students');
+      return res.json();
+    }
   });
 
   const totalWords = useMemo(() => {

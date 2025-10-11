@@ -78,6 +78,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { useSidebar } from "@/components/ui/sidebar";
 
 function Brand() {
   return (
@@ -123,9 +124,30 @@ function useBreadcrumbs() {
   return crumbs;
 }
 
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, [matches, query]);
+
+  return matches;
+}
+
 export default function Rehber360Layout() {
+  const location = useLocation();
   const [dark, setDark] = useState(false);
   const [account, setAccount] = useState<AppSettings["account"] | undefined>(undefined);
+  const [open, setOpen] = useState<boolean | undefined>(undefined);
+  
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  
   const initials = useMemo(() => {
     const n = account?.displayName || "";
     const parts = n.trim().split(/\s+/).filter(Boolean);
@@ -133,17 +155,20 @@ export default function Rehber360Layout() {
     const second = parts[1]?.[0] || "";
     return (first + second).toUpperCase();
   }, [account]);
+  
   useEffect(() => {
     loadSettings().then(settings => {
       setDark(settings.theme === "dark");
       setAccount(settings.account);
     });
   }, []);
+  
   useEffect(() => {
     const root = document.documentElement;
     if (dark) root.classList.add("dark");
     else root.classList.remove("dark");
   }, [dark]);
+  
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === SETTINGS_KEY) {
@@ -158,6 +183,12 @@ export default function Rehber360Layout() {
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
+
+  useEffect(() => {
+    if (!isDesktop && open !== false) {
+      setOpen(false);
+    }
+  }, [location.pathname, isDesktop, open]);
 
   const crumbs = useBreadcrumbs();
   const navigate = useNavigate();
@@ -174,7 +205,7 @@ export default function Rehber360Layout() {
   }, []);
 
   return (
-    <SidebarProvider>
+    <SidebarProvider open={open} onOpenChange={setOpen} defaultOpen={isDesktop}>
       <Sidebar className="border-r" collapsible="icon">
         <SidebarHeader>
           <Brand />

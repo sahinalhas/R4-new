@@ -56,16 +56,16 @@ export class PatternAnalysisService {
 
     // Son 6 ayın sınav sonuçları
     const exams = this.db.prepare(`
-      SELECT grade, examDate, subject
+      SELECT totalScore, examDate, examName
       FROM exam_results
-      WHERE studentId = ? AND examDate >= date('now', '-6 months')
+      WHERE studentId = ? AND examDate >= date('now', '-6 months') AND totalScore IS NOT NULL
       ORDER BY examDate ASC
     `).all(studentId) as any[];
 
     if (exams.length < 3) return insights;
 
     // Not ortalaması trendi
-    const grades = exams.map(e => parseFloat(e.grade) || 0).filter(g => g > 0);
+    const grades = exams.map(e => parseFloat(e.totalScore) || 0).filter(g => g > 0);
     if (grades.length >= 3) {
       const recentAvg = grades.slice(-3).reduce((a, b) => a + b, 0) / 3;
       const earlierAvg = grades.slice(0, 3).reduce((a, b) => a + b, 0) / 3;
@@ -100,28 +100,9 @@ export class PatternAnalysisService {
       }
     }
 
-    // Belirli derslerde sürekli düşük performans
-    const subjectPerformance = new Map<string, number[]>();
-    exams.forEach(exam => {
-      if (!subjectPerformance.has(exam.subject)) {
-        subjectPerformance.set(exam.subject, []);
-      }
-      subjectPerformance.get(exam.subject)!.push(parseFloat(exam.grade) || 0);
-    });
-
-    subjectPerformance.forEach((grades, subject) => {
-      const avg = grades.reduce((a, b) => a + b, 0) / grades.length;
-      if (grades.length >= 2 && avg < 50) {
-        insights.push({
-          category: 'PATTERN',
-          severity: 'CRITICAL',
-          title: `${subject} Dersinde Sürekli Düşük Performans`,
-          description: `${subject} dersinde sürekli olarak düşük notlar alınıyor (ortalama: ${avg.toFixed(1)}).`,
-          evidence: grades.map((g, i) => `Sınav ${i+1}: ${g.toFixed(1)}`),
-          recommendation: `${subject} dersi için özel destek programı oluşturun. Öğrenme güçlüğü olabilir, RAM yönlendirmesi değerlendirilmeli.`
-        });
-      }
-    });
+    // Subject-specific analiz (ders bazlı performans takibi)
+    // Not: Şema değişikliği sonrası subject kolonu kaldırıldı
+    // TODO: Subject-specific score'lar (turkishScore, mathScore, etc.) için yeni analiz eklenecek
 
     return insights;
   }
@@ -262,9 +243,9 @@ export class PatternAnalysisService {
     `).get(studentId) as any;
 
     const recentGrades = this.db.prepare(`
-      SELECT AVG(CAST(grade AS REAL)) as avg
+      SELECT AVG(CAST(totalScore AS REAL)) as avg
       FROM exam_results
-      WHERE studentId = ? AND examDate >= date('now', '-2 months')
+      WHERE studentId = ? AND examDate >= date('now', '-2 months') AND totalScore IS NOT NULL
     `).get(studentId) as any;
 
     if (absenceCount.count >= 5 && recentGrades.avg < 60) {
