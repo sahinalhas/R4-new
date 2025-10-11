@@ -114,14 +114,6 @@ export default function SessionAnalytics() {
     gcTime: 5 * 60 * 1000,
   });
 
-  if (statsLoading || timeSeriesLoading || topicLoading || participantLoading || classLoading || modeLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   const topTopics = useMemo(() => {
     return (topicData || []).slice(0, 10);
   }, [topicData]);
@@ -137,6 +129,14 @@ export default function SessionAnalytics() {
   const optimizedClassData = useMemo(() => 
     classData || []
   , [classData]);
+
+  if (statsLoading || timeSeriesLoading || topicLoading || participantLoading || classLoading || modeLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
