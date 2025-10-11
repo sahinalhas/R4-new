@@ -67,19 +67,13 @@ export function createCounselingSession(req: Request, res: Response) {
 export function completeCounselingSession(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const { exitTime, exitClassHourId, detailedNotes, autoCompleted } = req.body;
+    const completionData = req.body;
     
-    if (!exitTime) {
+    if (!completionData.exitTime) {
       return res.status(400).json({ error: 'Çıkış saati gereklidir' });
     }
     
-    const result = service.completeCounselingSession(
-      id,
-      exitTime,
-      exitClassHourId || null,
-      detailedNotes || null,
-      autoCompleted || false
-    );
+    const result = service.completeCounselingSession(id, completionData);
     
     if (result.notFound) {
       return res.status(404).json({ error: 'Görüşme bulunamadı' });

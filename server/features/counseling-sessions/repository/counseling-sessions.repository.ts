@@ -47,7 +47,12 @@ function ensureInitialized(): void {
     completeSession: db.prepare(`
       UPDATE counseling_sessions 
       SET exitTime = ?, exitClassHourId = ?, detailedNotes = ?, 
-          autoCompleted = ?, completed = 1, updated_at = CURRENT_TIMESTAMP
+          autoCompleted = ?, completed = 1,
+          sessionFlow = ?, studentParticipationLevel = ?, cooperationLevel = ?,
+          emotionalState = ?, physicalState = ?, communicationQuality = ?,
+          sessionTags = ?, achievedOutcomes = ?, followUpNeeded = ?,
+          followUpPlan = ?, actionItems = ?,
+          updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `),
     extendSession: db.prepare(`
@@ -151,7 +156,18 @@ export function completeSession(
   exitTime: string,
   exitClassHourId: number | null,
   detailedNotes: string | null,
-  autoCompleted: boolean
+  autoCompleted: boolean,
+  sessionFlow?: string,
+  studentParticipationLevel?: string,
+  cooperationLevel?: number,
+  emotionalState?: string,
+  physicalState?: string,
+  communicationQuality?: string,
+  sessionTags?: string | null,
+  achievedOutcomes?: string | null,
+  followUpNeeded?: number,
+  followUpPlan?: string | null,
+  actionItems?: string | null
 ): { changes: number } {
   ensureInitialized();
   const result = statements.completeSession.run(
@@ -159,6 +175,17 @@ export function completeSession(
     exitClassHourId || null,
     detailedNotes || null,
     autoCompleted ? 1 : 0,
+    sessionFlow || null,
+    studentParticipationLevel || null,
+    cooperationLevel || null,
+    emotionalState || null,
+    physicalState || null,
+    communicationQuality || null,
+    sessionTags || null,
+    achievedOutcomes || null,
+    followUpNeeded || 0,
+    followUpPlan || null,
+    actionItems || null,
     id
   );
   return { changes: result.changes };

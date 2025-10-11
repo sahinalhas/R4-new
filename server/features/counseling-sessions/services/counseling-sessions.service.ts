@@ -79,20 +79,49 @@ export function createCounselingSession(data: any): { success: boolean; id: stri
 
 export function completeCounselingSession(
   id: string,
-  exitTime: string,
-  exitClassHourId: number | null,
-  detailedNotes: string | null,
-  autoCompleted: boolean
+  completionData: {
+    exitTime: string;
+    exitClassHourId: number | null;
+    detailedNotes: string | null;
+    sessionFlow?: string;
+    studentParticipationLevel?: string;
+    cooperationLevel?: number;
+    emotionalState?: string;
+    physicalState?: string;
+    communicationQuality?: string;
+    sessionTags?: string[];
+    achievedOutcomes?: string;
+    followUpNeeded?: boolean;
+    followUpPlan?: string;
+    actionItems?: any[];
+    autoCompleted?: boolean;
+  }
 ): { success: boolean; notFound?: boolean } {
   const sanitizedId = sanitizeString(id);
-  const sanitizedNotes = detailedNotes ? sanitizeString(detailedNotes) : null;
+  const sanitizedNotes = completionData.detailedNotes ? sanitizeString(completionData.detailedNotes) : null;
+  const sanitizedOutcomes = completionData.achievedOutcomes ? sanitizeString(completionData.achievedOutcomes) : null;
+  const sanitizedFollowUpPlan = completionData.followUpPlan ? sanitizeString(completionData.followUpPlan) : null;
+  
+  const sessionTags = completionData.sessionTags ? JSON.stringify(completionData.sessionTags) : null;
+  const actionItems = completionData.actionItems ? JSON.stringify(completionData.actionItems) : null;
   
   const result = repository.completeSession(
     sanitizedId,
-    exitTime,
-    exitClassHourId,
+    completionData.exitTime,
+    completionData.exitClassHourId,
     sanitizedNotes,
-    autoCompleted
+    completionData.autoCompleted || false,
+    completionData.sessionFlow,
+    completionData.studentParticipationLevel,
+    completionData.cooperationLevel,
+    completionData.emotionalState,
+    completionData.physicalState,
+    completionData.communicationQuality,
+    sessionTags,
+    sanitizedOutcomes,
+    completionData.followUpNeeded ? 1 : 0,
+    sanitizedFollowUpPlan,
+    actionItems
   );
   
   if (result.changes === 0) {

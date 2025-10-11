@@ -5,6 +5,7 @@ import * as remindersRoutes from './routes/reminders.routes.js';
 import * as followUpsRoutes from './routes/follow-ups.routes.js';
 import * as analyticsRoutes from './routes/analytics.routes.js';
 import * as outcomesRoutes from './routes/outcomes.routes.js';
+import * as tagsRoutes from './routes/tags.routes.js';
 import interventionAIRoutes from './routes/intervention-ai.routes.js';
 
 const router = Router();
@@ -13,6 +14,11 @@ router.get('/', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.g
 router.get('/active', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.getActiveCounselingSessions);
 router.get('/class-hours', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.getClassHours);
 router.get('/topics', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.getCounselingTopics);
+
+router.get('/tags', simpleRateLimit(200, 15 * 60 * 1000), tagsRoutes.getAllTags);
+router.get('/tags/suggest', simpleRateLimit(200, 15 * 60 * 1000), tagsRoutes.getSuggestedTags);
+router.get('/tags/category/:category', simpleRateLimit(200, 15 * 60 * 1000), tagsRoutes.getTagsByCategory);
+router.get('/tags/:id', simpleRateLimit(200, 15 * 60 * 1000), tagsRoutes.getTagDetails);
 
 router.get('/analytics/overview', simpleRateLimit(200, 15 * 60 * 1000), analyticsRoutes.getOverview);
 router.get('/analytics/time-series', simpleRateLimit(200, 15 * 60 * 1000), analyticsRoutes.getTimeSeries);
