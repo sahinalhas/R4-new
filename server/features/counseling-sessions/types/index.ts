@@ -1,3 +1,34 @@
+export type SessionFlow = 'çok_olumlu' | 'olumlu' | 'nötr' | 'sorunlu' | 'kriz';
+export type ParticipationLevel = 'çok_aktif' | 'aktif' | 'pasif' | 'dirençli' | 'kapalı';
+export type EmotionalState = 'sakin' | 'kaygılı' | 'üzgün' | 'sinirli' | 'mutlu' | 'karışık' | 'diğer';
+export type PhysicalState = 'normal' | 'yorgun' | 'huzursuz' | 'ajite';
+export type CommunicationQuality = 'açık' | 'ketum' | 'seçici' | 'kapalı';
+
+export interface SessionTag {
+  id: string;
+  label: string;
+  category: 'topic' | 'status' | 'action' | 'emotion' | 'custom';
+  color?: string;
+}
+
+export interface ActionItem {
+  id: string;
+  description: string;
+  assignedTo?: string;
+  dueDate?: string;
+  priority?: 'low' | 'medium' | 'high';
+  completed?: boolean;
+}
+
+export interface AIAnalysisData {
+  sentiment?: 'positive' | 'neutral' | 'negative';
+  keyThemes?: string[];
+  riskLevel?: 'low' | 'medium' | 'high';
+  recommendedActions?: string[];
+  confidenceScore?: number;
+  processedAt?: string;
+}
+
 export interface CounselingSession {
   id: string;
   sessionType: 'individual' | 'group';
@@ -23,6 +54,20 @@ export interface CounselingSession {
   institutionalCooperation?: string;
   sessionDetails?: string;
   detailedNotes?: string;
+  
+  sessionFlow?: SessionFlow;
+  studentParticipationLevel?: ParticipationLevel;
+  cooperationLevel?: number;
+  emotionalState?: EmotionalState;
+  physicalState?: PhysicalState;
+  communicationQuality?: CommunicationQuality;
+  sessionTags?: string;
+  achievedOutcomes?: string;
+  followUpNeeded?: number;
+  followUpPlan?: string;
+  actionItems?: string;
+  aiAnalysisData?: string;
+  
   completed: number;
   autoCompleted?: number;
   extensionGranted?: number;
