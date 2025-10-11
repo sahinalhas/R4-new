@@ -2,6 +2,12 @@ import { Download, Eye, Filter, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import type { CounselingSession } from "./types";
 import { calculateSessionDuration } from "./utils/sessionHelpers";
@@ -22,6 +28,53 @@ function getParticipantInfo(session: CounselingSession): string {
     return session.otherParticipantDescription;
   }
   return '';
+}
+
+function parseSessionTags(tags: string[] | string | undefined): string[] {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags;
+  try {
+    return JSON.parse(tags);
+  } catch {
+    return [];
+  }
+}
+
+function TagsCell({ tags }: { tags: string[] }) {
+  if (!tags || tags.length === 0) return <span className="text-xs text-muted-foreground">-</span>;
+
+  const visibleTags = tags.slice(0, 3);
+  const remainingCount = tags.length - 3;
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {visibleTags.map((tag, index) => (
+        <Badge key={index} variant="secondary" className="text-xs">
+          {tag}
+        </Badge>
+      ))}
+      {remainingCount > 0 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="text-xs cursor-help">
+                +{remainingCount}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="flex flex-wrap gap-1 max-w-xs">
+                {tags.slice(3).map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+    </div>
+  );
 }
 
 export default function SessionsTable({ sessions, onExport }: SessionsTableProps) {
@@ -63,6 +116,7 @@ export default function SessionsTable({ sessions, onExport }: SessionsTableProps
                   <th className="text-left px-4 py-3">Tip</th>
                   <th className="text-left px-4 py-3">Katılımcı</th>
                   <th className="text-left px-4 py-3">Konu</th>
+                  <th className="text-left px-4 py-3">Etiketler</th>
                   <th className="text-left px-4 py-3">Süre</th>
                   <th className="text-left px-4 py-3">Durum</th>
                   <th className="text-left px-4 py-3">Notlar</th>
@@ -75,6 +129,7 @@ export default function SessionsTable({ sessions, onExport }: SessionsTableProps
                     ? session.student?.name
                     : session.students?.map(s => s.name).join(', ') || session.groupName;
                   const participantInfo = getParticipantInfo(session);
+                  const tags = parseSessionTags(session.sessionTags);
 
                   return (
                     <tr key={session.id} className="border-b hover:bg-muted/50 transition-colors">
@@ -93,6 +148,9 @@ export default function SessionsTable({ sessions, onExport }: SessionsTableProps
                         {participantInfo || '-'}
                       </td>
                       <td className="px-4 py-3 text-sm max-w-xs truncate">{session.topic}</td>
+                      <td className="px-4 py-3 max-w-xs">
+                        <TagsCell tags={tags} />
+                      </td>
                       <td className="px-4 py-3 text-sm">{duration ? `${duration} dk` : '-'}</td>
                       <td className="px-4 py-3">
                         {session.completed ? (

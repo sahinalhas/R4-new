@@ -196,6 +196,7 @@ export interface CounselingSession {
   institutionalCooperation?: string;
   sessionDetails?: string;
   detailedNotes?: string;
+  sessionTags?: string[];
   autoCompleted: boolean;
   extensionGranted: boolean;
   completed: boolean;

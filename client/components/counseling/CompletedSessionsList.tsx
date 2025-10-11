@@ -1,7 +1,13 @@
-import { CheckCircle2, Calendar, Clock, User, Users, FileText } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, User, Users, FileText, Tag } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import type { CounselingSession } from "./types";
 import { calculateSessionDuration } from "./utils/sessionHelpers";
@@ -24,6 +30,54 @@ function getParticipantInfo(session: CounselingSession): string {
   return '';
 }
 
+function parseSessionTags(tags: string[] | string | undefined): string[] {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags;
+  try {
+    return JSON.parse(tags);
+  } catch {
+    return [];
+  }
+}
+
+function SessionTagsDisplay({ tags }: { tags: string[] }) {
+  if (!tags || tags.length === 0) return null;
+
+  const visibleTags = tags.slice(0, 3);
+  const remainingCount = tags.length - 3;
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap mt-2">
+      <Tag className="h-3 w-3 text-muted-foreground" />
+      {visibleTags.map((tag, index) => (
+        <Badge key={index} variant="secondary" className="text-xs">
+          {tag}
+        </Badge>
+      ))}
+      {remainingCount > 0 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="text-xs cursor-help">
+                +{remainingCount} etiket daha
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="flex flex-wrap gap-1 max-w-xs">
+                {tags.slice(3).map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+    </div>
+  );
+}
+
 export default function CompletedSessionsList({ sessions, onAddOutcome }: CompletedSessionsListProps) {
   if (sessions.length === 0) {
     return (
@@ -41,6 +95,7 @@ export default function CompletedSessionsList({ sessions, onAddOutcome }: Comple
       {sessions.map((session) => {
         const duration = calculateSessionDuration(session.entryTime, session.exitTime || '');
         const participantInfo = getParticipantInfo(session);
+        const tags = parseSessionTags(session.sessionTags);
         
         return (
           <Card key={session.id} className="hover:shadow-sm transition-shadow">
@@ -105,6 +160,7 @@ export default function CompletedSessionsList({ sessions, onAddOutcome }: Comple
                 <span>•</span>
                 <span>{session.topic}</span>
               </CardDescription>
+              <SessionTagsDisplay tags={tags} />
             </CardHeader>
             {session.detailedNotes && (
               <CardContent>

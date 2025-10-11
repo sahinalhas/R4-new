@@ -2,16 +2,27 @@ import * as repository from '../repository/counseling-sessions.repository.js';
 import { sanitizeString } from '../../../middleware/validation.js';
 import type { CounselingSession, CounselingSessionWithStudents, ClassHour, CounselingTopic, SessionFilters } from '../types/index.js';
 
+function safeParseJSON(jsonString: string | null | undefined, fallback: any = []): any {
+  if (!jsonString) return fallback;
+  try {
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error('Failed to parse JSON:', error);
+    return fallback;
+  }
+}
+
 export function getAllSessionsWithStudents(): CounselingSessionWithStudents[] {
   const sessions = repository.getAllSessions();
   
   return sessions.map((session) => {
+    const parsedTags = safeParseJSON(session.sessionTags, []);
     if (session.sessionType === 'group') {
       const students = repository.getStudentsBySessionId(session.id);
-      return { ...session, students };
+      return { ...session, sessionTags: parsedTags, students };
     } else {
       const student = repository.getStudentBySessionId(session.id);
-      return { ...session, student };
+      return { ...session, sessionTags: parsedTags, student };
     }
   });
 }
@@ -20,12 +31,13 @@ export function getActiveSessionsWithStudents(): CounselingSessionWithStudents[]
   const sessions = repository.getActiveSessions();
   
   return sessions.map((session) => {
+    const parsedTags = safeParseJSON(session.sessionTags, []);
     if (session.sessionType === 'group') {
       const students = repository.getStudentsBySessionId(session.id);
-      return { ...session, students };
+      return { ...session, sessionTags: parsedTags, students };
     } else {
       const student = repository.getStudentBySessionId(session.id);
-      return { ...session, student };
+      return { ...session, sessionTags: parsedTags, student };
     }
   });
 }
@@ -36,12 +48,13 @@ export function getSessionByIdWithStudents(id: string): CounselingSessionWithStu
   
   if (!session) return null;
   
+  const parsedTags = safeParseJSON(session.sessionTags, []);
   if (session.sessionType === 'group') {
     const students = repository.getStudentsBySessionId(sanitizedId);
-    return { ...session, students };
+    return { ...session, sessionTags: parsedTags, students };
   } else {
     const student = repository.getStudentBySessionId(sanitizedId);
-    return { ...session, student };
+    return { ...session, sessionTags: parsedTags, student };
   }
 }
 
@@ -272,12 +285,13 @@ export function getFilteredSessionsWithStudents(filters: any): CounselingSession
   const sessions = repository.getFilteredSessions(sanitizedFilters);
   
   return sessions.map((session) => {
+    const parsedTags = safeParseJSON(session.sessionTags, []);
     if (session.sessionType === 'group') {
       const students = repository.getStudentsBySessionId(session.id);
-      return { ...session, students };
+      return { ...session, sessionTags: parsedTags, students };
     } else {
       const student = repository.getStudentBySessionId(session.id);
-      return { ...session, student };
+      return { ...session, sessionTags: parsedTags, student };
     }
   });
 }
