@@ -15,6 +15,14 @@ import { migration014 } from './014-fix-additional-schema-columns';
 import { migration015 } from './015-fix-remaining-columns';
 import { migration016 } from './016-add-missing-coaching-columns';
 import { migration017 } from './017-daily-insights';
+import { up as migration018up, down as migration018down } from './018-notification-automation';
+
+const migration018 = {
+  version: 18,
+  name: 'notification-automation',
+  up: migration018up,
+  down: migration018down
+};
 
 const migrations = [
   migration001,
@@ -32,7 +40,8 @@ const migrations = [
   migration014,
   migration015,
   migration016,
-  migration017
+  migration017,
+  migration018
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {

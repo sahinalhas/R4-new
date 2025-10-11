@@ -114,6 +114,33 @@ Preferred communication style: Simple, everyday language.
    - Class-level insights (strengths, challenges, inequities, systemic issues)
    - Prioritized recommendations (class-wide, group-based, individual interventions)
 
+**Notification & Automation System (October 11, 2025):**
+1. **Automated Notification Engine** (`server/features/notifications/`)
+   - Multi-channel notifications (EMAIL, SMS, PUSH, IN_APP)
+   - Template-based messaging with variable substitution
+   - Rule-based notification triggers (risk alerts, interventions, progress updates)
+   - Parent dashboard access links with secure tokens
+   - Notification preferences and quiet hours
+   - Delivery tracking and retry mechanism
+   - Database: `notification_logs`, `notification_preferences`, `notification_templates`, `parent_access_tokens`, `scheduled_tasks`
+
+2. **Intervention Effectiveness Tracking** (`server/features/intervention-tracking/`)
+   - Pre/post intervention metrics comparison
+   - AI-powered effectiveness analysis
+   - Impact measurement (academic, behavioral, attendance, social-emotional)
+   - Success pattern identification
+   - Similar intervention recommendations
+   - Lessons learned database
+   - Database: `intervention_effectiveness`, `parent_feedback`
+
+3. **Intelligent Escalation System** (`server/features/intervention-tracking/`)
+   - Automated escalation chain (Counselor → Assistant Principal → Principal)
+   - Response time tracking
+   - Risk-based escalation priorities (critical < 2h, normal < 24h)
+   - Multi-level notification system
+   - Escalation metrics and analytics
+   - Database: `escalation_logs`
+
 2. **Deep Analysis Engine** (`server/features/deep-analysis/`)
    - Comprehensive student trajectory prediction (1-3 month outlook)
    - Multi-dimensional risk assessment (academic, social-emotional, behavioral, attendance)
