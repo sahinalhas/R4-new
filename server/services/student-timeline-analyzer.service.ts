@@ -177,22 +177,22 @@ class StudentTimelineAnalyzerService {
     });
 
     const behaviorEvents = this.db.prepare(`
-      SELECT date, type, severity, description, antecedent, behavior, consequence
+      SELECT incidentDate, behaviorType, intensity, description, antecedent, consequence
       FROM behavior_incidents
-      WHERE studentId = ? ${dateFilter}
-      ORDER BY date DESC
+      WHERE studentId = ? ${dateFilter.replace(/date/g, 'incidentDate')}
+      ORDER BY incidentDate DESC
     `).all(studentId) as any[];
 
     behaviorEvents.forEach(e => {
       events.push({
-        id: `behavior-${e.date}-${e.type}`,
-        date: e.date,
+        id: `behavior-${e.incidentDate}-${e.behaviorType}`,
+        date: e.incidentDate,
         eventType: 'DAVRANIŞSAL',
-        category: e.type,
-        title: `Davranış Olayı: ${e.type}`,
-        description: e.description || e.behavior,
+        category: e.behaviorType,
+        title: `Davranış Olayı: ${e.behaviorType}`,
+        description: e.description,
         impact: 'NEGATİF',
-        severity: e.severity === 'Ciddi' ? 'KRİTİK' : e.severity === 'Orta' ? 'YÜKSEK' : 'ORTA',
+        severity: e.intensity === 'YÜKSEK' ? 'KRİTİK' : e.intensity === 'ORTA' ? 'YÜKSEK' : 'ORTA',
         metadata: { antecedent: e.antecedent, consequence: e.consequence }
       });
     });

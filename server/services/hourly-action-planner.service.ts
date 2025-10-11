@@ -199,8 +199,8 @@ class HourlyActionPlannerService {
       SELECT s.id, s.name, COUNT(bi.id) as incidentCount
       FROM students s
       JOIN behavior_incidents bi ON s.id = bi.studentId
-      WHERE bi.createdAt >= datetime('now', '-14 days')
-        AND bi.severity IN ('Orta', 'Ciddi')
+      WHERE bi.incidentDate >= date('now', '-14 days')
+        AND bi.intensity IN ('ORTA', 'YÜKSEK')
       GROUP BY s.id, s.name
       HAVING incidentCount >= 2
       ORDER BY incidentCount DESC
@@ -218,11 +218,10 @@ class HourlyActionPlannerService {
 
   private async getScheduledAppointments(date: string): Promise<any[]> {
     const appointments = this.db.prepare(`
-      SELECT cs.*, s.name as studentName
+      SELECT cs.*
       FROM counseling_sessions cs
-      LEFT JOIN students s ON cs.studentId = s.id
       WHERE DATE(cs.sessionDate) = ?
-        AND cs.status != 'İPTAL'
+        AND cs.completed = 0
       ORDER BY cs.sessionDate
     `).all(date);
 
@@ -233,22 +232,20 @@ class HourlyActionPlannerService {
     const tasks: any[] = [];
 
     const pendingFollowUps = this.db.prepare(`
-      SELECT fu.*, s.name as studentName
+      SELECT fu.*
       FROM counseling_follow_ups fu
-      LEFT JOIN students s ON fu.studentId = s.id
-      WHERE DATE(fu.dueDate) <= ?
-        AND fu.status = 'BEKLEMEDE'
-      ORDER BY fu.dueDate
+      WHERE DATE(fu.followUpDate) <= ?
+        AND fu.status = 'pending'
+      ORDER BY fu.followUpDate
     `).all(date);
 
     tasks.push(...pendingFollowUps);
 
     const pendingReminders = this.db.prepare(`
-      SELECT r.*, s.name as studentName
+      SELECT r.*
       FROM counseling_reminders r
-      LEFT JOIN students s ON r.studentId = s.id
       WHERE DATE(r.reminderDate) = ?
-        AND r.status = 'BEKLEMEDE'
+        AND r.status = 'pending'
       ORDER BY r.reminderDate
     `).all(date);
 

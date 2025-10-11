@@ -114,7 +114,7 @@ export class PatternAnalysisService {
     const insights: PatternInsight[] = [];
 
     const incidents = this.db.prepare(`
-      SELECT behaviorCategory, severity, incidentDate, description
+      SELECT behaviorCategory, intensity, incidentDate, description
       FROM behavior_incidents
       WHERE studentId = ? AND incidentDate >= date('now', '-3 months')
       ORDER BY incidentDate ASC
