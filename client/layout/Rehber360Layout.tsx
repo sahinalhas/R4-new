@@ -113,6 +113,9 @@ function useBreadcrumbs() {
       risk: "Risk Takip",
       "ai-asistan": "AI Asistan",
       "ai-insights": "AI Insights",
+      "gelismis-analiz": "Gelişmiş Analiz",
+      "gunluk-plan": "Günlük Eylem Planı",
+      odevler: "Ödev Yönetimi",
     };
     const parts = location.pathname.split("/").filter(Boolean);
     return parts.map((p, i) => ({
@@ -293,11 +296,35 @@ export default function Rehber360Layout() {
                             </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink to="/gelismis-analiz">
+                              <Sparkles />
+                              <span>Gelişmiş Analiz</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink to="/gunluk-plan">
+                              <CalendarDays />
+                              <span>Günlük Plan</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
 
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Ödev Yönetimi">
+                    <NavLink to="/odevler">
+                      <FileText /> <span>Ödev Yönetimi</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Ayarlar">
                     <NavLink to="/ayarlar">
@@ -473,6 +500,30 @@ export default function Rehber360Layout() {
                   }}
                 >
                   AI Insights
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/gelismis-analiz");
+                    setCmdOpen(false);
+                  }}
+                >
+                  Gelişmiş Analiz
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/gunluk-plan");
+                    setCmdOpen(false);
+                  }}
+                >
+                  Günlük Eylem Planı
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/odevler");
+                    setCmdOpen(false);
+                  }}
+                >
+                  Ödev Yönetimi
                 </CommandItem>
                 <CommandItem
                   onSelect={() => {
