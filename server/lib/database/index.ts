@@ -1,4 +1,4 @@
-import { getDatabase as getDbConnection, closeDatabase } from './connection';
+import { getDatabase as getDbConnection } from './connection';
 import { initializeDatabaseSchema } from './schema';
 import { runDatabaseMigrations } from './migrations';
 import { setupDatabaseTriggers } from './triggers';
@@ -54,7 +54,6 @@ export function setupTriggers(): void {
 }
 
 export { 
-  closeDatabase,
   createBackup,
   cleanupOldBackups,
   scheduleAutoBackup

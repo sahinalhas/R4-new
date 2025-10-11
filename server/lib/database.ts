@@ -1,1 +1,1 @@
-export { default, initializeDatabase, runMigrations, setupTriggers, closeDatabase, createBackup, cleanupOldBackups, scheduleAutoBackup } from './database/index';
+export { default, initializeDatabase, runMigrations, setupTriggers, createBackup, cleanupOldBackups, scheduleAutoBackup } from './database/index';

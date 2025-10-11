@@ -49,10 +49,3 @@ export function getDatabase(): Database.Database {
   }
   return db;
 }
-
-export function closeDatabase(): void {
-  if (db) {
-    db.close();
-    db = null;
-  }
-}
