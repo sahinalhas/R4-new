@@ -33,8 +33,8 @@ export class AIProviderService {
 
   private constructor(config?: Partial<AIProviderConfig>) {
     this.config = {
-      provider: (config?.provider || process.env.AI_PROVIDER || 'ollama') as AIProvider,
-      model: config?.model || process.env.AI_MODEL || 'llama3.1',
+      provider: (config?.provider || 'ollama') as AIProvider,
+      model: config?.model || 'llama3.1',
       temperature: config?.temperature || 0,
       ollamaBaseUrl: config?.ollamaBaseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434'
     };
