@@ -178,7 +178,7 @@ export class PatternAnalysisService {
 
     const absences = this.db.prepare(`
       SELECT date, status, reason
-      FROM attendance_records
+      FROM attendance
       WHERE studentId = ? AND date >= date('now', '-3 months')
       AND status IN ('Devamsız', 'Geç')
       ORDER BY date ASC
