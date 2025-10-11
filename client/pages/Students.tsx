@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Plus, Trash2, Pencil, Search, Users, GraduationCap, Filter, Download, Eye, UserPlus } from "lucide-react";
+import { Upload, Plus, Trash2, Pencil, Search, Users, GraduationCap, Filter, Download, Eye, UserPlus, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
@@ -123,6 +123,9 @@ const StudentRow = memo(({
 
 StudentRow.displayName = 'StudentRow';
 
+type SortColumn = 'id' | 'ad' | 'soyad' | 'sinif' | 'cinsiyet' | 'risk';
+type SortDirection = 'asc' | 'desc' | null;
+
 export default function Students() {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounced(q, 300);
@@ -135,6 +138,8 @@ export default function Students() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
   const [confirmationName, setConfirmationName] = useState("");
+  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   useEffect(() => {
     // Load initial data from cache/localStorage first
@@ -153,8 +158,22 @@ export default function Students() {
     };
   }, []);
 
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortColumn(null);
+        setSortDirection(null);
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
   const list = useMemo(() => {
-    return students.filter((s) => {
+    let filtered = students.filter((s) => {
       const matchesQ = `${s.id} ${s.ad} ${s.soyad}`
         .toLowerCase()
         .includes(debouncedQ.toLowerCase());
@@ -163,7 +182,30 @@ export default function Students() {
         cinsiyet === "tum" || s.cinsiyet === (cinsiyet as "K" | "E");
       return matchesQ && matchesSinif && matchesC;
     });
-  }, [debouncedQ, sinif, cinsiyet, students]);
+
+    if (sortColumn && sortDirection) {
+      filtered = [...filtered].sort((a, b) => {
+        let aVal: string | number = a[sortColumn] || '';
+        let bVal: string | number = b[sortColumn] || '';
+
+        // Numeric sort for 'id'
+        if (sortColumn === 'id') {
+          aVal = parseInt(a.id) || 0;
+          bVal = parseInt(b.id) || 0;
+        } else {
+          // String comparison for other fields
+          aVal = String(aVal).toLowerCase();
+          bVal = String(bVal).toLowerCase();
+        }
+
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [debouncedQ, sinif, cinsiyet, students, sortColumn, sortDirection]);
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<Student>({
     defaultValues: {
@@ -833,12 +875,72 @@ export default function Students() {
               <Table>
                 <TableHeader className="sticky top-0 bg-background z-10 border-b">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-semibold">No</TableHead>
-                    <TableHead className="font-semibold">Ad</TableHead>
-                    <TableHead className="font-semibold">Soyad</TableHead>
-                    <TableHead className="font-semibold">Sınıf</TableHead>
-                    <TableHead className="font-semibold">Cinsiyet</TableHead>
-                    <TableHead className="font-semibold">Risk</TableHead>
+                    <TableHead className="font-semibold">
+                      <button 
+                        onClick={() => handleSort('id')}
+                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        No
+                        {sortColumn === 'id' ? (
+                          sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        ) : <ArrowUpDown className="h-4 w-4 opacity-50" />}
+                      </button>
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      <button 
+                        onClick={() => handleSort('ad')}
+                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        Ad
+                        {sortColumn === 'ad' ? (
+                          sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        ) : <ArrowUpDown className="h-4 w-4 opacity-50" />}
+                      </button>
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      <button 
+                        onClick={() => handleSort('soyad')}
+                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        Soyad
+                        {sortColumn === 'soyad' ? (
+                          sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        ) : <ArrowUpDown className="h-4 w-4 opacity-50" />}
+                      </button>
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      <button 
+                        onClick={() => handleSort('sinif')}
+                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        Sınıf
+                        {sortColumn === 'sinif' ? (
+                          sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        ) : <ArrowUpDown className="h-4 w-4 opacity-50" />}
+                      </button>
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      <button 
+                        onClick={() => handleSort('cinsiyet')}
+                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        Cinsiyet
+                        {sortColumn === 'cinsiyet' ? (
+                          sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        ) : <ArrowUpDown className="h-4 w-4 opacity-50" />}
+                      </button>
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      <button 
+                        onClick={() => handleSort('risk')}
+                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        Risk
+                        {sortColumn === 'risk' ? (
+                          sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                        ) : <ArrowUpDown className="h-4 w-4 opacity-50" />}
+                      </button>
+                    </TableHead>
                     <TableHead className="font-semibold">Profil</TableHead>
                     <TableHead className="font-semibold">İşlemler</TableHead>
                   </TableRow>
