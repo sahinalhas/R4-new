@@ -1,12 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { User, Activity } from "lucide-react";
-import {
   MAIN_TABS,
   GENEL_TABS,
   EGITSEL_TABS,
@@ -55,7 +48,7 @@ export function StudentProfileTabs({
   onUpdate,
 }: StudentProfileTabsProps) {
   return (
-    <Tabs defaultValue="genel">
+    <Tabs defaultValue="genel" className="space-y-4">
       <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
         {MAIN_TABS.map(({ value, label, icon: Icon }) => (
           <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
@@ -64,239 +57,253 @@ export function StudentProfileTabs({
         ))}
       </TabsList>
 
-      <TabsContent value="genel">
-        <Accordion type="single" collapsible defaultValue="ogrenci" className="space-y-2">
-          <AccordionItem value="ogrenci">
-            <AccordionTrigger className="text-base font-semibold">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Öğrenci Bilgileri
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <BasicInfoSection student={student} onUpdate={onUpdate} />
-            </AccordionContent>
-          </AccordionItem>
+      <TabsContent value="genel" className="mt-4">
+        <Tabs defaultValue="ogrenci" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1">
+            {GENEL_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-          <AccordionItem value="saglik">
-            <AccordionTrigger className="text-base font-semibold">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Sağlık Bilgileri
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <StandardizedHealthSection
+          <TabsContent value="ogrenci">
+            <BasicInfoSection student={student} onUpdate={onUpdate} />
+          </TabsContent>
+
+          <TabsContent value="saglik">
+            <StandardizedHealthSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      <TabsContent value="aile" className="mt-4">
+        <Tabs defaultValue="veli-gorusmeleri" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {AILE_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="veli-gorusmeleri">
+            <VeliGorusmeleriSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="ev-ziyaretleri">
+            <EvZiyaretleriSection
+              studentId={studentId}
+              homeVisits={data.homeVisits}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="aile-katilim">
+            <AileKatilimiSection
+              studentId={studentId}
+              familyParticipation={data.familyParticipation}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      <TabsContent value="egitsel" className="mt-4">
+        <Tabs defaultValue="akademik" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {EGITSEL_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="akademik">
+            <StandardizedAcademicSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="calisma-programi">
+            <CalismaProgramiSection studentId={studentId} />
+          </TabsContent>
+
+          <TabsContent value="ozel-egitim">
+            <OzelEgitimSection
+              studentId={studentId}
+              specialEducation={data.specialEducation}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="mudahaleler">
+            <MudahalelerSection
+              studentId={studentId}
+              interventions={data.interventions}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="ilerleme">
+            <IlerlemeTakibiSection
+              studentId={studentId}
+              achievements={data.achievements}
+              selfAssessments={data.selfAssessments}
+              todaysAssessment={data.todaysAssessment}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="anketler">
+            <AnketlerSection
+              studentId={studentId}
+              surveyResults={data.surveyResults}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      <TabsContent value="kisisel-gelisim" className="mt-4">
+        <Tabs defaultValue="sosyal-duygusal" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {KISISEL_GELISIM_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="sosyal-duygusal">
+            <div className="space-y-6">
+              <StandardizedSocialEmotionalSection
                 studentId={studentId}
                 onUpdate={onUpdate}
               />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+              <StandardizedTalentsSection
+                studentId={studentId}
+                onUpdate={onUpdate}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="davranis">
+            <div className="space-y-6">
+              <DavranisTakibiSection
+                studentId={studentId}
+                behaviorIncidents={data.behaviorIncidents}
+                onUpdate={onUpdate}
+              />
+              <StandardizedBehaviorSection
+                studentId={studentId}
+                onUpdate={onUpdate}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="risk">
+            <div className="space-y-6">
+              <RiskDegerlendirmeSection
+                studentId={studentId}
+                riskFactors={data.riskFactors}
+                onUpdate={onUpdate}
+              />
+              <RiskProtectiveProfileSection
+                studentId={studentId}
+                onUpdate={onUpdate}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="gorusmeler">
+            <GorusmelerSection
+              studentId={studentId}
+              notes={data.notes}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="kisilik">
+            <KisilikProfiliSection
+              studentId={studentId}
+              multipleIntelligence={data.multipleIntelligence}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="360-degerlendirme">
+            <Degerlendirme360Section
+              studentId={studentId}
+              evaluations360={data.evaluations360}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </Tabs>
       </TabsContent>
 
-      <TabsContent value="aile">
-        <Accordion type="single" collapsible defaultValue="veli-gorusmeleri" className="space-y-2">
-          {AILE_TABS.map(({ value, label, icon: Icon }) => (
-            <AccordionItem key={value} value={value}>
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                {value === "veli-gorusmeleri" && (
-                  <VeliGorusmeleriSection
-                    studentId={studentId}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "ev-ziyaretleri" && (
-                  <EvZiyaretleriSection
-                    studentId={studentId}
-                    homeVisits={data.homeVisits}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "aile-katilim" && (
-                  <AileKatilimiSection
-                    studentId={studentId}
-                    familyParticipation={data.familyParticipation}
-                    onUpdate={onUpdate}
-                  />
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </TabsContent>
+      <TabsContent value="mesleki" className="mt-4">
+        <Tabs defaultValue="hedefler" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {MESLEKI_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-      <TabsContent value="egitsel">
-        <Accordion type="single" collapsible defaultValue="akademik" className="space-y-2">
-          {EGITSEL_TABS.map(({ value, label, icon: Icon }) => (
-            <AccordionItem key={value} value={value}>
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                {value === "akademik" && (
-                  <StandardizedAcademicSection
-                    studentId={studentId}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "calisma-programi" && (
-                  <CalismaProgramiSection studentId={studentId} />
-                )}
-                {value === "ozel-egitim" && (
-                  <OzelEgitimSection
-                    studentId={studentId}
-                    specialEducation={data.specialEducation}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "mudahaleler" && (
-                  <MudahalelerSection
-                    studentId={studentId}
-                    interventions={data.interventions}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "ilerleme" && (
-                  <IlerlemeTakibiSection
-                    studentId={studentId}
-                    achievements={data.achievements}
-                    selfAssessments={data.selfAssessments}
-                    todaysAssessment={data.todaysAssessment}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "anketler" && (
-                  <AnketlerSection
-                    studentId={studentId}
-                    surveyResults={data.surveyResults}
-                    onUpdate={onUpdate}
-                  />
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </TabsContent>
+          <TabsContent value="hedefler">
+            <div className="space-y-6">
+              <HedeflerPlanlamaSection
+                studentId={studentId}
+                academicGoals={data.academicGoals}
+                onUpdate={onUpdate}
+              />
+              <MotivationProfileSection
+                studentId={studentId}
+                onUpdate={onUpdate}
+              />
+            </div>
+          </TabsContent>
 
-      <TabsContent value="kisisel-gelisim">
-        <Accordion type="single" collapsible defaultValue="sosyal-duygusal" className="space-y-2">
-          {KISISEL_GELISIM_TABS.map(({ value, label, icon: Icon }) => (
-            <AccordionItem key={value} value={value}>
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                {value === "sosyal-duygusal" && (
-                  <div className="space-y-6">
-                    <StandardizedSocialEmotionalSection
-                      studentId={studentId}
-                      onUpdate={onUpdate}
-                    />
-                    <StandardizedTalentsSection
-                      studentId={studentId}
-                      onUpdate={onUpdate}
-                    />
-                  </div>
-                )}
-                {value === "davranis" && (
-                  <div className="space-y-6">
-                    <DavranisTakibiSection
-                      studentId={studentId}
-                      behaviorIncidents={data.behaviorIncidents}
-                      onUpdate={onUpdate}
-                    />
-                    <StandardizedBehaviorSection
-                      studentId={studentId}
-                      onUpdate={onUpdate}
-                    />
-                  </div>
-                )}
-                {value === "risk" && (
-                  <div className="space-y-6">
-                    <RiskDegerlendirmeSection
-                      studentId={studentId}
-                      riskFactors={data.riskFactors}
-                      onUpdate={onUpdate}
-                    />
-                    <RiskProtectiveProfileSection
-                      studentId={studentId}
-                      onUpdate={onUpdate}
-                    />
-                  </div>
-                )}
-                {value === "gorusmeler" && (
-                  <GorusmelerSection
-                    studentId={studentId}
-                    notes={data.notes}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "kisilik" && (
-                  <KisilikProfiliSection
-                    studentId={studentId}
-                    multipleIntelligence={data.multipleIntelligence}
-                    onUpdate={onUpdate}
-                  />
-                )}
-                {value === "360-degerlendirme" && (
-                  <Degerlendirme360Section
-                    studentId={studentId}
-                    evaluations360={data.evaluations360}
-                    onUpdate={onUpdate}
-                  />
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </TabsContent>
-
-      <TabsContent value="mesleki">
-        <Accordion type="single" collapsible defaultValue="hedefler" className="space-y-2">
-          {MESLEKI_TABS.map(({ value, label, icon: Icon }) => (
-            <AccordionItem key={value} value={value}>
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                {value === "hedefler" && (
-                  <div className="space-y-6">
-                    <HedeflerPlanlamaSection
-                      studentId={studentId}
-                      academicGoals={data.academicGoals}
-                      onUpdate={onUpdate}
-                    />
-                    <MotivationProfileSection
-                      studentId={studentId}
-                      onUpdate={onUpdate}
-                    />
-                  </div>
-                )}
-                {value === "kariyer" && (
-                  <div className="p-6 text-center text-muted-foreground">
-                    Kariyer planlama bölümü yakında eklenecek
-                  </div>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+          <TabsContent value="kariyer">
+            <div className="p-6 text-center text-muted-foreground">
+              Kariyer planlama bölümü yakında eklenecek
+            </div>
+          </TabsContent>
+        </Tabs>
       </TabsContent>
     </Tabs>
   );
