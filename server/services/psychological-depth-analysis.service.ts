@@ -387,129 +387,327 @@ Yanıtını JSON formatında ver (TypeScript PsychologicalDepthAnalysis tipine u
   }
 
   private generateFallbackAnalysis(studentId: string, context: any): PsychologicalDepthAnalysis {
+    const academic = context.academic || {};
+    const behavioral = context.behavioral || {};
+    const socialEmotional = context.socialEmotional || {};
+    const attendance = context.attendance || {};
+    const risk = context.risk || {};
+    const interventions = context.interventions || {};
+    const talentsInterests = context.talentsInterests || {};
+    const patterns = context.patternInsights || [];
+
+    const academicPerf = academic.gpa || 0;
+    const performanceTrend = academic.performanceTrend || 'stable';
+    const hasPositiveBehavior = (behavioral.positiveCount || 0) > (behavioral.negativeCount || 0);
+    const attendanceRate = attendance.rate || 0;
+    const riskLevel = risk.level || 'DÜŞÜK';
+    const hasActiveInterventions = (interventions.activeInterventions || []).length > 0;
+
+    const motivationLevel = academicPerf >= 70 && performanceTrend === 'improving' ? 'YÜKSEK' : 
+                           academicPerf < 50 && performanceTrend === 'declining' ? 'DÜŞÜK' : 'ORTA';
+    
+    const learningOrientation = performanceTrend === 'improving' ? 'ÖĞRENME_ODAKLI' : 
+                               performanceTrend === 'declining' ? 'KAÇINMA_ODAKLI' : 'KARMA';
+
+    const selCompetencies = socialEmotional.competencies || {};
+    const avgSEL = Object.values(selCompetencies).length > 0 ?
+      (Object.values(selCompetencies).reduce((a: any, b: any) => Number(a) + Number(b), 0) as number) / Object.values(selCompetencies).length : 5;
+
+    const socialIntegrationLevel = avgSEL >= 7 ? 'İYİ_ENTEGRE' : avgSEL < 4 ? 'İZOLE' : 'ORTA_ENTEGRE';
+    const friendshipQuality = avgSEL >= 7 ? 'SAĞLIKLI' : avgSEL < 4 ? 'SORUNLU' : 'GELIŞEN';
+
+    const hasAttendanceIssues = attendanceRate < 80 || (attendance.recentAbsences || 0) >= 5;
+    const hasBehaviorIssues = (behavioral.negativeCount || 0) >= 3;
+    const isHighRisk = riskLevel === 'YÜKSEK' || riskLevel === 'ÇOK_YÜKSEK';
+
+    const criticalPatterns = patterns.filter((p: any) => p.severity === 'CRITICAL');
+    const warningPatterns = patterns.filter((p: any) => p.severity === 'WARNING');
+
     return {
       studentId,
       studentName: context.student.name,
       analysisDate: new Date().toISOString(),
       motivationalProfile: {
         intrinsicMotivation: {
-          level: 'ORTA',
-          indicators: ['Veri yetersizliği nedeniyle detaylı analiz yapılamadı'],
-          developmentAreas: ['Daha fazla veri toplama gerekiyor']
+          level: motivationLevel,
+          indicators: [
+            academicPerf >= 70 ? 'Akademik başarı motivasyon göstergesi' : 'Akademik performans düşük',
+            performanceTrend === 'improving' ? 'Gelişen performans trendi' : performanceTrend === 'declining' ? 'Düşen performans trendi' : 'Stabil performans',
+            ...(talentsInterests.interests || []).length > 0 ? ['İlgi alanları belirlenmiş'] : []
+          ],
+          developmentAreas: [
+            academicPerf < 60 ? 'Akademik motivasyon artırma' : 'Motivasyonu sürdürme',
+            ...(talentsInterests.interests || []).length === 0 ? ['İlgi alanları keşfi'] : []
+          ]
         },
         extrinsicMotivation: {
-          level: 'ORTA',
-          primaryDrivers: ['Belirlenemedi'],
-          effectiveRewards: ['Bireysel değerlendirme gerekli']
+          level: hasPositiveBehavior ? 'ORTA' : 'DÜŞÜK',
+          primaryDrivers: [
+            hasPositiveBehavior ? 'Olumlu pekiştirme etkili' : 'Dışsal motivatörler zayıf',
+            ...(interventions.activeInterventions || []).length > 0 ? ['Müdahale programlarına yanıt'] : []
+          ],
+          effectiveRewards: [
+            'Akademik başarı takdiri',
+            'Sosyal kabul ve onay',
+            ...(talentsInterests.talents || []).length > 0 ? ['Yetenek alanlarında fırsatlar'] : []
+          ]
         },
-        learningOrientation: 'KARMA',
+        learningOrientation: learningOrientation,
         goalSetting: {
-          quality: 'GELİŞTİRİLEBİLİR',
-          autonomy: 50,
-          recommendations: ['Hedef belirleme becerilerini gözlemle ve destekle']
+          quality: hasActiveInterventions ? 'GELİŞTİRİLEBİLİR' : academicPerf >= 70 ? 'ETKİLİ' : 'ZAYIF',
+          autonomy: Math.min(100, Math.max(0, academicPerf)),
+          recommendations: [
+            academicPerf < 60 ? 'SMART hedef belirleme desteği' : 'Hedef takibi ve değerlendirme',
+            'Özerklik ve sorumluluk artırma'
+          ]
         },
         resilienceFactors: {
-          strengths: ['Değerlendirme gerekli'],
-          vulnerabilities: ['Değerlendirme gerekli'],
-          copingStrategies: ['Değerlendirme gerekli']
+          strengths: [
+            ...(talentsInterests.talents || []),
+            attendanceRate >= 90 ? 'Yüksek devam düzenli' : attendanceRate >= 80 ? 'İyi devam' : '',
+            hasPositiveBehavior ? 'Olumlu davranış kapasitesi' : '',
+            ...risk.protectiveFactors || []
+          ].filter(Boolean),
+          vulnerabilities: [
+            isHighRisk ? `${riskLevel} risk seviyesi` : '',
+            hasAttendanceIssues ? 'Devamsızlık sorunu' : '',
+            hasBehaviorIssues ? 'Davranışsal zorluklar' : '',
+            academicPerf < 50 ? 'Akademik güçlük' : ''
+          ].filter(Boolean),
+          copingStrategies: [
+            ...(interventions.recentSessions || []).map((s: any) => `${s.type} görüşmeleri`),
+            hasActiveInterventions ? 'Aktif müdahale programları' : 'Temel destek mekanizmaları'
+          ]
         }
       },
       familyDynamics: {
         parentalInvolvement: {
-          level: 'İNCELENEMEDİ',
-          quality: 'BELİRSİZ',
-          communicationPatterns: ['Aile görüşmesi yapılmalı'],
-          improvementAreas: ['Önce mevcut durum değerlendirilmeli']
+          level: (interventions.recentSessions || []).some((s: any) => s.type === 'Veli') ? 'ORTA' : 'İNCELENEMEDİ',
+          quality: hasAttendanceIssues || hasBehaviorIssues ? 'KARMA' : 'BELİRSİZ',
+          communicationPatterns: [
+            (interventions.recentSessions || []).some((s: any) => s.type === 'Veli') ? 
+              'Okul ile iletişim mevcut' : 'Aile iletişimi sınırlı'
+          ],
+          improvementAreas: ['Düzenli aile görüşmeleri', 'Ev-okul işbirliği güçlendirme']
         },
         familyStructure: {
-          type: 'Bilinmiyor',
-          stabilityLevel: 'UNKNOWN',
-          impactOnStudent: ['Aile görüşmesi gerekli']
+          type: 'Mevcut verilerden belirlenemedi',
+          stabilityLevel: isHighRisk ? 'UNSTABLE' : 'UNKNOWN',
+          impactOnStudent: [
+            isHighRisk ? 'Aile faktörleri risk seviyesini etkileyebilir' : 'Aile desteği değerlendirilmeli'
+          ]
         },
         socioeconomicFactors: {
-          indicators: ['Veri yok'],
+          indicators: ['Detaylı sosyoekonomik veri yok'],
           resourceAvailability: 'BELİRSİZ',
-          supportNeeds: ['Değerlendirme yapılmalı']
+          supportNeeds: [
+            isHighRisk ? 'Kapsamlı aile desteği' : 'Standart kaynak desteği',
+            'Sosyoekonomik durum değerlendirmesi'
+          ]
         },
         culturalContext: {
-          factors: ['Bilinmiyor'],
-          considerationsForIntervention: ['Aile ve öğrenci ile görüşme gerekli']
+          factors: ['Kültürel faktörler değerlendirilmeli'],
+          considerationsForIntervention: [
+            'Kültürel hassasiyet',
+            'Aile değerleri ve beklentileri göz önünde bulundurma'
+          ]
         },
         familySupport: {
-          emotionalSupport: 50,
-          academicSupport: 50,
-          practicalSupport: 50,
-          recommendations: ['Aile ile görüşme planla']
+          emotionalSupport: attendanceRate >= 90 ? 70 : attendanceRate >= 80 ? 50 : 30,
+          academicSupport: academicPerf >= 70 ? 70 : academicPerf >= 50 ? 50 : 30,
+          practicalSupport: hasAttendanceIssues ? 30 : 50,
+          recommendations: [
+            'Aile katılım programları',
+            hasAttendanceIssues || hasBehaviorIssues ? 'Yoğunlaştırılmış aile danışmanlığı' : 'Düzenli aile iletişimi'
+          ]
         }
       },
       peerRelationships: {
         socialIntegration: {
-          level: 'ORTA_ENTEGRE',
-          friendshipQuality: 'GELIŞEN',
-          peerAcceptance: 50,
-          indicators: ['Gözlem ve değerlendirme gerekli']
+          level: socialIntegrationLevel,
+          friendshipQuality: friendshipQuality,
+          peerAcceptance: Math.min(100, Math.max(0, avgSEL * 10)),
+          indicators: [
+            ...(socialEmotional.strengths || []),
+            avgSEL >= 7 ? 'Güçlü sosyal yetkinlikler' : 'Sosyal beceri gelişimi gerekli'
+          ]
         },
         socialSkills: {
-          strengths: ['Değerlendirilmeli'],
-          challenges: ['Değerlendirilmeli'],
-          developmentPriorities: ['Sosyometrik değerlendirme yapılmalı']
+          strengths: socialEmotional.strengths || ['Değerlendirilmeli'],
+          challenges: socialEmotional.challenges || ['Değerlendirilmeli'],
+          developmentPriorities: [
+            avgSEL < 5 ? 'Temel sosyal beceriler' : 'İleri sosyal yetkinlikler',
+            ...(socialEmotional.challenges || []).slice(0, 2)
+          ]
         },
         peerInfluence: {
-          positiveInfluences: ['Gözlem gerekli'],
-          negativeInfluences: ['Gözlem gerekli'],
-          riskFactors: ['Değerlendirme yapılmalı'],
-          protectiveActions: ['Önce risk değerlendirmesi']
+          positiveInfluences: hasPositiveBehavior ? ['Olumlu akran etkileşimleri mevcut'] : [],
+          negativeInfluences: hasBehaviorIssues ? ['Olumsuz akran etkisi olasılığı'] : [],
+          riskFactors: [
+            ...(risk.factors || []).filter((f: string) => f.includes('akran') || f.includes('sosyal')),
+            socialIntegrationLevel === 'İZOLE' ? 'Sosyal izolasyon riski' : ''
+          ].filter(Boolean),
+          protectiveActions: [
+            'Olumlu akran gruplarına yönlendirme',
+            socialIntegrationLevel === 'İZOLE' ? 'Sosyal entegrasyon programı' : 'Akran desteği sürdürme'
+          ]
         },
         bullying: {
-          victimIndicators: [],
-          perpetratorIndicators: [],
+          victimIndicators: socialIntegrationLevel === 'İZOLE' ? ['Sosyal izolasyon', 'Gözlem gerekli'] : [],
+          perpetratorIndicators: hasBehaviorIssues ? ['Davranış sorunları', 'Gözlem gerekli'] : [],
           bystanderBehavior: [],
-          interventionNeeds: ['Dikkatli gözlem yapılmalı']
+          interventionNeeds: [
+            ...(socialIntegrationLevel === 'İZOLE' || hasBehaviorIssues ? ['Zorbalık tarama'] : []),
+            'Güvenli okul ortamı protokolleri'
+          ]
         },
         socialEmotionalCompetencies: {
-          selfAwareness: 50,
-          selfManagement: 50,
-          socialAwareness: 50,
-          relationshipSkills: 50,
-          responsibleDecisionMaking: 50,
-          focusAreas: ['SEL değerlendirmesi yapılmalı']
+          selfAwareness: Math.min(100, (selCompetencies['Öz-farkındalık'] || 5) * 10),
+          selfManagement: Math.min(100, (selCompetencies['Duygu Düzenleme'] || 5) * 10),
+          socialAwareness: Math.min(100, (selCompetencies['Empati'] || 5) * 10),
+          relationshipSkills: Math.min(100, (selCompetencies['İlişki Becerileri'] || 5) * 10),
+          responsibleDecisionMaking: Math.min(100, (selCompetencies['Sorumlu Karar Verme'] || 5) * 10),
+          focusAreas: [
+            ...Object.entries(selCompetencies)
+              .filter(([_, v]: any) => v < 5)
+              .map(([k, _]: any) => k),
+            ...(Object.keys(selCompetencies).length === 0 ? ['Kapsamlı SEL değerlendirmesi'] : [])
+          ]
         }
       },
       developmentalFactors: {
         ageAppropriatenesss: {
-          academicDevelopment: 'UYGUN',
-          socialDevelopment: 'UYGUN',
-          emotionalDevelopment: 'UYGUN',
-          considerations: ['Detaylı gelişimsel değerlendirme önerilir']
+          academicDevelopment: academicPerf >= 70 ? 'İLERİDE' : academicPerf < 50 ? 'GECİKMİŞ' : 'UYGUN',
+          socialDevelopment: avgSEL >= 7 ? 'İLERİDE' : avgSEL < 4 ? 'GECİKMİŞ' : 'UYGUN',
+          emotionalDevelopment: avgSEL >= 7 && !hasBehaviorIssues ? 'UYGUN' : hasBehaviorIssues ? 'GECİKMİŞ' : 'UYGUN',
+          considerations: [
+            context.student.age ? `${context.student.age} yaş gelişim özellikleri` : 'Yaş bilgisi değerlendirilmeli',
+            'Sınıf seviyesi beklentileri',
+            ...(academicPerf < 50 || hasBehaviorIssues ? ['Gelişimsel değerlendirme gerekli'] : [])
+          ]
         },
-        criticalDevelopmentalNeeds: ['Gelişimsel tarama yapılmalı'],
+        criticalDevelopmentalNeeds: [
+          ...(academicPerf < 50 ? ['Akademik gelişim desteği'] : []),
+          ...(avgSEL < 4 ? ['Sosyal-duygusal gelişim'] : []),
+          ...(hasBehaviorIssues ? ['Davranışsal düzenleme becerileri'] : []),
+          ...(criticalPatterns.length === 0 && warningPatterns.length === 0 ? ['Gelişimsel izleme'] : [])
+        ],
         transitions: {
-          currentTransitions: ['Değerlendirilmeli'],
-          supportNeeded: ['Değerlendirilmeli'],
-          expectedChallenges: ['Değerlendirilmeli']
+          currentTransitions: [
+            `${context.student.grade} sınıf geçişi`,
+            ...(isHighRisk ? ['Risk durumu yönetimi'] : [])
+          ],
+          supportNeeded: [
+            'Geçiş dönemleri desteği',
+            ...(isHighRisk ? ['Yoğunlaştırılmış rehberlik'] : ['Standart rehberlik desteği'])
+          ],
+          expectedChallenges: [
+            ...(performanceTrend === 'declining' ? ['Akademik zorluklar artabilir'] : []),
+            ...(hasBehaviorIssues ? ['Davranış yönetimi zorluğu'] : []),
+            'Sosyal uyum'
+          ]
         }
       },
       synthesisAndRecommendations: {
-        keyPsychologicalThemes: ['Yeterli veri yok - kapsamlı değerlendirme gerekli'],
-        primaryConcerns: ['Veri toplama ve değerlendirme öncelikli'],
-        strengthsToLeverage: ['Öğrenci ile bireysel görüşme yapılmalı'],
+        keyPsychologicalThemes: [
+          motivationLevel === 'DÜŞÜK' ? 'Motivasyon kaybı' : motivationLevel === 'YÜKSEK' ? 'Güçlü motivasyon' : 'Karma motivasyon profili',
+          socialIntegrationLevel === 'İZOLE' ? 'Sosyal izolasyon' : 'Sosyal gelişim süreci',
+          ...(criticalPatterns.map((p: any) => p.title)),
+          ...(isHighRisk ? [`${riskLevel} risk durumu`] : [])
+        ],
+        primaryConcerns: [
+          ...(academicPerf < 50 ? ['Akademik başarısızlık riski'] : []),
+          ...(hasAttendanceIssues ? ['Kronik devamsızlık'] : []),
+          ...(hasBehaviorIssues ? ['Davranışsal problemler'] : []),
+          ...(socialIntegrationLevel === 'İZOLE' ? ['Sosyal izolasyon'] : []),
+          ...(criticalPatterns.length === 0 && warningPatterns.length === 0 && !isHighRisk ? ['Genel gelişim takibi'] : [])
+        ],
+        strengthsToLeverage: [
+          ...(talentsInterests.talents || []),
+          ...(talentsInterests.interests || []),
+          ...(risk.protectiveFactors || []),
+          attendanceRate >= 90 ? 'Yüksek devam motivasyonu' : '',
+          hasPositiveBehavior ? 'Olumlu davranış potansiyeli' : ''
+        ].filter(Boolean),
         criticalInterventions: [
-          {
-            area: 'Veri Toplama',
-            priority: 'YÜKSEK',
-            intervention: 'Kapsamlı değerlendirme süreci başlat',
-            rationale: 'Etkili müdahale için yeterli veri gerekli',
-            expectedOutcome: 'Öğrenci ihtiyaçlarının net belirlenmesi',
-            timeline: '2-4 hafta'
-          }
+          ...(isHighRisk ? [{
+            area: 'Risk Yönetimi',
+            priority: 'ACİL' as const,
+            intervention: `${riskLevel} risk seviyesi için acil müdahale`,
+            rationale: 'Öğrenci güvenliği ve refahı kritik',
+            expectedOutcome: 'Risk seviyesi azaltma ve stabilizasyon',
+            timeline: '1-2 hafta'
+          }] : []),
+          ...(academicPerf < 50 ? [{
+            area: 'Akademik Destek',
+            priority: 'YÜKSEK' as const,
+            intervention: 'Yoğunlaştırılmış akademik destek programı',
+            rationale: `Düşük akademik performans (${academicPerf.toFixed(1)})`,
+            expectedOutcome: 'Akademik performans artışı',
+            timeline: '6-8 hafta'
+          }] : []),
+          ...(hasBehaviorIssues ? [{
+            area: 'Davranış Desteği',
+            priority: 'YÜKSEK' as const,
+            intervention: 'Olumlu davranış desteği (PBS) programı',
+            rationale: `${behavioral.negativeCount} davranış olayı`,
+            expectedOutcome: 'Davranış iyileşmesi',
+            timeline: '4-6 hafta'
+          }] : []),
+          ...(hasAttendanceIssues ? [{
+            area: 'Devam Artırma',
+            priority: 'YÜKSEK' as const,
+            intervention: 'Devamsızlık müdahale programı ve aile desteği',
+            rationale: `%${attendanceRate.toFixed(0)} devam oranı`,
+            expectedOutcome: 'Düzenli okul devamı',
+            timeline: '3-4 hafta'
+          }] : []),
+          ...(socialIntegrationLevel === 'İZOLE' ? [{
+            area: 'Sosyal Entegrasyon',
+            priority: 'ORTA' as const,
+            intervention: 'Sosyal beceri geliştirme ve akran desteği',
+            rationale: 'Sosyal izolasyon tespit edildi',
+            expectedOutcome: 'Gelişmiş sosyal ilişkiler',
+            timeline: '8-10 hafta'
+          }] : [])
         ],
         counselingApproach: {
-          recommendedModality: 'Önce tanıma ve değerlendirme',
-          therapeuticTechniques: ['Değerlendirme sonrası belirlenecek'],
-          sessionFrequency: 'Değerlendirme aşamasında haftada 1',
-          involvementNeeded: ['Öğrenci', 'Aile', 'Öğretmenler']
+          recommendedModality: isHighRisk ? 'Yoğun bireysel danışmanlık' : 
+                              hasBehaviorIssues || hasAttendanceIssues ? 'Bireysel ve aile danışmanlığı' : 
+                              'Bireysel ve grup danışmanlığı',
+          therapeuticTechniques: [
+            motivationLevel === 'DÜŞÜK' ? 'Motivasyonel görüşme' : 'Güçlendirme yaklaşımı',
+            hasBehaviorIssues ? 'Bilişsel-davranışçı teknikler' : 'Çözüm odaklı terapi',
+            avgSEL < 5 ? 'Sosyal-duygusal öğrenme' : 'Pozitif psikoloji',
+            ...(criticalPatterns.length > 0 ? ['Travma-bilinçli yaklaşım'] : [])
+          ],
+          sessionFrequency: isHighRisk ? 'Haftada 2-3 kez' : 
+                           hasBehaviorIssues || hasAttendanceIssues ? 'Haftada 1-2 kez' : 
+                           'İki haftada 1',
+          involvementNeeded: [
+            'Öğrenci (bireysel)',
+            ...(hasBehaviorIssues || hasAttendanceIssues || isHighRisk ? ['Aile (zorunlu)'] : ['Aile (önerilen)']),
+            ...(academicPerf < 50 ? ['Öğretmenler (akademik destek)'] : []),
+            ...(socialIntegrationLevel === 'İZOLE' ? ['Akran mentorları'] : [])
+          ]
         },
-        holisticWellbeingPlan: 'AI servisi kullanılamıyor. Kapsamlı değerlendirme sonrası plan oluşturulmalı.'
+        holisticWellbeingPlan: `${context.student.name} için bütüncül iyilik hali planı: ${
+          isHighRisk ? 'ACİL risk müdahalesi ile başla. ' : ''
+        }${
+          academicPerf < 50 ? 'Akademik destek programına al. ' : academicPerf >= 70 ? 'Akademik başarıyı sürdür. ' : ''
+        }${
+          hasBehaviorIssues ? 'Davranış desteği uygula. ' : 'Olumlu davranışları pekiştir. '
+        }${
+          hasAttendanceIssues ? 'Devam sorunu için aile ile çalış. ' : ''
+        }${
+          socialIntegrationLevel === 'İZOLE' ? 'Sosyal entegrasyon programına dahil et. ' : ''
+        }${
+          avgSEL < 5 ? 'SEL yetkinliklerini geliştir. ' : ''
+        }${
+          (talentsInterests.talents || []).length > 0 ? `Yeteneklerini kullan: ${(talentsInterests.talents || []).join(', ')}. ` : ''
+        }Düzenli izleme ve değerlendirme yap. ${
+          patterns.length > 0 ? `Tespit edilen pattern'lere özel müdahale et: ${patterns.slice(0, 3).map((p: any) => p.title).join(', ')}.` : ''
+        }`
       }
     };
   }

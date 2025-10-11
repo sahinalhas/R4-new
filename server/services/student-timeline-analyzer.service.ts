@@ -331,18 +331,28 @@ Yanıtını JSON formatında ver (TypeScript StudentTimeline tipine uygun).`;
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
-        return {
+        
+        const validatedTimeline = {
           studentId,
           studentName,
           generatedAt: new Date().toISOString(),
           timelineStart: events[0]?.date || new Date().toISOString().split('T')[0],
           timelineEnd: events[events.length - 1]?.date || new Date().toISOString().split('T')[0],
           chronologicalEvents: events,
-          ...parsed
+          patternClusters: Array.isArray(parsed.patternClusters) ? parsed.patternClusters : [],
+          causalRelationships: Array.isArray(parsed.causalRelationships) ? parsed.causalRelationships : [],
+          turningPoints: Array.isArray(parsed.turningPoints) ? parsed.turningPoints : [],
+          trendAnalysis: parsed.trendAnalysis || this.generateFallbackTimeline(studentId, studentName, events).trendAnalysis,
+          criticalPeriods: Array.isArray(parsed.criticalPeriods) ? parsed.criticalPeriods : [],
+          successMoments: Array.isArray(parsed.successMoments) ? parsed.successMoments : [],
+          insights: parsed.insights || this.generateFallbackTimeline(studentId, studentName, events).insights
         };
+        
+        return validatedTimeline;
       }
     } catch (error) {
-      console.error('Parse error:', error);
+      console.error('Timeline parse error:', error);
+      console.log('Falling back to rule-based timeline generation...');
     }
 
     return this.generateFallbackTimeline(studentId, studentName, events);

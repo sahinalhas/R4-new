@@ -298,16 +298,29 @@ Yanıtını JSON formatında ver (TypeScript ComparativeAnalysisReport tipine uy
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
-        return {
+        
+        const fallback = this.generateBasicAnalysisFromText(classId, students, '');
+        
+        const validatedReport = {
           analysisDate: new Date().toISOString(),
           classId: classId !== 'custom' ? classId : undefined,
           className: students[0]?.className,
           studentCount: students.length,
-          ...parsed
+          studentComparisons: Array.isArray(parsed.studentComparisons) ? parsed.studentComparisons : fallback.studentComparisons,
+          classPatterns: Array.isArray(parsed.classPatterns) ? parsed.classPatterns : fallback.classPatterns,
+          riskCorrelations: Array.isArray(parsed.riskCorrelations) ? parsed.riskCorrelations : fallback.riskCorrelations,
+          groupDynamics: parsed.groupDynamics || fallback.groupDynamics,
+          classLevelMetrics: parsed.classLevelMetrics || fallback.classLevelMetrics,
+          comparativeInsights: parsed.comparativeInsights || fallback.comparativeInsights,
+          prioritizedRecommendations: Array.isArray(parsed.prioritizedRecommendations) ? parsed.prioritizedRecommendations : fallback.prioritizedRecommendations,
+          successStories: Array.isArray(parsed.successStories) ? parsed.successStories : fallback.successStories
         };
+        
+        return validatedReport;
       }
     } catch (error) {
-      console.error('Parse error:', error);
+      console.error('Comparative analysis parse error:', error);
+      console.log('Falling back to context-based analysis...');
     }
 
     return this.generateBasicAnalysisFromText(classId, students, response);

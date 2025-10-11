@@ -148,7 +148,7 @@ class HourlyActionPlannerService {
         temperature: 0.3
       });
 
-      return this.parseDailyPlanResponse(date, counselorName, response);
+      return this.parseDailyPlanResponse(date, counselorName, response, studentsNeedingAttention);
     } catch (error) {
       console.error('Daily plan generation error:', error);
       return this.generateFallbackDailyPlan(date, counselorName, studentsNeedingAttention);
@@ -321,23 +321,41 @@ ${JSON.stringify(tasks, null, 2)}
 Yanıtını JSON formatında ver (TypeScript CounselorDailyPlan tipine uygun).`;
   }
 
-  private parseDailyPlanResponse(date: string, counselorName: string, response: string): CounselorDailyPlan {
+  private parseDailyPlanResponse(date: string, counselorName: string, response: string, priorityStudents: any[]): CounselorDailyPlan {
     try {
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
-        return {
+        
+        const fallbackPlan = this.generateFallbackDailyPlan(date, counselorName, priorityStudents);
+        
+        const validatedPlan = {
           date,
           counselorName,
           generatedAt: new Date().toISOString(),
-          ...parsed
+          dailySummary: parsed.dailySummary || fallbackPlan.dailySummary,
+          morningBriefing: parsed.morningBriefing || fallbackPlan.morningBriefing,
+          hourlySchedule: Array.isArray(parsed.hourlySchedule) && parsed.hourlySchedule.length > 0 
+            ? parsed.hourlySchedule 
+            : fallbackPlan.hourlySchedule,
+          priorities: parsed.priorities || fallbackPlan.priorities,
+          flexibilityRecommendations: parsed.flexibilityRecommendations || fallbackPlan.flexibilityRecommendations,
+          endOfDayChecklist: Array.isArray(parsed.endOfDayChecklist) && parsed.endOfDayChecklist.length > 0
+            ? parsed.endOfDayChecklist 
+            : fallbackPlan.endOfDayChecklist,
+          tomorrowPrep: Array.isArray(parsed.tomorrowPrep) && parsed.tomorrowPrep.length > 0
+            ? parsed.tomorrowPrep 
+            : fallbackPlan.tomorrowPrep
         };
+        
+        return validatedPlan;
       }
     } catch (error) {
-      console.error('Parse error:', error);
+      console.error('JSON parse error:', error);
+      console.log('Falling back to database-driven plan generation...');
     }
 
-    return this.generateBasicPlanFromText(date, counselorName, response);
+    return this.generateFallbackDailyPlan(date, counselorName, priorityStudents);
   }
 
   private generateBasicPlanFromText(date: string, counselorName: string, text: string): CounselorDailyPlan {
