@@ -14,6 +14,7 @@ import SurveyStats from "@/components/surveys/SurveyStats";
 import TemplatesList from "@/components/surveys/TemplatesList";
 import DistributionsList from "@/components/surveys/DistributionsList";
 import TemplateSelector from "@/components/surveys/TemplateSelector";
+import SurveyAIAnalysis from "@/components/ai/SurveyAIAnalysis";
 
 export default function Surveys() {
   const { toast } = useToast();
@@ -22,6 +23,7 @@ export default function Surveys() {
   const { questions, loadQuestions, clearQuestions } = useTemplateQuestions();
   
   const [selectedTemplate, setSelectedTemplate] = useState<SurveyTemplate | null>(null);
+  const [selectedDistributionForAI, setSelectedDistributionForAI] = useState<any>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   const loading = templatesLoading || distributionsLoading;
@@ -112,6 +114,7 @@ export default function Surveys() {
           <TabsTrigger value="distributions">Dağıtımlar</TabsTrigger>
           <TabsTrigger value="responses">Yanıtlar</TabsTrigger>
           <TabsTrigger value="analytics">Analiz</TabsTrigger>
+          <TabsTrigger value="ai-analysis">AI Analiz</TabsTrigger>
         </TabsList>
 
         <TabsContent value="templates" className="space-y-4">
@@ -148,6 +151,48 @@ export default function Surveys() {
 
         <TabsContent value="analytics" className="space-y-4">
           <SurveyAnalyticsTab distributions={distributions} />
+        </TabsContent>
+
+        <TabsContent value="ai-analysis" className="space-y-4">
+          {distributions.length > 0 ? (
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Dağıtım Seçin</CardTitle>
+                  <CardDescription>AI analizi için bir anket dağıtımı seçin</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-2">
+                    {distributions.map(dist => (
+                      <Button
+                        key={dist.id}
+                        variant="outline"
+                        className="justify-start h-auto p-4"
+                        onClick={() => setSelectedDistributionForAI(dist)}
+                      >
+                        <div className="text-left">
+                          <div className="font-medium">{dist.title}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {dist.targetClasses?.join(', ') || 'Tüm Sınıflar'} • {new Date(dist.startDate).toLocaleDateString('tr-TR')}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {selectedDistributionForAI && (
+                <SurveyAIAnalysis distributionId={String(selectedDistributionForAI.id)} />
+              )}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <p>Henüz anket dağıtımı bulunmuyor</p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
 

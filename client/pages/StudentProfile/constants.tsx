@@ -21,6 +21,8 @@ import {
   Sparkles,
   Database,
   Shield,
+  Mail,
+  Bot,
 } from "lucide-react";
 
 export const MAIN_TABS = [
@@ -86,6 +88,11 @@ export const EGITSEL_TABS = [
     icon: ShieldAlert,
   },
   {
+    value: "ai-mudahale",
+    label: "AI Müdahale Planı",
+    icon: Bot,
+  },
+  {
     value: "ilerleme",
     label: "İlerleme",
     icon: Trophy,
@@ -94,6 +101,11 @@ export const EGITSEL_TABS = [
     value: "anketler",
     label: "Anketler",
     icon: PieChart,
+  },
+  {
+    value: "ai-raporlar",
+    label: "AI Raporlar",
+    icon: Sparkles,
   },
 ] as const;
 
@@ -158,5 +170,10 @@ export const AILE_TABS = [
     value: "aile-katilim",
     label: "Aile Katılımı",
     icon: Star,
+  },
+  {
+    value: "ai-iletisim",
+    label: "AI İletişim Asistanı",
+    icon: Mail,
   },
 ] as const;

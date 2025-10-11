@@ -5,6 +5,7 @@ import * as questionsRoutes from './routes/modules/questions.routes.js';
 import * as distributionsRoutes from './routes/modules/distributions.routes.js';
 import * as responsesRoutes from './routes/modules/responses.routes.js';
 import * as analyticsRoutes from './routes/modules/analytics.routes.js';
+import aiAnalysisRoutes from './routes/ai-analysis.routes.js';
 
 const router = Router();
 
@@ -40,5 +41,8 @@ router.delete("/survey-responses/:id", simpleRateLimit(30, 15 * 60 * 1000), resp
 router.get("/survey-analytics/:distributionId", simpleRateLimit(150, 15 * 60 * 1000), analyticsRoutes.getSurveyAnalytics);
 router.get("/survey-analytics/:distributionId/question/:questionId", simpleRateLimit(150, 15 * 60 * 1000), analyticsRoutes.getSurveyQuestionAnalytics);
 router.get("/survey-statistics/:distributionId", simpleRateLimit(150, 15 * 60 * 1000), analyticsRoutes.getDistributionStatistics);
+
+// ============= AI ANALYSIS ROUTES =============
+router.use("/ai-analysis", simpleRateLimit(50, 15 * 60 * 1000), aiAnalysisRoutes);
 
 export default router;

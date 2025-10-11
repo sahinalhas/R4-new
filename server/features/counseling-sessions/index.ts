@@ -5,6 +5,7 @@ import * as remindersRoutes from './routes/reminders.routes.js';
 import * as followUpsRoutes from './routes/follow-ups.routes.js';
 import * as analyticsRoutes from './routes/analytics.routes.js';
 import * as outcomesRoutes from './routes/outcomes.routes.js';
+import interventionAIRoutes from './routes/intervention-ai.routes.js';
 
 const router = Router();
 
@@ -51,5 +52,8 @@ router.put('/:id/complete', simpleRateLimit(50, 15 * 60 * 1000), counselingSessi
 router.put('/:id/extend', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.extendCounselingSession);
 router.get('/:id', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.getCounselingSessionById);
 router.delete('/:id', simpleRateLimit(20, 15 * 60 * 1000), counselingSessionsRoutes.deleteCounselingSession);
+
+// AI-Powered Intervention Recommendations
+router.use('/interventions', simpleRateLimit(30, 15 * 60 * 1000), interventionAIRoutes);
 
 export default router;

@@ -25,6 +25,8 @@ import aiAssistantRouter from './ai-assistant/index.js';
 import dailyInsightsRouter from './daily-insights/index.js';
 import deepAnalysisRouter from './deep-analysis/index.js';
 import advancedAIAnalysisRouter from './advanced-ai-analysis/index.js';
+import parentCommunicationRouter from './parent-communication/index.js';
+import reportsRouter from './reports/index.js';
 
 /**
  * Feature Registry
@@ -148,5 +150,9 @@ featureRegistry.use('/deep-analysis', deepAnalysisRouter);
 
 // =================== ADVANCED AI ANALYSIS ===================
 featureRegistry.use('/advanced-ai-analysis', advancedAIAnalysisRouter);
+
+// =================== AI-POWERED FEATURES (NEW) ===================
+featureRegistry.use('/parent-communication', parentCommunicationRouter);
+featureRegistry.use('/reports', reportsRouter);
 
 export default featureRegistry;

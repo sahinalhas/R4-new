@@ -27,6 +27,9 @@ import ComparativeReports from "@/components/analytics/ComparativeReports";
 import ProgressCharts from "@/components/analytics/ProgressCharts";
 import EarlyWarningSystem from "@/components/analytics/EarlyWarningSystem";
 
+// AI Components
+import BulkAnalysisDashboard from "@/components/ai/BulkAnalysisDashboard";
+
 // Chart Components
 import {
   SuccessMetricCard,
@@ -62,6 +65,7 @@ import {
   RefreshCw,
   FileText,
   Mail,
+  Brain,
 } from "lucide-react";
 
 // =================== OVERVIEW DASHBOARD ===================
@@ -558,7 +562,7 @@ export default function Reports() {
 
       {/* Ana İçerik */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview" className="gap-2">
             <Eye className="h-4 w-4" />
             Genel Bakış
@@ -578,6 +582,10 @@ export default function Reports() {
           <TabsTrigger value="warnings" className="gap-2">
             <AlertTriangle className="h-4 w-4" />
             Erken Uyarı
+          </TabsTrigger>
+          <TabsTrigger value="ai-analysis" className="gap-2">
+            <Brain className="h-4 w-4" />
+            AI Analiz
           </TabsTrigger>
           <TabsTrigger value="settings" className="gap-2">
             <Settings className="h-4 w-4" />
@@ -648,6 +656,12 @@ export default function Reports() {
             >
               {loadedTabs.has("warnings") && <EarlyWarningSystem key={refreshKey} />}
             </PermissionGuard>
+          </div>
+        )}
+
+        {activeTab === "ai-analysis" && (
+          <div className="mt-4">
+            {loadedTabs.has("ai-analysis") && <BulkAnalysisDashboard key={refreshKey} />}
           </div>
         )}
 

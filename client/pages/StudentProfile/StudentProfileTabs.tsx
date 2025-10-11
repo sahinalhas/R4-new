@@ -34,6 +34,10 @@ import StandardizedBehaviorSection from "@/components/student-profile/sections/S
 import MotivationProfileSection from "@/components/student-profile/sections/MotivationProfileSection";
 import RiskProtectiveProfileSection from "@/components/student-profile/sections/RiskProtectiveProfileSection";
 
+import ParentCommunication from "@/components/ai/ParentCommunication";
+import InterventionRecommendations from "@/components/ai/InterventionRecommendations";
+import AutoReportGenerator from "@/components/ai/AutoReportGenerator";
+
 interface StudentProfileTabsProps {
   student: Student;
   studentId: string;
@@ -122,6 +126,13 @@ export function StudentProfileTabs({
               onUpdate={onUpdate}
             />
           </TabsContent>
+
+          <TabsContent value="ai-iletisim">
+            <ParentCommunication
+              studentId={studentId}
+              studentName={`${student.ad} ${student.soyad}`}
+            />
+          </TabsContent>
         </Tabs>
       </TabsContent>
 
@@ -182,6 +193,20 @@ export function StudentProfileTabs({
               studentId={studentId}
               surveyResults={data.surveyResults}
               onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="ai-mudahale">
+            <InterventionRecommendations
+              studentId={studentId}
+              studentName={`${student.ad} ${student.soyad}`}
+            />
+          </TabsContent>
+
+          <TabsContent value="ai-raporlar">
+            <AutoReportGenerator
+              studentId={studentId}
+              studentName={`${student.ad} ${student.soyad}`}
             />
           </TabsContent>
         </Tabs>
