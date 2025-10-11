@@ -375,11 +375,59 @@ export default function Rehber360Layout() {
                 </CommandItem>
                 <CommandItem
                   onSelect={() => {
+                    navigate("/anketler");
+                    setCmdOpen(false);
+                  }}
+                >
+                  Anket & Test
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
                     navigate("/raporlar");
                     setCmdOpen(false);
                   }}
                 >
                   Raporlama
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/etkinlikler");
+                    setCmdOpen(false);
+                  }}
+                >
+                  Etkinlikler
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/risk");
+                    setCmdOpen(false);
+                  }}
+                >
+                  Risk Takip
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/ai-asistan");
+                    setCmdOpen(false);
+                  }}
+                >
+                  AI Asistan
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/ai-insights");
+                    setCmdOpen(false);
+                  }}
+                >
+                  AI Insights
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    navigate("/istatistik");
+                    setCmdOpen(false);
+                  }}
+                >
+                  İstatistikler
                 </CommandItem>
                 <CommandItem
                   onSelect={() => {
