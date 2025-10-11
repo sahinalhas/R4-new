@@ -94,15 +94,15 @@ function useBreadcrumbs() {
     const map: Record<string, string> = {
       "": "Ana Sayfa",
       ogrenci: "Öğrenci Yönetimi",
-      gorusmeler: "Görüşme & Randevu",
+      gorusmeler: "Görüşmeler",
       anketler: "Anket & Test",
       raporlar: "Raporlama",
       etkinlikler: "Etkinlikler",
       ayarlar: "Ayarlar",
       risk: "Risk Takip",
       istatistik: "İstatistikler",
-      "ai-asistan": "AI Rehber Asistan",
-      "ai-insights": "AI Günlük Insights",
+      "ai-asistan": "AI Asistan",
+      "ai-insights": "AI Insights",
     };
     const parts = location.pathname.split("/").filter(Boolean);
     return parts.map((p, i) => ({
