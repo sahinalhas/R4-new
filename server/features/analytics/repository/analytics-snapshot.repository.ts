@@ -1,5 +1,12 @@
 import { getDatabase } from '../../../lib/database/connection.js';
-import type { StudentAnalytics, EarlyWarning } from '../services/analytics.service.js';
+import type { StudentAnalytics } from '../services/analytics.service.js';
+import {
+  calculateAcademicTrend,
+  calculateRiskScore,
+  getRiskLevel,
+  generateEarlyWarnings,
+  calculateStudyConsistency
+} from '../utils/analytics-calculations.js';
 
 export interface SnapshotData {
   student_id: string;
@@ -90,6 +97,7 @@ export function refreshAnalyticsSnapshot(): number {
     const riskScore = calculateRiskScore(attendanceRate, academicTrend, row.total_sessions);
     const riskLevel = getRiskLevel(riskScore);
     const earlyWarnings = generateEarlyWarnings(row.student_name, attendanceRate, academicTrend, row.total_sessions);
+    const studyConsistency = calculateStudyConsistency(row.total_sessions);
     
     upsertStmt.run(
       row.student_id,
@@ -100,7 +108,7 @@ export function refreshAnalyticsSnapshot(): number {
       Math.max(0, 100 - riskScore),
       attendanceRate,
       academicTrend,
-      row.total_sessions > 0 ? 70 : 50,
+      studyConsistency,
       row.avg_exam_score || 0,
       row.total_sessions,
       JSON.stringify(earlyWarnings)
@@ -141,110 +149,4 @@ export function snapshotToStudentAnalytics(snapshot: SnapshotData): StudentAnaly
     studyConsistency: snapshot.study_consistency,
     earlyWarnings: snapshot.early_warnings ? JSON.parse(snapshot.early_warnings) : []
   };
-}
-
-function calculateAcademicTrend(examDataJson: string | null): number {
-  if (!examDataJson) return 0;
-  
-  try {
-    const exams = JSON.parse(examDataJson);
-    if (!Array.isArray(exams) || exams.length < 2) return 0;
-    
-    const scores = exams
-      .filter((e: any) => e && e.score != null)
-      .map((e: any) => e.score)
-      .slice(0, 5);
-    
-    if (scores.length < 2) return 0;
-    
-    let trend = 0;
-    for (let i = 1; i < scores.length; i++) {
-      trend += scores[i] - scores[i - 1];
-    }
-    
-    return Math.round(trend / (scores.length - 1));
-  } catch {
-    return 0;
-  }
-}
-
-function calculateRiskScore(attendanceRate: number, academicTrend: number, sessionCount: number): number {
-  let risk = 0;
-  
-  if (attendanceRate < 70) risk += 40;
-  else if (attendanceRate < 85) risk += 20;
-  else if (attendanceRate < 95) risk += 5;
-  
-  if (academicTrend < -10) risk += 30;
-  else if (academicTrend < -5) risk += 15;
-  else if (academicTrend < 0) risk += 5;
-  
-  if (sessionCount > 5) risk += 20;
-  else if (sessionCount > 3) risk += 10;
-  
-  return Math.min(100, risk);
-}
-
-function getRiskLevel(riskScore: number): string {
-  if (riskScore >= 70) return 'Kritik';
-  if (riskScore >= 50) return 'Yüksek';
-  if (riskScore >= 30) return 'Orta';
-  return 'Düşük';
-}
-
-function generateEarlyWarnings(
-  studentName: string,
-  attendanceRate: number,
-  academicTrend: number,
-  sessionCount: number
-): EarlyWarning[] {
-  const warnings: EarlyWarning[] = [];
-  
-  if (attendanceRate < 70) {
-    warnings.push({
-      studentName,
-      warningType: 'attendance',
-      severity: 'kritik',
-      message: 'Devamsızlık oranı kritik seviyede',
-      priority: 10
-    });
-  } else if (attendanceRate < 85) {
-    warnings.push({
-      studentName,
-      warningType: 'attendance',
-      severity: 'yüksek',
-      message: 'Devamsızlık oranı yüksek',
-      priority: 7
-    });
-  }
-  
-  if (academicTrend < -10) {
-    warnings.push({
-      studentName,
-      warningType: 'academic',
-      severity: 'kritik',
-      message: 'Akademik performansta ciddi düşüş',
-      priority: 9
-    });
-  } else if (academicTrend < -5) {
-    warnings.push({
-      studentName,
-      warningType: 'academic',
-      severity: 'yüksek',
-      message: 'Akademik performansta düşüş',
-      priority: 6
-    });
-  }
-  
-  if (sessionCount > 5) {
-    warnings.push({
-      studentName,
-      warningType: 'behavioral',
-      severity: 'yüksek',
-      message: 'Sık görüşme ihtiyacı',
-      priority: 5
-    });
-  }
-  
-  return warnings;
 }
