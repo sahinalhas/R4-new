@@ -6,6 +6,7 @@ import * as followUpsRoutes from './routes/follow-ups.routes.js';
 import * as analyticsRoutes from './routes/analytics.routes.js';
 import * as outcomesRoutes from './routes/outcomes.routes.js';
 import * as tagsRoutes from './routes/tags.routes.js';
+import * as aiExportRoutes from './routes/ai-export.routes.js';
 import interventionAIRoutes from './routes/intervention-ai.routes.js';
 
 const router = Router();
@@ -58,6 +59,11 @@ router.put('/:id/complete', simpleRateLimit(50, 15 * 60 * 1000), counselingSessi
 router.put('/:id/extend', simpleRateLimit(50, 15 * 60 * 1000), counselingSessionsRoutes.extendCounselingSession);
 router.get('/:id', simpleRateLimit(200, 15 * 60 * 1000), counselingSessionsRoutes.getCounselingSessionById);
 router.delete('/:id', simpleRateLimit(20, 15 * 60 * 1000), counselingSessionsRoutes.deleteCounselingSession);
+
+// AI Export & Analysis
+router.get('/ai-export', simpleRateLimit(50, 15 * 60 * 1000), aiExportRoutes.exportForAI);
+router.get('/ai-export/prompt/:sessionId', simpleRateLimit(50, 15 * 60 * 1000), aiExportRoutes.generatePrompt);
+router.get('/ai-export/student/:studentId', simpleRateLimit(50, 15 * 60 * 1000), aiExportRoutes.getStudentAggregation);
 
 // AI-Powered Intervention Recommendations
 router.use('/interventions', simpleRateLimit(30, 15 * 60 * 1000), interventionAIRoutes);

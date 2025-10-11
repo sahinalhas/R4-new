@@ -13,7 +13,7 @@ import CompletedSessionsList from "@/components/counseling/CompletedSessionsList
 import SessionsTable from "@/components/counseling/SessionsTable";
 import SessionFiltersComponent from "@/components/counseling/SessionFilters";
 import NewSessionDialog from "@/components/counseling/NewSessionDialog";
-import CompleteSessionDialog from "@/components/counseling/CompleteSessionDialog";
+import EnhancedCompleteSessionDialog from "@/components/counseling/enhanced/EnhancedCompleteSessionDialog";
 import ReminderDialog from "@/components/counseling/ReminderDialog";
 import FollowUpDialog from "@/components/counseling/FollowUpDialog";
 import SessionOutcomeDialog from "@/components/counseling/SessionOutcomeDialog";
@@ -945,7 +945,7 @@ export default function CounselingSessions() {
         isPending={createSessionMutation.isPending}
       />
 
-      <CompleteSessionDialog
+      <EnhancedCompleteSessionDialog
         open={completeDialogOpen}
         onOpenChange={setCompleteDialogOpen}
         session={selectedSession}

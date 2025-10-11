@@ -85,8 +85,25 @@ export const groupSessionSchema = z.object({
 });
 
 export const completeSessionSchema = z.object({
-  exitTime: z.string(),
+  exitTime: z.string().min(1, "Çıkış saati gereklidir"),
   detailedNotes: z.string().optional(),
+  sessionFlow: z.enum(['çok_olumlu', 'olumlu', 'nötr', 'sorunlu', 'kriz']).optional(),
+  studentParticipationLevel: z.enum(['çok_aktif', 'aktif', 'pasif', 'dirençli', 'kapalı']).optional(),
+  cooperationLevel: z.number().min(1).max(5).optional(),
+  emotionalState: z.enum(['sakin', 'kaygılı', 'üzgün', 'sinirli', 'mutlu', 'karışık', 'diğer']).optional(),
+  physicalState: z.enum(['normal', 'yorgun', 'huzursuz', 'ajite']).optional(),
+  communicationQuality: z.enum(['açık', 'ketum', 'seçici', 'kapalı']).optional(),
+  sessionTags: z.array(z.string()).default([]),
+  achievedOutcomes: z.string().optional(),
+  followUpNeeded: z.boolean().default(false),
+  followUpPlan: z.string().optional(),
+  actionItems: z.array(z.object({
+    id: z.string(),
+    description: z.string(),
+    assignedTo: z.string().optional(),
+    dueDate: z.string().optional(),
+    priority: z.enum(['low', 'medium', 'high']).optional(),
+  })).default([]),
 });
 
 export const reminderSchema = z.object({
