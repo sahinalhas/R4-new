@@ -15,31 +15,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Frontend & Backend"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Rehber360 Server"
+args = "Development Server"
 
 [[workflows.workflow]]
-name = "Frontend & Backend"
+name = "Development Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
-waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow]]
-name = "Rehber360 Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "tsx server/index.ts"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
