@@ -104,6 +104,10 @@ const App = () => {
                     path="/ogrenci/:studentId/gelismis-analiz"
                     element={<Suspense fallback={<LoadingFallback />}><AdvancedStudentAnalysis /></Suspense>}
                   />
+                  <Route
+                    path="/odevler"
+                    element={<Suspense fallback={<LoadingFallback />}><StudyAssignments /></Suspense>}
+                  />
                 </Route>
                 <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />
                 <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
