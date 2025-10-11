@@ -1,16 +1,16 @@
-import apiClient from './api-client';
-import type { NotificationPreferences, NotificationLog, NotificationTemplate } from '@/../../shared/types/notification.types';
+import { apiClient } from './api-client';
+import type { NotificationPreference, NotificationLog, NotificationTemplate } from '@/../../shared/types/notification.types';
 
 export const notificationsApi = {
   // Notification Preferences
   getPreferences: (userId: number) => 
-    apiClient.get<NotificationPreferences>(`/notifications/preferences/${userId}`),
+    apiClient.get<NotificationPreference>(`/notifications/preferences/${userId}`),
   
-  updatePreferences: (userId: number, data: Partial<NotificationPreferences>) => 
-    apiClient.put<NotificationPreferences>(`/notifications/preferences/${userId}`, data),
+  updatePreferences: (userId: number, data: Partial<NotificationPreference>) => 
+    apiClient.put<NotificationPreference>(`/notifications/preferences/${userId}`, data),
 
   // Notification Logs
-  getNotificationLogs: (params?: { 
+  getNotificationLogs: async (params?: { 
     userId?: number; 
     studentId?: number; 
     status?: 'PENDING' | 'SENT' | 'FAILED' | 'DELIVERED';
@@ -24,7 +24,10 @@ export const notificationsApi = {
     if (params?.dateFrom) query.set('dateFrom', params.dateFrom);
     if (params?.limit) query.set('limit', params.limit.toString());
     
-    return apiClient.get<NotificationLog[]>(`/notifications/logs?${query.toString()}`);
+    const response = await apiClient.get<{ success: boolean; data: NotificationLog[] }>(
+      `/notifications/logs?${query.toString()}`
+    );
+    return response.data;
   },
 
   // Manual notification sending
@@ -52,19 +55,29 @@ export const notificationsApi = {
     apiClient.delete(`/notifications/templates/${id}`),
 
   // Stats
-  getNotificationStats: (dateFrom?: string) => 
-    apiClient.get<{
-      total: number;
-      sent: number;
-      failed: number;
-      delivered: number;
-      byChannel: Record<string, number>;
-      byType: Record<string, number>;
-    }>(`/notifications/stats${dateFrom ? `?dateFrom=${dateFrom}` : ''}`),
+  getNotificationStats: async (dateFrom?: string) => {
+    const response = await apiClient.get<{
+      success: boolean;
+      data: {
+        total: number;
+        sent: number;
+        failed: number;
+        delivered: number;
+        byChannel: Record<string, number>;
+        byType: Record<string, number>;
+      };
+    }>(`/notifications/stats${dateFrom ? `?dateFrom=${dateFrom}` : ''}`);
+    return response.data;
+  },
 
   // Retry failed notifications
-  retryFailed: () => 
-    apiClient.post<{ retried: number }>('/notifications/retry-failed', {}),
+  retryFailed: async () => {
+    const response = await apiClient.post<{ success: boolean; data: { retried: number } }>(
+      '/notifications/retry-failed',
+      {}
+    );
+    return response.data;
+  },
 
   // Parent dashboard access
   generateParentAccess: (studentId: number, expiresInDays?: number) =>

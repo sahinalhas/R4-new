@@ -93,6 +93,14 @@ export function getInterventionsByType(interventionType: string): InterventionEf
   return stmt.all(interventionType) as InterventionEffectiveness[];
 }
 
+export function getAllEffectiveness(): InterventionEffectiveness[] {
+  const stmt = db.prepare(`
+    SELECT * FROM intervention_effectiveness 
+    ORDER BY startDate DESC
+  `);
+  return stmt.all() as InterventionEffectiveness[];
+}
+
 // ==================== PARENT FEEDBACK ====================
 
 export function createParentFeedback(feedback: Omit<ParentFeedback, 'id' | 'created_at' | 'updated_at'>): string {

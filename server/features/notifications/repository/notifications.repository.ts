@@ -94,6 +94,26 @@ export function getPendingNotifications(): NotificationLog[] {
   return stmt.all() as NotificationLog[];
 }
 
+export function getNotificationsByStatus(status?: string, limit?: number): NotificationLog[] {
+  let query = 'SELECT * FROM notification_logs';
+  const params: any[] = [];
+  
+  if (status) {
+    query += ' WHERE status = ?';
+    params.push(status);
+  }
+  
+  query += ' ORDER BY created_at DESC';
+  
+  if (limit) {
+    query += ' LIMIT ?';
+    params.push(limit);
+  }
+  
+  const stmt = db.prepare(query);
+  return stmt.all(...params) as NotificationLog[];
+}
+
 export function getNotificationStats(dateFrom?: string): any {
   const stmt = db.prepare(`
     SELECT 

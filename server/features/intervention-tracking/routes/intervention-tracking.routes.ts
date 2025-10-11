@@ -42,6 +42,55 @@ router.post('/evaluate/:interventionId', async (req, res) => {
   }
 });
 
+router.get('/effectiveness', async (req, res) => {
+  try {
+    const { studentId, interventionId, effectivenessLevel } = req.query;
+    
+    let effectiveness: any[];
+    if (studentId) {
+      effectiveness = repository.getEffectivenessByStudent(studentId as string);
+    } else if (interventionId) {
+      const single = repository.getEffectivenessByIntervention(interventionId as string);
+      effectiveness = single ? [single] : [];
+    } else {
+      effectiveness = repository.getAllEffectiveness();
+    }
+    
+    if (effectivenessLevel && effectiveness.length > 0) {
+      effectiveness = effectiveness.filter((e: any) => e.effectivenessLevel === effectivenessLevel);
+    }
+    
+    res.json({ success: true, data: effectiveness });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/effectiveness/stats', async (req, res) => {
+  try {
+    const all = repository.getAllEffectiveness();
+    const effective = all.filter((e: any) => 
+      e.effectivenessLevel === 'VERY_EFFECTIVE' || e.effectivenessLevel === 'EFFECTIVE'
+    ).length;
+    const needsImprovement = all.filter((e: any) => 
+      e.effectivenessLevel === 'PARTIALLY_EFFECTIVE' || e.effectivenessLevel === 'NOT_EFFECTIVE'
+    ).length;
+    const withAiAnalysis = all.filter((e: any) => e.aiAnalysis).length;
+    
+    res.json({ 
+      success: true, 
+      data: {
+        total: all.length,
+        effective,
+        needsImprovement,
+        withAiAnalysis
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/student/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;

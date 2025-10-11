@@ -61,11 +61,33 @@ router.get('/pending', async (req, res) => {
   }
 });
 
+router.get('/logs', async (req, res) => {
+  try {
+    const { status, limit } = req.query;
+    const notifications = repository.getNotificationsByStatus(
+      status as any,
+      limit ? Number(limit) : undefined
+    );
+    res.json({ success: true, data: notifications });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/stats', async (req, res) => {
   try {
     const { dateFrom } = req.query;
     const stats = await notificationEngine.getNotificationStats(dateFrom as string);
     res.json({ success: true, data: stats });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/retry-failed', async (req, res) => {
+  try {
+    const retried = await notificationEngine.retryFailedNotifications();
+    res.json({ success: true, data: { retried } });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

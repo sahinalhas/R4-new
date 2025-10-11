@@ -26,6 +26,9 @@ const DailyActionPlan = lazy(() => import("./pages/DailyActionPlan"));
 const AdvancedStudentAnalysis = lazy(() => import("./pages/AdvancedStudentAnalysis"));
 const AdvancedAIAnalysis = lazy(() => import("./pages/AdvancedAIAnalysis"));
 const StudyAssignments = lazy(() => import("./pages/StudyAssignments"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const InterventionTracking = lazy(() => import("./pages/InterventionTracking"));
+const ParentAccess = lazy(() => import("./pages/ParentAccess"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -112,6 +115,18 @@ const App = () => {
                   <Route
                     path="/gelismis-analiz"
                     element={<Suspense fallback={<LoadingFallback />}><AdvancedAIAnalysis /></Suspense>}
+                  />
+                  <Route
+                    path="/bildirimler"
+                    element={<Suspense fallback={<LoadingFallback />}><Notifications /></Suspense>}
+                  />
+                  <Route
+                    path="/mudahale-takip"
+                    element={<Suspense fallback={<LoadingFallback />}><InterventionTracking /></Suspense>}
+                  />
+                  <Route
+                    path="/veli-erisim"
+                    element={<Suspense fallback={<LoadingFallback />}><ParentAccess /></Suspense>}
                   />
                 </Route>
                 <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />

@@ -1,44 +1,43 @@
-import apiClient from './api-client';
-
-export interface InterventionEffectiveness {
-  id: number;
-  intervention_id: number;
-  student_id: number;
-  pre_intervention_metrics: any;
-  post_intervention_metrics: any;
-  impact_analysis: any;
-  success_rating: number;
-  lessons_learned: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ParentFeedback {
-  id: number;
-  student_id: number;
-  intervention_id: number | null;
-  rating: number;
-  feedback_text: string | null;
-  submitted_at: string;
-}
-
-export interface EscalationLog {
-  id: number;
-  student_id: number;
-  alert_id: number;
-  escalated_from: string;
-  escalated_to: string;
-  reason: string;
-  response_time_minutes: number | null;
-  status: 'PENDING' | 'ACKNOWLEDGED' | 'RESOLVED';
-  created_at: string;
-  resolved_at: string | null;
-}
+import { apiClient } from './api-client';
+import type { InterventionEffectiveness, ParentFeedback, EscalationLog } from '@/../../shared/types/notification.types';
 
 export const interventionTrackingApi = {
   // Intervention Effectiveness
-  getEffectiveness: (interventionId: number) =>
-    apiClient.get<InterventionEffectiveness>(`/intervention-tracking/effectiveness/${interventionId}`),
+  getEffectiveness: async (params?: {
+    studentId?: string;
+    interventionId?: string;
+    effectivenessLevel?: string;
+  }) => {
+    const query = new URLSearchParams();
+    if (params?.studentId) query.set('studentId', params.studentId);
+    if (params?.interventionId) query.set('interventionId', params.interventionId);
+    if (params?.effectivenessLevel) query.set('effectivenessLevel', params.effectivenessLevel);
+    
+    const response = await apiClient.get<{ success: boolean; data: InterventionEffectiveness[] }>(
+      `/intervention-tracking/effectiveness?${query.toString()}`
+    );
+    return response.data;
+  },
+
+  getEffectivenessById: async (interventionId: number) => {
+    const response = await apiClient.get<{ success: boolean; data: InterventionEffectiveness }>(
+      `/intervention-tracking/effectiveness/${interventionId}`
+    );
+    return response.data;
+  },
+
+  getEffectivenessStats: async () => {
+    const response = await apiClient.get<{
+      success: boolean;
+      data: {
+        total: number;
+        effective: number;
+        needsImprovement: number;
+        withAiAnalysis: number;
+      };
+    }>('/intervention-tracking/effectiveness/stats');
+    return response.data;
+  },
 
   trackEffectiveness: (data: {
     interventionId: number;
