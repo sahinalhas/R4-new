@@ -110,7 +110,6 @@ function useBreadcrumbs() {
       etkinlikler: "Etkinlikler",
       ayarlar: "Ayarlar",
       risk: "Risk Takip",
-      istatistik: "İstatistikler",
       "ai-asistan": "AI Asistan",
       "ai-insights": "AI Insights",
     };
@@ -268,13 +267,6 @@ export default function Rehber360Layout() {
                   </SidebarMenuItem>
                 </Collapsible>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="İstatistikler">
-                    <NavLink to="/istatistik">
-                      <BarChart3 /> <span>İstatistikler</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Ayarlar">
                     <NavLink to="/ayarlar">
@@ -450,14 +442,6 @@ export default function Rehber360Layout() {
                   }}
                 >
                   AI Insights
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/istatistik");
-                    setCmdOpen(false);
-                  }}
-                >
-                  İstatistikler
                 </CommandItem>
                 <CommandItem
                   onSelect={() => {
