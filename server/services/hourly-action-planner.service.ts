@@ -112,7 +112,7 @@ export interface WeeklyActionPlan {
   };
 }
 
-export class HourlyActionPlannerService {
+class HourlyActionPlannerService {
   private aiProvider: AIProviderService;
   private db: ReturnType<typeof getDatabase>;
 

@@ -101,7 +101,7 @@ export interface StudentTimeline {
   };
 }
 
-export class StudentTimelineAnalyzerService {
+class StudentTimelineAnalyzerService {
   private db: ReturnType<typeof getDatabase>;
   private aiProvider: AIProviderService;
 

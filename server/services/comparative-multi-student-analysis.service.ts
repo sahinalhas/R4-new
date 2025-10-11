@@ -115,7 +115,7 @@ export interface ComparativeAnalysisReport {
   }>;
 }
 
-export class ComparativeMultiStudentAnalysisService {
+class ComparativeMultiStudentAnalysisService {
   private aiProvider: AIProviderService;
   private contextService: StudentContextService;
   private patternService: PatternAnalysisService;

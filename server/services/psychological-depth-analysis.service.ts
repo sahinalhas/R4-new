@@ -144,7 +144,7 @@ export interface PsychologicalDepthAnalysis {
   };
 }
 
-export class PsychologicalDepthAnalysisService {
+class PsychologicalDepthAnalysisService {
   private aiProvider: AIProviderService;
   private contextService: StudentContextService;
   private db: ReturnType<typeof getDatabase>;

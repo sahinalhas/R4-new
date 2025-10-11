@@ -114,7 +114,7 @@ export interface PredictiveRiskTimeline {
   };
 }
 
-export class PredictiveRiskTimelineService {
+class PredictiveRiskTimelineService {
   private aiProvider: AIProviderService;
   private patternService: PatternAnalysisService;
   private contextService: StudentContextService;

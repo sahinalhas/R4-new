@@ -22,6 +22,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const RiskDashboard = lazy(() => import("./pages/RiskDashboard"));
 const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const AIInsightsDashboard = lazy(() => import("./pages/AIInsightsDashboard"));
+const DailyActionPlan = lazy(() => import("./pages/DailyActionPlan"));
+const AdvancedStudentAnalysis = lazy(() => import("./pages/AdvancedStudentAnalysis"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,6 +94,14 @@ const App = () => {
                   <Route
                     path="/ai-insights"
                     element={<Suspense fallback={<LoadingFallback />}><AIInsightsDashboard /></Suspense>}
+                  />
+                  <Route
+                    path="/gunluk-plan"
+                    element={<Suspense fallback={<LoadingFallback />}><DailyActionPlan /></Suspense>}
+                  />
+                  <Route
+                    path="/ogrenci/:studentId/gelismis-analiz"
+                    element={<Suspense fallback={<LoadingFallback />}><AdvancedStudentAnalysis /></Suspense>}
                   />
                 </Route>
                 <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />
