@@ -24,6 +24,7 @@ const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const AIInsightsDashboard = lazy(() => import("./pages/AIInsightsDashboard"));
 const DailyActionPlan = lazy(() => import("./pages/DailyActionPlan"));
 const AdvancedStudentAnalysis = lazy(() => import("./pages/AdvancedStudentAnalysis"));
+const AdvancedAIAnalysis = lazy(() => import("./pages/AdvancedAIAnalysis"));
 const StudyAssignments = lazy(() => import("./pages/StudyAssignments"));
 
 const queryClient = new QueryClient({
@@ -107,6 +108,10 @@ const App = () => {
                   <Route
                     path="/odevler"
                     element={<Suspense fallback={<LoadingFallback />}><StudyAssignments /></Suspense>}
+                  />
+                  <Route
+                    path="/gelismis-analiz"
+                    element={<Suspense fallback={<LoadingFallback />}><AdvancedAIAnalysis /></Suspense>}
                   />
                 </Route>
                 <Route path="/anket/:publicLink" element={<Suspense fallback={<LoadingFallback />}><PublicSurvey /></Suspense>} />

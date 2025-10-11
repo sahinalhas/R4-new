@@ -48,6 +48,8 @@ import { optimizedGenerateEarlyWarnings } from "@/lib/analytics-cache";
 import type { Student, Intervention } from "@/lib/storage";
 import { useNavigate } from "react-router-dom";
 import RiskSummaryWidget from "@/components/RiskSummaryWidget";
+import DailyActionPlanWidget from "@/components/dashboard/DailyActionPlanWidget";
+import SchoolWideAIInsights from "@/components/dashboard/SchoolWideAIInsights";
 
 interface DashboardStats {
   studentCount: number;
@@ -632,6 +634,14 @@ export default function Index() {
             )}
 
             <RiskSummaryWidget />
+
+            {!hiddenWidgets.has('ai-daily-plan') && (
+              <DailyActionPlanWidget onHide={() => toggleWidget('ai-daily-plan')} />
+            )}
+
+            {!hiddenWidgets.has('school-ai-insights') && (
+              <SchoolWideAIInsights onHide={() => toggleWidget('school-ai-insights')} />
+            )}
 
             {!hiddenWidgets.has('weekly-focus') && (
               <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">

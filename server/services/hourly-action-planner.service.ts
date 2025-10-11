@@ -199,7 +199,7 @@ class HourlyActionPlannerService {
       SELECT s.id, s.name, COUNT(bi.id) as incidentCount
       FROM students s
       JOIN behavior_incidents bi ON s.id = bi.studentId
-      WHERE bi.date >= date('now', '-14 days')
+      WHERE bi.createdAt >= datetime('now', '-14 days')
         AND bi.severity IN ('Orta', 'Ciddi')
       GROUP BY s.id, s.name
       HAVING incidentCount >= 2
