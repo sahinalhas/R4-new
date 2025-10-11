@@ -7,12 +7,7 @@ let db: Database.Database | null = null;
 export function getDatabase(): Database.Database {
   if (!db) {
     try {
-      const dataDir = path.join(process.cwd(), 'data');
-      if (!existsSync(dataDir)) {
-        mkdirSync(dataDir, { recursive: true });
-      }
-      
-      const dbPath = path.join(dataDir, 'data.db');
+      const dbPath = path.join(process.cwd(), 'database.db');
       db = new Database(dbPath);
       
       try {
