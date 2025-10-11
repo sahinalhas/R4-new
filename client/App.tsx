@@ -24,6 +24,7 @@ const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const AIInsightsDashboard = lazy(() => import("./pages/AIInsightsDashboard"));
 const DailyActionPlan = lazy(() => import("./pages/DailyActionPlan"));
 const AdvancedStudentAnalysis = lazy(() => import("./pages/AdvancedStudentAnalysis"));
+const StudyAssignments = lazy(() => import("./pages/StudyAssignments"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

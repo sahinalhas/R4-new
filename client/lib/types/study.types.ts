@@ -24,6 +24,9 @@ export type StudyAssignment = {
   id: string;
   studentId: string;
   topicId: string;
+  dueDate: string;
+  status: string;
+  notes?: string | null;
   targetPerWeek?: number;
 };
 

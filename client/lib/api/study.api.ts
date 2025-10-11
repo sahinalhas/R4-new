@@ -468,3 +468,35 @@ export function weeklyTotalMinutes(studentId: string) {
     0,
   );
 }
+
+export async function getStudyAssignmentsByStudent(studentId: string): Promise<StudyAssignment[]> {
+  return createApiHandler(
+    () => apiClient.get<StudyAssignment[]>(`/api/study/study-assignments/${studentId}`, { showErrorToast: false }),
+    [],
+    'Ödevler yüklenemedi'
+  )();
+}
+
+export async function saveStudyAssignment(assignment: StudyAssignment): Promise<void> {
+  return apiClient.post('/api/study/study-assignments', assignment, {
+    showSuccessToast: true,
+    successMessage: 'Ödev kaydedildi',
+    errorMessage: 'Ödev kaydedilemedi',
+  });
+}
+
+export async function updateStudyAssignment(id: string, updates: Partial<StudyAssignment>): Promise<void> {
+  return apiClient.put(`/api/study/study-assignments/${id}`, updates, {
+    showSuccessToast: true,
+    successMessage: 'Ödev güncellendi',
+    errorMessage: 'Ödev güncellenemedi',
+  });
+}
+
+export async function deleteStudyAssignment(id: string): Promise<void> {
+  return apiClient.delete(`/api/study/study-assignments/${id}`, {
+    showSuccessToast: true,
+    successMessage: 'Ödev silindi',
+    errorMessage: 'Ödev silinemedi',
+  });
+}

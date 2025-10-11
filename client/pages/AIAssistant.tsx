@@ -4,13 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
   Loader2, Send, Bot, User, Settings, Sparkles, Copy, Check, 
   RefreshCw, Edit2, Trash2, Pin, PinOff, Download, Search, 
-  X, StopCircle, FileText, FileJson, FileCode, Clock, Hash
+  X, StopCircle, FileText, FileJson, FileCode, Clock, Hash,
+  MessageSquare, Calendar, AlertTriangle, BookOpen
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -20,6 +22,9 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import MeetingPrepPanel from '@/components/ai/MeetingPrepPanel';
+import PriorityStudentsWidget from '@/components/ai/PriorityStudentsWidget';
+import ResourceRecommendations from '@/components/ai/ResourceRecommendations';
 
 interface Message {
   id: string;
@@ -506,38 +511,59 @@ export default function AIAssistant() {
         </div>
       </div>
 
-      {showSearch && (
-        <Card className="mb-4 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Sohbette ara..."
-                className="flex-1"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchQuery('');
-                  setShowSearch(false);
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            {searchQuery && (
-              <p className="text-xs text-muted-foreground mt-2">
-                {filteredMessages.length} sonuç bulundu
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      <Tabs defaultValue="chat" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="chat" className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Sohbet
+          </TabsTrigger>
+          <TabsTrigger value="meeting-prep" className="gap-2">
+            <Calendar className="h-4 w-4" />
+            Toplantı Hazırlık
+          </TabsTrigger>
+          <TabsTrigger value="priority" className="gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Öncelikli Öğrenciler
+          </TabsTrigger>
+          <TabsTrigger value="resources" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            Kaynaklar
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <TabsContent value="chat" className="space-y-4">
+          {showSearch && (
+            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Sohbette ara..."
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setShowSearch(false);
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                {searchQuery && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {filteredMessages.length} sonuç bulundu
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <Card className="lg:col-span-1 border-border/50 bg-card/95 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -875,6 +901,23 @@ export default function AIAssistant() {
           </CardContent>
         </Card>
       </div>
+        </TabsContent>
+
+        <TabsContent value="meeting-prep" className="space-y-4">
+          <MeetingPrepPanel 
+            selectedStudent={selectedStudent}
+            students={studentsData?.students || []}
+          />
+        </TabsContent>
+
+        <TabsContent value="priority" className="space-y-4">
+          <PriorityStudentsWidget />
+        </TabsContent>
+
+        <TabsContent value="resources" className="space-y-4">
+          <ResourceRecommendations />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
