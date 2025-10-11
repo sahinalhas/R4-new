@@ -74,6 +74,46 @@ Preferred communication style: Simple, everyday language.
    - Priority action recommendations for counselors
    - Database: `daily_insights`, `student_daily_status`, `proactive_alerts` tables
 
+**Ultra-Advanced AI Features (Latest - 2025):**
+1. **Psychological Depth Analysis** (`server/services/psychological-depth-analysis.service.ts`)
+   - Deep motivational profiling (intrinsic/extrinsic motivation, learning orientation)
+   - Comprehensive family dynamics analysis (parental involvement, socioeconomic factors, cultural context)
+   - Detailed peer relationship assessment (social integration, bullying indicators, SEL competencies)
+   - Developmental factors analysis (age-appropriateness, critical needs, transitions)
+   - Holistic wellbeing planning with evidence-based therapeutic approaches
+
+2. **Predictive Risk Timeline** (`server/services/predictive-risk-timeline.service.ts`)
+   - 24-48-72 hour and 1-week risk predictions with probability scores
+   - Behavior pattern detection (academic, behavioral, social, emotional, attendance)
+   - Predictive alerts with action deadlines and responsible parties
+   - Causal analysis (root causes, contributing factors, cascade effects)
+   - Early intervention opportunities with impact assessment
+   - Comprehensive monitoring plans with escalation triggers
+
+3. **Hourly Action Planner** (`server/services/hourly-action-planner.service.ts`)
+   - Detailed daily action plans for counselors with hourly schedules
+   - Morning briefing with urgent matters and priority students
+   - Action categorization (meetings, monitoring, intervention, documentation, family communication, emergency)
+   - Priority-based task organization (critical, high, medium, low)
+   - Flexibility recommendations with buffer times and contingency plans
+   - End-of-day checklists and next-day preparation tasks
+
+4. **Student Timeline Analyzer** (`server/services/student-timeline-analyzer.service.ts`)
+   - Chronological event collection from all student data sources
+   - Pattern clustering (recurring events, triggers, outcomes, intervention points)
+   - Causal relationship mapping (direct, indirect, probable, correlation)
+   - Turning point identification with before/after state analysis
+   - Trend analysis (academic, behavioral, social trajectories)
+   - Success moment tracking with replication strategies
+
+5. **Comparative Multi-Student Analysis** (`server/services/comparative-multi-student-analysis.service.ts`)
+   - Class-level pattern detection and analysis
+   - Risk correlation identification across student populations
+   - Group dynamics analysis (positive groups, risk groups, isolated students, leadership opportunities)
+   - Student comparison metrics (academic/behavior scores, intervention priorities)
+   - Class-level insights (strengths, challenges, inequities, systemic issues)
+   - Prioritized recommendations (class-wide, group-based, individual interventions)
+
 2. **Deep Analysis Engine** (`server/features/deep-analysis/`)
    - Comprehensive student trajectory prediction (1-3 month outlook)
    - Multi-dimensional risk assessment (academic, social-emotional, behavioral, attendance)
