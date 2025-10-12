@@ -25,36 +25,46 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
   const sessionMode = form.watch("sessionMode");
 
   return (
-    <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-      {/* Section Header */}
-      <div className="flex items-center gap-3 pb-4 border-b-2">
-        <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 ring-2 ring-primary/20">
-          <Settings2 className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <h3 className="font-semibold text-xl">Görüşme Detayları</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Tarih, saat ve görüşme şeklini belirleyin
-          </p>
+    <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+      {/* Section Header - Green/Orange Theme */}
+      <div className="relative pb-6 mb-2">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-orange-500 rounded-2xl blur-md opacity-40" />
+            <div className="relative p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-orange-500">
+              <Settings2 className="h-7 w-7 text-white" />
+            </div>
+          </div>
+          <div>
+            <h3 className="font-bold text-2xl bg-gradient-to-r from-emerald-600 to-orange-600 bg-clip-text text-transparent">
+              Görüşme Detayları
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Tarih, saat ve görüşme şeklini belirleyin
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Date and Time */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <FormField
             control={form.control}
             name="sessionDate"
             render={({ field }) => (
-              <FormItem className="flex flex-col animate-in fade-in-50 slide-in-from-left-4 duration-500">
-                <FormLabel className="text-base font-semibold">Görüşme Tarihi *</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  Tarih *
+                </FormLabel>
                 <Popover open={dateOpen} onOpenChange={setDateOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant="outline"
                         className={cn(
-                          "justify-start text-left font-normal h-12 transition-all hover:border-primary/50",
+                          "justify-start text-left font-normal h-12 border-2 hover:border-emerald-400",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -80,9 +90,6 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                     />
                   </PopoverContent>
                 </Popover>
-                <FormDescription>
-                  Görüşme tarihini seçin veya değiştirin
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -92,21 +99,21 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
             control={form.control}
             name="sessionTime"
             render={({ field }) => (
-              <FormItem className="flex flex-col animate-in fade-in-50 slide-in-from-right-4 duration-500">
-                <FormLabel className="text-base font-semibold">Başlangıç Saati *</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Saat *
+                </FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                     <Input 
                       type="time" 
                       {...field} 
-                      className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
+                      className="pl-10 h-12 border-2 focus:border-emerald-400"
                     />
                   </div>
                 </FormControl>
-                <FormDescription>
-                  Görüşme başlangıç saatini girin
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -118,8 +125,8 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
           control={form.control}
           name="sessionMode"
           render={({ field }) => (
-            <FormItem className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-              <FormLabel className="text-base font-semibold">Görüşme Şekli *</FormLabel>
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-orange-700 dark:text-orange-400">Görüşme Şekli *</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -134,11 +141,11 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                     />
                     <Label
                       htmlFor="yuz_yuze"
-                      className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-background p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all duration-200 hover:shadow-md"
+                      className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-background p-5 hover:bg-accent hover:border-emerald-400 peer-data-[state=checked]:border-emerald-500 peer-data-[state=checked]:bg-emerald-50 dark:peer-data-[state=checked]:bg-emerald-950/30 cursor-pointer transition-all duration-200 hover:shadow-lg"
                     >
-                      <UsersIcon className="mb-3 h-8 w-8 text-primary" />
+                      <UsersIcon className="mb-2 h-8 w-8 text-emerald-600" />
                       <span className="font-semibold">Yüz Yüze</span>
-                      <span className="text-xs text-muted-foreground mt-1">Ofiste görüşme</span>
+                      <span className="text-xs text-muted-foreground mt-1">Ofiste</span>
                     </Label>
                   </div>
                   <div>
@@ -149,11 +156,11 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                     />
                     <Label
                       htmlFor="online"
-                      className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-background p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all duration-200 hover:shadow-md"
+                      className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-background p-5 hover:bg-accent hover:border-blue-400 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50 dark:peer-data-[state=checked]:bg-blue-950/30 cursor-pointer transition-all duration-200 hover:shadow-lg"
                     >
-                      <Video className="mb-3 h-8 w-8 text-primary" />
+                      <Video className="mb-2 h-8 w-8 text-blue-600" />
                       <span className="font-semibold">Online</span>
-                      <span className="text-xs text-muted-foreground mt-1">Video görüşme</span>
+                      <span className="text-xs text-muted-foreground mt-1">Video</span>
                     </Label>
                   </div>
                   <div>
@@ -164,18 +171,15 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                     />
                     <Label
                       htmlFor="telefon"
-                      className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-background p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all duration-200 hover:shadow-md"
+                      className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-background p-5 hover:bg-accent hover:border-orange-400 peer-data-[state=checked]:border-orange-500 peer-data-[state=checked]:bg-orange-50 dark:peer-data-[state=checked]:bg-orange-950/30 cursor-pointer transition-all duration-200 hover:shadow-lg"
                     >
-                      <Phone className="mb-3 h-8 w-8 text-primary" />
+                      <Phone className="mb-2 h-8 w-8 text-orange-600" />
                       <span className="font-semibold">Telefon</span>
-                      <span className="text-xs text-muted-foreground mt-1">Telefon görüşme</span>
+                      <span className="text-xs text-muted-foreground mt-1">Arama</span>
                     </Label>
                   </div>
                 </RadioGroup>
               </FormControl>
-              <FormDescription>
-                Görüşmenin nasıl gerçekleştirileceğini seçin
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -187,8 +191,8 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
           name="sessionLocation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+              <FormLabel className="text-base font-semibold flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-emerald-600" />
                 Görüşme Yeri *
               </FormLabel>
               <FormControl>
@@ -201,48 +205,37 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                       ? "Telefon görüşmesi"
                       : "Rehberlik Servisi"
                   }
-                  className="h-12"
+                  className="h-12 border-2 focus:border-emerald-400"
                 />
               </FormControl>
-              <FormDescription>
-                {sessionMode === "online" 
-                  ? "Online görüşme platformunu belirtin"
-                  : sessionMode === "telefon"
-                  ? "Telefon görüşmesi için not ekleyin"
-                  : "Görüşmenin yapılacağı fiziksel yeri belirtin"
-                }
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Discipline/Student Behavior Evaluation */}
+        {/* Discipline Status */}
         <FormField
           control={form.control}
           name="disciplineStatus"
           render={({ field }) => (
-            <FormItem className="animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-              <FormLabel className="text-base flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4" />
-                Disiplin / Öğrenci Davranış Değerlendirme Görüşmeleri
+            <FormItem>
+              <FormLabel className="text-base font-semibold flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-orange-600" />
+                Disiplin / Davranış Değerlendirme
               </FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger className="h-12 border-2">
                     <SelectValue placeholder="Seçiniz" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Seçiniz</SelectItem>
                   <SelectItem value="kurulu_sevk">Kurulu sevk edilen öğrenci</SelectItem>
-                  <SelectItem value="gorusu_alinan">Olayla ilgili görüşü alınan öğrenci / şahit</SelectItem>
+                  <SelectItem value="gorusu_alinan">Görüşü alınan öğrenci / şahit</SelectItem>
                   <SelectItem value="akran_gorusmesi">Akran Görüşmesi</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>
-                Görüşmenin disiplin veya davranış değerlendirmesi kapsamında olup olmadığını belirtin
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
