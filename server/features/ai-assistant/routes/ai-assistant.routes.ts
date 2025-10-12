@@ -49,7 +49,7 @@ router.post('/set-provider', async (req, res) => {
   try {
     const { provider, model } = req.body;
 
-    if (!provider || !['openai', 'ollama'].includes(provider)) {
+    if (!provider || !['openai', 'ollama', 'gemini'].includes(provider)) {
       return res.status(400).json({
         success: false,
         error: 'Geçersiz provider'

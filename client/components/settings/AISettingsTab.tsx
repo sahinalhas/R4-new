@@ -10,8 +10,8 @@ import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 
 export default function AISettingsTab() {
-  const [provider, setProvider] = useState<'ollama' | 'openai'>('ollama');
-  const [model, setModel] = useState('llama3');
+  const [provider, setProvider] = useState<'ollama' | 'openai' | 'gemini'>('gemini');
+  const [model, setModel] = useState('gemini-2.0-flash-exp');
   const [ollamaUrl, setOllamaUrl] = useState('http://localhost:11434');
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isChecking, setIsChecking] = useState(false);
@@ -26,10 +26,15 @@ export default function AISettingsTab() {
       const response = await fetch('/api/ai-assistant/models');
       if (response.ok) {
         const data = await response.json();
-        setProvider(data.provider || 'ollama');
-        setModel(data.currentModel || 'llama3');
-        if (data.provider === 'ollama' && data.ollamaBaseUrl) {
-          setOllamaUrl(data.ollamaBaseUrl);
+        if (data.success && data.data) {
+          setProvider(data.data.provider || 'gemini');
+          setModel(data.data.currentModel || 'gemini-2.0-flash-exp');
+          if (data.data.provider === 'ollama' && data.data.ollamaBaseUrl) {
+            setOllamaUrl(data.data.ollamaBaseUrl);
+          }
+          if (data.data.availableModels) {
+            setAvailableModels(data.data.availableModels);
+          }
         }
       }
     } catch (error) {
@@ -44,7 +49,7 @@ export default function AISettingsTab() {
     try {
       const endpoint = provider === 'ollama' 
         ? `${ollamaUrl}/api/tags`
-        : '/api/ai-assistant/models';
+        : '/api/ai-assistant/health';
 
       const response = await fetch(endpoint);
       
@@ -56,20 +61,33 @@ export default function AISettingsTab() {
           setAvailableModels(modelNames);
           setConnectionStatus('success');
           toast.success('Ollama bağlantısı başarılı!');
-        } else if (provider === 'openai' && data.availableModels) {
-          setAvailableModels(data.availableModels);
-          setConnectionStatus('success');
-          toast.success('OpenAI bağlantısı başarılı!');
+        } else if (provider === 'gemini' && data.success && data.data) {
+          if (data.data.available) {
+            await loadCurrentSettings();
+            setConnectionStatus('success');
+            toast.success('Gemini bağlantısı başarılı!');
+          } else {
+            throw new Error('Gemini API key tanımlı değil');
+          }
+        } else if (provider === 'openai' && data.success && data.data) {
+          if (data.data.available) {
+            await loadCurrentSettings();
+            setConnectionStatus('success');
+            toast.success('OpenAI bağlantısı başarılı!');
+          } else {
+            throw new Error('OpenAI API key tanımlı değil');
+          }
         } else {
           throw new Error('Invalid response');
         }
       } else {
         throw new Error('Connection failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Connection error:', error);
       setConnectionStatus('error');
-      toast.error(`Bağlantı hatası: ${provider === 'ollama' ? 'Ollama' : 'OpenAI'} servisi erişilemiyor`);
+      const providerName = provider === 'ollama' ? 'Ollama' : provider === 'gemini' ? 'Gemini' : 'OpenAI';
+      toast.error(`Bağlantı hatası: ${error.message || providerName + ' servisi erişilemiyor'}`);
     } finally {
       setIsChecking(false);
     }
@@ -115,11 +133,17 @@ export default function AISettingsTab() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="ai-provider">AI Provider</Label>
-            <Select value={provider} onValueChange={(value: 'ollama' | 'openai') => setProvider(value)}>
+            <Select value={provider} onValueChange={(value: 'ollama' | 'openai' | 'gemini') => setProvider(value)}>
               <SelectTrigger id="ai-provider">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="gemini">
+                  <div className="flex items-center gap-2">
+                    <Cloud className="h-4 w-4" />
+                    Gemini (Ücretsiz)
+                  </div>
+                </SelectItem>
                 <SelectItem value="ollama">
                   <div className="flex items-center gap-2">
                     <Server className="h-4 w-4" />
@@ -129,7 +153,7 @@ export default function AISettingsTab() {
                 <SelectItem value="openai">
                   <div className="flex items-center gap-2">
                     <Cloud className="h-4 w-4" />
-                    OpenAI (Cloud)
+                    OpenAI (Ücretli)
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -163,6 +187,21 @@ export default function AISettingsTab() {
                 </ul>
               </div>
             </>
+          )}
+
+          {provider === 'gemini' && (
+            <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Cloud className="h-4 w-4" />
+                Gemini AI (Önerilen - Ücretsiz)
+              </h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Google'ın Gemini AI modeli ücretsizdir ve limit yoktur (makul kullanım dahilinde).
+              </p>
+              <p className="text-sm text-muted-foreground">
+                GEMINI_API_KEY zaten tanımlanmış durumda. Eğer değiştirmek isterseniz, API key'inizi <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google AI Studio</a> üzerinden alabilirsiniz.
+              </p>
+            </div>
           )}
 
           {provider === 'openai' && (

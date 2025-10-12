@@ -53,6 +53,16 @@ export class AIProviderService {
   public static getInstance(config?: Partial<AIProviderConfig>): AIProviderService {
     if (!AIProviderService.instance) {
       AIProviderService.instance = new AIProviderService(config);
+    } else if (!config) {
+      const hasGeminiKey = !!process.env.GEMINI_API_KEY;
+      const currentProvider = AIProviderService.instance.config.provider;
+      
+      if (hasGeminiKey && currentProvider === 'ollama') {
+        console.log('🔄 Switching to Gemini (GEMINI_API_KEY detected)');
+        AIProviderService.instance.config.provider = 'gemini';
+        AIProviderService.instance.config.model = 'gemini-2.0-flash-exp';
+        AIProviderService.instance.adapter = AIAdapterFactory.createAdapter(AIProviderService.instance.config);
+      }
     }
     return AIProviderService.instance;
   }

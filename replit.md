@@ -54,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 - **Build Process:** Two-stage build (client and server) using Vite.
 - **Deployment Target:** Replit VM, running `dist/server/production.mjs` on port 3000.
 - **Database:** File-based SQLite (`data/data.db`) with automatic backups and schema migrations.
-- **Environment Variables:** Supports `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables (`OLLAMA_BASE_URL`).
+- **Environment Variables:** Supports `GEMINI_API_KEY` (auto-detected, enables Gemini), `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables (`OLLAMA_BASE_URL`). Note: `.env` file is auto-created if needed, already in `.gitignore`.
 
 ## External Dependencies
 
@@ -64,8 +64,8 @@ Preferred communication style: Simple, everyday language.
 - **Shared:** `zod`, `xlsx`, `jspdf`.
 
 ### Third-Party Services
-- **Gemini API:** Primary AI provider with generous free tier (automatic default when GEMINI_API_KEY is set).
-- **OpenAI API:** Optional integration for AI features.
+- **Gemini API:** Primary AI provider (FREE, no limits). Automatically activates when GEMINI_API_KEY is present. AI Provider Service includes smart auto-switching to Gemini when API key is detected, even if system starts with Ollama.
+- **OpenAI API:** Optional integration for AI features (requires OPENAI_API_KEY).
 - **Ollama:** Recommended for local, privacy-focused AI (automatic fallback when no cloud API keys are present).
 - **MEB Integration:** Placeholder for future integration.
 - **e-Okul API:** Placeholder for future integration.

@@ -36,7 +36,7 @@ interface Message {
 }
 
 interface AIModelsResponse {
-  provider: 'openai' | 'ollama';
+  provider: 'openai' | 'ollama' | 'gemini';
   currentModel: string;
   availableModels: string[];
 }
