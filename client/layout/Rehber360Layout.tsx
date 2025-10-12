@@ -207,9 +207,10 @@ export default function Rehber360Layout() {
     if (!searchQuery.trim()) return studentsData;
     const query = searchQuery.toLowerCase();
     return studentsData.filter(student => 
-      student.name?.toLowerCase().includes(query) ||
-      student.studentNumber?.toString().includes(query) ||
-      student.className?.toLowerCase().includes(query)
+      student.ad?.toLowerCase().includes(query) ||
+      student.soyad?.toLowerCase().includes(query) ||
+      student.id?.toString().toLowerCase().includes(query) ||
+      student.sinif?.toLowerCase().includes(query)
     );
   }, [studentsData, searchQuery]);
 
@@ -442,7 +443,7 @@ export default function Rehber360Layout() {
                       id="header-search-input"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Öğrenci veya sayfa ara... (ESC ile kapat)"
+                      placeholder="Öğrenci adı, numarası veya sayfa ara... (ESC)"
                       className="pr-8"
                       onBlur={() => {
                         setTimeout(() => {
@@ -483,12 +484,12 @@ export default function Rehber360Layout() {
                               >
                                 <Users2 className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <span className="truncate">{student.name}</span>
-                                  {student.studentNumber && (
-                                    <span className="text-xs text-muted-foreground shrink-0">#{student.studentNumber}</span>
+                                  <span className="truncate">{student.ad} {student.soyad}</span>
+                                  {student.id && (
+                                    <span className="text-xs text-muted-foreground shrink-0">#{student.id}</span>
                                   )}
-                                  {student.className && (
-                                    <span className="text-xs text-muted-foreground shrink-0">({student.className})</span>
+                                  {student.sinif && (
+                                    <span className="text-xs text-muted-foreground shrink-0">({student.sinif})</span>
                                   )}
                                 </div>
                               </button>
