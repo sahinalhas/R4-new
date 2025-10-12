@@ -113,12 +113,18 @@ export class PatternAnalysisService {
   private async analyzeBehavioralPatterns(studentId: string): Promise<PatternInsight[]> {
     const insights: PatternInsight[] = [];
 
-    const incidents = this.db.prepare(`
-      SELECT behaviorCategory, intensity, incidentDate, description
-      FROM behavior_incidents
-      WHERE studentId = ? AND incidentDate >= date('now', '-3 months')
-      ORDER BY incidentDate ASC
-    `).all(studentId) as any[];
+    let incidents: any[] = [];
+    try {
+      incidents = this.db.prepare(`
+        SELECT behaviorCategory, behaviorType, incidentDate, description
+        FROM standardized_behavior_incidents
+        WHERE studentId = ? AND incidentDate >= date('now', '-3 months')
+        ORDER BY incidentDate ASC
+      `).all(studentId) as any[];
+    } catch (error) {
+      // Table may not exist yet
+      incidents = [];
+    }
 
     if (incidents.length === 0) return insights;
 
@@ -264,16 +270,21 @@ export class PatternAnalysisService {
     }
 
     // Davranış olayları ile sosyal-duygusal skor korelasyonu
-    const recentIncidents = this.db.prepare(`
-      SELECT COUNT(*) as count
-      FROM behavior_incidents
-      WHERE studentId = ? AND incidentDate >= date('now', '-2 months')
-      AND behaviorCategory != 'Olumlu'
-    `).get(studentId) as any;
+    let recentIncidents: any = { count: 0 };
+    try {
+      recentIncidents = this.db.prepare(`
+        SELECT COUNT(*) as count
+        FROM standardized_behavior_incidents
+        WHERE studentId = ? AND incidentDate >= date('now', '-2 months')
+        AND behaviorType != 'OLUMLU'
+      `).get(studentId) as any;
+    } catch (error) {
+      recentIncidents = { count: 0 };
+    }
 
     const selProfile = this.db.prepare(`
       SELECT emotionRegulationLevel
-      FROM social_emotional_profile
+      FROM social_emotional_profiles
       WHERE studentId = ?
       ORDER BY assessmentDate DESC LIMIT 1
     `).get(studentId) as any;

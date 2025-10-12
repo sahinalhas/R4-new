@@ -170,16 +170,22 @@ export class StudentContextService {
       'SELECT * FROM academic_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
     ).get(studentId) as any;
 
-    const exams = this.db.prepare(
-      'SELECT * FROM exam_results WHERE studentId = ? ORDER BY date DESC LIMIT 5'
-    ).all(studentId) as any[];
+    let exams: any[] = [];
+    try {
+      exams = this.db.prepare(
+        'SELECT * FROM exam_results WHERE studentId = ? ORDER BY examDate DESC LIMIT 5'
+      ).all(studentId) as any[];
+    } catch (error) {
+      // Table may not exist yet
+      exams = [];
+    }
 
     return {
       gpa: undefined,
       recentExams: exams.map(exam => ({
         subject: exam.subject || exam.examName,
-        score: exam.score || exam.grade,
-        date: exam.date
+        score: exam.totalScore || exam.score || exam.grade,
+        date: exam.examDate
       })),
       strengths: academic?.strongSubjects ? JSON.parse(academic.strongSubjects) : [],
       weaknesses: academic?.weakSubjects ? JSON.parse(academic.weakSubjects) : [],
@@ -409,8 +415,8 @@ export class StudentContextService {
 
     if (recent.length === 0 || older.length === 0) return 'stable';
 
-    const recentAvg = recent.reduce((sum, e) => sum + (e.score || e.grade || 0), 0) / recent.length;
-    const olderAvg = older.reduce((sum, e) => sum + (e.score || e.grade || 0), 0) / older.length;
+    const recentAvg = recent.reduce((sum, e) => sum + (e.totalScore || e.score || e.grade || 0), 0) / recent.length;
+    const olderAvg = older.reduce((sum, e) => sum + (e.totalScore || e.score || e.grade || 0), 0) / older.length;
 
     const diff = recentAvg - olderAvg;
 

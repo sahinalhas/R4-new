@@ -155,12 +155,18 @@ class StudentTimelineAnalyzerService {
       ? `AND date >= '${startDate}' AND date <= '${endDate}'`
       : '';
 
-    const academicEvents = this.db.prepare(`
-      SELECT date as eventDate, grade, subject, examType
-      FROM exam_results
-      WHERE studentId = ? ${dateFilter}
-      ORDER BY date DESC
-    `).all(studentId) as any[];
+    let academicEvents: any[] = [];
+    try {
+      academicEvents = this.db.prepare(`
+        SELECT examDate as eventDate, totalScore as grade, examName as subject, examType
+        FROM exam_results
+        WHERE studentId = ? ${dateFilter.replace(/date/g, 'examDate')}
+        ORDER BY examDate DESC
+      `).all(studentId) as any[];
+    } catch (error) {
+      // Table may not exist yet
+      academicEvents = [];
+    }
 
     academicEvents.forEach(e => {
       events.push({
@@ -176,12 +182,18 @@ class StudentTimelineAnalyzerService {
       });
     });
 
-    const behaviorEvents = this.db.prepare(`
-      SELECT incidentDate, behaviorType, intensity, description, antecedent, consequence
-      FROM behavior_incidents
-      WHERE studentId = ? ${dateFilter.replace(/date/g, 'incidentDate')}
-      ORDER BY incidentDate DESC
-    `).all(studentId) as any[];
+    let behaviorEvents: any[] = [];
+    try {
+      behaviorEvents = this.db.prepare(`
+        SELECT incidentDate, behaviorType, behaviorCategory, description, antecedent, consequence
+        FROM standardized_behavior_incidents
+        WHERE studentId = ? ${dateFilter.replace(/date/g, 'incidentDate')}
+        ORDER BY incidentDate DESC
+      `).all(studentId) as any[];
+    } catch (error) {
+      // Table may not exist yet
+      behaviorEvents = [];
+    }
 
     behaviorEvents.forEach(e => {
       events.push({
@@ -218,12 +230,19 @@ class StudentTimelineAnalyzerService {
       });
     });
 
-    const counselingEvents = this.db.prepare(`
-      SELECT sessionDate as date, sessionType, topic, mode, notes, outcome
-      FROM counseling_sessions
-      WHERE studentId = ? ${dateFilter}
-      ORDER BY sessionDate DESC
-    `).all(studentId) as any[];
+    let counselingEvents: any[] = [];
+    try {
+      counselingEvents = this.db.prepare(`
+        SELECT sessionDate as date, sessionType, topic, sessionMode as mode, detailedNotes as notes, '' as outcome
+        FROM counseling_sessions cs
+        JOIN counseling_session_students css ON cs.id = css.sessionId
+        WHERE css.studentId = ? ${dateFilter.replace(/date/g, 'sessionDate')}
+        ORDER BY sessionDate DESC
+      `).all(studentId) as any[];
+    } catch (error) {
+      // Table may not exist yet
+      counselingEvents = [];
+    }
 
     counselingEvents.forEach(e => {
       events.push({
