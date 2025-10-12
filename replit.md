@@ -23,8 +23,9 @@ Preferred communication style: Simple, everyday language.
 
 ### AI and Analytics System
 - **AI Assistant:** A professional-grade virtual guidance counselor with deep psychological and pedagogical expertise.
-    - **Architecture:** Unified `AI Provider Service` (OpenAI/Ollama), `AI Prompt Builder Service`, `Pattern Analysis Service`, `Student Context Service`.
+    - **Architecture:** Unified `AI Provider Service` (OpenAI/Ollama/Gemini), `AI Prompt Builder Service`, `Pattern Analysis Service`, `Student Context Service`.
     - **Capabilities:** Pattern recognition, proactive insights, psychological depth analysis, evidence-based recommendations, contextual awareness, real-time streaming chat, 9 quick-action analyses, risk analysis, meeting summaries, runtime model selection, full Turkish language support.
+    - **Provider Selection:** Automatically defaults to Gemini (if GEMINI_API_KEY is present) or Ollama (if not). All providers support streaming, system instructions, and JSON mode.
 - **Advanced AI Features:**
     - **Daily Insights Service:** Automated daily/weekly/monthly reports, real-time student status tracking, AI-powered pattern detection, proactive alerts (academic decline, behavioral issues, attendance, social isolation), priority action recommendations.
     - **Psychological Depth Analysis:** Motivational profiling, family dynamics, peer relationships, developmental factors, holistic wellbeing planning.
@@ -53,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 - **Build Process:** Two-stage build (client and server) using Vite.
 - **Deployment Target:** Replit VM, running `dist/server/production.mjs` on port 3000.
 - **Database:** File-based SQLite (`data/data.db`) with automatic backups and schema migrations.
-- **Environment Variables:** Supports `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables.
+- **Environment Variables:** Supports `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables (`OLLAMA_BASE_URL`).
 
 ## External Dependencies
 
@@ -63,8 +64,9 @@ Preferred communication style: Simple, everyday language.
 - **Shared:** `zod`, `xlsx`, `jspdf`.
 
 ### Third-Party Services
+- **Gemini API:** Primary AI provider with generous free tier (automatic default when GEMINI_API_KEY is set).
 - **OpenAI API:** Optional integration for AI features.
-- **Ollama:** Recommended for local, privacy-focused AI.
+- **Ollama:** Recommended for local, privacy-focused AI (automatic fallback when no cloud API keys are present).
 - **MEB Integration:** Placeholder for future integration.
 - **e-Okul API:** Placeholder for future integration.
 
