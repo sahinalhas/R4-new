@@ -108,7 +108,11 @@ export default function AISettingsTab() {
       });
 
       if (response.ok) {
-        toast.success('AI ayarları kaydedildi!');
+        toast.success('AI ayarları kaydedildi! Değişiklikler hemen aktif oldu.');
+        // Ayarları yeniden yükle
+        await loadCurrentSettings();
+        // Bağlantı durumunu sıfırla
+        setConnectionStatus('unchecked');
       } else {
         throw new Error('Failed to save settings');
       }

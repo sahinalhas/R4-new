@@ -39,7 +39,7 @@ export class SurveyAIAnalysisService {
   private aiProvider: AIProviderService;
 
   constructor() {
-    this.aiProvider = AIProviderService.getInstance({ provider: 'ollama', model: 'llama3' });
+    this.aiProvider = AIProviderService.getInstance();
   }
 
   /**

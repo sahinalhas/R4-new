@@ -10,9 +10,11 @@ import { OllamaAPIService } from '../../../services/ollama-api.service.js';
 import AIPromptBuilder from '../../../services/ai-prompt-builder.service.js';
 
 const router = express.Router();
-const aiProvider = AIProviderService.getInstance();
 const contextService = new StudentContextService();
 const ollamaService = new OllamaAPIService();
+
+// Her istekte güncel provider instance'ını al
+const getAIProvider = () => AIProviderService.getInstance();
 
 /**
  * GET /api/ai-assistant/models
@@ -20,20 +22,39 @@ const ollamaService = new OllamaAPIService();
  */
 router.get('/models', async (req, res) => {
   try {
+    const aiProvider = getAIProvider();
     const provider = aiProvider.getProvider();
-    const models = await aiProvider.listModels();
     const currentModel = aiProvider.getModel();
+    
+    let models: string[] = [];
+    let isAvailable = false;
+    
+    try {
+      models = await aiProvider.listModels();
+      isAvailable = true;
+    } catch (modelError) {
+      console.error('Error listing models:', modelError);
+      // Hata olsa bile varsayılan modelleri döndür
+      if (provider === 'gemini') {
+        models = ['gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+      } else if (provider === 'openai') {
+        models = ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+      } else if (provider === 'ollama') {
+        models = ['llama3', 'mistral', 'codellama'];
+      }
+    }
 
     res.json({
       success: true,
       data: {
         provider,
         currentModel,
-        availableModels: models
+        availableModels: models,
+        isAvailable
       }
     });
   } catch (error) {
-    console.error('Error listing models:', error);
+    console.error('Error in models endpoint:', error);
     res.status(500).json({
       success: false,
       error: 'Model listesi alınamadı'
@@ -47,6 +68,7 @@ router.get('/models', async (req, res) => {
  */
 router.post('/set-provider', async (req, res) => {
   try {
+    const aiProvider = getAIProvider();
     const { provider, model, ollamaBaseUrl } = req.body;
 
     if (!provider || !['openai', 'ollama', 'gemini'].includes(provider)) {
@@ -81,6 +103,7 @@ router.post('/set-provider', async (req, res) => {
  */
 router.get('/health', async (req, res) => {
   try {
+    const aiProvider = getAIProvider();
     const isAvailable = await aiProvider.isAvailable();
     const provider = aiProvider.getProvider();
 
@@ -141,6 +164,7 @@ router.post('/chat', async (req, res) => {
     // Kullanıcı mesajını ekle
     messages.push({ role: 'user', content: message });
 
+    const aiProvider = getAIProvider();
     const response = await aiProvider.chat({
       messages,
       temperature: 0.7
@@ -209,6 +233,7 @@ router.post('/chat-stream', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
 
     // Stream response
+    const aiProvider = getAIProvider();
     for await (const chunk of aiProvider.chatStream({
       messages,
       temperature: 0.7
@@ -261,6 +286,7 @@ router.post('/generate-meeting-summary', async (req, res) => {
       }
     ];
 
+    const aiProvider = getAIProvider();
     const summary = await aiProvider.chat({
       messages,
       temperature: 0.3
@@ -312,6 +338,7 @@ router.post('/analyze-risk', async (req, res) => {
       }
     ];
 
+    const aiProvider = getAIProvider();
     const response = await aiProvider.chat({
       messages,
       temperature: 0.2,

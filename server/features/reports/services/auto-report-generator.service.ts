@@ -151,7 +151,7 @@ export class AutoReportGeneratorService {
   private contextService: StudentContextService;
 
   constructor() {
-    this.aiProvider = AIProviderService.getInstance({ provider: 'ollama', model: 'llama3' });
+    this.aiProvider = AIProviderService.getInstance();
     this.contextService = new StudentContextService();
   }
 
