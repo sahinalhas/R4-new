@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Star, MessageSquare, Activity, Brain, Target, ArrowRight } from "lucide-react";
+import { Loader2, Star, MessageSquare, Activity, Brain, Target, ArrowRight, FileText, ClipboardCheck, Tag, CheckCircle2 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -33,6 +33,8 @@ export default function EnhancedCompleteSessionDialog({
   onSubmit,
   isPending,
 }: EnhancedCompleteSessionDialogProps) {
+  const [activeTab, setActiveTab] = useState("summary");
+
   const form = useForm<CompleteSessionFormValues>({
     resolver: zodResolver(completeSessionSchema),
     defaultValues: {
@@ -52,38 +54,97 @@ export default function EnhancedCompleteSessionDialog({
     form.reset();
   };
 
+  const getTabIcon = (tab: string) => {
+    switch(tab) {
+      case "summary": return <FileText className="h-4 w-4" />;
+      case "assessment": return <ClipboardCheck className="h-4 w-4" />;
+      case "tags": return <Tag className="h-4 w-4" />;
+      case "actions": return <Target className="h-4 w-4" />;
+      default: return null;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Görüşmeyi Tamamla
-          </DialogTitle>
-          <DialogDescription>
-            Görüşme detaylarını kaydedin, etiketleyin ve takip planı oluşturun
-          </DialogDescription>
+          <div className="relative pb-4">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-md opacity-40" />
+                <div className="relative p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600">
+                  <MessageSquare className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <DialogTitle className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Görüşmeyi Tamamla
+                </DialogTitle>
+                <DialogDescription className="mt-1">
+                  Görüşme detaylarını kaydedin, etiketleyin ve takip planı oluşturun
+                </DialogDescription>
+              </div>
+            </div>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <Tabs defaultValue="summary" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="summary">Özet</TabsTrigger>
-                <TabsTrigger value="assessment">Değerlendirme</TabsTrigger>
-                <TabsTrigger value="tags">Etiketler</TabsTrigger>
-                <TabsTrigger value="actions">Aksiyon</TabsTrigger>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50">
+                <TabsTrigger 
+                  value="summary" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white py-2.5"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Özet
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="assessment"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white py-2.5"
+                >
+                  <ClipboardCheck className="h-4 w-4 mr-2" />
+                  Değerlendirme
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="tags"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white py-2.5"
+                >
+                  <Tag className="h-4 w-4 mr-2" />
+                  Etiketler
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="actions"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white py-2.5"
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  Aksiyon
+                </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="summary" className="space-y-4 mt-4">
+              <TabsContent value="summary" className="space-y-5 mt-6">
+                <div className="relative pb-4 mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl blur-sm opacity-30" />
+                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+                        <FileText className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      Görüşme Özeti
+                    </h3>
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="exitTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Çıkış Saati</FormLabel>
+                      <FormLabel className="text-base font-semibold text-blue-700 dark:text-blue-400">Çıkış Saati</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" {...field} className="h-12 border-2 focus:border-blue-400" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -95,10 +156,10 @@ export default function EnhancedCompleteSessionDialog({
                   name="sessionFlow"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Görüşme Seyri</FormLabel>
+                      <FormLabel className="text-base font-semibold text-purple-700 dark:text-purple-400">Görüşme Seyri</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-12 border-2 focus:border-purple-400">
                             <SelectValue placeholder="Görüşme nasıl geçti?" />
                           </SelectTrigger>
                         </FormControl>
@@ -120,17 +181,15 @@ export default function EnhancedCompleteSessionDialog({
                   name="detailedNotes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Görüşme Özeti</FormLabel>
+                      <FormLabel className="text-base font-semibold">Görüşme Özeti</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
                           placeholder="Görüşmede neler konuşuldu, ne tür kararlar alındı..."
                           rows={6}
+                          className="border-2 focus:border-blue-400 resize-none"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Görüşmenin detaylı özetini yazın
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -141,12 +200,13 @@ export default function EnhancedCompleteSessionDialog({
                   name="achievedOutcomes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Ulaşılan Sonuçlar</FormLabel>
+                      <FormLabel className="text-base font-semibold">Ulaşılan Sonuçlar</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
                           placeholder="Görüşmede ulaşılan sonuçlar ve alınan kararlar..."
                           rows={4}
+                          className="border-2 focus:border-purple-400 resize-none"
                         />
                       </FormControl>
                       <FormMessage />
@@ -155,19 +215,33 @@ export default function EnhancedCompleteSessionDialog({
                 />
               </TabsContent>
 
-              <TabsContent value="assessment" className="space-y-4 mt-4">
+              <TabsContent value="assessment" className="space-y-5 mt-6">
+                <div className="relative pb-4 mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl blur-sm opacity-30" />
+                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
+                        <ClipboardCheck className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                      Görüşme Değerlendirmesi
+                    </h3>
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="studentParticipationLevel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
+                      <FormLabel className="text-base font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                         <Activity className="h-4 w-4" />
                         Öğrenci Katılım Düzeyi
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-12 border-2 focus:border-emerald-400">
                             <SelectValue placeholder="Katılım düzeyini seçin" />
                           </SelectTrigger>
                         </FormControl>
@@ -189,7 +263,7 @@ export default function EnhancedCompleteSessionDialog({
                   name="cooperationLevel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
+                      <FormLabel className="text-base font-semibold text-teal-700 dark:text-teal-400 flex items-center gap-2">
                         <Star className="h-4 w-4" />
                         İşbirliği Düzeyi: {field.value}/5
                       </FormLabel>
@@ -200,6 +274,7 @@ export default function EnhancedCompleteSessionDialog({
                           step={1}
                           value={[field.value || 3]}
                           onValueChange={(value) => field.onChange(value[0])}
+                          className="py-4"
                         />
                       </FormControl>
                       <FormMessage />
@@ -212,13 +287,13 @@ export default function EnhancedCompleteSessionDialog({
                   name="emotionalState"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
+                      <FormLabel className="text-base font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                         <Brain className="h-4 w-4" />
                         Duygu Durumu
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-12 border-2 focus:border-emerald-400">
                             <SelectValue placeholder="Duygu durumunu seçin" />
                           </SelectTrigger>
                         </FormControl>
@@ -242,10 +317,10 @@ export default function EnhancedCompleteSessionDialog({
                   name="physicalState"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fiziksel Durum</FormLabel>
+                      <FormLabel className="text-base font-semibold">Fiziksel Durum</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-12 border-2 focus:border-teal-400">
                             <SelectValue placeholder="Fiziksel durumu seçin" />
                           </SelectTrigger>
                         </FormControl>
@@ -266,10 +341,10 @@ export default function EnhancedCompleteSessionDialog({
                   name="communicationQuality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>İletişim Kalitesi</FormLabel>
+                      <FormLabel className="text-base font-semibold">İletişim Kalitesi</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-12 border-2 focus:border-emerald-400">
                             <SelectValue placeholder="İletişim kalitesini seçin" />
                           </SelectTrigger>
                         </FormControl>
@@ -286,13 +361,27 @@ export default function EnhancedCompleteSessionDialog({
                 />
               </TabsContent>
 
-              <TabsContent value="tags" className="space-y-4 mt-4">
+              <TabsContent value="tags" className="space-y-5 mt-6">
+                <div className="relative pb-4 mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl blur-sm opacity-30" />
+                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600">
+                        <Tag className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                      Görüşme Etiketleri
+                    </h3>
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="sessionTags"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Görüşme Etiketleri</FormLabel>
+                      <FormLabel className="text-base font-semibold text-pink-700 dark:text-pink-400">Etiketler</FormLabel>
                       <FormControl>
                         <SessionTagSelector
                           selectedTags={field.value || []}
@@ -300,7 +389,7 @@ export default function EnhancedCompleteSessionDialog({
                           topicPath={session?.topic}
                         />
                       </FormControl>
-                      <FormDescription>
+                      <FormDescription className="text-sm">
                         Görüşmeyi etiketleyerek raporlamayı kolaylaştırın
                       </FormDescription>
                       <FormMessage />
@@ -309,15 +398,29 @@ export default function EnhancedCompleteSessionDialog({
                 />
               </TabsContent>
 
-              <TabsContent value="actions" className="space-y-4 mt-4">
+              <TabsContent value="actions" className="space-y-5 mt-6">
+                <div className="relative pb-4 mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl blur-sm opacity-30" />
+                      <div className="relative p-2 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600">
+                        <Target className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                      Aksiyon Planı
+                    </h3>
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="followUpNeeded"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <FormItem className="flex items-center justify-between rounded-xl border-2 border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20 p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">Takip Gerekli mi?</FormLabel>
-                        <FormDescription>
+                        <FormLabel className="text-base font-semibold">Takip Gerekli mi?</FormLabel>
+                        <FormDescription className="text-sm">
                           Gelecekte takip görüşmesi planlanacak
                         </FormDescription>
                       </div>
@@ -337,8 +440,8 @@ export default function EnhancedCompleteSessionDialog({
                     name="followUpPlan"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Target className="h-4 w-4" />
+                        <FormLabel className="text-base font-semibold text-orange-700 dark:text-orange-400 flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4" />
                           Takip Planı
                         </FormLabel>
                         <FormControl>
@@ -346,6 +449,7 @@ export default function EnhancedCompleteSessionDialog({
                             {...field} 
                             placeholder="Takip görüşmesinde neler yapılacak..."
                             rows={3}
+                            className="border-2 focus:border-orange-400 resize-none"
                           />
                         </FormControl>
                         <FormMessage />
@@ -359,7 +463,7 @@ export default function EnhancedCompleteSessionDialog({
                   name="actionItems"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
+                      <FormLabel className="text-base font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-2">
                         <ArrowRight className="h-4 w-4" />
                         Eylem Maddeleri
                       </FormLabel>
@@ -369,7 +473,7 @@ export default function EnhancedCompleteSessionDialog({
                           onItemsChange={field.onChange}
                         />
                       </FormControl>
-                      <FormDescription>
+                      <FormDescription className="text-sm">
                         Yapılacak işleri ve sorumlularını belirleyin
                       </FormDescription>
                       <FormMessage />
@@ -379,17 +483,19 @@ export default function EnhancedCompleteSessionDialog({
               </TabsContent>
             </Tabs>
 
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
+                className="border-2"
               >
                 İptal
               </Button>
               <Button 
                 type="submit" 
                 disabled={isPending}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold min-w-[180px]"
               >
                 {isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
