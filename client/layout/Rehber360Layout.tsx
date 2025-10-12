@@ -70,15 +70,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSidebar } from "@/components/ui/sidebar";
 
 function Brand() {
@@ -196,7 +190,8 @@ export default function Rehber360Layout() {
 
   const crumbs = useBreadcrumbs();
   const navigate = useNavigate();
-  const [cmdOpen, setCmdOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const { data: studentsData = [] } = useQuery<any[]>({
     queryKey: ['/api/students'],
@@ -207,16 +202,61 @@ export default function Rehber360Layout() {
       return Array.isArray(data) ? data : [];
     },
   });
+
+  const filteredStudents = useMemo(() => {
+    if (!searchQuery.trim()) return studentsData;
+    const query = searchQuery.toLowerCase();
+    return studentsData.filter(student => 
+      student.name?.toLowerCase().includes(query) ||
+      student.studentNumber?.toString().includes(query) ||
+      student.className?.toLowerCase().includes(query)
+    );
+  }, [studentsData, searchQuery]);
+
+  const navigationItems = useMemo(() => [
+    { label: "Ana Sayfa", path: "/" },
+    { label: "Öğrenci Yönetimi", path: "/ogrenci" },
+    { label: "Görüşmeler", path: "/gorusmeler" },
+    { label: "Anket & Test", path: "/anketler" },
+    { label: "Raporlama", path: "/raporlar" },
+    { label: "Etkinlikler", path: "/etkinlikler" },
+    { label: "Risk Takip", path: "/risk" },
+    { label: "AI Asistan", path: "/ai-asistan" },
+    { label: "AI Insights", path: "/ai-insights" },
+    { label: "Gelişmiş Analiz", path: "/gelismis-analiz" },
+    { label: "Günlük Eylem Planı", path: "/gunluk-plan" },
+    { label: "Ödev Yönetimi", path: "/odevler" },
+    { label: "Ayarlar", path: "/ayarlar" },
+  ], []);
+
+  const filteredNavigation = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return navigationItems.filter(item => 
+      item.label.toLowerCase().includes(query)
+    );
+  }, [navigationItems, searchQuery]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setCmdOpen((v) => !v);
+        setSearchOpen((v) => !v);
+        if (!searchOpen) {
+          setTimeout(() => {
+            document.getElementById('header-search-input')?.focus();
+          }, 100);
+        }
+      }
+      if (e.key === "Escape" && searchOpen) {
+        e.preventDefault();
+        setSearchOpen(false);
+        setSearchQuery("");
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [searchOpen]);
 
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} defaultOpen={isDesktop}>
@@ -379,16 +419,111 @@ export default function Rehber360Layout() {
                 ))}
               </BreadcrumbList>
             </Breadcrumb>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCmdOpen(true)}
-                aria-label="Komut Menüsü"
-                title="Komut Menüsü (⌘K / Ctrl+K)"
-              >
-                <Search className="h-5 w-5" />
-              </Button>
+            <div className="ml-auto flex items-center gap-2 relative">
+              {!searchOpen ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setSearchOpen(true);
+                    setTimeout(() => {
+                      document.getElementById('header-search-input')?.focus();
+                    }, 100);
+                  }}
+                  aria-label="Ara"
+                  title="Ara (⌘K / Ctrl+K)"
+                >
+                  <Search className="h-5 w-5" />
+                </Button>
+              ) : (
+                <div className="absolute right-0 top-0 z-50 w-[400px] max-w-[calc(100vw-2rem)]">
+                  <div className="relative">
+                    <Input
+                      id="header-search-input"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Öğrenci veya sayfa ara... (ESC ile kapat)"
+                      className="pr-8"
+                      onBlur={() => {
+                        setTimeout(() => {
+                          if (!document.activeElement?.closest('.search-results')) {
+                            setSearchOpen(false);
+                            setSearchQuery("");
+                          }
+                        }, 200);
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-10 w-10"
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchQuery("");
+                      }}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {searchQuery && (filteredStudents.length > 0 || filteredNavigation.length > 0) && (
+                    <Card className="search-results absolute top-12 w-full max-h-[400px] overflow-hidden shadow-lg border-primary/20">
+                      <ScrollArea className="h-full max-h-[400px]">
+                        {filteredStudents.length > 0 && (
+                          <div className="p-2">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Öğrenciler</div>
+                            {filteredStudents.map((student) => (
+                              <button
+                                key={student.id}
+                                onClick={() => {
+                                  navigate(`/ogrenci/${student.id}`);
+                                  setSearchOpen(false);
+                                  setSearchQuery("");
+                                }}
+                                className="w-full flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent text-left transition-colors"
+                              >
+                                <Users2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <span className="truncate">{student.name}</span>
+                                  {student.studentNumber && (
+                                    <span className="text-xs text-muted-foreground shrink-0">#{student.studentNumber}</span>
+                                  )}
+                                  {student.className && (
+                                    <span className="text-xs text-muted-foreground shrink-0">({student.className})</span>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {filteredNavigation.length > 0 && (
+                          <div className="p-2">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Sayfalar</div>
+                            {filteredNavigation.map((item) => (
+                              <button
+                                key={item.path}
+                                onClick={() => {
+                                  navigate(item.path);
+                                  setSearchOpen(false);
+                                  setSearchQuery("");
+                                }}
+                                className="w-full flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent text-left transition-colors"
+                              >
+                                <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <span className="truncate">{item.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </Card>
+                  )}
+                  {searchQuery && filteredStudents.length === 0 && filteredNavigation.length === 0 && (
+                    <Card className="search-results absolute top-12 w-full p-4 text-sm text-muted-foreground text-center">
+                      Sonuç bulunamadı
+                    </Card>
+                  )}
+                </div>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -435,157 +570,6 @@ export default function Rehber360Layout() {
           </div>
         </header>
         <div className="p-6 md:p-8">
-          <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
-            <CommandInput placeholder="Öğrenci adı, numarası veya komut yazın..." />
-            <CommandList>
-              <CommandEmpty>Kayıt bulunamadı</CommandEmpty>
-              <CommandGroup heading="Öğrenciler">
-                {studentsData.slice(0, 10).map((student) => (
-                  <CommandItem
-                    key={student.id}
-                    onSelect={() => {
-                      navigate(`/ogrenci/${student.id}`);
-                      setCmdOpen(false);
-                    }}
-                    keywords={[student.name, student.studentNumber?.toString() || '', student.className || '']}
-                  >
-                    <Users2 className="h-4 w-4 mr-2" />
-                    <div className="flex items-center gap-2">
-                      <span>{student.name}</span>
-                      {student.studentNumber && (
-                        <span className="text-xs text-muted-foreground">#{student.studentNumber}</span>
-                      )}
-                      {student.className && (
-                        <span className="text-xs text-muted-foreground">({student.className})</span>
-                      )}
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-              <CommandSeparator />
-              <CommandGroup heading="Gezinme">
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Ana Sayfa
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/ogrenci");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Öğrenci Yönetimi
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/gorusmeler");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Görüşmeler
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/anketler");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Anket & Test
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/raporlar");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Raporlama
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/etkinlikler");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Etkinlikler
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/risk");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Risk Takip
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/ai-asistan");
-                    setCmdOpen(false);
-                  }}
-                >
-                  AI Asistan
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/ai-insights");
-                    setCmdOpen(false);
-                  }}
-                >
-                  AI Insights
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/gelismis-analiz");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Gelişmiş Analiz
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/gunluk-plan");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Günlük Eylem Planı
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/odevler");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Ödev Yönetimi
-                </CommandItem>
-                <CommandItem
-                  onSelect={() => {
-                    navigate("/ayarlar");
-                    setCmdOpen(false);
-                  }}
-                >
-                  Ayarlar
-                </CommandItem>
-              </CommandGroup>
-              <CommandSeparator />
-              <CommandGroup heading="Eylemler">
-                <CommandItem
-                  onSelect={() => {
-                    setDark((v) => {
-                      const next = !v;
-                      updateSettings({ theme: next ? "dark" : "light" });
-                      return next;
-                    });
-                    setCmdOpen(false);
-                  }}
-                >
-                  Tema değiştir
-                </CommandItem>
-              </CommandGroup>
-            </CommandList>
-          </CommandDialog>
           <Outlet />
         </div>
       </SidebarInset>
