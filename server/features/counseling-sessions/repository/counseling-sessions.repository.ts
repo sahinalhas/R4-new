@@ -65,10 +65,10 @@ function ensureInitialized(): void {
       WHERE completed = 0 
       AND (
         (extensionGranted = 0 AND 
-         CAST((julianday('now', 'localtime') - julianday(sessionDate || ' ' || entryTime)) * 24 * 60 AS INTEGER) >= 60)
+         CAST((julianday('now', 'localtime') - julianday(sessionDate || ' ' || entryTime || ':00')) * 24 * 60 AS INTEGER) >= 60)
         OR 
         (extensionGranted = 1 AND 
-         CAST((julianday('now', 'localtime') - julianday(sessionDate || ' ' || entryTime)) * 24 * 60 AS INTEGER) >= 75)
+         CAST((julianday('now', 'localtime') - julianday(sessionDate || ' ' || entryTime || ':00')) * 24 * 60 AS INTEGER) >= 75)
       )
     `),
     autoCompleteSession: db.prepare(`
