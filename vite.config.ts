@@ -84,6 +84,15 @@ function expressPlugin(): Plugin {
         .catch((error) => {
           console.error('Failed to start analytics scheduler:', error);
         });
+      
+      // Start auto-complete scheduler in development mode
+      import('./server/features/counseling-sessions/services/auto-complete-scheduler.service.js')
+        .then(({ startAutoCompleteScheduler }) => {
+          startAutoCompleteScheduler();
+        })
+        .catch((error) => {
+          console.error('Failed to start auto-complete scheduler:', error);
+        });
     },
   };
 }

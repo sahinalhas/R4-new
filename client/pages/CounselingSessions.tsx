@@ -659,19 +659,6 @@ export default function CounselingSessions() {
     return () => clearInterval(interval);
   }, [activeSessions, remindedSessions, toast, queryClient]);
 
-  useEffect(() => {
-    const autoCompleteInterval = setInterval(async () => {
-      try {
-        await fetch('/api/counseling-sessions/auto-complete', { method: 'POST' });
-        queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions'] });
-      } catch (error) {
-        console.error('Auto-complete error:', error);
-      }
-    }, 60000);
-
-    return () => clearInterval(autoCompleteInterval);
-  }, [queryClient]);
-
   const handleExport = () => {
     const count = exportSessionsToExcel(sessions);
     toast({

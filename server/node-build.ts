@@ -2,6 +2,7 @@ import path from "path";
 import { createServer } from "./index";
 import express from "express";
 import { startAnalyticsScheduler, stopAnalyticsScheduler } from "./features/analytics/services/analytics-scheduler.service";
+import { startAutoCompleteScheduler, stopAutoCompleteScheduler } from "./features/counseling-sessions/services/auto-complete-scheduler.service";
 
 const app = createServer();
 const port = process.env.PORT || 3000;
@@ -36,17 +37,20 @@ app.listen(port, () => {
   console.log(`🔧 API: http://localhost:${port}/api`);
   
   startAnalyticsScheduler();
+  startAutoCompleteScheduler();
 });
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
   console.log("🛑 Received SIGTERM, shutting down gracefully");
   stopAnalyticsScheduler();
+  stopAutoCompleteScheduler();
   process.exit(0);
 });
 
 process.on("SIGINT", () => {
   console.log("🛑 Received SIGINT, shutting down gracefully");
   stopAnalyticsScheduler();
+  stopAutoCompleteScheduler();
   process.exit(0);
 });
