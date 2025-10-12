@@ -1,0 +1,87 @@
+import { BaseAIAdapter } from './base-adapter.js';
+import type { ChatCompletionRequest } from '../ai-provider.service.js';
+import { GoogleGenAI } from '@google/genai';
+
+// Blueprint reference: blueprint:javascript_gemini
+// Using Gemini AI for chat completions with streaming support
+
+export class GeminiAdapter extends BaseAIAdapter {
+  private ai: GoogleGenAI;
+
+  constructor(model: string, temperature: number = 0) {
+    super(model, temperature);
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('Gemini API key not configured');
+    }
+    this.ai = new GoogleGenAI({ apiKey });
+  }
+
+  async isAvailable(): Promise<boolean> {
+    return !!process.env.GEMINI_API_KEY;
+  }
+
+  async listModels(): Promise<string[]> {
+    return ['gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+  }
+
+  async chat(request: ChatCompletionRequest): Promise<string> {
+    const systemMessage = request.messages.find(m => m.role === 'system');
+    const userMessages = request.messages.filter(m => m.role !== 'system');
+
+    const contents = userMessages.map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+
+    const config: any = {
+      temperature: request.temperature ?? this.temperature,
+    };
+
+    if (systemMessage) {
+      config.systemInstruction = systemMessage.content;
+    }
+
+    if (request.format === 'json') {
+      config.responseMimeType = 'application/json';
+    }
+
+    const response = await this.ai.models.generateContent({
+      model: this.model,
+      contents: contents,
+      config: config
+    });
+
+    return response.text || '';
+  }
+
+  async *chatStream(request: ChatCompletionRequest): AsyncGenerator<string, void, unknown> {
+    const systemMessage = request.messages.find(m => m.role === 'system');
+    const userMessages = request.messages.filter(m => m.role !== 'system');
+
+    const contents = userMessages.map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+
+    const config: any = {
+      temperature: request.temperature ?? this.temperature,
+    };
+
+    if (systemMessage) {
+      config.systemInstruction = systemMessage.content;
+    }
+
+    const stream = await this.ai.models.generateContentStream({
+      model: this.model,
+      contents: contents,
+      config: config
+    });
+
+    for await (const chunk of stream) {
+      if (chunk.text) {
+        yield chunk.text;
+      }
+    }
+  }
+}

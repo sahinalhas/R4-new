@@ -8,7 +8,7 @@
 import type { AIAdapter } from './ai-adapters/base-adapter.js';
 import { AIAdapterFactory } from './ai-adapters/adapter-factory.js';
 
-export type AIProvider = 'openai' | 'ollama';
+export type AIProvider = 'openai' | 'ollama' | 'gemini';
 
 export interface AIProviderConfig {
   provider: AIProvider;
@@ -35,8 +35,8 @@ export class AIProviderService {
 
   private constructor(config?: Partial<AIProviderConfig>) {
     this.config = {
-      provider: (config?.provider || 'ollama') as AIProvider,
-      model: config?.model || 'llama3',
+      provider: (config?.provider || 'gemini') as AIProvider,
+      model: config?.model || 'gemini-2.0-flash-exp',
       temperature: config?.temperature || 0,
       ollamaBaseUrl: config?.ollamaBaseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434'
     };

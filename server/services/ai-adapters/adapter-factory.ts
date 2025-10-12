@@ -1,6 +1,7 @@
 import type { AIAdapter } from './base-adapter.js';
 import { OllamaAdapter } from './ollama-adapter.js';
 import { OpenAIAdapter } from './openai-adapter.js';
+import { GeminiAdapter } from './gemini-adapter.js';
 import type { AIProvider, AIProviderConfig } from '../ai-provider.service.js';
 
 export class AIAdapterFactory {
@@ -15,6 +16,12 @@ export class AIAdapterFactory {
       
       case 'openai':
         return new OpenAIAdapter(
+          config.model,
+          config.temperature
+        );
+      
+      case 'gemini':
+        return new GeminiAdapter(
           config.model,
           config.temperature
         );
