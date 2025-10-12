@@ -42,6 +42,7 @@ import {
   Activity,
   Eye,
   EyeOff,
+  Sparkles,
 } from "lucide-react";
 import { type EarlyWarning } from "@/lib/analytics";
 import { optimizedGenerateEarlyWarnings } from "@/lib/analytics-cache";
@@ -641,6 +642,55 @@ export default function Index() {
 
             {!hiddenWidgets.has('school-ai-insights') && (
               <SchoolWideAIInsights onHide={() => toggleWidget('school-ai-insights')} />
+            )}
+
+            {!hiddenWidgets.has('ai-tools-showcase') && (
+              <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-blue-500/10">
+                <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                      <Brain className="h-5 w-5" />
+                      AI Araçları
+                    </CardTitle>
+                    <CardDescription>Yapay zeka destekli rehberlik özellikleri</CardDescription>
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toggleWidget('ai-tools-showcase')}>
+                    <EyeOff className="h-3 w-3" />
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button asChild variant="ghost" className="w-full justify-start text-sm h-9 hover:bg-purple-100 dark:hover:bg-purple-900/20">
+                    <a href="/ai-asistan">
+                      <MessageSquare className="h-4 w-4 mr-2 text-purple-600" />
+                      AI Asistan
+                    </a>
+                  </Button>
+                  <Button asChild variant="ghost" className="w-full justify-start text-sm h-9 hover:bg-indigo-100 dark:hover:bg-indigo-900/20">
+                    <a href="/ai-insights">
+                      <Brain className="h-4 w-4 mr-2 text-indigo-600" />
+                      AI Insights & Toplu Analiz
+                    </a>
+                  </Button>
+                  <Button asChild variant="ghost" className="w-full justify-start text-sm h-9 hover:bg-blue-100 dark:hover:bg-blue-900/20">
+                    <a href="/gelismis-analiz">
+                      <Sparkles className="h-4 w-4 mr-2 text-blue-600" />
+                      Gelişmiş AI Analiz
+                    </a>
+                  </Button>
+                  <Button asChild variant="ghost" className="w-full justify-start text-sm h-9 hover:bg-teal-100 dark:hover:bg-teal-900/20">
+                    <a href="/gunluk-plan">
+                      <CalendarDays className="h-4 w-4 mr-2 text-teal-600" />
+                      Günlük Eylem Planı
+                    </a>
+                  </Button>
+                  <Button asChild variant="ghost" className="w-full justify-start text-sm h-9 hover:bg-rose-100 dark:hover:bg-rose-900/20">
+                    <a href="/risk">
+                      <Shield className="h-4 w-4 mr-2 text-rose-600" />
+                      Risk Takip & Erken Uyarı
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
             )}
 
             {!hiddenWidgets.has('weekly-focus') && (

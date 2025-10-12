@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, TrendingUp, Users, Calendar, Brain, FileText } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertTriangle, TrendingUp, Users, Calendar, Brain, FileText, School } from 'lucide-react';
+import BulkAnalysisDashboard from '@/components/ai/BulkAnalysisDashboard';
 
 interface DailyInsightsSummary {
   date: string;
@@ -80,15 +82,31 @@ export default function AIInsightsDashboard() {
             Günlük otomatik analiz ve akıllı öneriler
           </p>
         </div>
-        <Button onClick={generateNewInsights} disabled={generating}>
-          {generating ? 'Oluşturuluyor...' : 'Yeni Analiz Oluştur'}
-        </Button>
       </div>
 
-      {insights && (
-        <>
-          {/* Özet Kartları */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <Tabs defaultValue="daily" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="daily" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Günlük Insights
+          </TabsTrigger>
+          <TabsTrigger value="bulk" className="flex items-center gap-2">
+            <School className="h-4 w-4" />
+            Toplu Analiz
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="daily" className="space-y-6 mt-6">
+          <div className="flex justify-end">
+            <Button onClick={generateNewInsights} disabled={generating}>
+              {generating ? 'Oluşturuluyor...' : 'Yeni Analiz Oluştur'}
+            </Button>
+          </div>
+
+          {insights && (
+            <>
+              {/* Özet Kartları */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -269,6 +287,12 @@ export default function AIInsightsDashboard() {
           )}
         </>
       )}
+        </TabsContent>
+
+        <TabsContent value="bulk" className="mt-6">
+          <BulkAnalysisDashboard />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

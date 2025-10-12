@@ -16,6 +16,7 @@ import GeneralSettingsTab from "@/components/settings/GeneralSettingsTab";
 import NotificationsSettingsTab from "@/components/settings/NotificationsSettingsTab";
 import DataSettingsTab from "@/components/settings/DataSettingsTab";
 import IntegrationsSettingsTab from "@/components/settings/IntegrationsSettingsTab";
+import AISettingsTab from "@/components/settings/AISettingsTab";
 import CoursesSettingsTab from "@/components/settings/CoursesSettingsTab";
 import PresentationSettingsTab from "@/components/settings/PresentationSettingsTab";
 import ClassHoursSettingsTab from "@/components/settings/ClassHoursSettingsTab";
@@ -82,6 +83,7 @@ export default function SettingsPage() {
       "bildirim",
       "veri",
       "entegrasyon",
+      "ai",
       "dersler",
       "sunum-sistemi",
       "saatler",
@@ -219,6 +221,7 @@ export default function SettingsPage() {
           <TabsTrigger value="bildirim">Bildirimler</TabsTrigger>
           <TabsTrigger value="veri">Veri</TabsTrigger>
           <TabsTrigger value="entegrasyon">Entegrasyonlar</TabsTrigger>
+          <TabsTrigger value="ai">AI Yapılandırma</TabsTrigger>
           <TabsTrigger value="dersler">Dersler & Konular</TabsTrigger>
           <TabsTrigger value="sunum-sistemi">Sunum Sistemi</TabsTrigger>
           <TabsTrigger value="saatler">Ders Saatleri</TabsTrigger>
@@ -240,6 +243,10 @@ export default function SettingsPage() {
 
         <TabsContent value="entegrasyon" className="mt-4">
           <IntegrationsSettingsTab form={form} />
+        </TabsContent>
+
+        <TabsContent value="ai" className="mt-4">
+          <AISettingsTab />
         </TabsContent>
 
         <TabsContent value="dersler" className="mt-4">
