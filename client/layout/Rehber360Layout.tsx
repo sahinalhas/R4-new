@@ -207,9 +207,11 @@ export default function Rehber360Layout() {
     if (!searchQuery.trim()) return studentsData;
     const query = searchQuery.toLowerCase();
     return studentsData.filter(student => 
+      student.name?.toLowerCase().includes(query) ||
       student.ad?.toLowerCase().includes(query) ||
       student.soyad?.toLowerCase().includes(query) ||
       student.id?.toString().toLowerCase().includes(query) ||
+      student.className?.toLowerCase().includes(query) ||
       student.sinif?.toLowerCase().includes(query)
     );
   }, [studentsData, searchQuery]);
@@ -480,17 +482,22 @@ export default function Rehber360Layout() {
                                   setSearchOpen(false);
                                   setSearchQuery("");
                                 }}
-                                className="w-full flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent text-left transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-accent text-left transition-colors"
                               >
                                 <Users2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <span className="truncate">{student.ad} {student.soyad}</span>
-                                  {student.id && (
-                                    <span className="text-xs text-muted-foreground shrink-0">#{student.id}</span>
-                                  )}
-                                  {student.sinif && (
-                                    <span className="text-xs text-muted-foreground shrink-0">({student.sinif})</span>
-                                  )}
+                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                  <div className="font-medium truncate">
+                                    {student.name || `${student.ad || ''} ${student.soyad || ''}`.trim()}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span>No: {student.id}</span>
+                                    {(student.className || student.sinif) && (
+                                      <>
+                                        <span>•</span>
+                                        <span>Sınıf: {student.className || student.sinif}</span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                               </button>
                             ))}
