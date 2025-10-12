@@ -171,15 +171,15 @@ export class StudentContextService {
     ).get(studentId) as any;
 
     const exams = this.db.prepare(
-      'SELECT * FROM exam_results WHERE studentId = ? ORDER BY examDate DESC LIMIT 5'
+      'SELECT * FROM exam_results WHERE studentId = ? ORDER BY date DESC LIMIT 5'
     ).all(studentId) as any[];
 
     return {
-      gpa: academic?.averageGrade,
+      gpa: undefined,
       recentExams: exams.map(exam => ({
         subject: exam.subject || exam.examName,
         score: exam.score || exam.grade,
-        date: exam.examDate
+        date: exam.date
       })),
       strengths: academic?.strongSubjects ? JSON.parse(academic.strongSubjects) : [],
       weaknesses: academic?.weakSubjects ? JSON.parse(academic.weakSubjects) : [],
@@ -204,12 +204,14 @@ export class StudentContextService {
         'Empati': sel.empathyLevel || 0,
         'Öz-farkındalık': sel.selfAwarenessLevel || 0,
         'Duygu Düzenleme': sel.emotionRegulationLevel || 0,
-        'İlişki Becerileri': sel.relationshipSkillsLevel || 0,
-        'Sorumlu Karar Verme': sel.responsibleDecisionMakingLevel || 0
+        'Çatışma Çözme': sel.conflictResolutionLevel || 0,
+        'Liderlik': sel.leadershipLevel || 0,
+        'Takım Çalışması': sel.teamworkLevel || 0,
+        'İletişim': sel.communicationLevel || 0
       },
-      strengths: sel.socialStrengths ? JSON.parse(sel.socialStrengths) : [],
-      challenges: sel.socialChallenges ? JSON.parse(sel.socialChallenges) : [],
-      relationships: sel.peerRelationshipQuality
+      strengths: sel.strongSocialSkills ? JSON.parse(sel.strongSocialSkills) : [],
+      challenges: sel.developingSocialSkills ? JSON.parse(sel.developingSocialSkills) : [],
+      relationships: sel.socialRole
     };
   }
 
@@ -218,7 +220,7 @@ export class StudentContextService {
    */
   private async getBehavioralContext(studentId: string): Promise<StudentContext['behavioral']> {
     const incidents = this.db.prepare(`
-      SELECT * FROM behavior_incidents 
+      SELECT * FROM standardized_behavior_incidents 
       WHERE studentId = ? 
       ORDER BY incidentDate DESC, incidentTime DESC 
       LIMIT 10
@@ -227,17 +229,17 @@ export class StudentContextService {
     const stats = this.db.prepare(`
       SELECT 
         COUNT(*) as total,
-        SUM(CASE WHEN behaviorCategory = 'Olumlu' THEN 1 ELSE 0 END) as positive,
-        SUM(CASE WHEN behaviorCategory != 'Olumlu' THEN 1 ELSE 0 END) as negative
-      FROM behavior_incidents 
+        SUM(CASE WHEN behaviorType = 'OLUMLU' THEN 1 ELSE 0 END) as positive,
+        SUM(CASE WHEN behaviorType != 'OLUMLU' THEN 1 ELSE 0 END) as negative
+      FROM standardized_behavior_incidents 
       WHERE studentId = ?
     `).get(studentId) as any;
 
     return {
       recentIncidents: incidents.map(inc => ({
         date: inc.incidentDate,
-        type: inc.behaviorType,
-        severity: inc.intensity,
+        type: inc.behaviorCategory,
+        severity: inc.behaviorType,
         description: inc.description
       })),
       positiveCount: stats?.positive || 0,
@@ -284,8 +286,8 @@ export class StudentContextService {
    * Get risk context
    */
   private async getRiskContext(studentId: string): Promise<StudentContext['risk']> {
-    const riskScore = this.db.prepare(
-      'SELECT * FROM risk_score_history WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
+    const riskProfile = this.db.prepare(
+      'SELECT * FROM risk_protective_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
     ).get(studentId) as any;
 
     const alerts = this.db.prepare(`
@@ -294,14 +296,18 @@ export class StudentContextService {
       ORDER BY created_at DESC
     `).all(studentId) as any[];
 
-    const riskProfile = this.db.prepare(
-      'SELECT * FROM risk_protective_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
-    ).get(studentId) as any;
+    const riskFactors: string[] = [];
+    if (riskProfile) {
+      if (riskProfile.academicRiskFactors) riskFactors.push(riskProfile.academicRiskFactors);
+      if (riskProfile.behavioralRiskFactors) riskFactors.push(riskProfile.behavioralRiskFactors);
+      if (riskProfile.socialRiskFactors) riskFactors.push(riskProfile.socialRiskFactors);
+      if (riskProfile.familyRiskFactors) riskFactors.push(riskProfile.familyRiskFactors);
+    }
 
     return {
-      level: riskScore?.riskLevel || 'DÜŞÜK',
-      factors: riskProfile?.riskFactors ? JSON.parse(riskProfile.riskFactors) : [],
-      protectiveFactors: riskProfile?.protectiveFactors ? JSON.parse(riskProfile.protectiveFactors) : [],
+      level: riskProfile?.dropoutRisk || 'DÜŞÜK',
+      factors: riskFactors,
+      protectiveFactors: riskProfile?.activeProtectiveFactors ? JSON.parse(riskProfile.activeProtectiveFactors) : [],
       alerts: alerts.map(alert => ({
         type: alert.alertType,
         level: alert.alertLevel,
@@ -357,10 +363,18 @@ export class StudentContextService {
       return undefined;
     }
 
+    const talents: string[] = [];
+    if (profile.creativeTalents) talents.push(...JSON.parse(profile.creativeTalents));
+    if (profile.physicalTalents) talents.push(...JSON.parse(profile.physicalTalents));
+
+    const interests: string[] = [];
+    if (profile.primaryInterests) interests.push(...JSON.parse(profile.primaryInterests));
+    if (profile.exploratoryInterests) interests.push(...JSON.parse(profile.exploratoryInterests));
+
     return {
-      talents: profile.talents ? JSON.parse(profile.talents) : [],
-      interests: profile.interests ? JSON.parse(profile.interests) : [],
-      hobbies: profile.hobbies ? JSON.parse(profile.hobbies) : [],
+      talents,
+      interests,
+      hobbies: profile.clubMemberships ? JSON.parse(profile.clubMemberships) : [],
       careerGoals: profile.careerAspirations ? JSON.parse(profile.careerAspirations) : []
     };
   }
@@ -370,7 +384,7 @@ export class StudentContextService {
    */
   private async getHealthContext(studentId: string): Promise<StudentContext['health']> {
     const health = this.db.prepare(
-      'SELECT * FROM standardized_health_profiles WHERE studentId = ? ORDER BY assessmentDate DESC LIMIT 1'
+      'SELECT * FROM standardized_health_profiles WHERE studentId = ?'
     ).get(studentId) as any;
 
     if (!health) {
@@ -378,9 +392,9 @@ export class StudentContextService {
     }
 
     return {
-      conditions: health.chronicConditions ? JSON.parse(health.chronicConditions) : [],
+      conditions: health.chronicDiseases ? JSON.parse(health.chronicDiseases) : [],
       medications: health.currentMedications ? JSON.parse(health.currentMedications) : [],
-      notes: health.healthNotes
+      notes: health.additionalNotes
     };
   }
 
@@ -412,7 +426,7 @@ export class StudentContextService {
     if (incidents.length === 0) return 'Davranış kaydı yok';
 
     const recent = incidents.slice(0, 5);
-    const positiveCount = recent.filter(i => i.behaviorCategory === 'Olumlu').length;
+    const positiveCount = recent.filter(i => i.behaviorType === 'OLUMLU').length;
     const negativeCount = recent.length - positiveCount;
 
     if (positiveCount > negativeCount * 2) {
