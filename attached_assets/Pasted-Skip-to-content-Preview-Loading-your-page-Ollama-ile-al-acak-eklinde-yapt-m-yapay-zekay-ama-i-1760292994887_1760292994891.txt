@@ -1,0 +1,62 @@
+Skip to content
+Preview
+Loading your page…
+
+Ollama ile çalışacak şeklinde yaptım yapay zekayı ama şimdi ollama kurmadım deneme amaçlı open ai vardı ama onunda limiti doldu limiti olmayan yapay zeka var mı
+
+26 minutes ago
+Geminiye göre düzenle ama ollama kurunca onunla devam edecepim
+
+22 minutes ago
+19 minutes ago
+Add Gemini AI as a supported language model option
+2 minutes of work
+18 minutes ago
+Remove temporary shared memory database file
+Ready to share? Publish this App in a few clicks.
+Reserved VM Deployment
+$20/month
+Primary URL
+r-4-czdv4hdlf
+.replit.app
+10 minutes ago
+Add Gemini as a selectable AI provider and improve Ollama fallback
+4 minutes of work
+Şu an gemini aktif çalışıyor mı API key verdim sonuçta
+
+8 minutes ago
+Hemen kontrol edeyim! API key'iniz tanımlandı mı ve Gemini aktif mi çalışıyor, bakayım:
+
+Harika! GEMINI_API_KEY tanımlı. Şimdi AI Asistan sayfasını açıp Gemini'nin aktif olduğunu size göstereyim:
+
+Giriş sayfası açıldı. Giriş yapmanız gerekiyor. Ben arka planda kontrol edeyim, Gemini'nin aktif olup olmadığını:
+
+Ah! Sorunu gördüm. Log'lara göre sistem hala Ollama'ya bağlanmaya çalışıyor, oysa GEMINI_API_KEY var ve Gemini kullanması gerekiyor.
+
+Sorun: Kod değişikliklerim henüz aktif değil. Sunucuyu yeniden başlatmam gerekiyor:
+
+Sorun: Vite'ın geçici derlenmiş dosyaları eski kodu kullanıyor. Temizleyip yeniden başlatalım:
+
+Güzel! Ollama hatası yok artık. Şimdi API'yi test edelim:
+
+Kod doğru. Sorun singleton pattern olabilir - ilk instance oluşturulduğunda GEMINI_API_KEY henüz yüklenmemiş olabilir. Kontrol edelim:
+
+Sorun buldum! Vite dev server singleton instance'ı GEMINI_API_KEY eklenmeden önce oluşturmuş. Singleton'u resetlemek için server'ı tamamen durdurup başlatmamız gerekiyor. Build yapalım ve production modda test edelim:
+
+Build başarılı! Şimdi production modda Gemini'nin çalışıp çalışmadığını test edelim:
+
+Routing hatası var ama asıl sorun: Dev server başlatıldığında GEMINI_API_KEY henüz yoktu, singleton o zaman oluşturuldu ve Ollama seçti. En basit çözüm tam bir yeniden başlatma:
+
+Tamam! Şimdi Gemini'nin aktif olup olmadığını test edelim:
+
+3 minutes ago
+Fix error that occurs when users attempt to view profile information
+4 minutes of work
+Working..
+Upgrade to continue building
+You've reached your Starter usage limit. Upgrade to make, launch, and scale your apps.
+$25 Monthly credits for Replit Agent
+Publish and host your apps
+Access more powerful models
+Agent
+Agent can make changes, review its work, and debug itself automatically.
