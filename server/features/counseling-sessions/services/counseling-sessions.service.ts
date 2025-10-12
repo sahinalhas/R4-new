@@ -157,10 +157,9 @@ export function extendCounselingSession(id: string): { success: boolean; notFoun
 
 export function autoCompleteSessions(): { success: boolean; completedCount: number } {
   const now = new Date();
-  const currentDate = now.toISOString().split('T')[0];
   const currentTime = now.toTimeString().slice(0, 5);
   
-  const sessionsToComplete = repository.getSessionsToAutoComplete(currentDate, currentTime);
+  const sessionsToComplete = repository.getSessionsToAutoComplete();
   const completedCount = sessionsToComplete.length;
   
   if (completedCount > 0) {

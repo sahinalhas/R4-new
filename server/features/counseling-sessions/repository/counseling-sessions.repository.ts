@@ -64,14 +64,11 @@ function ensureInitialized(): void {
       SELECT * FROM counseling_sessions 
       WHERE completed = 0 
       AND (
-        (sessionDate < ? )
-        OR (sessionDate = ? AND (
-          (extensionGranted = 0 AND 
-           CAST((julianday(?) - julianday(entryTime)) * 24 * 60 AS INTEGER) >= 60)
-          OR 
-          (extensionGranted = 1 AND 
-           CAST((julianday(?) - julianday(entryTime)) * 24 * 60 AS INTEGER) >= 75)
-        ))
+        (extensionGranted = 0 AND 
+         CAST((julianday('now', 'localtime') - julianday(sessionDate || ' ' || entryTime)) * 24 * 60 AS INTEGER) >= 60)
+        OR 
+        (extensionGranted = 1 AND 
+         CAST((julianday('now', 'localtime') - julianday(sessionDate || ' ' || entryTime)) * 24 * 60 AS INTEGER) >= 75)
       )
     `),
     autoCompleteSession: db.prepare(`
@@ -197,17 +194,9 @@ export function extendSession(id: string): { changes: number } {
   return { changes: result.changes };
 }
 
-export function getSessionsToAutoComplete(
-  currentDate: string,
-  currentTime: string
-): CounselingSession[] {
+export function getSessionsToAutoComplete(): CounselingSession[] {
   ensureInitialized();
-  return statements.getSessionsToAutoComplete.all(
-    currentDate,
-    currentDate,
-    currentTime,
-    currentTime
-  ) as CounselingSession[];
+  return statements.getSessionsToAutoComplete.all() as CounselingSession[];
 }
 
 export function autoCompleteSession(id: string, exitTime: string): void {
