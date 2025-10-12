@@ -7,6 +7,7 @@
 
 import type { AIAdapter } from './ai-adapters/base-adapter.js';
 import { AIAdapterFactory } from './ai-adapters/adapter-factory.js';
+import { AppSettingsService } from './app-settings.service.js';
 
 export type AIProvider = 'openai' | 'ollama' | 'gemini';
 
@@ -34,14 +35,13 @@ export class AIProviderService {
   private adapter: AIAdapter;
 
   private constructor(config?: Partial<AIProviderConfig>) {
-    const defaultProvider = process.env.GEMINI_API_KEY ? 'gemini' : 'ollama';
-    const defaultModel = process.env.GEMINI_API_KEY ? 'gemini-2.0-flash-exp' : 'llama3';
+    const savedSettings = AppSettingsService.getAIProvider();
     
     this.config = {
-      provider: (config?.provider || defaultProvider) as AIProvider,
-      model: config?.model || defaultModel,
+      provider: (config?.provider || savedSettings?.provider || 'gemini') as AIProvider,
+      model: config?.model || savedSettings?.model || 'gemini-2.0-flash-exp',
       temperature: config?.temperature || 0,
-      ollamaBaseUrl: config?.ollamaBaseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434'
+      ollamaBaseUrl: config?.ollamaBaseUrl || savedSettings?.ollamaBaseUrl || 'http://localhost:11434'
     };
 
     this.adapter = AIAdapterFactory.createAdapter(this.config);
@@ -84,11 +84,17 @@ export class AIProviderService {
   /**
    * Set provider
    */
-  setProvider(provider: AIProvider, model?: string): void {
+  setProvider(provider: AIProvider, model?: string, ollamaBaseUrl?: string): void {
     this.config.provider = provider;
     if (model) {
       this.config.model = model;
     }
+    if (ollamaBaseUrl) {
+      this.config.ollamaBaseUrl = ollamaBaseUrl;
+    }
+    
+    AppSettingsService.saveAIProvider(provider, this.config.model, this.config.ollamaBaseUrl);
+    
     this.adapter = AIAdapterFactory.createAdapter(this.config);
   }
 

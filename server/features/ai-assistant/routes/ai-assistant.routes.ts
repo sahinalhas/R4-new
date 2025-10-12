@@ -47,7 +47,7 @@ router.get('/models', async (req, res) => {
  */
 router.post('/set-provider', async (req, res) => {
   try {
-    const { provider, model } = req.body;
+    const { provider, model, ollamaBaseUrl } = req.body;
 
     if (!provider || !['openai', 'ollama', 'gemini'].includes(provider)) {
       return res.status(400).json({
@@ -56,11 +56,11 @@ router.post('/set-provider', async (req, res) => {
       });
     }
 
-    aiProvider.setProvider(provider, model);
+    aiProvider.setProvider(provider, model, ollamaBaseUrl);
 
     res.json({
       success: true,
-      message: `AI provider ${provider} olarak ayarlandı`,
+      message: `AI provider ${provider} olarak ayarlandı ve database'e kaydedildi`,
       data: {
         provider,
         model: aiProvider.getModel()

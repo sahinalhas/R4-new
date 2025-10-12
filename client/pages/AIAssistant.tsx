@@ -145,7 +145,7 @@ export default function AIAssistant() {
     refetchInterval: 10000
   });
 
-  const { data: studentsData } = useQuery<{ students: any[] }>({
+  const { data: studentsData } = useQuery<any[]>({
     queryKey: ['/api/students'],
     queryFn: async () => {
       const res = await fetch('/api/students');
@@ -585,7 +585,7 @@ export default function AIAssistant() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Tüm Öğrenciler</SelectItem>
-                  {studentsData?.students?.map((student: any) => (
+                  {studentsData?.map((student: any) => (
                     <SelectItem key={student.id} value={student.id}>
                       {student.name}
                     </SelectItem>
@@ -892,7 +892,7 @@ export default function AIAssistant() {
                   <Sparkles className="h-3 w-3" />
                   Şu anda{' '}
                   <span className="font-medium text-foreground">
-                    {studentsData?.students?.find((s: any) => s.id === selectedStudent)?.name || 'Öğrenci'}
+                    {studentsData?.find((s: any) => s.id === selectedStudent)?.name || 'Öğrenci'}
                   </span>{' '}
                   hakkında konuşuyorsunuz
                 </p>
@@ -906,7 +906,7 @@ export default function AIAssistant() {
         <TabsContent value="meeting-prep" className="space-y-4">
           <MeetingPrepPanel 
             selectedStudent={selectedStudent}
-            students={studentsData?.students || []}
+            students={studentsData || []}
           />
         </TabsContent>
 
