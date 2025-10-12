@@ -34,9 +34,12 @@ export class AIProviderService {
   private adapter: AIAdapter;
 
   private constructor(config?: Partial<AIProviderConfig>) {
+    const defaultProvider = process.env.GEMINI_API_KEY ? 'gemini' : 'ollama';
+    const defaultModel = process.env.GEMINI_API_KEY ? 'gemini-2.0-flash-exp' : 'llama3';
+    
     this.config = {
-      provider: (config?.provider || 'gemini') as AIProvider,
-      model: config?.model || 'gemini-2.0-flash-exp',
+      provider: (config?.provider || defaultProvider) as AIProvider,
+      model: config?.model || defaultModel,
       temperature: config?.temperature || 0,
       ollamaBaseUrl: config?.ollamaBaseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434'
     };

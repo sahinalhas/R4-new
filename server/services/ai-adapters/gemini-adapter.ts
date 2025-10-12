@@ -72,6 +72,10 @@ export class GeminiAdapter extends BaseAIAdapter {
       config.systemInstruction = systemMessage.content;
     }
 
+    if (request.format === 'json') {
+      config.responseMimeType = 'application/json';
+    }
+
     const stream = await this.ai.models.generateContentStream({
       model: this.model,
       contents: contents,
