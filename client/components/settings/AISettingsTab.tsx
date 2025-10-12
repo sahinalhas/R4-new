@@ -101,7 +101,7 @@ export default function AISettingsTab() {
         ...(provider === 'ollama' && { ollamaBaseUrl: ollamaUrl })
       };
 
-      const response = await fetch('/api/ai-assistant/configure', {
+      const response = await fetch('/api/ai-assistant/set-provider', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings)

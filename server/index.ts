@@ -32,15 +32,9 @@ export function createServer() {
   app.use(securityHeaders);
   app.use(cors(getCorsOptions()));
 
-  // Request size limits with additional validation
+  // Request size limits
   app.use(express.json({ 
-    limit: '10mb',
-    verify: (req, res, buf) => {
-      // Additional validation could be added here
-      if (buf.length === 0) {
-        throw new Error('Empty request body');
-      }
-    }
+    limit: '10mb'
   }));
   app.use(express.urlencoded({ 
     extended: true, 
