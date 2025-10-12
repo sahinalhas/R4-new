@@ -11,7 +11,6 @@ import FormStepper, { Step } from "./form-steps/FormStepper";
 import FormProgress from "./form-widgets/FormProgress";
 import ParticipantStep from "./form-steps/ParticipantStep";
 import SessionDetailsStep from "./form-steps/SessionDetailsStep";
-import NotesStep from "./form-steps/NotesStep";
 
 interface GroupSessionFormProps {
   form: UseFormReturn<GroupSessionFormValues>;
@@ -27,7 +26,6 @@ interface GroupSessionFormProps {
 const STEPS: Step[] = [
   { id: 1, title: "Katılımcılar", description: "Grup & Konu" },
   { id: 2, title: "Detaylar", description: "Tarih & Yer" },
-  { id: 3, title: "Notlar", description: "Özet" },
 ];
 
 export default function GroupSessionForm({
@@ -51,8 +49,6 @@ export default function GroupSessionForm({
         break;
       case 2:
         fieldsToValidate = ['sessionDate', 'sessionTime', 'sessionMode', 'sessionLocation'];
-        break;
-      case 3:
         break;
       default:
         return true;
@@ -111,15 +107,6 @@ export default function GroupSessionForm({
 
           {currentStep === 2 && (
             <SessionDetailsStep form={form} />
-          )}
-
-          {currentStep === 3 && (
-            <NotesStep
-              form={form}
-              sessionType="group"
-              students={students}
-              selectedStudents={selectedStudents}
-            />
           )}
         </div>
 
