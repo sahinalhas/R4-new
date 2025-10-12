@@ -64,6 +64,7 @@ import {
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { loadSettings, updateSettings, SETTINGS_KEY, AppSettings } from "@/lib/app-settings";
+import { useQuery } from "@tanstack/react-query";
 import {
   Collapsible,
   CollapsibleContent,
@@ -196,6 +197,16 @@ export default function Rehber360Layout() {
   const crumbs = useBreadcrumbs();
   const navigate = useNavigate();
   const [cmdOpen, setCmdOpen] = useState(false);
+  
+  const { data: studentsData = [] } = useQuery<any[]>({
+    queryKey: ['/api/students'],
+    queryFn: async () => {
+      const response = await fetch('/api/students');
+      if (!response.ok) throw new Error('Failed to fetch students');
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    },
+  });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
@@ -425,9 +436,33 @@ export default function Rehber360Layout() {
         </header>
         <div className="p-6 md:p-8">
           <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
-            <CommandInput placeholder="Ara veya komut yazın..." />
+            <CommandInput placeholder="Öğrenci adı, numarası veya komut yazın..." />
             <CommandList>
               <CommandEmpty>Kayıt bulunamadı</CommandEmpty>
+              <CommandGroup heading="Öğrenciler">
+                {studentsData.slice(0, 10).map((student) => (
+                  <CommandItem
+                    key={student.id}
+                    onSelect={() => {
+                      navigate(`/ogrenci/${student.id}`);
+                      setCmdOpen(false);
+                    }}
+                    keywords={[student.name, student.studentNumber?.toString() || '', student.className || '']}
+                  >
+                    <Users2 className="h-4 w-4 mr-2" />
+                    <div className="flex items-center gap-2">
+                      <span>{student.name}</span>
+                      {student.studentNumber && (
+                        <span className="text-xs text-muted-foreground">#{student.studentNumber}</span>
+                      )}
+                      {student.className && (
+                        <span className="text-xs text-muted-foreground">({student.className})</span>
+                      )}
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
               <CommandGroup heading="Gezinme">
                 <CommandItem
                   onSelect={() => {

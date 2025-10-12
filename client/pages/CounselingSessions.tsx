@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ActiveSessionsGrid from "@/components/counseling/ActiveSessionsGrid";
-import CompletedSessionsList from "@/components/counseling/CompletedSessionsList";
 import SessionsTable from "@/components/counseling/SessionsTable";
 import SessionFiltersComponent from "@/components/counseling/SessionFilters";
 import NewSessionDialog from "@/components/counseling/NewSessionDialog";
@@ -134,7 +133,6 @@ export default function CounselingSessions() {
   });
 
   const activeSessions = sessions.filter(s => !s.completed);
-  const completedSessions = sessions.filter(s => s.completed);
 
   const createSessionMutation = useMutation({
     mutationFn: async (data: IndividualSessionFormValues | GroupSessionFormValues) => {
@@ -215,10 +213,11 @@ export default function CounselingSessions() {
       queryClient.invalidateQueries({ queryKey: ['/api/counseling-sessions'] });
       toast({
         title: "✅ Görüşme tamamlandı",
-        description: "Rehberlik görüşmesi başarıyla kapatıldı.",
+        description: "Görüşme Defteri'nde tamamlanan görüşmeyi görüntüleyebilirsiniz.",
       });
       setCompleteDialogOpen(false);
       setSelectedSession(null);
+      setActiveTab("journal");
     },
     onError: (error: Error) => {
       toast({
@@ -831,17 +830,13 @@ export default function CounselingSessions() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="active" className="gap-2">
             <Clock className="h-4 w-4" />
             Aktif Görüşmeler
             {activeSessions.length > 0 && (
               <Badge variant="secondary" className="ml-2">{activeSessions.length}</Badge>
             )}
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            Tamamlanan
           </TabsTrigger>
           <TabsTrigger value="reminders" className="gap-2">
             <Bell className="h-4 w-4" />
@@ -872,10 +867,6 @@ export default function CounselingSessions() {
             onExtendSession={(id) => extendSessionMutation.mutate(id)}
             extendingSessionId={extendSessionMutation.variables as string | undefined}
           />
-        </TabsContent>
-
-        <TabsContent value="completed" className="space-y-4">
-          <CompletedSessionsList sessions={completedSessions} />
         </TabsContent>
 
         <TabsContent value="reminders" className="space-y-4">
