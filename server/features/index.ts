@@ -35,6 +35,7 @@ import { enhancedRiskRoutes } from './enhanced-risk/index.js';
 import { personalizedLearningRoutes } from './personalized-learning/index.js';
 import { advancedAnalyticsRoutes } from './advanced-analytics/index.js';
 import { socialNetworkRoutes } from './social-network/index.js';
+import { voiceTranscriptionRoutes } from './voice-transcription/index.js';
 
 /**
  * Feature Registry
@@ -182,5 +183,8 @@ featureRegistry.use('/advanced-analytics', advancedAnalyticsRoutes);
 
 // =================== SOCIAL NETWORK ANALYSIS ===================
 featureRegistry.use('/social-network', socialNetworkRoutes);
+
+// =================== VOICE TRANSCRIPTION & AI ANALYSIS ===================
+featureRegistry.use('/voice-transcription', voiceTranscriptionRoutes);
 
 export default featureRegistry;
