@@ -21,14 +21,29 @@ import {
   Clock,
   ArrowRight,
   BookOpen,
-  Loader2
+  Loader2,
+  Award,
+  BarChart3,
+  History,
+  GitCompare,
+  RefreshCw,
+  TrendingDown
 } from "lucide-react";
 import {
   getAllCareers,
   analyzeCareerMatch,
   generateCareerRoadmap,
   getStudentRoadmap,
-  getStudentAnalysisHistory
+  getStudentAnalysisHistory,
+  getStudentCompetencies,
+  refreshStudentCompetencies,
+  getStudentCompetencyStats,
+  getAllStudentRoadmaps,
+  updateRoadmapProgress,
+  compareCareers,
+  type StudentCompetency,
+  type CompetencyStats,
+  type CareerComparison
 } from "@/lib/api/career-guidance.api";
 import type {
   CareerProfile,
@@ -64,6 +79,13 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<CareerCategory | "ALL">("ALL");
   const [selectedCareer, setSelectedCareer] = useState<CareerProfile | null>(null);
+  
+  const [competencies, setCompetencies] = useState<StudentCompetency[]>([]);
+  const [competencyStats, setCompetencyStats] = useState<CompetencyStats | null>(null);
+  const [allRoadmaps, setAllRoadmaps] = useState<CareerRoadmap[]>([]);
+  const [analysisHistory, setAnalysisHistory] = useState<CareerAnalysisResult[]>([]);
+  const [comparison, setComparison] = useState<CareerComparison | null>(null);
+  const [selectedCareersForComparison, setSelectedCareersForComparison] = useState<string[]>([]);
 
   useEffect(() => {
     loadInitialData();
@@ -71,12 +93,20 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
 
   const loadInitialData = async () => {
     try {
-      const [careersData, roadmapData] = await Promise.all([
+      const [careersData, roadmapData, competenciesData, statsData, roadmapsData, historyData] = await Promise.all([
         getAllCareers(),
-        getStudentRoadmap(studentId)
+        getStudentRoadmap(studentId),
+        getStudentCompetencies(studentId),
+        getStudentCompetencyStats(studentId),
+        getAllStudentRoadmaps(studentId),
+        getStudentAnalysisHistory(studentId, 10)
       ]);
       setCareers(careersData);
       setRoadmap(roadmapData);
+      setCompetencies(competenciesData);
+      setCompetencyStats(statsData);
+      setAllRoadmaps(roadmapsData);
+      setAnalysisHistory(historyData);
     } catch (error) {
       console.error("Error loading career data:", error);
     }
@@ -146,10 +176,13 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="analysis">Kariyer Analizi</TabsTrigger>
-            <TabsTrigger value="explore">Meslek Keşfi</TabsTrigger>
-            <TabsTrigger value="roadmap">Kariyer Yol Haritası</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="analysis">Analiz</TabsTrigger>
+            <TabsTrigger value="explore">Keşfet</TabsTrigger>
+            <TabsTrigger value="roadmap">Yol Haritası</TabsTrigger>
+            <TabsTrigger value="competencies">Yetkinlikler</TabsTrigger>
+            <TabsTrigger value="compare">Karşılaştır</TabsTrigger>
+            <TabsTrigger value="history">Geçmiş</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analysis" className="space-y-4 mt-4">
@@ -552,6 +585,417 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                 </Button>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="competencies" className="space-y-4 mt-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium">Yetkinlik Profili</h3>
+                <p className="text-xs text-muted-foreground">
+                  Mevcut yetkinliklerinizi görüntüleyin ve geliştirin
+                </p>
+              </div>
+              <Button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const updated = await refreshStudentCompetencies(studentId);
+                    setCompetencies(updated);
+                    const stats = await getStudentCompetencyStats(studentId);
+                    setCompetencyStats(stats);
+                  } catch (error) {
+                    console.error("Error refreshing competencies:", error);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                variant="outline"
+                className="gap-2"
+              >
+                {loading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Yenileniyor...</>
+                ) : (
+                  <><RefreshCw className="h-4 w-4" /> AI ile Yenile</>
+                )}
+              </Button>
+            </div>
+
+            {competencyStats && (
+              <div className="grid grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Toplam Yetkinlik</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{competencyStats.totalCompetencies}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Değerlendirilen alan</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Ortalama Seviye</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{competencyStats.averageLevel.toFixed(1)}/10</div>
+                    <Progress value={competencyStats.averageLevel * 10} className="mt-2 h-2" />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Güçlü Alanlar</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{competencyStats.strongCompetencies.length}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Seviye 7+ yetkinlik</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            <ScrollArea className="h-[500px] pr-4">
+              <div className="space-y-3">
+                {competencies.length > 0 ? (
+                  competencies.map((comp) => (
+                    <Card key={comp.competencyId}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Award className="h-4 w-4 text-primary" />
+                              <h5 className="font-semibold">{comp.competencyName}</h5>
+                              <Badge variant="secondary" className="text-xs">{comp.category}</Badge>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                              <div className="flex-1">
+                                <Progress value={comp.currentLevel * 10} className="h-2" />
+                              </div>
+                              <span className="text-sm font-medium">{comp.currentLevel}/10</span>
+                            </div>
+
+                            <div className="text-xs text-muted-foreground">
+                              Kaynak: {comp.source} • Değerlendirme: {new Date(comp.assessmentDate).toLocaleDateString('tr-TR')}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-sm mb-4">Henüz yetkinlik değerlendirmesi yapılmamış</p>
+                    <Button
+                      onClick={async () => {
+                        setLoading(true);
+                        try {
+                          const updated = await refreshStudentCompetencies(studentId);
+                          setCompetencies(updated);
+                        } catch (error) {
+                          console.error("Error refreshing:", error);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      disabled={loading}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      AI ile Yetkinlikleri Çıkar
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="compare" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Meslek Karşılaştırma</h3>
+                <p className="text-xs text-muted-foreground">
+                  Birden fazla mesleği karşılaştırarak en uygun olanı bulun
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Select 
+                    onValueChange={(value) => {
+                      if (!selectedCareersForComparison.includes(value) && selectedCareersForComparison.length < 5) {
+                        setSelectedCareersForComparison([...selectedCareersForComparison, value]);
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Meslek seçin (en fazla 5)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {careers
+                        .filter(c => !selectedCareersForComparison.includes(c.id))
+                        .map(career => (
+                          <SelectItem key={career.id} value={career.id}>
+                            {career.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  onClick={async () => {
+                    if (selectedCareersForComparison.length >= 2) {
+                      setLoading(true);
+                      try {
+                        const result = await compareCareers(studentId, selectedCareersForComparison);
+                        setComparison(result);
+                      } catch (error) {
+                        console.error("Comparison error:", error);
+                      } finally {
+                        setLoading(false);
+                      }
+                    } else {
+                      toast.error("En az 2 meslek seçmelisiniz");
+                    }
+                  }}
+                  disabled={loading || selectedCareersForComparison.length < 2}
+                >
+                  <GitCompare className="mr-2 h-4 w-4" />
+                  Karşılaştır
+                </Button>
+              </div>
+
+              {selectedCareersForComparison.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedCareersForComparison.map(careerId => {
+                    const career = careers.find(c => c.id === careerId);
+                    return (
+                      <Badge key={careerId} variant="secondary" className="gap-2">
+                        {career?.name}
+                        <button
+                          onClick={() => setSelectedCareersForComparison(selectedCareersForComparison.filter(id => id !== careerId))}
+                          className="hover:text-destructive"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+
+              {comparison && (
+                <div className="space-y-4">
+                  <Card className="bg-gradient-to-br from-primary/5 to-primary/10">
+                    <CardHeader>
+                      <CardTitle className="text-sm">En İyi Eşleşme</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-2">
+                        <Award className="h-5 w-5 text-primary" />
+                        <span className="font-semibold">{comparison.bestMatch}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <ScrollArea className="h-[450px] pr-4">
+                    <div className="space-y-3">
+                      {comparison.careers.map((item) => (
+                        <Card key={item.career.id}>
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="font-mono">#{item.rank}</Badge>
+                                    <h5 className="font-semibold">{item.career.name}</h5>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">{item.career.description}</p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <div className="text-2xl font-bold">{item.matchScore.toFixed(0)}%</div>
+                                  <Badge className={getCompatibilityColor(item.matchScore)}>
+                                    {getCompatibilityLabel(item.matchScore)}
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              <Progress value={item.matchScore} className="h-2" />
+
+                              <div className="grid grid-cols-2 gap-4 text-xs">
+                                <div>
+                                  <p className="font-medium mb-1">✅ Güçlü Yönler ({item.strengths.length})</p>
+                                  <ul className="space-y-0.5 text-muted-foreground">
+                                    {item.strengths.slice(0, 3).map((s, i) => (
+                                      <li key={i}>• {s}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                <div>
+                                  <p className="font-medium mb-1">📈 Gelişim Alanları ({item.gaps.length})</p>
+                                  <ul className="space-y-0.5 text-muted-foreground">
+                                    {item.gaps.slice(0, 3).map((g: any, i: number) => (
+                                      <li key={i}>• {g.competencyName}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+
+              {!comparison && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <GitCompare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-sm">Karşılaştırma yapmak için en az 2 meslek seçin</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium">Kariyer Geçmişi</h3>
+                <p className="text-xs text-muted-foreground">
+                  Geçmiş analizler ve yol haritalarınızı görüntüleyin
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Toplam Analiz
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{analysisHistory.length}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Yapılan kariyer analizi</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Yol Haritaları
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{allRoadmaps.length}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Oluşturulan yol haritası</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Analiz Geçmişi
+                </h4>
+                <ScrollArea className="h-[250px] pr-4">
+                  {analysisHistory.length > 0 ? (
+                    <div className="space-y-2">
+                      {analysisHistory.map((analysis, index) => (
+                        <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer">
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Badge variant="outline" className="text-xs">
+                                    {new Date(analysis.analysisDate).toLocaleDateString('tr-TR')}
+                                  </Badge>
+                                  {analysis.targetCareer && (
+                                    <span className="text-xs font-medium">{analysis.targetCareer.name}</span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {analysis.topMatches.length} meslek analiz edildi • Uyumluluk: {analysis.overallCompatibility.toFixed(0)}%
+                                </div>
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-sm">Henüz analiz yapılmamış</p>
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Yol Haritası Geçmişi
+                </h4>
+                <ScrollArea className="h-[250px] pr-4">
+                  {allRoadmaps.length > 0 ? (
+                    <div className="space-y-2">
+                      {allRoadmaps.map((rm) => (
+                        <Card key={rm.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <h5 className="font-semibold text-sm">{rm.targetCareerName}</h5>
+                                  <Badge variant={
+                                    (rm as any).status === 'ACTIVE' ? 'default' : 
+                                    (rm as any).status === 'COMPLETED' ? 'secondary' : 'outline'
+                                  } className="text-xs">
+                                    {(rm as any).status || 'ACTIVE'}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                  <span>Oluşturulma: {new Date(rm.createdAt).toLocaleDateString('tr-TR')}</span>
+                                  <span>•</span>
+                                  <span>{rm.developmentSteps.length} adım</span>
+                                  <span>•</span>
+                                  <span>{rm.estimatedCompletionTime}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={rm.currentMatchScore} className="flex-1 h-1.5" />
+                                  <span className="text-xs font-medium">{rm.currentMatchScore.toFixed(0)}%</span>
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setRoadmap(rm);
+                                  setActiveTab("roadmap");
+                                }}
+                              >
+                                Görüntüle
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-sm">Henüz yol haritası oluşturulmamış</p>
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </CardContent>
