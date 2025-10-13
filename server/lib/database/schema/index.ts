@@ -8,6 +8,7 @@ import { createSettingsTables } from './settings.schema';
 import { createUsersTable } from './users.schema';
 import { createAnalyticsCacheTable } from './analytics-cache.schema';
 import { initStandardizedProfileTables } from './standardized-profile.schema';
+import { createCareerGuidanceTables, seedCareerProfiles } from './career-guidance.schema';
 
 export function initializeDatabaseSchema(db: Database.Database): void {
   createUsersTable(db);
@@ -19,4 +20,6 @@ export function initializeDatabaseSchema(db: Database.Database): void {
   createSettingsTables(db);
   createAnalyticsCacheTable(db);
   initStandardizedProfileTables(db);
+  createCareerGuidanceTables(db);
+  seedCareerProfiles(db);
 }
