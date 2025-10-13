@@ -7,6 +7,10 @@ import { useStudentProfile, useStudentData } from "@/hooks/student-profile";
 import { StudentHeader, StudentStats } from "./components";
 import { ProfileDashboard } from "./components/ProfileDashboard";
 import { StudentProfileTabs } from "./StudentProfileTabs";
+import { EnhancedRiskCard } from "@/components/analytics/EnhancedRiskCard";
+import { PersonalizedLearningCard } from "@/components/learning/PersonalizedLearningCard";
+import { AdvancedAnalyticsCard } from "@/components/analytics/AdvancedAnalyticsCard";
+import { SocialNetworkMap } from "@/components/social/SocialNetworkMap";
 
 export default function StudentProfile() {
   const { id } = useParams();
@@ -93,6 +97,15 @@ export default function StudentProfile() {
         completeness={scoresData?.completeness}
         isLoading={loadingScores}
       />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <EnhancedRiskCard studentId={studentId as string} />
+        <PersonalizedLearningCard studentId={studentId as string} />
+      </div>
+
+      <AdvancedAnalyticsCard studentId={studentId as string} />
+      
+      <SocialNetworkMap studentId={studentId as string} />
 
       <StudentProfileTabs
         student={student}
