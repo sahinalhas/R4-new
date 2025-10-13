@@ -76,6 +76,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSidebar } from "@/components/ui/sidebar";
 
 function Brand() {
+  const { state } = useSidebar();
+  
   return (
     <Link
       to="/"
@@ -84,12 +86,14 @@ function Brand() {
       <div className="size-8 rounded-md bg-primary text-primary-foreground grid place-items-center font-extrabold">
         R
       </div>
-      <div className="leading-tight">
-        <div className="text-sm font-bold">Rehber360</div>
-        <div className="text-[10px] text-muted-foreground">
-          Dijital Rehberlik Sistemi
+      {state === "expanded" && (
+        <div className="leading-tight">
+          <div className="text-sm font-bold">Rehber360</div>
+          <div className="text-[10px] text-muted-foreground">
+            Dijital Rehberlik Sistemi
+          </div>
         </div>
-      </div>
+      )}
     </Link>
   );
 }
