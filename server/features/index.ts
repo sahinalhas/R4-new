@@ -36,6 +36,7 @@ import { personalizedLearningRoutes } from './personalized-learning/index.js';
 import { advancedAnalyticsRoutes } from './advanced-analytics/index.js';
 import { socialNetworkRoutes } from './social-network/index.js';
 import { voiceTranscriptionRoutes } from './voice-transcription/index.js';
+import searchRouter from './search/index.js';
 
 /**
  * Feature Registry
@@ -144,6 +145,7 @@ featureRegistry.use('/', documentsRouter);
 featureRegistry.use('/', settingsRouter);
 featureRegistry.use('/session', authRouter);
 featureRegistry.use('/users', usersRouter);
+featureRegistry.use('/search', searchRouter);
 
 // =================== ANALYTICS DOMAIN ===================
 featureRegistry.use('/analytics', analyticsRouter);

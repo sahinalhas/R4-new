@@ -17,7 +17,6 @@ const CounselingSessions = lazy(() => import("./pages/CounselingSessions"));
 const Surveys = lazy(() => import("./pages/Surveys"));
 const Reports = lazy(() => import("./pages/Reports"));
 const SettingsPage = lazy(() => import("./pages/Settings"));
-const Placeholder = lazy(() => import("./pages/Placeholder"));
 const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const RiskDashboard = lazy(() => import("./pages/RiskDashboard"));
@@ -26,7 +25,6 @@ const AIInsightsDashboard = lazy(() => import("./pages/AIInsightsDashboard"));
 const DailyActionPlan = lazy(() => import("./pages/DailyActionPlan"));
 const AdvancedStudentAnalysis = lazy(() => import("./pages/AdvancedStudentAnalysis"));
 const AdvancedAIAnalysis = lazy(() => import("./pages/AdvancedAIAnalysis"));
-const StudyAssignments = lazy(() => import("./pages/StudyAssignments"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const InterventionTracking = lazy(() => import("./pages/InterventionTracking"));
 const ParentAccess = lazy(() => import("./pages/ParentAccess"));
@@ -83,10 +81,6 @@ const App = () => {
                     path="/raporlar"
                     element={<Suspense fallback={<LoadingFallback />}><Reports /></Suspense>}
                   />
-                  <Route
-                    path="/etkinlikler"
-                    element={<Suspense fallback={<LoadingFallback />}><Placeholder title="Etkinlik Yönetimi" /></Suspense>}
-                  />
                   <Route path="/ayarlar" element={<Suspense fallback={<LoadingFallback />}><SettingsPage /></Suspense>} />
                   <Route
                     path="/risk"
@@ -111,10 +105,6 @@ const App = () => {
                   <Route
                     path="/ogrenci/:studentId/gelismis-analiz"
                     element={<Suspense fallback={<LoadingFallback />}><AdvancedStudentAnalysis /></Suspense>}
-                  />
-                  <Route
-                    path="/odevler"
-                    element={<Suspense fallback={<LoadingFallback />}><StudyAssignments /></Suspense>}
                   />
                   <Route
                     path="/gelismis-analiz"

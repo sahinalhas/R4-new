@@ -55,8 +55,6 @@ import {
   BarChart3,
   Settings,
   ShieldAlert,
-  FolderKanban,
-  Download,
   Search,
   Bot,
   Brain,
@@ -109,14 +107,12 @@ function useBreadcrumbs() {
       gorusmeler: "Görüşmeler",
       anketler: "Anket & Test",
       raporlar: "Raporlama",
-      etkinlikler: "Etkinlikler",
       ayarlar: "Ayarlar",
       risk: "Risk Takip",
       "ai-asistan": "AI Asistan",
-      "ai-insights": "AI Insights",
-      "gelismis-analiz": "Gelişmiş Analiz",
-      "gunluk-plan": "Günlük Eylem Planı",
-      odevler: "Ödev Yönetimi",
+      "ai-insights": "Günlük AI Raporları",
+      "gelismis-analiz": "Derinlemesine Analiz",
+      "gunluk-plan": "Günlük Plan",
     };
     const parts = location.pathname.split("/").filter(Boolean);
     return parts.map((p, i) => ({
@@ -204,52 +200,25 @@ export default function Rehber360Layout() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: studentsData = [] } = useQuery<any[]>({
-    queryKey: ['/api/students'],
+  // Evrensel arama için API çağrısı
+  const { data: searchResults, refetch: refetchSearch } = useQuery<{
+    students: any[];
+    counselingSessions: any[];
+    surveys: any[];
+    pages: any[];
+  }>({
+    queryKey: ['/api/search/global', searchQuery],
     queryFn: async () => {
-      const response = await fetch('/api/students');
-      if (!response.ok) throw new Error('Failed to fetch students');
-      const data = await response.json();
-      return Array.isArray(data) ? data : [];
+      if (!searchQuery.trim() || searchQuery.length < 2) {
+        return { students: [], counselingSessions: [], surveys: [], pages: [] };
+      }
+      const response = await fetch(`/api/search/global?q=${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) throw new Error('Failed to fetch search results');
+      return response.json();
     },
+    enabled: searchQuery.length >= 2,
   });
 
-  const filteredStudents = useMemo(() => {
-    if (!searchQuery.trim()) return studentsData;
-    const query = searchQuery.toLowerCase();
-    return studentsData.filter(student => 
-      student.name?.toLowerCase().includes(query) ||
-      student.ad?.toLowerCase().includes(query) ||
-      student.soyad?.toLowerCase().includes(query) ||
-      student.id?.toString().toLowerCase().includes(query) ||
-      student.className?.toLowerCase().includes(query) ||
-      student.sinif?.toLowerCase().includes(query)
-    );
-  }, [studentsData, searchQuery]);
-
-  const navigationItems = useMemo(() => [
-    { label: "Ana Sayfa", path: "/" },
-    { label: "Öğrenci Yönetimi", path: "/ogrenci" },
-    { label: "Görüşmeler", path: "/gorusmeler" },
-    { label: "Anket & Test", path: "/anketler" },
-    { label: "Raporlama", path: "/raporlar" },
-    { label: "Etkinlikler", path: "/etkinlikler" },
-    { label: "Risk Takip", path: "/risk" },
-    { label: "AI Asistan", path: "/ai-asistan" },
-    { label: "AI Insights", path: "/ai-insights" },
-    { label: "Gelişmiş Analiz", path: "/gelismis-analiz" },
-    { label: "Günlük Eylem Planı", path: "/gunluk-plan" },
-    { label: "Ödev Yönetimi", path: "/odevler" },
-    { label: "Ayarlar", path: "/ayarlar" },
-  ], []);
-
-  const filteredNavigation = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
-    return navigationItems.filter(item => 
-      item.label.toLowerCase().includes(query)
-    );
-  }, [navigationItems, searchQuery]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -318,13 +287,6 @@ export default function Rehber360Layout() {
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Etkinlikler">
-                    <NavLink to="/etkinlikler">
-                      <FolderKanban /> <span>Etkinlikler</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 
                 <Collapsible defaultOpen className="group/collapsible">
                   <SidebarMenuItem>
@@ -357,7 +319,7 @@ export default function Rehber360Layout() {
                           <SidebarMenuSubButton asChild>
                             <NavLink to="/ai-insights">
                               <Brain />
-                              <span>AI Insights</span>
+                              <span>Günlük AI Raporları</span>
                             </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -365,7 +327,7 @@ export default function Rehber360Layout() {
                           <SidebarMenuSubButton asChild>
                             <NavLink to="/gelismis-analiz">
                               <Sparkles />
-                              <span>Gelişmiş Analiz</span>
+                              <span>Derinlemesine Analiz</span>
                             </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -382,14 +344,6 @@ export default function Rehber360Layout() {
                   </SidebarMenuItem>
                 </Collapsible>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Ödev Yönetimi">
-                    <NavLink to="/odevler">
-                      <FileText /> <span>Ödev Yönetimi</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Ayarlar">
                     <NavLink to="/ayarlar">
@@ -456,7 +410,7 @@ export default function Rehber360Layout() {
                       id="header-search-input"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Öğrenci adı, numarası veya sayfa ara... (ESC)"
+                      placeholder="Öğrenci, görüşme, anket veya sayfa ara... (ESC)"
                       className="pr-8"
                       onBlur={() => {
                         setTimeout(() => {
@@ -479,13 +433,18 @@ export default function Rehber360Layout() {
                       <Search className="h-4 w-4" />
                     </Button>
                   </div>
-                  {searchQuery && (filteredStudents.length > 0 || filteredNavigation.length > 0) && (
+                  {searchQuery && searchQuery.length >= 2 && searchResults && (
+                    searchResults.students.length > 0 || 
+                    searchResults.counselingSessions.length > 0 || 
+                    searchResults.surveys.length > 0 || 
+                    searchResults.pages.length > 0
+                  ) && (
                     <Card className="search-results absolute top-12 w-full max-h-[400px] overflow-hidden shadow-lg border-primary/20">
                       <ScrollArea className="h-full max-h-[400px]">
-                        {filteredStudents.length > 0 && (
+                        {searchResults.students.length > 0 && (
                           <div className="p-2">
                             <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Öğrenciler</div>
-                            {filteredStudents.map((student) => (
+                            {searchResults.students.map((student) => (
                               <button
                                 key={student.id}
                                 onClick={() => {
@@ -497,15 +456,13 @@ export default function Rehber360Layout() {
                               >
                                 <Users2 className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                                  <div className="font-medium truncate">
-                                    {student.name || `${student.ad || ''} ${student.soyad || ''}`.trim()}
-                                  </div>
+                                  <div className="font-medium truncate">{student.name}</div>
                                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                     <span>No: {student.id}</span>
-                                    {(student.className || student.sinif) && (
+                                    {student.className && (
                                       <>
                                         <span>•</span>
-                                        <span>Sınıf: {student.className || student.sinif}</span>
+                                        <span>Sınıf: {student.className}</span>
                                       </>
                                     )}
                                   </div>
@@ -514,10 +471,59 @@ export default function Rehber360Layout() {
                             ))}
                           </div>
                         )}
-                        {filteredNavigation.length > 0 && (
+                        {searchResults.counselingSessions.length > 0 && (
+                          <div className="p-2">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Görüşmeler</div>
+                            {searchResults.counselingSessions.map((session) => (
+                              <button
+                                key={session.id}
+                                onClick={() => {
+                                  navigate(`/gorusmeler`);
+                                  setSearchOpen(false);
+                                  setSearchQuery("");
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-accent text-left transition-colors"
+                              >
+                                <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                  <div className="font-medium truncate">{session.title}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {new Date(session.date).toLocaleDateString('tr-TR')}
+                                    {session.studentNames && ` • ${session.studentNames}`}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {searchResults.surveys.length > 0 && (
+                          <div className="p-2">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Anketler</div>
+                            {searchResults.surveys.map((survey) => (
+                              <button
+                                key={survey.id}
+                                onClick={() => {
+                                  navigate(`/anketler`);
+                                  setSearchOpen(false);
+                                  setSearchQuery("");
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-accent text-left transition-colors"
+                              >
+                                <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                  <div className="font-medium truncate">{survey.title}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {survey.status} • {new Date(survey.createdAt).toLocaleDateString('tr-TR')}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {searchResults.pages.length > 0 && (
                           <div className="p-2">
                             <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Sayfalar</div>
-                            {filteredNavigation.map((item) => (
+                            {searchResults.pages.map((item) => (
                               <button
                                 key={item.path}
                                 onClick={() => {
@@ -536,7 +542,12 @@ export default function Rehber360Layout() {
                       </ScrollArea>
                     </Card>
                   )}
-                  {searchQuery && filteredStudents.length === 0 && filteredNavigation.length === 0 && (
+                  {searchQuery && searchQuery.length >= 2 && searchResults && (
+                    searchResults.students.length === 0 && 
+                    searchResults.counselingSessions.length === 0 && 
+                    searchResults.surveys.length === 0 && 
+                    searchResults.pages.length === 0
+                  ) && (
                     <Card className="search-results absolute top-12 w-full p-4 text-sm text-muted-foreground text-center">
                       Sonuç bulunamadı
                     </Card>
