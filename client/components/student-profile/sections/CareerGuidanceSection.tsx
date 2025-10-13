@@ -222,9 +222,9 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                       <CardTitle className="text-sm font-medium">Genel Uyumluluk</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{analysis.overallCompatibility.toFixed(0)}%</div>
+                      <div className="text-2xl font-bold">{analysis.overallCompatibility?.toFixed(0) || 0}%</div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {analysis.topMatches.length} meslek analiz edildi
+                        {analysis.topMatches?.length || 0} meslek analiz edildi
                       </p>
                     </CardContent>
                   </Card>
@@ -234,10 +234,10 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                       <CardTitle className="text-sm font-medium">En İyi Eşleşme</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-sm font-semibold">{analysis.topMatches[0]?.careerName}</div>
+                      <div className="text-sm font-semibold">{analysis.topMatches?.[0]?.careerName || 'N/A'}</div>
                       <div className="flex items-center gap-2 mt-1">
-                        <Progress value={analysis.topMatches[0]?.matchScore} className="flex-1 h-2" />
-                        <span className="text-xs font-medium">{analysis.topMatches[0]?.matchScore.toFixed(0)}%</span>
+                        <Progress value={analysis.topMatches?.[0]?.matchScore || 0} className="flex-1 h-2" />
+                        <span className="text-xs font-medium">{analysis.topMatches?.[0]?.matchScore?.toFixed(0) || 0}%</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -250,7 +250,7 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                   </h4>
                   <ScrollArea className="h-[400px] pr-4">
                     <div className="space-y-3">
-                      {analysis.topMatches.map((match, index) => (
+                      {(analysis.topMatches || []).map((match, index) => (
                         <Card key={match.careerId} className="hover:shadow-md transition-shadow">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between gap-4">
@@ -266,20 +266,20 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                                 </div>
                                 
                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                  <span>Uyum: {match.matchScore.toFixed(0)}%</span>
+                                  <span>Uyum: {match.matchScore?.toFixed(0) || 0}%</span>
                                   <span>•</span>
-                                  <span>{match.strengths.length} güçlü yön</span>
+                                  <span>{match.strengths?.length || 0} güçlü yön</span>
                                   <span>•</span>
-                                  <span>{match.gaps.length} gelişim alanı</span>
+                                  <span>{match.gaps?.length || 0} gelişim alanı</span>
                                 </div>
 
-                                <Progress value={match.matchScore} className="h-2" />
+                                <Progress value={match.matchScore || 0} className="h-2" />
 
-                                {match.gaps.filter(g => g.importance === 'CRITICAL').length > 0 && (
+                                {(match.gaps || []).filter(g => g.importance === 'CRITICAL').length > 0 && (
                                   <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
                                     <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
                                     <span>
-                                      {match.gaps.filter(g => g.importance === 'CRITICAL').length} kritik yetkinlik gerekiyor
+                                      {(match.gaps || []).filter(g => g.importance === 'CRITICAL').length} kritik yetkinlik gerekiyor
                                     </span>
                                   </div>
                                 )}
@@ -472,23 +472,23 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                       <div>
                         <p className="text-xs text-muted-foreground">Mevcut Uyum</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Progress value={roadmap.currentMatchScore} className="flex-1 h-2" />
-                          <span className="text-sm font-semibold">{roadmap.currentMatchScore.toFixed(0)}%</span>
+                          <Progress value={roadmap.currentMatchScore || 0} className="flex-1 h-2" />
+                          <span className="text-sm font-semibold">{roadmap.currentMatchScore?.toFixed(0) || 0}%</span>
                         </div>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Hedef Uyum</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Progress value={roadmap.projectedMatchScore} className="flex-1 h-2" />
-                          <span className="text-sm font-semibold">{roadmap.projectedMatchScore.toFixed(0)}%</span>
+                          <Progress value={roadmap.projectedMatchScore || 0} className="flex-1 h-2" />
+                          <span className="text-sm font-semibold">{roadmap.projectedMatchScore?.toFixed(0) || 0}%</span>
                         </div>
                       </div>
                     </div>
 
-                    {roadmap.motivationalInsights && roadmap.motivationalInsights.length > 0 && (
+                    {roadmap.motivationalInsights && (roadmap.motivationalInsights || []).length > 0 && (
                       <div className="bg-blue-50 text-blue-900 p-3 rounded-lg text-sm space-y-2">
                         <p className="font-medium">💡 Motivasyonel İçgörüler</p>
-                        {roadmap.motivationalInsights.map((insight, idx) => (
+                        {(roadmap.motivationalInsights || []).map((insight, idx) => (
                           <p key={idx} className="text-xs">{insight}</p>
                         ))}
                       </div>
@@ -499,12 +499,12 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
-                    Gelişim Adımları ({roadmap.developmentSteps.length})
+                    Gelişim Adımları ({(roadmap.developmentSteps || []).length})
                   </h4>
 
                   <ScrollArea className="h-[400px] pr-4">
                     <div className="space-y-3">
-                      {roadmap.developmentSteps.map((step, index) => (
+                      {(roadmap.developmentSteps || []).map((step, index) => (
                         <Card key={step.id}>
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
@@ -528,11 +528,11 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                                   <span>Hedef: {step.targetLevel}/10</span>
                                 </div>
 
-                                {step.strategies.length > 0 && (
+                                {(step.strategies || []).length > 0 && (
                                   <div className="space-y-1 mt-2">
                                     <p className="text-xs font-medium">Geliştirme Stratejileri:</p>
                                     <ul className="text-xs text-muted-foreground space-y-1">
-                                      {step.strategies.map((strategy, idx) => (
+                                      {(step.strategies || []).map((strategy, idx) => (
                                         <li key={idx} className="flex items-start gap-1">
                                           <CheckCircle2 className="h-3 w-3 mt-0.5 shrink-0 text-green-600" />
                                           <span>{strategy}</span>
@@ -542,10 +542,10 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                                   </div>
                                 )}
 
-                                {step.resources.length > 0 && (
+                                {(step.resources || []).length > 0 && (
                                   <div className="space-y-1 mt-2 pt-2 border-t">
                                     <p className="text-xs font-medium">Önerilen Kaynaklar:</p>
-                                    {step.resources.slice(0, 3).map((resource, idx) => (
+                                    {(step.resources || []).slice(0, 3).map((resource, idx) => (
                                       <div key={idx} className="text-xs text-muted-foreground flex items-start gap-1">
                                         <BookOpen className="h-3 w-3 mt-0.5 shrink-0" />
                                         <span>{resource.title} ({resource.type})</span>
@@ -562,7 +562,7 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                   </ScrollArea>
                 </div>
 
-                {roadmap.aiRecommendations && roadmap.aiRecommendations.length > 0 && (
+                {roadmap.aiRecommendations && (roadmap.aiRecommendations || []).length > 0 && (
                   <Card className="border-2 border-primary/20">
                     <CardHeader>
                       <CardTitle className="text-sm flex items-center gap-2">
@@ -572,7 +572,7 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2">
-                        {roadmap.aiRecommendations.map((recommendation, idx) => (
+                        {(roadmap.aiRecommendations || []).map((recommendation, idx) => (
                           <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
                             <CheckCircle2 className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                             <span>{recommendation}</span>
@@ -802,14 +802,14 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                     <CardContent>
                       <div className="flex items-center gap-2">
                         <Award className="h-5 w-5 text-primary" />
-                        <span className="font-semibold">{comparison.bestMatch}</span>
+                        <span className="font-semibold">{comparison.bestMatch || 'N/A'}</span>
                       </div>
                     </CardContent>
                   </Card>
 
                   <ScrollArea className="h-[450px] pr-4">
                     <div className="space-y-3">
-                      {comparison.careers.map((item) => (
+                      {(comparison.careers || []).map((item) => (
                         <Card key={item.career.id}>
                           <CardContent className="p-4">
                             <div className="space-y-3">
@@ -822,29 +822,29 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                                   <p className="text-xs text-muted-foreground">{item.career.description}</p>
                                 </div>
                                 <div className="text-right shrink-0">
-                                  <div className="text-2xl font-bold">{item.matchScore.toFixed(0)}%</div>
-                                  <Badge className={getCompatibilityColor(item.matchScore)}>
-                                    {getCompatibilityLabel(item.matchScore)}
+                                  <div className="text-2xl font-bold">{item.matchScore?.toFixed(0) || 0}%</div>
+                                  <Badge className={getCompatibilityColor(item.matchScore || 0)}>
+                                    {getCompatibilityLabel(item.matchScore || 0)}
                                   </Badge>
                                 </div>
                               </div>
 
-                              <Progress value={item.matchScore} className="h-2" />
+                              <Progress value={item.matchScore || 0} className="h-2" />
 
                               <div className="grid grid-cols-2 gap-4 text-xs">
                                 <div>
-                                  <p className="font-medium mb-1">✅ Güçlü Yönler ({item.strengths.length})</p>
+                                  <p className="font-medium mb-1">✅ Güçlü Yönler ({item.strengths?.length || 0})</p>
                                   <ul className="space-y-0.5 text-muted-foreground">
-                                    {item.strengths.slice(0, 3).map((s, i) => (
+                                    {(item.strengths || []).slice(0, 3).map((s, i) => (
                                       <li key={i}>• {s}</li>
                                     ))}
                                   </ul>
                                 </div>
                                 <div>
-                                  <p className="font-medium mb-1">📈 Gelişim Alanları ({item.gaps.length})</p>
+                                  <p className="font-medium mb-1">📈 Gelişim Alanları ({item.gaps?.length || 0})</p>
                                   <ul className="space-y-0.5 text-muted-foreground">
-                                    {item.gaps.slice(0, 3).map((g: any, i: number) => (
-                                      <li key={i}>• {g.competencyName}</li>
+                                    {(item.gaps || []).slice(0, 3).map((g: any, i: number) => (
+                                      <li key={i}>• {g?.competencyName || 'N/A'}</li>
                                     ))}
                                   </ul>
                                 </div>
@@ -928,7 +928,7 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                                   )}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                  {analysis.topMatches.length} meslek analiz edildi • Uyumluluk: {analysis.overallCompatibility.toFixed(0)}%
+                                  {analysis.topMatches?.length || 0} meslek analiz edildi • Uyumluluk: {analysis.overallCompatibility?.toFixed(0) || 0}%
                                 </div>
                               </div>
                               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -972,13 +972,13 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                   <span>Oluşturulma: {new Date(rm.createdAt).toLocaleDateString('tr-TR')}</span>
                                   <span>•</span>
-                                  <span>{rm.developmentSteps.length} adım</span>
+                                  <span>{(rm.developmentSteps || []).length} adım</span>
                                   <span>•</span>
                                   <span>{rm.estimatedCompletionTime}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Progress value={rm.currentMatchScore} className="flex-1 h-1.5" />
-                                  <span className="text-xs font-medium">{rm.currentMatchScore.toFixed(0)}%</span>
+                                  <Progress value={rm.currentMatchScore || 0} className="flex-1 h-1.5" />
+                                  <span className="text-xs font-medium">{rm.currentMatchScore?.toFixed(0) || 0}%</span>
                                 </div>
                               </div>
                               <Button
