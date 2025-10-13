@@ -38,10 +38,10 @@ export function AdvancedAnalyticsCard({ studentId }: AdvancedAnalyticsCardProps)
   const { data: analyticsData, isLoading, error } = useQuery({
     queryKey: ['advanced-analytics', studentId],
     queryFn: async () => {
-      const response = await apiClient.get<{ data: any }>(
+      const response = await apiClient.get<{ success: boolean; data: any }>(
         `/api/advanced-analytics/student/${studentId}`
       );
-      return response.data;
+      return response.data.data;
     },
     staleTime: 5 * 60 * 1000,
   });

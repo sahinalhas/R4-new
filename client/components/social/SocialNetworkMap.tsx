@@ -31,10 +31,10 @@ export function SocialNetworkMap({ studentId }: SocialNetworkMapProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['social-network', studentId],
     queryFn: async () => {
-      const response = await apiClient.get<{ data: any }>(
+      const response = await apiClient.get<{ success: boolean; data: any }>(
         `/api/social-network/student/${studentId}`
       );
-      return response.data;
+      return response.data.data;
     },
     staleTime: 10 * 60 * 1000,
   });
