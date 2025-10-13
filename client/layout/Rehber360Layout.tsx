@@ -4,6 +4,7 @@ import {
   Outlet,
   useLocation,
   useNavigate,
+  Navigate,
 } from "react-router-dom";
 import {
   Sidebar,
@@ -74,6 +75,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAuth } from "@/lib/auth-context";
 
 function Brand() {
   const { state } = useSidebar();
@@ -144,11 +146,16 @@ function useMediaQuery(query: string) {
 
 export default function Rehber360Layout() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const [dark, setDark] = useState(false);
   const [account, setAccount] = useState<AppSettings["account"] | undefined>(undefined);
   const [open, setOpen] = useState<boolean | undefined>(undefined);
   
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
   
   const initials = useMemo(() => {
     const n = account?.displayName || "";

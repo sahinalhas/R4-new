@@ -17,12 +17,11 @@ export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  showDemoNotice: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
   hasRole: (role: UserRole | UserRole[]) => boolean;
-  dismissDemoNotice: () => Promise<void>;
+  quickDemoLogin: () => Promise<void>;
 }
 
 // =================== ROLE PERMISSIONS ===================
@@ -81,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showDemoNotice, setShowDemoNotice] = useState(false);
 
   // Load user from SQLite on mount
   useEffect(() => {
@@ -93,21 +91,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const sessionData = await response.json();
           setUser(sessionData.userData);
           setIsAuthenticated(true);
-          
-          // Check if demo notice was seen
-          if (!sessionData.demoNoticeSeen) {
-            setShowDemoNotice(true);
-          }
           setIsLoading(false);
         } else {
-          // No session found - show demo notice for first-time users
-          setShowDemoNotice(true);
+          // No session found
           setIsLoading(false);
         }
       } catch (error) {
         console.error('Failed to load session:', error);
-        // On error, show demo notice
-        setShowDemoNotice(true);
         setIsLoading(false);
       }
     }
@@ -175,8 +165,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const dismissDemoNotice = async () => {
-    setShowDemoNotice(false);
-    
+    // Quick demo login for development
     const success = await login('rehber@okul.edu.tr', 'demo');
     
     if (!success) {
@@ -202,43 +191,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     isAuthenticated,
     isLoading,
-    showDemoNotice,
     login,
     logout,
     hasPermission,
     hasRole,
-    dismissDemoNotice,
+    quickDemoLogin: dismissDemoNotice,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {/* Demo Notice for first-time users */}
-      {showDemoNotice && !isAuthenticated && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background border rounded-lg p-6 max-w-md mx-4 shadow-lg">
-            <div className="text-center space-y-4">
-              <div className="text-2xl font-bold text-primary">Rehber360 Demo</div>
-              <p className="text-muted-foreground">
-                Bu bir demo uygulamasıdır. Sistemi incelemek için otomatik olarak 
-                <span className="font-semibold text-foreground"> Rehber Öğretmen </span>
-                hesabıyla giriş yapılacaktır.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Demo şifresi: <code className="bg-muted px-1 rounded">demo</code>
-              </p>
-              <button 
-                onClick={dismissDemoNotice}
-                className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors"
-              >
-                Anladım, Devam Et
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
       {/* Loading screen */}
-      {isLoading && !showDemoNotice && (
+      {isLoading && (
         <div className="fixed inset-0 bg-background flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="text-2xl font-bold text-primary">Rehber360</div>
