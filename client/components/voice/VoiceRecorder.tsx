@@ -65,6 +65,16 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
 
   const startRecording = async () => {
     try {
+      // Browser Web Speech API kontrolü
+      if (useBrowserAPI && !('webkitSpeechRecognition' in window)) {
+        toast({
+          title: 'Uyumsuz Tarayıcı',
+          description: 'Sesli not özelliği için Chrome veya Edge kullanmanız gerekmektedir.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
       // MediaRecorder başlat (audio data için)
@@ -158,6 +168,10 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
           if (useBrowserAPI && browserTranscriptRef.current) {
             result = await sendBrowserTranscription(browserTranscriptRef.current);
           }
+          // Browser API gerekli ama transcript yok (recognition başarısız)
+          else if (useBrowserAPI && !browserTranscriptRef.current) {
+            throw new Error('Ses tanıma başarısız oldu. Lütfen tekrar deneyin.');
+          }
           // Değilse audio dosyasını gönder
           else {
             result = await sendAudioFile(audioBlob);
@@ -238,6 +252,13 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
         });
 
         const data = await response.json();
+        
+        // Handle browser-only fallback response
+        if (data.success && data.data.useBrowserAPI) {
+          reject(new Error('Tarayıcı ses tanıma API\'si gereklidir. Lütfen Chrome/Edge kullanın.'));
+          return;
+        }
+        
         if (!data.success) {
           reject(new Error(data.error));
         } else {
