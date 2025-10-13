@@ -119,7 +119,7 @@ export async function getStudentRoadmap(studentId: string): Promise<CareerRoadma
   return createApiHandler(
     async () => {
       const response = await apiClient.get<{ success: boolean; data: CareerRoadmap | null }>(
-        `/api/career-guidance/roadmap/${studentId}`,
+        `/api/career-guidance/students/${studentId}/roadmap`,
         { showErrorToast: false }
       );
       
@@ -130,11 +130,45 @@ export async function getStudentRoadmap(studentId: string): Promise<CareerRoadma
   )();
 }
 
+export async function getAllStudentRoadmaps(studentId: string): Promise<CareerRoadmap[]> {
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.get<{ success: boolean; data: CareerRoadmap[]; count: number }>(
+        `/api/career-guidance/students/${studentId}/roadmaps`,
+        { showErrorToast: false }
+      );
+      
+      return response.data || [];
+    },
+    [],
+    'Yol haritaları yüklenirken hata oluştu'
+  )();
+}
+
+export async function updateRoadmapProgress(roadmapId: string, updates: any): Promise<void> {
+  return createApiHandler(
+    async () => {
+      await apiClient.put(
+        `/api/career-guidance/roadmap/${roadmapId}`,
+        updates,
+        {
+          showSuccessToast: true,
+          successMessage: 'Yol haritası ilerleme güncellendi',
+          showErrorToast: true,
+          errorMessage: 'Yol haritası güncellenirken hata oluştu'
+        }
+      );
+    },
+    undefined,
+    'Yol haritası güncellenirken hata oluştu'
+  )();
+}
+
 export async function getStudentAnalysisHistory(studentId: string, limit: number = 5): Promise<CareerAnalysisResult[]> {
   return createApiHandler(
     async () => {
       const response = await apiClient.get<{ success: boolean; data: CareerAnalysisResult[] }>(
-        `/api/career-guidance/analysis/${studentId}?limit=${limit}`,
+        `/api/career-guidance/students/${studentId}/analysis-history?limit=${limit}`,
         { showErrorToast: false }
       );
       
@@ -155,4 +189,117 @@ export async function setStudentCareerTarget(studentId: string, careerId: string
       errorMessage: 'Kariyer hedefi belirlenirken hata oluştu'
     }
   );
+}
+
+export interface StudentCompetency {
+  studentId: string;
+  competencyId: string;
+  competencyName: string;
+  category: string;
+  currentLevel: number;
+  assessmentDate: string;
+  source: string;
+}
+
+export interface CompetencyStats {
+  totalCompetencies: number;
+  averageLevel: number;
+  byCategory: Record<string, { count: number; averageLevel: number }>;
+  strongCompetencies: StudentCompetency[];
+  developmentAreas: StudentCompetency[];
+}
+
+export interface CareerComparison {
+  studentId: string;
+  careers: Array<{
+    career: CareerProfile;
+    matchScore: number;
+    strengths: string[];
+    gaps: any[];
+    rank: number;
+  }>;
+  bestMatch: string;
+  comparisonDate: string;
+}
+
+export async function getStudentCompetencies(studentId: string): Promise<StudentCompetency[]> {
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.get<{ success: boolean; data: StudentCompetency[]; count: number }>(
+        `/api/career-guidance/students/${studentId}/competencies`,
+        { showErrorToast: false }
+      );
+      
+      return response.data || [];
+    },
+    [],
+    'Yetkinlikler yüklenirken hata oluştu'
+  )();
+}
+
+export async function refreshStudentCompetencies(studentId: string): Promise<StudentCompetency[]> {
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.post<{ success: boolean; data: StudentCompetency[]; count: number; message: string }>(
+        `/api/career-guidance/students/${studentId}/competencies/refresh`,
+        {},
+        {
+          showSuccessToast: true,
+          successMessage: 'Yetkinlikler AI ile güncellendi',
+          showErrorToast: true,
+          errorMessage: 'Yetkinlikler güncellenirken hata oluştu'
+        }
+      );
+      
+      return response.data || [];
+    },
+    [],
+    'Yetkinlikler güncellenirken hata oluştu'
+  )();
+}
+
+export async function getStudentCompetencyStats(studentId: string): Promise<CompetencyStats> {
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.get<{ success: boolean; data: CompetencyStats }>(
+        `/api/career-guidance/students/${studentId}/competencies/stats`,
+        { showErrorToast: false }
+      );
+      
+      return response.data || {
+        totalCompetencies: 0,
+        averageLevel: 0,
+        byCategory: {},
+        strongCompetencies: [],
+        developmentAreas: []
+      };
+    },
+    {
+      totalCompetencies: 0,
+      averageLevel: 0,
+      byCategory: {},
+      strongCompetencies: [],
+      developmentAreas: []
+    },
+    'Yetkinlik istatistikleri yüklenirken hata oluştu'
+  )();
+}
+
+export async function compareCareers(studentId: string, careerIds: string[]): Promise<CareerComparison> {
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.post<{ success: boolean; data: CareerComparison }>(
+        '/api/career-guidance/compare',
+        { studentId, careerIds },
+        {
+          showErrorToast: true,
+          errorMessage: 'Meslekler karşılaştırılırken hata oluştu'
+        }
+      );
+      
+      return response.data;
+    },
+    {} as CareerComparison,
+    'Meslekler karşılaştırılırken hata oluştu'
+  )();
 }
