@@ -18,7 +18,7 @@ Preferred communication style: Simple, everyday language.
 - **Core Features:** Students, Surveys, Academic Data, Student Support, Administrative Functions, and AI features (holistic-profile, standardized-profile, student-profile-ai, ai-assistant).
 
 ### Data Architecture
-- **Database:** Normalized relational schema in `data/data.db` for student profiles, behavior, attendance, surveys, counseling, and interventions.
+- **Database:** Normalized relational schema in `database.db` (root directory) for student profiles, behavior, attendance, surveys, counseling, and interventions.
 - **Data Standardization:** Utilizes a comprehensive taxonomy (`shared/constants/student-profile-taxonomy.ts`) for consistent values across academic, social-emotional, and behavioral data, enabling deterministic AI analysis.
 
 ### AI and Analytics System
@@ -53,7 +53,7 @@ Preferred communication style: Simple, everyday language.
 ### Build and Deployment
 - **Build Process:** Two-stage build (client and server) using Vite.
 - **Deployment Target:** Replit VM, running `dist/server/production.mjs` on port 3000.
-- **Database:** File-based SQLite (`data/data.db`) with automatic backups and schema migrations.
+- **Database:** File-based SQLite (`database.db` in root directory) with automatic backups and schema migrations.
 - **Environment Variables:** Supports `GEMINI_API_KEY` (auto-detected, enables Gemini), `OPENAI_API_KEY`, `ALLOWED_ORIGINS`, `PORT`, and Ollama-specific variables (`OLLAMA_BASE_URL`). Note: `.env` file is auto-created if needed, already in `.gitignore`.
 
 ## External Dependencies
@@ -71,7 +71,7 @@ Preferred communication style: Simple, everyday language.
 - **e-Okul API:** Placeholder for future integration.
 
 ### Database
-- **SQLite Database:** `data/data.db` using `better-sqlite3` driver.
+- **SQLite Database:** `database.db` (root directory) using `better-sqlite3` driver.
 
 ### Development Tools
 - **Vitest, ESLint, Prettier, TypeScript.**

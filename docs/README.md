@@ -27,7 +27,7 @@ Rehber360, eğitim kurumlarında öğrenci takibi, rehberlik ve idari görevler 
 
 ### Backend
 - **Express.js** - Web framework
-- **SQLite** - Veritabanı (`data/data.db`)
+- **SQLite** - Veritabanı (`database.db`)
 - **Better-SQLite3** - Database driver
 
 ### Proje Yapısı
@@ -39,7 +39,7 @@ Rehber360, eğitim kurumlarında öğrenci takibi, rehberlik ve idari görevler 
 │   ├── lib/         # Database, middleware
 │   └── services/    # İş mantığı servisleri
 ├── shared/          # Ortak tipler ve sabitler
-├── data/            # Veritabanı dosyaları
+├── database.db      # SQLite veritabanı (kök dizinde)
 └── docs/            # Dokümantasyon
 ```
 
@@ -83,10 +83,10 @@ pnpm start
 
 ## 📊 Veritabanı
 
-SQLite veritabanı `data/` klasöründe tutulur:
-- `data.db` - Ana veritabanı
-- `data.db-shm` - Shared memory dosyası
-- `data.db-wal` - Write-Ahead Log
+SQLite veritabanı proje kök dizininde tutulur:
+- `database.db` - Ana veritabanı
+- `database.db-shm` - Shared memory dosyası
+- `database.db-wal` - Write-Ahead Log
 
 ## 🔧 Geliştirme Komutları
 

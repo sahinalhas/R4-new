@@ -91,10 +91,10 @@ server/features/<feature-name>/
 ### Database Architecture
 
 **SQLite Configuration:**
-- Database location: `data/data.db`
+- Database location: `database.db` (root directory)
 - Write-Ahead Logging (WAL) mode for concurrent reads
-- Shared memory file: `data/data.db-shm`
-- WAL file: `data/data.db-wal`
+- Shared memory file: `database.db-shm`
+- WAL file: `database.db-wal`
 
 **Schema Organization:**
 - Migration-based schema evolution
@@ -196,6 +196,6 @@ server/features/<feature-name>/
 
 ### Database
 - **SQLite** (file-based): No external database service required
-- Database files stored in `data/` directory
+- Database files stored in root directory (`database.db`)
 - Automatic migrations on startup
 - Scheduled backups with configurable frequency

@@ -43,4 +43,13 @@ Thumbs.db
 .breakpoints
 
 # Database
+database.db
+database.db-shm
+database.db-wal
 data/
+
+# Backups
+backups/
+
+# Uploaded Assets
+attached_assets/
