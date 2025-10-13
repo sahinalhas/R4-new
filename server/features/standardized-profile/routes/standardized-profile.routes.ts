@@ -6,6 +6,46 @@ import getDatabase from '../../../lib/database';
 
 const router = Router();
 
+router.get('/intervention-stats', (req, res) => {
+  try {
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    
+    const studentsStmt = db.prepare('SELECT id FROM students');
+    const students = studentsStmt.all() as Array<{ id: string }>;
+    
+    let totalOpen = 0;
+    let completedThisMonth = 0;
+    
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    for (const student of students) {
+      const interventions = repo.getStandardizedInterventions(student.id);
+      totalOpen += interventions.filter(i => 
+        i.status !== "Tamamlandı" && i.status !== "İptal Edildi"
+      ).length;
+      
+      const completed = interventions.filter(i => {
+        if (i.status !== "Tamamlandı") return false;
+        const intDate = new Date(i.date);
+        return intDate.getMonth() === currentMonth && intDate.getFullYear() === currentYear;
+      });
+      completedThisMonth += completed.length;
+    }
+    
+    res.json({
+      openInterventions: totalOpen,
+      completedThisMonth: completedThisMonth,
+      totalStudents: students.length
+    });
+  } catch (error) {
+    console.error('Error fetching intervention stats:', error);
+    res.status(500).json({ error: 'Failed to fetch intervention stats' });
+  }
+});
+
 router.get('/:studentId/academic', (req, res) => {
   try {
     const { studentId } = req.params;
@@ -210,20 +250,6 @@ router.post('/:studentId/behavior-incident', (req, res) => {
   }
 });
 
-router.delete('/:studentId/behavior-incident/:incidentId', (req, res) => {
-  try {
-    const { incidentId } = req.params;
-    const db = getDatabase();
-    const repo = new StandardizedProfileRepository(db);
-    
-    repo.deleteStandardizedBehaviorIncident(incidentId);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting behavior incident:', error);
-    res.status(500).json({ error: 'Failed to delete behavior incident' });
-  }
-});
-
 router.get('/:studentId/aggregate', (req, res) => {
   try {
     const { studentId } = req.params;
@@ -234,7 +260,7 @@ router.get('/:studentId/aggregate', (req, res) => {
     const academic = repo.getAcademicProfile(studentId);
     const socialEmotional = repo.getSocialEmotionalProfile(studentId);
     const talentsInterests = repo.getTalentsInterestsProfile(studentId);
-    const health = repo.getHealthProfile(studentId);
+    const health = repo.getStandardizedHealthProfile(studentId);
     const behaviorIncidents = repo.getStandardizedBehaviorIncidents(studentId);
     const motivation = repo.getMotivationProfile(studentId);
     const riskProtective = repo.getRiskProtectiveProfile(studentId);
@@ -285,26 +311,6 @@ router.get('/:studentId/aggregate', (req, res) => {
   }
 });
 
-router.post('/:studentId/motivation', (req, res) => {
-  try {
-    const { studentId } = req.params;
-    const db = getDatabase();
-    const repo = new StandardizedProfileRepository(db);
-    
-    const profile = {
-      ...req.body,
-      studentId,
-      id: req.body.id || randomUUID(),
-    };
-    
-    repo.upsertMotivationProfile(profile);
-    res.json({ success: true, profile });
-  } catch (error) {
-    console.error('Error saving motivation profile:', error);
-    res.status(500).json({ error: 'Failed to save motivation profile' });
-  }
-});
-
 router.get('/:studentId/motivation', (req, res) => {
   try {
     const { studentId } = req.params;
@@ -316,26 +322,6 @@ router.get('/:studentId/motivation', (req, res) => {
   } catch (error) {
     console.error('Error fetching motivation profile:', error);
     res.status(500).json({ error: 'Failed to fetch motivation profile' });
-  }
-});
-
-router.post('/:studentId/risk-protective', (req, res) => {
-  try {
-    const { studentId } = req.params;
-    const db = getDatabase();
-    const repo = new StandardizedProfileRepository(db);
-    
-    const profile = {
-      ...req.body,
-      studentId,
-      id: req.body.id || randomUUID(),
-    };
-    
-    repo.upsertRiskProtectiveProfile(profile);
-    res.json({ success: true, profile });
-  } catch (error) {
-    console.error('Error saving risk/protective profile:', error);
-    res.status(500).json({ error: 'Failed to save risk/protective profile' });
   }
 });
 
