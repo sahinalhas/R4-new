@@ -138,8 +138,8 @@ export function createCareerGuidanceTables(db: Database): void {
 }
 
 // Seed data - Meslek profillerini yükle
-export function seedCareerProfiles(db: Database): void {
-  const { CAREER_PROFILES } = require('../../../shared/constants/career-profiles');
+export async function seedCareerProfiles(db: Database): Promise<void> {
+  const { CAREER_PROFILES } = await import('../../../../shared/constants/career-profiles.js');
   
   const insert = db.prepare(`
     INSERT OR REPLACE INTO career_profiles (

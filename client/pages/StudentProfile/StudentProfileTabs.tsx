@@ -33,6 +33,7 @@ import StandardizedHealthSection from "@/components/student-profile/sections/Sta
 import StandardizedBehaviorSection from "@/components/student-profile/sections/StandardizedBehaviorSection";
 import MotivationProfileSection from "@/components/student-profile/sections/MotivationProfileSection";
 import RiskProtectiveProfileSection from "@/components/student-profile/sections/RiskProtectiveProfileSection";
+import CareerGuidanceSection from "@/components/student-profile/sections/CareerGuidanceSection";
 
 import ParentCommunication from "@/components/ai/ParentCommunication";
 import InterventionRecommendations from "@/components/ai/InterventionRecommendations";
@@ -324,9 +325,10 @@ export function StudentProfileTabs({
           </TabsContent>
 
           <TabsContent value="kariyer">
-            <div className="p-6 text-center text-muted-foreground">
-              Kariyer planlama bölümü yakında eklenecek
-            </div>
+            <CareerGuidanceSection
+              studentId={studentId}
+              studentName={`${student.ad} ${student.soyad}`}
+            />
           </TabsContent>
         </Tabs>
       </TabsContent>

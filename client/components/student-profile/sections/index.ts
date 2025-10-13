@@ -14,3 +14,4 @@ export { default as SaglikBilgileriSection } from './SaglikBilgileriSection';
 export { default as OzelEgitimSection } from './OzelEgitimSection';
 export { default as RiskDegerlendirmeSection } from './RiskDegerlendirmeSection';
 export { default as DavranisTakibiSection } from './DavranisTakibiSection';
+export { default as CareerGuidanceSection } from './CareerGuidanceSection';
