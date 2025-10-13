@@ -52,7 +52,7 @@ No environment variables are currently required for basic operation. The applica
 
 The application uses SQLite with the following features:
 
-- **Development Database**: `data.db` (auto-created on first run)
+- **Development Database**: `database.db` (auto-created on first run, located in root directory)
 - **Automatic Migrations**: Schema migrations run automatically on startup
 - **Database Indexes**: Performance indexes created automatically
 - **Data Persistence**: Database file persists across deployments
@@ -95,7 +95,7 @@ The application is optimized for:
 ### Troubleshooting
 
 **Database Errors**:
-- Check that `data.db` file has correct permissions
+- Check that `database.db` file has correct permissions (located in root directory)
 - Verify migrations ran successfully (check startup logs)
 
 **Build Failures**:
