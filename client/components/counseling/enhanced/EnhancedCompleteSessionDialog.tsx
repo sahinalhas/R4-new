@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Star, MessageSquare, Activity, Brain, Target, ArrowRight, FileText, ClipboardCheck, Tag, CheckCircle2 } from "lucide-react";
+import { Loader2, Star, MessageSquare, Activity, Brain, Target, ArrowRight, FileText, ClipboardCheck, Tag, CheckCircle2, Mic } from "lucide-react";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,10 +13,12 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 import { completeSessionSchema, type CompleteSessionFormValues, type CounselingSession } from "../types";
 import SessionTagSelector from "./SessionTagSelector";
 import ActionItemsManager from "./ActionItemsManager";
+import { VoiceRecorder } from "../../voice/VoiceRecorder";
 
 interface EnhancedCompleteSessionDialogProps {
   open: boolean;
@@ -194,6 +196,31 @@ export default function EnhancedCompleteSessionDialog({
                     </FormItem>
                   )}
                 />
+
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="voice-note">
+                    <AccordionTrigger className="text-base font-semibold text-blue-700 dark:text-blue-400">
+                      <div className="flex items-center gap-2">
+                        <Mic className="h-4 w-4" />
+                        Sesli Not Al (AI ile Otomatik Analiz)
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <VoiceRecorder
+                        onTranscriptionComplete={(result) => {
+                          const currentNotes = form.getValues("detailedNotes");
+                          const newNotes = currentNotes 
+                            ? `${currentNotes}\n\n[Sesli Not - ${new Date().toLocaleString('tr-TR')}]\n${result.transcription.text}\n\n[AI Analizi: ${result.analysis.category} - ${result.analysis.sentiment}]\n${result.analysis.summary}`
+                            : `[Sesli Not - ${new Date().toLocaleString('tr-TR')}]\n${result.transcription.text}\n\n[AI Analizi: ${result.analysis.category} - ${result.analysis.sentiment}]\n${result.analysis.summary}`;
+                          
+                          form.setValue("detailedNotes", newNotes);
+                        }}
+                        studentId={session?.student?.id || session?.students?.[0]?.id}
+                        sessionType={session?.sessionType === 'individual' ? 'INDIVIDUAL' : session?.sessionType === 'group' ? 'GROUP' : session?.participantType === 'veli' ? 'PARENT' : 'OTHER'}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
 
                 <FormField
                   control={form.control}
