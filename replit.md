@@ -45,6 +45,12 @@ Preferred communication style: Simple, everyday language.
 - **Deterministic Profile Analysis:** Consistent AI analysis using fixed prompts and zero temperature.
 - **Early Warning System:** Risk assessment pipeline, weighted thresholds, prioritized alerts, evidence-based interventions.
 - **Analytics Caching:** In-memory caching with configurable TTL and background processing.
+- **Voice Transcription & AI Analysis (NEW):**
+    - **Provider-Aware STT:** Automatic provider detection (Gemini audio API, OpenAI Whisper, browser Web Speech API fallback)
+    - **Hybrid Architecture:** Real-time browser transcription + cloud API accuracy verification
+    - **AI-Powered Analysis:** Auto-summary, keyword extraction, category detection, sentiment analysis, risk word flagging, emergency alerts
+    - **Smart Integration:** Embedded in counseling session dialogs and student profile pages
+    - **Error Handling:** Graceful fallbacks, browser compatibility checks, user-friendly error messages
 
 ### Authentication and Authorization
 - **Role-Based Access Control (RBAC):** Four roles (Admin, Counselor, Teacher, Observer) with hierarchical permissions.
