@@ -31,6 +31,10 @@ import notificationsRouter from './notifications/index.js';
 import interventionTrackingRouter from './intervention-tracking/index.js';
 import advancedReportsRouter from './advanced-reports/index.js';
 import backupRouter from './backup/routes/backup.routes.js';
+import { enhancedRiskRoutes } from './enhanced-risk/index.js';
+import { personalizedLearningRoutes } from './personalized-learning/index.js';
+import { advancedAnalyticsRoutes } from './advanced-analytics/index.js';
+import { socialNetworkRoutes } from './social-network/index.js';
 
 /**
  * Feature Registry
@@ -166,5 +170,17 @@ featureRegistry.use('/intervention-tracking', interventionTrackingRouter);
 
 // =================== DATA SECURITY & BACKUP ===================
 featureRegistry.use('/backup', backupRouter);
+
+// =================== ENHANCED RISK PREDICTION ===================
+featureRegistry.use('/enhanced-risk', enhancedRiskRoutes);
+
+// =================== PERSONALIZED LEARNING ===================
+featureRegistry.use('/personalized-learning', personalizedLearningRoutes);
+
+// =================== ADVANCED ANALYTICS DASHBOARD ===================
+featureRegistry.use('/advanced-analytics', advancedAnalyticsRoutes);
+
+// =================== SOCIAL NETWORK ANALYSIS ===================
+featureRegistry.use('/social-network', socialNetworkRoutes);
 
 export default featureRegistry;
