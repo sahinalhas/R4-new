@@ -117,6 +117,10 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
     try {
       const result = await analyzeCareerMatch({ studentId });
       setAnalysis(result);
+      
+      const updatedHistory = await getStudentAnalysisHistory(studentId, 10);
+      setAnalysisHistory(updatedHistory);
+      
       toast.success("Kariyer analizi tamamlandı!");
       setActiveTab("analysis");
     } catch (error) {
@@ -132,6 +136,10 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
     try {
       const result = await generateCareerRoadmap({ studentId, careerId });
       setRoadmap(result);
+      
+      const updatedRoadmaps = await getAllStudentRoadmaps(studentId);
+      setAllRoadmaps(updatedRoadmaps);
+      
       toast.success("Kariyer yol haritası oluşturuldu!");
       setActiveTab("roadmap");
     } catch (error) {
