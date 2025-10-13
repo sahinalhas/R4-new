@@ -269,15 +269,15 @@ export class CareerGuidanceService {
    */
   private getStudentInfo(studentId: string): { fullName: string } | null {
     const stmt = this.db.prepare(`
-      SELECT firstName, lastName FROM students WHERE id = ?
+      SELECT name FROM students WHERE id = ?
     `);
     
-    const row = stmt.get(studentId) as { firstName: string; lastName: string } | undefined;
+    const row = stmt.get(studentId) as { name: string } | undefined;
     
     if (!row) return null;
     
     return {
-      fullName: `${row.firstName} ${row.lastName}`
+      fullName: row.name
     };
   }
 }
