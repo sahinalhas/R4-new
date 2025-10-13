@@ -11,6 +11,7 @@ import { EnhancedRiskCard } from "@/components/analytics/EnhancedRiskCard";
 import { PersonalizedLearningCard } from "@/components/learning/PersonalizedLearningCard";
 import { AdvancedAnalyticsCard } from "@/components/analytics/AdvancedAnalyticsCard";
 import { SocialNetworkMap } from "@/components/social/SocialNetworkMap";
+import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
 
 export default function StudentProfile() {
   const { id } = useParams();
@@ -106,6 +107,26 @@ export default function StudentProfile() {
       <AdvancedAnalyticsCard studentId={studentId as string} />
       
       <SocialNetworkMap studentId={studentId as string} />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Sesli Not ve AI Analizi</CardTitle>
+          <CardDescription>
+            Öğrenci ile ilgili sesli not alın, otomatik transkript ve AI analizi alın
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <VoiceRecorder
+            studentId={studentId as string}
+            sessionType="INDIVIDUAL"
+            onTranscriptionComplete={(result) => {
+              console.log('Voice note completed:', result);
+              // Buraya isterseniz bir backend kayıt işlemi eklenebilir
+              handleUpdate();
+            }}
+          />
+        </CardContent>
+      </Card>
 
       <StudentProfileTabs
         student={student}
