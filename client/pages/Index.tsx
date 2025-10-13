@@ -51,6 +51,7 @@ import { useNavigate } from "react-router-dom";
 import RiskSummaryWidget from "@/components/RiskSummaryWidget";
 import DailyActionPlanWidget from "@/components/dashboard/DailyActionPlanWidget";
 import SchoolWideAIInsights from "@/components/dashboard/SchoolWideAIInsights";
+import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 
 interface DashboardStats {
   studentCount: number;
@@ -248,20 +249,13 @@ export default function Index() {
   }, [navigate]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center space-y-2">
-          <Activity className="h-8 w-8 animate-pulse mx-auto text-primary" />
-          <p className="text-muted-foreground">Dashboard yükleniyor...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="md:col-span-2 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 border-primary/30 shadow-lg">
+        <Card className="md:col-span-2 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 border-primary/30 shadow-lg hover:shadow-2xl transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Rehber360 Dashboard</span>
@@ -316,7 +310,7 @@ export default function Index() {
               criticalWarnings.slice(0, 3).map((warning, i) => (
                 <div 
                   key={i} 
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/70 hover-hover:hover:scale-[1.02] transition-all duration-150 cursor-pointer"
                   onClick={() => handleQuickAction('view-student', warning.studentId)}
                 >
                   <AlertTriangle className="h-4 w-4 text-fuchsia-600" />
@@ -344,7 +338,7 @@ export default function Index() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="group hover:shadow-xl hover-hover:hover:scale-[1.02] transition-all duration-200 cursor-pointer hover:border-primary/50">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
@@ -352,8 +346,8 @@ export default function Index() {
                     <div className="text-2xl font-bold">{s.value.toLocaleString()}</div>
                     <div className="text-xs text-muted-foreground mt-1">{s.trend}</div>
                   </div>
-                  <div className={`size-10 rounded-md bg-gradient-to-br ${s.color} text-primary grid place-items-center`}>
-                    <s.icon className="h-5 w-5" />
+                  <div className={`size-10 rounded-md bg-gradient-to-br ${s.color} text-primary grid place-items-center hover-hover:group-hover:scale-110 transition-transform duration-200`}>
+                    <s.icon className="h-5 w-5 hover-hover:group-hover:rotate-6 transition-transform duration-200" />
                   </div>
                 </div>
               </CardContent>
@@ -370,7 +364,7 @@ export default function Index() {
       <div className="grid gap-4 md:grid-cols-3">
         {!hiddenWidgets.has('weekly-meetings') && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="md:col-span-2">
+            <Card className="md:col-span-2 hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Görüşme Trendleri</CardTitle>
@@ -416,7 +410,7 @@ export default function Index() {
 
         {!hiddenWidgets.has('quick-actions') && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <Card>
+            <Card className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Hızlı Erişim</CardTitle>
@@ -429,32 +423,32 @@ export default function Index() {
               <CardContent className="space-y-2">
                 {role === "yönetici" ? (
                   <>
-                    <Button asChild className="w-full">
-                      <a href="/ogrenci"><Users2 className="mr-2 h-4 w-4" /> Öğrenci Yönetimi</a>
+                    <Button asChild className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/ogrenci"><Users2 className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-6 transition-transform" /> Öğrenci Yönetimi</a>
                     </Button>
-                    <Button asChild variant="outline" className="w-full">
-                      <a href="/raporlar"><BarChart3 className="mr-2 h-4 w-4" /> Sistem Raporları</a>
+                    <Button asChild variant="outline" className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/raporlar"><BarChart3 className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-6 transition-transform" /> Sistem Raporları</a>
                     </Button>
-                    <Button asChild variant="outline" className="w-full">
-                      <a href="/ayarlar"><Settings className="mr-2 h-4 w-4" /> Sistem Ayarları</a>
+                    <Button asChild variant="outline" className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/ayarlar"><Settings className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-12 transition-transform" /> Sistem Ayarları</a>
                     </Button>
-                    <Button asChild variant="secondary" className="w-full">
-                      <a href="/anketler"><MessageSquare className="mr-2 h-4 w-4" /> Anket Yönetimi</a>
+                    <Button asChild variant="secondary" className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/anketler"><MessageSquare className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-6 transition-transform" /> Anket Yönetimi</a>
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button asChild className="w-full">
-                      <a href="/ogrenci"><Users2 className="mr-2 h-4 w-4" /> Öğrenci Yönetimi</a>
+                    <Button asChild className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/ogrenci"><Users2 className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-6 transition-transform" /> Öğrenci Yönetimi</a>
                     </Button>
-                    <Button asChild variant="outline" className="w-full">
-                      <a href="/gorusmeler"><CalendarDays className="mr-2 h-4 w-4" /> Görüşmeler</a>
+                    <Button asChild variant="outline" className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/gorusmeler"><CalendarDays className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-6 transition-transform" /> Görüşmeler</a>
                     </Button>
-                    <Button asChild variant="outline" className="w-full">
-                      <a href="/ayarlar?tab=dersler"><BookOpen className="mr-2 h-4 w-4" /> Ders & Konular</a>
+                    <Button asChild variant="outline" className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/ayarlar?tab=dersler"><BookOpen className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-6 transition-transform" /> Ders & Konular</a>
                     </Button>
-                    <Button asChild variant="secondary" className="w-full">
-                      <a href="/raporlar"><FileText className="mr-2 h-4 w-4" /> Raporlama</a>
+                    <Button asChild variant="secondary" className="w-full group hover-hover:hover:scale-[1.02] transition-transform">
+                      <a href="/raporlar"><FileText className="mr-2 h-4 w-4 hover-hover:group-hover:rotate-6 transition-transform" /> Raporlama</a>
                     </Button>
                   </>
                 )}

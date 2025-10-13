@@ -66,31 +66,31 @@ class ErrorBoundary extends Component<Props, State> {
       const isDev = process.env.NODE_ENV === 'development';
 
       return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <div className="max-w-md w-full space-y-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="max-w-md w-full space-y-4 animate-in slide-in-from-bottom-4 duration-500">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Beklenmeyen Bir Hata Oluştu</AlertTitle>
               <AlertDescription>
-                Üzgünüz, bir şeyler ters gitti. Lütfen sayfayı yenilemeyi deneyin 
-                veya ana sayfaya geri dönün.
+                Üzgünüz, uygulama beklenmeyen bir hatayla karşılaştı. Endişelenmeyin, 
+                verileriniz güvende. Lütfen sayfayı yenilemeyi deneyin.
               </AlertDescription>
             </Alert>
 
             <div className="flex gap-2 flex-col sm:flex-row">
               <Button 
                 onClick={this.handleRetry}
-                className="flex-1"
+                className="flex-1 group"
                 variant="outline"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 mr-2 hover-hover:group-hover:rotate-180 transition-transform duration-300" />
                 Tekrar Dene
               </Button>
               <Button 
                 onClick={this.handleGoHome}
-                className="flex-1"
+                className="flex-1 group"
               >
-                <Home className="w-4 h-4 mr-2" />
+                <Home className="w-4 h-4 mr-2 hover-hover:group-hover:scale-110 transition-transform" />
                 Ana Sayfa
               </Button>
             </div>
