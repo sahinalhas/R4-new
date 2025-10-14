@@ -28,6 +28,9 @@ import {
   ResponsiveContainer,
   Tooltip
 } from 'recharts';
+import UnifiedProfileCard from "@/components/profile-sync/UnifiedProfileCard";
+import ProfileChangeTimeline from "@/components/profile-sync/ProfileChangeTimeline";
+import ConflictResolutionPanel from "@/components/profile-sync/ConflictResolutionPanel";
 
 interface UnifiedScores {
   akademikSkor: number;
@@ -200,6 +203,9 @@ export function ProfileDashboard({
 
   return (
     <div className="space-y-4">
+      {/* Canlı Profil Kartı - YENİ! */}
+      <UnifiedProfileCard studentId={studentId} />
+
       {/* AI Action Buttons */}
       <div className="flex gap-2 flex-wrap">
         <Button
@@ -225,6 +231,20 @@ export function ProfileDashboard({
           )}
           Risk Analizi
         </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Profil Değişim Geçmişi - YENİ! */}
+        <div className="md:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <ProfileChangeTimeline studentId={studentId} />
+            </div>
+            <div>
+              <ConflictResolutionPanel studentId={studentId} />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
