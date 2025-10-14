@@ -18,10 +18,10 @@ export interface SessionFormAutoFillResult {
   sessionTags?: string[];
   actionItems?: Array<{
     id: string;
-    title: string;
     description: string;
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    completed: boolean;
+    assignedTo?: string;
+    dueDate?: string;
+    priority?: 'low' | 'medium' | 'high';
   }>;
   followUpNeeded?: boolean;
   followUpPlan?: string;
@@ -92,7 +92,8 @@ Aşağıdaki alanları doldur ve JSON formatında döndür:
    - Diğer: "veli_görüşmesi", "kriz_müdahale", "yönlendirme"
 
 10. **actionItems**: Yapılacak aksiyonlar (array of objects)
-    - Her aksiyon için: title, description, priority ("low", "medium", "high", "urgent")
+    - Her aksiyon için: description (aksiyon açıklaması), priority ("low", "medium", "high")
+    - assignedTo ve dueDate opsiyonel (eğer transkriptte varsa ekle)
     - Görüşmeden çıkan somut adımları belirt
 
 11. **followUpNeeded**: Takip görüşmesi gerekli mi? (true/false)
@@ -120,10 +121,10 @@ JSON formatı:
   "actionItems": [
     {
       "id": "unique-id-1",
-      "title": "Başlık",
-      "description": "Detay",
-      "priority": "medium",
-      "completed": false
+      "description": "Aksiyon açıklaması",
+      "assignedTo": "Opsiyonel - kime atandı",
+      "dueDate": "Opsiyonel - YYYY-MM-DD formatında",
+      "priority": "medium"
     }
   ],
   "followUpNeeded": false,
@@ -155,8 +156,7 @@ JSON formatı:
       if (result.actionItems && Array.isArray(result.actionItems)) {
         result.actionItems = result.actionItems.map((item, index) => ({
           ...item,
-          id: item.id || `action-${Date.now()}-${index}`,
-          completed: false
+          id: item.id || `action-${Date.now()}-${index}`
         }));
       }
 

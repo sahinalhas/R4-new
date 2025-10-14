@@ -36,6 +36,7 @@ export default function EnhancedCompleteSessionDialog({
   isPending,
 }: EnhancedCompleteSessionDialogProps) {
   const [activeTab, setActiveTab] = useState("summary");
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
 
   const form = useForm<CompleteSessionFormValues>({
     resolver: zodResolver(completeSessionSchema),
@@ -202,18 +203,78 @@ export default function EnhancedCompleteSessionDialog({
                     <AccordionTrigger className="text-base font-semibold text-blue-700 dark:text-blue-400">
                       <div className="flex items-center gap-2">
                         <Mic className="h-4 w-4" />
-                        Sesli Not Al (AI ile Otomatik Analiz)
+                        Sesli Not Al (AI ile Otomatik Form Doldurma)
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
+                      {isAutoFilling && (
+                        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="text-sm font-medium">AI formu otomatik dolduruyor...</span>
+                          </div>
+                        </div>
+                      )}
                       <VoiceRecorder
-                        onTranscriptionComplete={(result) => {
-                          const currentNotes = form.getValues("detailedNotes");
-                          const newNotes = currentNotes 
-                            ? `${currentNotes}\n\n[Sesli Not - ${new Date().toLocaleString('tr-TR')}]\n${result.transcription.text}\n\n[AI Analizi: ${result.analysis.category} - ${result.analysis.sentiment}]\n${result.analysis.summary}`
-                            : `[Sesli Not - ${new Date().toLocaleString('tr-TR')}]\n${result.transcription.text}\n\n[AI Analizi: ${result.analysis.category} - ${result.analysis.sentiment}]\n${result.analysis.summary}`;
+                        onTranscriptionComplete={async (result) => {
+                          setIsAutoFilling(true);
                           
-                          form.setValue("detailedNotes", newNotes);
+                          try {
+                            const sessionType = session?.sessionType === 'individual' ? 'INDIVIDUAL' : session?.sessionType === 'group' ? 'GROUP' : session?.participantType === 'veli' ? 'PARENT' : 'OTHER';
+                            
+                            const response = await fetch('/api/voice-transcription/auto-fill-form', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                transcriptionText: result.transcription.text,
+                                sessionType
+                              }),
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success && data.data) {
+                              const formData = data.data;
+                              
+                              if (formData.sessionFlow) form.setValue("sessionFlow", formData.sessionFlow);
+                              if (formData.detailedNotes) form.setValue("detailedNotes", formData.detailedNotes);
+                              if (formData.achievedOutcomes) form.setValue("achievedOutcomes", formData.achievedOutcomes);
+                              if (formData.studentParticipationLevel) form.setValue("studentParticipationLevel", formData.studentParticipationLevel);
+                              if (formData.cooperationLevel) form.setValue("cooperationLevel", formData.cooperationLevel);
+                              if (formData.emotionalState) form.setValue("emotionalState", formData.emotionalState);
+                              if (formData.physicalState) form.setValue("physicalState", formData.physicalState);
+                              if (formData.communicationQuality) form.setValue("communicationQuality", formData.communicationQuality);
+                              if (formData.sessionTags && formData.sessionTags.length > 0) form.setValue("sessionTags", formData.sessionTags);
+                              if (formData.actionItems && formData.actionItems.length > 0) {
+                                const validActionItems = formData.actionItems
+                                  .filter(item => item.id && item.description)
+                                  .map(item => ({
+                                    id: item.id!,
+                                    description: item.description!,
+                                    assignedTo: item.assignedTo,
+                                    dueDate: item.dueDate,
+                                    priority: item.priority
+                                  }));
+                                form.setValue("actionItems", validActionItems);
+                              }
+                              if (formData.followUpNeeded !== undefined) form.setValue("followUpNeeded", formData.followUpNeeded);
+                              if (formData.followUpPlan) form.setValue("followUpPlan", formData.followUpPlan);
+
+                              alert('✅ Form otomatik dolduruldu! Lütfen kontrol edin ve gerekirse düzenleyin.');
+                            } else {
+                              throw new Error(data.error || 'Form doldurma başarısız');
+                            }
+                          } catch (error: any) {
+                            console.error('Auto-fill error:', error);
+                            
+                            const fallbackNotes = `[Sesli Not - ${new Date().toLocaleString('tr-TR')}]\n${result.transcription.text}\n\n[AI Analizi: ${result.analysis.category} - ${result.analysis.sentiment}]\n${result.analysis.summary}`;
+                            const currentNotes = form.getValues("detailedNotes");
+                            form.setValue("detailedNotes", currentNotes ? `${currentNotes}\n\n${fallbackNotes}` : fallbackNotes);
+                            
+                            alert(`⚠️ Otomatik form doldurma başarısız oldu: ${error.message}\n\nSesli not manuel olarak eklendi.`);
+                          } finally {
+                            setIsAutoFilling(false);
+                          }
                         }}
                         studentId={session?.student?.id || session?.students?.[0]?.id}
                         sessionType={session?.sessionType === 'individual' ? 'INDIVIDUAL' : session?.sessionType === 'group' ? 'GROUP' : session?.participantType === 'veli' ? 'PARENT' : 'OTHER'}
@@ -496,7 +557,7 @@ export default function EnhancedCompleteSessionDialog({
                       </FormLabel>
                       <FormControl>
                         <ActionItemsManager
-                          items={field.value || []}
+                          items={(field.value || []).filter(item => item.id && item.description) as any}
                           onItemsChange={field.onChange}
                         />
                       </FormControl>
