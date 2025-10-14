@@ -317,9 +317,9 @@ export class PatternAnalysisService {
     const monthlyGrades = this.db.prepare(`
       SELECT 
         strftime('%Y-%m', examDate) as month,
-        AVG(CAST(grade AS REAL)) as avg
+        AVG(CAST(totalScore AS REAL)) as avg
       FROM exam_results
-      WHERE studentId = ? AND examDate >= date('now', '-6 months')
+      WHERE studentId = ? AND examDate >= date('now', '-6 months') AND totalScore IS NOT NULL
       GROUP BY month
       ORDER BY month ASC
     `).all(studentId) as any[];
