@@ -15,13 +15,20 @@ Preferred communication style: Simple, everyday language.
 ### Backend
 - **Technology Stack:** Express.js v5, SQLite with `better-sqlite3`, TypeScript, Zod.
 - **Key Decisions:** Modular architecture (`server/features/<feature-name>/`), Repository Pattern for data access, Service Layer for business logic, shared type safety, robust security measures (input sanitization, prepared statements, CORS, rate limiting), and centralized error handling.
-- **Core Features:** Students, Surveys, Academic Data, Student Support, Administrative Functions, and AI features (holistic-profile, standardized-profile, student-profile-ai, ai-assistant).
+- **Core Features:** Students, Surveys, Academic Data, Student Support, Administrative Functions, and AI features (holistic-profile, standardized-profile, student-profile-ai, ai-assistant, **profile-sync**).
 
 ### Data Architecture
 - **Database:** Normalized relational schema in `database.db` (root directory) for student profiles, behavior, attendance, surveys, counseling, and interventions.
 - **Data Standardization:** Utilizes a comprehensive taxonomy (`shared/constants/student-profile-taxonomy.ts`) for consistent values across academic, social-emotional, and behavioral data, enabling deterministic AI analysis.
 
 ### AI and Analytics System
+- **Living Student Profile (NEW - October 2025):** AI-powered profile aggregation system that automatically updates student identity from all data sources.
+    - **Auto-Sync Engine:** Automatic triggers when counseling sessions complete, surveys submitted, or exam results added - profile instantly updates.
+    - **AI Validation:** Gemini-powered data validation checks meaningfulness and realism before profile updates (scoring 0-100%).
+    - **Intelligent Aggregation:** Combines data from multiple sources with conflict resolution and weighted domain scoring.
+    - **Real-Time Dashboard:** "Who is this student?" - Live profile card showing identity summary, current state, scores, strengths/challenges, AI recommendations.
+    - **Update Timeline:** Complete history of profile changes with AI reasoning, validation scores, and extracted insights.
+    - **Database Schema:** Unified identity table, sync logs, conflict tracking, and processing queue for reliable updates.
 - **AI Assistant:** A professional-grade virtual guidance counselor with deep psychological and pedagogical expertise.
     - **Architecture:** Unified `AI Provider Service` (OpenAI/Ollama/Gemini), `AI Prompt Builder Service`, `Pattern Analysis Service`, `Student Context Service`.
     - **Capabilities:** Pattern recognition, proactive insights, psychological depth analysis, evidence-based recommendations, contextual awareness, real-time streaming chat, 9 quick-action analyses, risk analysis, meeting summaries, runtime model selection, full Turkish language support.
