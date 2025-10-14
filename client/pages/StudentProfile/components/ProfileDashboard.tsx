@@ -31,6 +31,8 @@ import {
 import UnifiedProfileCard from "@/components/profile-sync/UnifiedProfileCard";
 import ProfileChangeTimeline from "@/components/profile-sync/ProfileChangeTimeline";
 import ConflictResolutionPanel from "@/components/profile-sync/ConflictResolutionPanel";
+import ManualCorrectionPanel from "@/components/profile-sync/ManualCorrectionPanel";
+import ConflictResolutionUI from "@/components/profile-sync/ConflictResolutionUI";
 
 interface UnifiedScores {
   akademikSkor: number;
@@ -231,6 +233,16 @@ export function ProfileDashboard({
           )}
           Risk Analizi
         </Button>
+      </div>
+
+      {/* Manuel Düzeltme ve Çelişki Çözüm Araçları - YENİ! */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <ManualCorrectionPanel studentId={studentId} />
+        </div>
+        <div>
+          <ConflictResolutionUI studentId={studentId} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

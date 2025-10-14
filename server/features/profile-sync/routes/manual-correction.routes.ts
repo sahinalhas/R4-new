@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import * as repository from '../repository/profile-sync.repository.js';
-import { getDatabase } from '../../../lib/db-service.js';
+import getDatabase from '../../../lib/database.js';
 
 interface CorrectionRequest {
   studentId: string;
@@ -17,7 +17,7 @@ interface CorrectionRequest {
   correctedBy: string;
 }
 
-export function correctAIExtraction(req: Request, res: Response) {
+export async function correctAIExtraction(req: Request, res: Response) {
   try {
     const correction: CorrectionRequest = req.body;
     
@@ -52,7 +52,7 @@ export function correctAIExtraction(req: Request, res: Response) {
     );
 
     // Profil alanını güncelle
-    updateProfileField(
+    await updateProfileField(
       correction.studentId,
       correction.domain,
       correction.field,
@@ -168,12 +168,12 @@ export function undoLastUpdate(req: Request, res: Response) {
   }
 }
 
-function updateProfileField(
+async function updateProfileField(
   studentId: string,
   domain: string,
   field: string,
   value: any
-): void {
+): Promise<void> {
   const db = getDatabase();
   
   const tableMap: Record<string, string> = {
@@ -184,21 +184,45 @@ function updateProfileField(
   };
   
   const tableName = tableMap[domain];
-  if (!tableName) return;
+  if (!tableName) {
+    console.warn(`Unknown domain: ${domain}`);
+    return;
+  }
   
   try {
-    const stmt = db.prepare(`
-      UPDATE ${tableName}
-      SET ${field} = ?, updatedAt = ?
-      WHERE studentId = ?
-    `);
+    // Önce mevcut kaydı kontrol et
+    const checkStmt = db.prepare(`SELECT * FROM ${tableName} WHERE studentId = ?`);
+    const existing = checkStmt.get(studentId) as any;
     
-    stmt.run(
-      typeof value === 'object' ? JSON.stringify(value) : value,
-      new Date().toISOString(),
-      studentId
-    );
+    if (!existing) {
+      // Eğer kayıt yoksa, önce oluştur
+      const createStmt = db.prepare(`
+        INSERT INTO ${tableName} (studentId, ${field}, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?)
+      `);
+      createStmt.run(
+        studentId,
+        typeof value === 'object' ? JSON.stringify(value) : value,
+        new Date().toISOString(),
+        new Date().toISOString()
+      );
+    } else {
+      // Kayıt varsa güncelle
+      const updateStmt = db.prepare(`
+        UPDATE ${tableName}
+        SET ${field} = ?, updatedAt = ?
+        WHERE studentId = ?
+      `);
+      updateStmt.run(
+        typeof value === 'object' ? JSON.stringify(value) : value,
+        new Date().toISOString(),
+        studentId
+      );
+    }
+    
+    console.log(`✅ Updated ${domain}.${field} for student ${studentId}`);
   } catch (error) {
-    console.error(`Error updating ${domain}.${field}:`, error);
+    console.error(`❌ Error updating ${domain}.${field}:`, error);
+    throw error;
   }
 }

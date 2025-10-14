@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { getDatabase } from '../../../lib/db-service.js';
+import getDatabase from '../../../lib/database.js';
 
 export function getClassProfileSummary(req: Request, res: Response) {
   try {

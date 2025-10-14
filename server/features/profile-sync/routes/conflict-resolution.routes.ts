@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import * as repository from '../repository/profile-sync.repository.js';
-import { getDatabase } from '../../../lib/db-service.js';
+import getDatabase from '../../../lib/database.js';
 
 interface ManualResolutionRequest {
   conflictId: string;
@@ -14,7 +14,7 @@ interface ManualResolutionRequest {
   resolvedBy: string;
 }
 
-export function resolveConflictManually(req: Request, res: Response) {
+export async function resolveConflictManually(req: Request, res: Response) {
   try {
     const resolution: ManualResolutionRequest = req.body;
     
@@ -51,9 +51,10 @@ export function resolveConflictManually(req: Request, res: Response) {
     
     if (conflict && conflict.domain) {
       // Seçilen değeri profile'a uygula
-      applyResolvedValue(
+      await applyResolvedValue(
         conflict.studentId,
         conflict.domain,
+        conflict.conflictType, // field name from conflictType
         resolution.selectedValue
       );
     }
@@ -180,11 +181,12 @@ export function bulkResolveConflicts(req: Request, res: Response) {
   }
 }
 
-function applyResolvedValue(
+async function applyResolvedValue(
   studentId: string,
   domain: string,
+  field: string,
   value: any
-): void {
+): Promise<void> {
   const db = getDatabase();
   
   const tableMap: Record<string, string> = {
@@ -195,26 +197,45 @@ function applyResolvedValue(
   };
   
   const tableName = tableMap[domain];
-  if (!tableName) return;
+  if (!tableName) {
+    console.warn(`Unknown domain for conflict resolution: ${domain}`);
+    return;
+  }
   
   try {
-    // value objesi içindeki her alanı güncelle
-    if (typeof value === 'object' && value !== null) {
-      for (const [field, fieldValue] of Object.entries(value)) {
-        const stmt = db.prepare(`
-          UPDATE ${tableName}
-          SET ${field} = ?, updatedAt = ?
-          WHERE studentId = ?
-        `);
-        
-        stmt.run(
-          typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : fieldValue,
-          new Date().toISOString(),
-          studentId
-        );
-      }
+    // Önce mevcut kaydı kontrol et
+    const checkStmt = db.prepare(`SELECT * FROM ${tableName} WHERE studentId = ?`);
+    const existing = checkStmt.get(studentId) as any;
+    
+    if (!existing) {
+      // Eğer kayıt yoksa, önce oluştur
+      const createStmt = db.prepare(`
+        INSERT INTO ${tableName} (studentId, ${field}, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?)
+      `);
+      createStmt.run(
+        studentId,
+        typeof value === 'object' ? JSON.stringify(value) : value,
+        new Date().toISOString(),
+        new Date().toISOString()
+      );
+    } else {
+      // Kayıt varsa güncelle
+      const updateStmt = db.prepare(`
+        UPDATE ${tableName}
+        SET ${field} = ?, updatedAt = ?
+        WHERE studentId = ?
+      `);
+      updateStmt.run(
+        typeof value === 'object' ? JSON.stringify(value) : value,
+        new Date().toISOString(),
+        studentId
+      );
     }
+    
+    console.log(`✅ Applied resolved value to ${domain}.${field} for student ${studentId}`);
   } catch (error) {
-    console.error(`Error applying resolved value to ${domain}:`, error);
+    console.error(`❌ Error applying resolved value to ${domain}.${field}:`, error);
+    throw error;
   }
 }

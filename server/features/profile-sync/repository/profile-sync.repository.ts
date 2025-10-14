@@ -205,6 +205,31 @@ export function saveConflictResolution(conflict: Omit<ConflictResolution, 'creat
   );
 }
 
+export function getConflictById(conflictId: string): ConflictResolution | null {
+  const stmt = db.prepare(`
+    SELECT * FROM conflict_resolutions WHERE id = ?
+  `);
+  
+  const row = stmt.get(conflictId) as any;
+  
+  if (!row) return null;
+  
+  return {
+    id: row.id,
+    studentId: row.studentId,
+    conflictType: row.conflictType,
+    domain: row.domain,
+    oldValue: JSON.parse(row.oldValue),
+    newValue: JSON.parse(row.newValue),
+    resolvedValue: JSON.parse(row.resolvedValue),
+    resolutionMethod: row.resolutionMethod,
+    severity: row.severity,
+    reasoning: row.reasoning,
+    timestamp: row.timestamp,
+    resolvedBy: row.resolvedBy
+  };
+}
+
 export function getConflictsByStudent(studentId: string): ConflictResolution[] {
   const stmt = db.prepare(`
     SELECT * FROM conflict_resolutions 

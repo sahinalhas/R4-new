@@ -106,6 +106,42 @@ export function createProfileSyncTables(db: Database.Database): void {
     );
   `);
 
+  // 5. AI Corrections - Manuel AI düzeltmeleri
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ai_corrections (
+      id TEXT PRIMARY KEY,
+      studentId TEXT NOT NULL,
+      domain TEXT NOT NULL,
+      field TEXT NOT NULL,
+      oldValue TEXT,
+      newValue TEXT,
+      reason TEXT,
+      correctedBy TEXT NOT NULL,
+      timestamp TEXT NOT NULL,
+      
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      
+      FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE
+    );
+  `);
+
+  // 6. Undo Operations - Geri alma işlemleri
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS undo_operations (
+      id TEXT PRIMARY KEY,
+      studentId TEXT NOT NULL,
+      logId TEXT NOT NULL,
+      previousState TEXT, -- JSON
+      timestamp TEXT NOT NULL,
+      performedBy TEXT NOT NULL,
+      
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      
+      FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE,
+      FOREIGN KEY (logId) REFERENCES profile_sync_logs (id) ON DELETE CASCADE
+    );
+  `);
+
   // Indexes for performance
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_sync_logs_student ON profile_sync_logs(studentId);
@@ -117,6 +153,12 @@ export function createProfileSyncTables(db: Database.Database): void {
     
     CREATE INDEX IF NOT EXISTS idx_update_queue_status ON profile_update_queue(status);
     CREATE INDEX IF NOT EXISTS idx_update_queue_priority ON profile_update_queue(priority);
+    
+    CREATE INDEX IF NOT EXISTS idx_ai_corrections_student ON ai_corrections(studentId);
+    CREATE INDEX IF NOT EXISTS idx_ai_corrections_timestamp ON ai_corrections(timestamp);
+    
+    CREATE INDEX IF NOT EXISTS idx_undo_operations_student ON undo_operations(studentId);
+    CREATE INDEX IF NOT EXISTS idx_undo_operations_log ON undo_operations(logId);
   `);
 
   console.log('✅ Profile sync tables created successfully');

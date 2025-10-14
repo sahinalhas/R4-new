@@ -5,6 +5,9 @@
 
 import { Router } from 'express';
 import * as routes from './routes/profile-sync.routes.js';
+import * as manualCorrection from './routes/manual-correction.routes.js';
+import * as conflictResolution from './routes/conflict-resolution.routes.js';
+import * as classAnalytics from './routes/class-analytics.routes.js';
 
 const router = Router();
 
@@ -26,6 +29,21 @@ router.get('/conflicts/high-severity', routes.getHighSeverityConflicts);
 
 // Statistics
 router.get('/statistics', routes.getSyncStatistics);
+
+// Manual Correction endpoints
+router.post('/correction', manualCorrection.correctAIExtraction);
+router.get('/corrections/:studentId', manualCorrection.getCorrectionHistory);
+router.post('/undo', manualCorrection.undoLastUpdate);
+
+// Conflict Resolution endpoints
+router.post('/conflicts/resolve', conflictResolution.resolveConflictManually);
+router.get('/conflicts/pending', conflictResolution.getPendingConflicts);
+router.post('/conflicts/bulk-resolve', conflictResolution.bulkResolveConflicts);
+
+// Class Analytics endpoints
+router.get('/class/:classId/summary', classAnalytics.getClassProfileSummary);
+router.get('/class/:classId/trends', classAnalytics.getClassTrends);
+router.get('/class/compare', classAnalytics.compareClasses);
 
 export default router;
 
