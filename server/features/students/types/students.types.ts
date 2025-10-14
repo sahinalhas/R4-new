@@ -33,11 +33,3 @@ export interface Progress {
   lastStudied?: string;
   notes?: string;
 }
-
-export interface Intervention {
-  id: string;
-  studentId: string;
-  date: string;
-  title: string;
-  status: string;
-}

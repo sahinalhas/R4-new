@@ -82,23 +82,6 @@ export function validateAcademic(academic: any): { valid: boolean; error?: strin
   return { valid: true };
 }
 
-export function validateIntervention(intervention: any): { valid: boolean; error?: string } {
-  if (!intervention || typeof intervention !== 'object') {
-    return { valid: false, error: "Geçersiz müdahale kaydı verisi" };
-  }
-  
-  if (!intervention.id || !intervention.studentId || !intervention.date || !intervention.title || !intervention.status) {
-    return { valid: false, error: "id, studentId, date, title ve status alanları zorunludur" };
-  }
-  
-  const validStatuses = ['Planlandı', 'Devam', 'Tamamlandı'];
-  if (!validStatuses.includes(intervention.status)) {
-    return { valid: false, error: "Geçersiz durum. Geçerli değerler: Planlandı, Devam, Tamamlandı" };
-  }
-  
-  return { valid: true };
-}
-
 export function getAllStudents(): Student[] {
   return repository.loadStudents();
 }
@@ -186,27 +169,4 @@ export function getStudentProgress(studentId: string): Progress[] {
   
   repository.ensureProgressForStudent(studentId);
   return repository.getProgressByStudent(studentId);
-}
-
-export function getStudentInterventions(studentId: string): Intervention[] {
-  if (!studentId || typeof studentId !== 'string' || studentId.length > 50) {
-    throw new Error("Geçersiz öğrenci ID");
-  }
-  
-  return repository.getInterventionsByStudent(studentId);
-}
-
-export function createIntervention(intervention: any): void {
-  const validation = validateIntervention(intervention);
-  if (!validation.valid) {
-    throw new Error(validation.error);
-  }
-  
-  repository.insertIntervention(
-    intervention.id,
-    intervention.studentId,
-    intervention.date,
-    intervention.title,
-    intervention.status
-  );
 }

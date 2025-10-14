@@ -12,8 +12,6 @@ router.delete("/:id", simpleRateLimit(20, 15 * 60 * 1000), studentsRoutes.delete
 router.get("/:id/academics", simpleRateLimit(200, 15 * 60 * 1000), studentsRoutes.getStudentAcademics);
 router.post("/academics", simpleRateLimit(50, 15 * 60 * 1000), studentsRoutes.addStudentAcademic);
 router.get("/:id/progress", simpleRateLimit(200, 15 * 60 * 1000), studentsRoutes.getStudentProgress);
-router.get("/:id/interventions", simpleRateLimit(200, 15 * 60 * 1000), studentsRoutes.getStudentInterventions);
-router.post("/interventions", simpleRateLimit(50, 15 * 60 * 1000), studentsRoutes.addStudentIntervention);
 
 // Unified Profile Routes - Birleşik Profil API
 router.get("/:id/unified-profile", simpleRateLimit(100, 15 * 60 * 1000), unifiedProfileRoutes.getUnifiedProfile);

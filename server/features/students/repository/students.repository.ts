@@ -1,5 +1,5 @@
 import getDatabase from '../../../lib/database.js';
-import type { Student, AcademicRecord, Progress, Intervention } from '../types/students.types.js';
+import type { Student, AcademicRecord, Progress } from '../types/students.types.js';
 
 let statements: any = null;
 let isInitialized = false;
@@ -53,11 +53,6 @@ function ensureInitialized(): void {
         lastStudied = excluded.lastStudied,
         notes = excluded.notes,
         updated_at = CURRENT_TIMESTAMP
-    `),
-    getInterventionsByStudent: db.prepare('SELECT * FROM interventions WHERE studentId = ? ORDER BY created_at DESC'),
-    insertIntervention: db.prepare(`
-      INSERT INTO interventions (id, studentId, date, title, status)
-      VALUES (?, ?, ?, ?, ?)
     `),
   };
   
@@ -240,25 +235,5 @@ export function ensureProgressForStudent(studentId: string): void {
   
   if (newProgress.length > 0) {
     saveProgress(newProgress);
-  }
-}
-
-export function getInterventionsByStudent(studentId: string): Intervention[] {
-  try {
-    ensureInitialized();
-    return statements.getInterventionsByStudent.all(studentId) as Intervention[];
-  } catch (error) {
-    console.error('Error loading interventions:', error);
-    return [];
-  }
-}
-
-export function insertIntervention(id: string, studentId: string, date: string, title: string, status: string): void {
-  try {
-    ensureInitialized();
-    statements.insertIntervention.run(id, studentId, date, title, status);
-  } catch (error) {
-    console.error('Error inserting intervention:', error);
-    throw error;
   }
 }
