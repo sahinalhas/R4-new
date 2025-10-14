@@ -19,6 +19,7 @@ import { up as migration018up, down as migration018down } from './018-notificati
 import { migration019 } from './019-enhanced-session-completion';
 import { migration as migration020 } from './020-social-network-analysis';
 import { migration021 } from './021-fix-missing-features';
+import { migration022 } from './022-daily-action-plans';
 
 const migration018 = {
   version: 18,
@@ -47,7 +48,8 @@ const migrations = [
   migration018,
   migration019,
   migration020,
-  migration021
+  migration021,
+  migration022
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {
