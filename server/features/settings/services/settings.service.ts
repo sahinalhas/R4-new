@@ -4,7 +4,13 @@ import * as settingsRepository from '../repository/settings.repository.js';
 
 export function getSettings(): AppSettings {
   const settings = settingsRepository.getAppSettings();
-  return mergeWithDefaults(settings || {});
+  const merged = mergeWithDefaults(settings || {});
+  
+  if (!settings?.presentationSystem || settings.presentationSystem.length === 0) {
+    settingsRepository.saveAppSettings(merged);
+  }
+  
+  return merged;
 }
 
 export function saveSettings(settings: Partial<AppSettings>): void {
