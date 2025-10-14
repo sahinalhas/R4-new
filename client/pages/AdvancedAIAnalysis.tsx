@@ -33,8 +33,8 @@ export default function AdvancedAIAnalysis() {
     }
   });
 
-  const students = studentsData?.students || [];
-  const classes = [...new Set(students.map((s: any) => s.sinif).filter(Boolean))];
+  const students = studentsData || [];
+  const classes = [...new Set(students.map((s: any) => s.className).filter(Boolean))];
 
   // Class comparison
   const { data: classAnalysis, isLoading: classLoading, error: classError } = useQuery({
@@ -144,7 +144,7 @@ export default function AdvancedAIAnalysis() {
                       htmlFor={student.id}
                       className="flex-1 cursor-pointer text-sm"
                     >
-                      {student.name} - {student.sinif}
+                      {student.name} - {student.className}
                     </label>
                   </div>
                 ))}
