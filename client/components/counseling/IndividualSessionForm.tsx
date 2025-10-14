@@ -73,11 +73,21 @@ export default function IndividualSessionForm({
     }
   };
 
-  const handleSubmit = form.handleSubmit(onSubmit);
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Only submit if we're on the last step
+    if (currentStep === STEPS.length) {
+      form.handleSubmit(onSubmit)();
+    } else {
+      // Otherwise, go to next step
+      await handleNext();
+    }
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         {/* Progress Bar */}
         <FormProgress currentStep={currentStep} totalSteps={STEPS.length} />
 
