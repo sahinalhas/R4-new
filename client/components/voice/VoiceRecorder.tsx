@@ -338,6 +338,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
         <div className="flex items-center justify-center gap-4">
           {!isRecording && !isProcessing && (
             <Button
+              type="button"
               size="lg"
               onClick={startRecording}
               className="gap-2"
@@ -349,6 +350,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
 
           {isRecording && (
             <Button
+              type="button"
               size="lg"
               onClick={stopRecording}
               variant="destructive"
@@ -379,6 +381,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
                   {!isEditing ? (
                     <>
                       <Button
+                        type="button"
                         size="sm"
                         variant="outline"
                         onClick={handleEdit}
@@ -388,6 +391,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
                         Düzenle
                       </Button>
                       <Button
+                        type="button"
                         size="sm"
                         variant="outline"
                         onClick={handleDelete}
@@ -400,6 +404,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
                   ) : (
                     <>
                       <Button
+                        type="button"
                         size="sm"
                         variant="default"
                         onClick={handleSaveEdit}
@@ -409,6 +414,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
                         Kaydet
                       </Button>
                       <Button
+                        type="button"
                         size="sm"
                         variant="outline"
                         onClick={handleCancelEdit}
