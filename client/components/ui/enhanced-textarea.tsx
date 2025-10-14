@@ -50,24 +50,27 @@ const EnhancedTextarea = React.forwardRef<HTMLTextAreaElement, EnhancedTextareaP
 
     React.useEffect(() => {
       if (transcript) {
-        const newValue = currentValue + (currentValue && !currentValue.endsWith(' ') ? ' ' : '') + transcript;
-        setCurrentValue(newValue);
-        onValueChangeRef.current?.(newValue);
-        
-        if (textareaRef.current) {
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-            window.HTMLTextAreaElement.prototype,
-            'value'
-          )?.set;
-          nativeInputValueSetter?.call(textareaRef.current, newValue);
+        setCurrentValue(prevValue => {
+          const newValue = prevValue + (prevValue && !prevValue.endsWith(' ') ? ' ' : '') + transcript;
+          onValueChangeRef.current?.(newValue);
           
-          const event = new Event('input', { bubbles: true });
-          textareaRef.current.dispatchEvent(event);
-        }
+          if (textareaRef.current) {
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+              window.HTMLTextAreaElement.prototype,
+              'value'
+            )?.set;
+            nativeInputValueSetter?.call(textareaRef.current, newValue);
+            
+            const event = new Event('input', { bubbles: true });
+            textareaRef.current.dispatchEvent(event);
+          }
+          
+          return newValue;
+        });
         
         resetTranscript();
       }
-    }, [transcript, resetTranscript, currentValue]);
+    }, [transcript, resetTranscript]);
 
     const handleVoiceToggle = () => {
       if (isListening) {
