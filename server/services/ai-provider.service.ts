@@ -48,19 +48,20 @@ export class AIProviderService {
       // 1. Öncelik: Config'den gelen provider (programatik kullanım)
       defaultProvider = config.provider;
       defaultModel = config.model || this.getDefaultModelForProvider(config.provider);
-    } else if (savedSettings?.provider) {
-      // 2. Öncelik: Kullanıcının ayarlardan seçtiği provider
-      defaultProvider = savedSettings.provider as AIProvider;
-      defaultModel = savedSettings.model || this.getDefaultModelForProvider(savedSettings.provider as AIProvider);
     } else if (hasGeminiKey) {
-      // 3. Öncelik: API key varsa o provider'ı kullan (ilk kurulum)
+      // 2. Öncelik: Gemini API key varsa DAIMA Gemini kullan
       defaultProvider = 'gemini';
       defaultModel = 'gemini-2.0-flash-exp';
     } else if (hasOpenAIKey) {
+      // 3. Öncelik: OpenAI API key varsa OpenAI kullan
       defaultProvider = 'openai';
       defaultModel = 'gpt-4o-mini';
+    } else if (savedSettings?.provider) {
+      // 4. Öncelik: Kullanıcının ayarlardan seçtiği provider (sadece API key yoksa)
+      defaultProvider = savedSettings.provider as AIProvider;
+      defaultModel = savedSettings.model || this.getDefaultModelForProvider(savedSettings.provider as AIProvider);
     } else {
-      // 4. Son seçenek: Ollama (local)
+      // 5. Son seçenek: Ollama (local)
       defaultProvider = 'ollama';
       defaultModel = 'llama3';
     }
