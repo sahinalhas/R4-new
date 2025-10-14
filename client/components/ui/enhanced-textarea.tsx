@@ -17,6 +17,7 @@ const EnhancedTextarea = React.forwardRef<HTMLTextAreaElement, EnhancedTextareaP
   ({ className, enableVoice = true, enableAIPolish = true, aiContext = 'general', onValueChange, ...props }, ref) => {
     const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
     const [isPolishing, setIsPolishing] = React.useState(false);
+    const [isFocused, setIsFocused] = React.useState(false);
     const [currentValue, setCurrentValue] = React.useState(props.value?.toString() || props.defaultValue?.toString() || '');
     const previousValueRef = React.useRef<string | undefined>(undefined);
 
@@ -137,6 +138,16 @@ const EnhancedTextarea = React.forwardRef<HTMLTextAreaElement, EnhancedTextareaP
       props.onChange?.(e);
     };
 
+    const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+      setIsFocused(true);
+      props.onFocus?.(e);
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+      setIsFocused(false);
+      props.onBlur?.(e);
+    };
+
     const setRefs = React.useCallback(
       (node: HTMLTextAreaElement | null) => {
         textareaRef.current = node;
@@ -163,10 +174,17 @@ const EnhancedTextarea = React.forwardRef<HTMLTextAreaElement, EnhancedTextareaP
           ref={setRefs}
           {...props}
           onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
         />
         
         {showToolbar && (
-          <div className="absolute top-2 right-2 flex items-center gap-1">
+          <div className={cn(
+            "absolute top-2 right-2 flex items-center gap-1 transition-all duration-300 ease-out",
+            (isFocused || isListening || isPolishing) 
+              ? "opacity-100 translate-x-0" 
+              : "opacity-0 translate-x-2 pointer-events-none"
+          )}>
             {enableVoice && isVoiceSupported && (
               <Button
                 type="button"
