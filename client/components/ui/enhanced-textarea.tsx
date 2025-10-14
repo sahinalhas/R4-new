@@ -18,10 +18,15 @@ const EnhancedTextarea = React.forwardRef<HTMLTextAreaElement, EnhancedTextareaP
     const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
     const [isPolishing, setIsPolishing] = React.useState(false);
     const [currentValue, setCurrentValue] = React.useState(props.value?.toString() || props.defaultValue?.toString() || '');
+    const previousValueRef = React.useRef<string | undefined>(undefined);
 
     React.useEffect(() => {
       if (props.value !== undefined) {
-        setCurrentValue(props.value.toString());
+        const newValue = props.value.toString();
+        if (previousValueRef.current !== newValue) {
+          previousValueRef.current = newValue;
+          setCurrentValue(newValue);
+        }
       }
     }, [props.value]);
 
