@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Mic, Square, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Textarea } from '../ui/textarea';
+import { Mic, Square, Loader2, CheckCircle, AlertTriangle, Edit2, Trash2, Save, X } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
 interface VoiceRecorderProps {
@@ -35,6 +36,8 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
   const [transcriptionResult, setTranscriptionResult] = useState<TranscriptionResult | null>(null);
   const [useBrowserAPI, setUseBrowserAPI] = useState(false);
   const [provider, setProvider] = useState<string>('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState<string>('');
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -271,6 +274,53 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
     });
   };
 
+  const handleEdit = () => {
+    if (transcriptionResult) {
+      setEditedText(transcriptionResult.transcription.text);
+      setIsEditing(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (transcriptionResult && editedText.trim()) {
+      const updatedResult = {
+        ...transcriptionResult,
+        transcription: {
+          ...transcriptionResult.transcription,
+          text: editedText.trim()
+        }
+      };
+      
+      setTranscriptionResult(updatedResult);
+      setIsEditing(false);
+      
+      if (onTranscriptionComplete) {
+        onTranscriptionComplete(updatedResult);
+      }
+      
+      toast({
+        title: 'Başarılı',
+        description: 'Not güncellendi',
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedText('');
+  };
+
+  const handleDelete = () => {
+    setTranscriptionResult(null);
+    setIsEditing(false);
+    setEditedText('');
+    
+    toast({
+      title: 'Silindi',
+      description: 'Sesli not silindi',
+    });
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -320,13 +370,71 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
         {transcriptionResult && (
           <div className="space-y-4 border-t pt-4">
             <div className="space-y-2">
-              <h4 className="font-semibold flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Transkript
-              </h4>
-              <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                {transcriptionResult.transcription.text}
-              </p>
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  Transkript
+                </h4>
+                <div className="flex gap-2">
+                  {!isEditing ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleEdit}
+                        className="gap-1"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        Düzenle
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleDelete}
+                        className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Sil
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={handleSaveEdit}
+                        className="gap-1"
+                      >
+                        <Save className="h-3 w-3" />
+                        Kaydet
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                        className="gap-1"
+                      >
+                        <X className="h-3 w-3" />
+                        İptal
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              {isEditing ? (
+                <Textarea
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  className="min-h-[100px] text-sm"
+                  placeholder="Metni düzenleyin..."
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                  {transcriptionResult.transcription.text}
+                </p>
+              )}
+              
               <p className="text-xs text-muted-foreground">
                 Sağlayıcı: {transcriptionResult.transcription.provider.toUpperCase()}
                 {transcriptionResult.transcription.duration && ` • ${transcriptionResult.transcription.duration}ms`}
