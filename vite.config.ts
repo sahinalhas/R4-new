@@ -93,6 +93,15 @@ function expressPlugin(): Plugin {
         .catch((error) => {
           console.error('Failed to start auto-complete scheduler:', error);
         });
+      
+      // Start daily action plan scheduler in development mode
+      import('./server/services/daily-action-plan-scheduler.service.js')
+        .then(({ startDailyActionPlanScheduler }) => {
+          startDailyActionPlanScheduler();
+        })
+        .catch((error) => {
+          console.error('Failed to start daily action plan scheduler:', error);
+        });
     },
   };
 }
