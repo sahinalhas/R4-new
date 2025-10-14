@@ -1,5 +1,5 @@
 import * as repository from '../repository/students.repository.js';
-import type { Student, AcademicRecord, Progress, Intervention } from '../types/students.types.js';
+import type { Student, AcademicRecord, Progress } from '../types/students.types.js';
 
 export function normalizeStudentData(student: any): any {
   const normalized = { ...student };
