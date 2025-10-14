@@ -8,7 +8,7 @@ import type {
   StandardizedBehaviorIncident,
   MotivationProfile,
   RiskProtectiveProfile
-} from '@/shared/types/standardized-profile.types';
+} from '../../../../shared/types/standardized-profile.types.js';
 
 export class StandardizedProfileRepository {
   constructor(private db: Database.Database) {}

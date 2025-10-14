@@ -3,8 +3,12 @@
  * Tüm veri kaynaklarını birleştirerek canlı öğrenci profilini oluşturur
  */
 
+import { randomUUID } from 'crypto';
 import { DataValidationService } from './data-validation.service.js';
+import { FieldMapperService } from './field-mapper.service.js';
 import { AIProviderService } from '../../../services/ai-provider.service.js';
+import { StandardizedProfileRepository } from '../../standardized-profile/repository/standardized-profile.repository.js';
+import getDatabase from '../../../lib/database/index.js';
 import type { 
   ProfileUpdateRequest, 
   ProfileUpdateResult, 
@@ -12,14 +16,24 @@ import type {
   DataConflict,
   ProfileDomain
 } from '../types/index.js';
+import type {
+  StandardizedHealthProfile,
+  AcademicProfile,
+  SocialEmotionalProfile,
+  TalentsInterestsProfile
+} from '../../../../shared/types/standardized-profile.types.js';
 
 export class ProfileAggregationService {
   private validationService: DataValidationService;
+  private fieldMapper: FieldMapperService;
   private aiProvider: AIProviderService;
+  private profileRepo: StandardizedProfileRepository;
 
   constructor() {
     this.validationService = new DataValidationService();
+    this.fieldMapper = new FieldMapperService();
     this.aiProvider = AIProviderService.getInstance();
+    this.profileRepo = new StandardizedProfileRepository(getDatabase());
   }
 
   /**
@@ -101,7 +115,7 @@ export class ProfileAggregationService {
   }
 
   /**
-   * Belirli bir profil alanını günceller
+   * Belirli bir profil alanını günceller - AI'NIN BULDUĞU BİLGİLERİ GERÇEK ALANLARA YAZAR
    */
   private async updateSpecificDomain(
     studentId: string,
@@ -109,16 +123,198 @@ export class ProfileAggregationService {
     insights: Record<string, any>,
     source: string
   ): Promise<void> {
-    // Bu fonksiyon her domain için özel güncelleme mantığı içerir
-    // Şimdilik log kaydı yapıyoruz, sonra repository'lere bağlayacağız
+    console.log(`🔄 Updating ${domain} for student ${studentId}...`);
     
-    console.log(`✅ Updated ${domain} for student ${studentId} with insights:`, insights);
+    // Field mapper ile AI insights'ı database field'larına map et
+    const mappedFields = this.fieldMapper.mapInsightsToFields(domain, insights);
     
-    // TODO: Repository'lere bağla
-    // - Academic profile güncelle
-    // - Social-emotional profile güncelle
-    // - Risk factors güncelle
-    // vs.
+    if (Object.keys(mappedFields).length === 0) {
+      console.log(`⚠️ No fields to update for domain: ${domain}`);
+      return;
+    }
+
+    try {
+      switch (domain) {
+        case 'health':
+          await this.updateHealthProfile(studentId, mappedFields);
+          break;
+        
+        case 'academic':
+          await this.updateAcademicProfile(studentId, mappedFields);
+          break;
+        
+        case 'social_emotional':
+          await this.updateSocialEmotionalProfile(studentId, mappedFields);
+          break;
+        
+        case 'talents_interests':
+          await this.updateTalentsInterestsProfile(studentId, mappedFields);
+          break;
+        
+        case 'behavioral':
+        case 'motivation':
+        case 'risk_factors':
+        case 'family':
+          // Bu alanlar için gelecekte ek tablolar eklenebilir
+          console.log(`📝 Domain ${domain} için mapped fields:`, mappedFields);
+          break;
+        
+        default:
+          console.log(`⚠️ Unknown domain: ${domain}`);
+      }
+      
+      console.log(`✅ Successfully updated ${domain} for student ${studentId}`);
+    } catch (error) {
+      console.error(`❌ Failed to update ${domain}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sağlık profilini günceller - DOKTOR KONTROLÜ GİBİ BİLGİLER BURAYA YAZILIR
+   */
+  private async updateHealthProfile(studentId: string, fields: Record<string, any>): Promise<void> {
+    console.log(`🏥 Updating health profile for ${studentId}:`, fields);
+    
+    // Mevcut profili al
+    const existing = this.profileRepo.getStandardizedHealthProfile(studentId);
+    
+    // Tarih alanlarını normalize et
+    if (fields.lastHealthCheckup) {
+      fields.lastHealthCheckup = this.fieldMapper.normalizeDate(fields.lastHealthCheckup);
+    }
+    
+    // Profil oluştur veya güncelle
+    const profile: StandardizedHealthProfile = {
+      id: existing?.id || randomUUID(),
+      studentId,
+      bloodType: fields.bloodType || existing?.bloodType || null,
+      chronicDiseases: this.ensureJsonArray(fields.chronicDiseases || existing?.chronicDiseases || []),
+      allergies: this.ensureJsonArray(fields.allergies || existing?.allergies || []),
+      currentMedications: this.ensureJsonArray(fields.currentMedications || existing?.currentMedications || []),
+      medicalHistory: fields.medicalHistory || existing?.medicalHistory || null,
+      specialNeeds: fields.specialNeeds || existing?.specialNeeds || null,
+      physicalLimitations: fields.physicalLimitations || existing?.physicalLimitations || null,
+      emergencyContact1Name: fields.emergencyContact1Name || existing?.emergencyContact1Name || null,
+      emergencyContact1Phone: fields.emergencyContact1Phone || existing?.emergencyContact1Phone || null,
+      emergencyContact1Relation: fields.emergencyContact1Relation || existing?.emergencyContact1Relation || null,
+      emergencyContact2Name: fields.emergencyContact2Name || existing?.emergencyContact2Name || null,
+      emergencyContact2Phone: fields.emergencyContact2Phone || existing?.emergencyContact2Phone || null,
+      emergencyContact2Relation: fields.emergencyContact2Relation || existing?.emergencyContact2Relation || null,
+      physicianName: fields.physicianName || existing?.physicianName || null,
+      physicianPhone: fields.physicianPhone || existing?.physicianPhone || null,
+      lastHealthCheckup: fields.lastHealthCheckup || existing?.lastHealthCheckup || null,
+      additionalNotes: fields.additionalNotes || existing?.additionalNotes || null
+    };
+    
+    this.profileRepo.upsertStandardizedHealthProfile(profile);
+    console.log(`✅ Health profile updated! Last checkup: ${profile.lastHealthCheckup}`);
+  }
+
+  /**
+   * Akademik profili günceller
+   */
+  private async updateAcademicProfile(studentId: string, fields: Record<string, any>): Promise<void> {
+    console.log(`📚 Updating academic profile for ${studentId}:`, fields);
+    
+    const existing = this.profileRepo.getAcademicProfile(studentId);
+    
+    const profile: AcademicProfile = {
+      id: existing?.id || randomUUID(),
+      studentId,
+      assessmentDate: new Date().toISOString(),
+      strongSubjects: this.ensureJsonArray(fields.strongSubjects || existing?.strongSubjects || []),
+      weakSubjects: this.ensureJsonArray(fields.weakSubjects || existing?.weakSubjects || []),
+      strongSkills: this.ensureJsonArray(fields.strongSkills || existing?.strongSkills || []),
+      weakSkills: this.ensureJsonArray(fields.weakSkills || existing?.weakSkills || []),
+      primaryLearningStyle: fields.primaryLearningStyle || existing?.primaryLearningStyle || null,
+      secondaryLearningStyle: fields.secondaryLearningStyle || existing?.secondaryLearningStyle || null,
+      overallMotivation: fields.overallMotivation || existing?.overallMotivation || null,
+      studyHoursPerWeek: fields.studyHoursPerWeek || existing?.studyHoursPerWeek || null,
+      homeworkCompletionRate: fields.homeworkCompletionRate || existing?.homeworkCompletionRate || null,
+      additionalNotes: fields.additionalNotes || existing?.additionalNotes || null,
+      assessedBy: 'AI Auto-Sync'
+    };
+    
+    this.profileRepo.upsertAcademicProfile(profile);
+    console.log(`✅ Academic profile updated!`);
+  }
+
+  /**
+   * Sosyal-duygusal profili günceller
+   */
+  private async updateSocialEmotionalProfile(studentId: string, fields: Record<string, any>): Promise<void> {
+    console.log(`❤️ Updating social-emotional profile for ${studentId}:`, fields);
+    
+    const existing = this.profileRepo.getSocialEmotionalProfile(studentId);
+    
+    const profile: SocialEmotionalProfile = {
+      id: existing?.id || randomUUID(),
+      studentId,
+      assessmentDate: new Date().toISOString(),
+      strongSocialSkills: this.ensureJsonArray(fields.strongSocialSkills || existing?.strongSocialSkills || []),
+      developingSocialSkills: this.ensureJsonArray(fields.developingSocialSkills || existing?.developingSocialSkills || []),
+      empathyLevel: fields.empathyLevel || existing?.empathyLevel || null,
+      selfAwarenessLevel: fields.selfAwarenessLevel || existing?.selfAwarenessLevel || null,
+      emotionRegulationLevel: fields.emotionRegulationLevel || existing?.emotionRegulationLevel || null,
+      conflictResolutionLevel: fields.conflictResolutionLevel || existing?.conflictResolutionLevel || null,
+      leadershipLevel: fields.leadershipLevel || existing?.leadershipLevel || null,
+      teamworkLevel: fields.teamworkLevel || existing?.teamworkLevel || null,
+      communicationLevel: fields.communicationLevel || existing?.communicationLevel || null,
+      friendCircleSize: fields.friendCircleSize || existing?.friendCircleSize || null,
+      friendCircleQuality: fields.friendCircleQuality || existing?.friendCircleQuality || null,
+      socialRole: fields.socialRole || existing?.socialRole || null,
+      bullyingStatus: fields.bullyingStatus || existing?.bullyingStatus || null,
+      additionalNotes: fields.additionalNotes || existing?.additionalNotes || null,
+      assessedBy: 'AI Auto-Sync'
+    };
+    
+    this.profileRepo.upsertSocialEmotionalProfile(profile);
+    console.log(`✅ Social-emotional profile updated!`);
+  }
+
+  /**
+   * Yetenek ve ilgi alanları profilini günceller
+   */
+  private async updateTalentsInterestsProfile(studentId: string, fields: Record<string, any>): Promise<void> {
+    console.log(`🎨 Updating talents/interests profile for ${studentId}:`, fields);
+    
+    const existing = this.profileRepo.getTalentsInterestsProfile(studentId);
+    
+    const profile: TalentsInterestsProfile = {
+      id: existing?.id || randomUUID(),
+      studentId,
+      assessmentDate: new Date().toISOString(),
+      creativeTalents: this.ensureJsonArray(fields.creativeTalents || existing?.creativeTalents || []),
+      physicalTalents: this.ensureJsonArray(fields.physicalTalents || existing?.physicalTalents || []),
+      primaryInterests: this.ensureJsonArray(fields.primaryInterests || existing?.primaryInterests || []),
+      exploratoryInterests: this.ensureJsonArray(fields.exploratoryInterests || existing?.exploratoryInterests || []),
+      talentProficiency: existing?.talentProficiency || null,
+      weeklyEngagementHours: fields.weeklyEngagementHours || existing?.weeklyEngagementHours || null,
+      clubMemberships: this.ensureJsonArray(fields.clubMemberships || existing?.clubMemberships || []),
+      competitionsParticipated: this.ensureJsonArray(fields.competitionsParticipated || existing?.competitionsParticipated || []),
+      additionalNotes: fields.additionalNotes || existing?.additionalNotes || null,
+      assessedBy: 'AI Auto-Sync'
+    };
+    
+    this.profileRepo.upsertTalentsInterestsProfile(profile);
+    console.log(`✅ Talents/interests profile updated!`);
+  }
+
+  /**
+   * JSON array formatını garanti eder
+   */
+  private ensureJsonArray(value: any): any[] {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        return [value];
+      }
+    }
+    return [];
   }
 
   /**
@@ -200,9 +396,10 @@ ZORUNLU JSON FORMATI:
 SADECE JSON döndür.`;
 
     try {
-      const response = await this.aiProvider.generateText(prompt, {
+      const response = await this.aiProvider.chat({
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0.4,
-        responseFormat: 'json'
+        format: 'json'
       });
 
       const parsed = JSON.parse(response.replace(/```json\n?/g, '').replace(/```\n?/g, ''));

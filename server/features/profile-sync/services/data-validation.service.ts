@@ -29,9 +29,10 @@ export class DataValidationService {
     try {
       const prompt = this.buildValidationPrompt(source, rawData, existingProfile);
       
-      const response = await this.aiProvider.generateText(prompt, {
-        temperature: 0.3, // Daha tutarlı sonuçlar için düşük temperature
-        responseFormat: 'json'
+      const response = await this.aiProvider.chat({
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.3,
+        format: 'json'
       });
 
       const result = this.parseAIResponse(response);
@@ -211,9 +212,10 @@ ${JSON.stringify(existingData, null, 2)}
 SADECE JSON döndür.`;
 
     try {
-      const response = await this.aiProvider.generateText(prompt, {
+      const response = await this.aiProvider.chat({
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0.2,
-        responseFormat: 'json'
+        format: 'json'
       });
 
       const parsed = JSON.parse(response.replace(/```json\n?/g, '').replace(/```\n?/g, ''));
