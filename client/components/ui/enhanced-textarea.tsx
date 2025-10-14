@@ -195,6 +195,7 @@ const EnhancedTextarea = React.forwardRef<HTMLTextAreaElement, EnhancedTextareaP
                   isListening && "text-red-500 animate-pulse"
                 )}
                 onClick={handleVoiceToggle}
+                onMouseDown={(e) => e.preventDefault()}
                 disabled={props.disabled}
                 title={isListening ? "Sesli girişi durdur" : "Sesli giriş başlat"}
               >
@@ -216,6 +217,7 @@ const EnhancedTextarea = React.forwardRef<HTMLTextAreaElement, EnhancedTextareaP
                   isPolishing && "text-primary"
                 )}
                 onClick={handleAIPolish}
+                onMouseDown={(e) => e.preventDefault()}
                 disabled={props.disabled || isPolishing || !currentValue.trim()}
                 title="AI ile temizle ve düzelt"
               >
