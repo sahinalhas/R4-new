@@ -19,7 +19,7 @@ export class AppSettingsService {
     return {
       aiProvider: {
         provider: process.env.GEMINI_API_KEY ? 'gemini' : 'ollama',
-        model: process.env.GEMINI_API_KEY ? 'gemini-2.0-flash-exp' : 'llama3',
+        model: process.env.GEMINI_API_KEY ? 'gemini-2.5-flash' : 'llama3',
         ollamaBaseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434'
       }
     };
@@ -65,7 +65,16 @@ export class AppSettingsService {
 
   static getAIProvider(): AppSettings['aiProvider'] {
     const settings = this.getSettings();
-    return settings.aiProvider || this.getDefaultSettings().aiProvider;
+    let result = settings.aiProvider || this.getDefaultSettings().aiProvider;
+    
+    // Auto-migrate deprecated Gemini models to current version
+    if (result?.model === 'gemini-1.5-flash' || result?.model === 'gemini-1.5-pro') {
+      console.log('🔄 Auto-migrating deprecated Gemini model:', result.model, '→ gemini-2.5-flash');
+      result.model = 'gemini-2.5-flash';
+      this.saveAIProvider(result.provider, result.model, result.ollamaBaseUrl);
+    }
+    
+    return result;
   }
 
   static saveAIProvider(provider: string, model: string, ollamaBaseUrl?: string): void {

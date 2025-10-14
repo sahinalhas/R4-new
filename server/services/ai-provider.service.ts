@@ -51,7 +51,7 @@ export class AIProviderService {
     } else if (hasGeminiKey) {
       // 2. Öncelik: Gemini API key varsa DAIMA Gemini kullan
       defaultProvider = 'gemini';
-      defaultModel = 'gemini-2.0-flash-exp';
+      defaultModel = 'gemini-2.5-flash';
     } else if (hasOpenAIKey) {
       // 3. Öncelik: OpenAI API key varsa OpenAI kullan
       defaultProvider = 'openai';
@@ -94,13 +94,13 @@ export class AIProviderService {
   private getDefaultModelForProvider(provider: AIProvider): string {
     switch (provider) {
       case 'gemini':
-        return 'gemini-2.0-flash-exp';
+        return 'gemini-2.5-flash';
       case 'openai':
         return 'gpt-4o-mini';
       case 'ollama':
         return 'llama3';
       default:
-        return 'gemini-2.0-flash-exp';
+        return 'gemini-2.5-flash';
     }
   }
 
