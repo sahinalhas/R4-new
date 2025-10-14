@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as service from '../services/counseling-sessions.service.js';
+import { autoSyncHooks } from '../../profile-sync/index.js';
 
 export function getAllCounselingSessions(req: Request, res: Response) {
   try {
@@ -77,6 +78,19 @@ export function completeCounselingSession(req: Request, res: Response) {
     
     if (result.notFound) {
       return res.status(404).json({ error: 'Görüşme bulunamadı' });
+    }
+    
+    // 🔥 OTOMATIK PROFİL SENKRONIZASYONU - Görüşme tamamlandığında profili güncelle
+    const session = service.getSessionByIdWithStudents(id);
+    if (session) {
+      autoSyncHooks.onCounselingSessionCompleted({
+        id,
+        ...completionData,
+        studentId: session.sessionType === 'individual' ? (session as any).student?.id : undefined,
+        studentIds: session.sessionType === 'group' ? (session as any).students?.map((s: any) => s.id) : undefined
+      }).catch(error => {
+        console.error('Profile sync failed after counseling session:', error);
+      });
     }
     
     res.json({ success: true });

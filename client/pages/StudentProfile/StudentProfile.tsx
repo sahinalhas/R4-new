@@ -12,6 +12,8 @@ import { PersonalizedLearningCard } from "@/components/learning/PersonalizedLear
 import { AdvancedAnalyticsCard } from "@/components/analytics/AdvancedAnalyticsCard";
 import { SocialNetworkMap } from "@/components/social/SocialNetworkMap";
 import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
+import LiveProfileCard from "@/components/live-profile/LiveProfileCard";
+import ProfileUpdateTimeline from "@/components/live-profile/ProfileUpdateTimeline";
 
 export default function StudentProfile() {
   const { id } = useParams();
@@ -92,6 +94,9 @@ export default function StudentProfile() {
     <div className="space-y-4">
       <StudentHeader student={student} />
       
+      {/* 🔥 CANLI ÖĞRENCİ PROFİLİ - "Öğrenci Kimdir?" */}
+      <LiveProfileCard studentId={studentId as string} />
+      
       <ProfileDashboard
         studentId={studentId as string}
         scores={scoresData?.scores}
@@ -105,6 +110,9 @@ export default function StudentProfile() {
       </div>
 
       <AdvancedAnalyticsCard studentId={studentId as string} />
+      
+      {/* 🔥 PROFİL GÜNCELLEME GEÇMİŞİ - Timeline */}
+      <ProfileUpdateTimeline studentId={studentId as string} />
       
       <SocialNetworkMap studentId={studentId as string} />
 

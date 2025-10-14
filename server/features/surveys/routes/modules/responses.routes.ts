@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import * as surveyService from '../../services/surveys.service.js';
+import { autoSyncHooks } from '../../../profile-sync/index.js';
 
 export const getSurveyResponses: RequestHandler = (req, res) => {
   try {
@@ -60,6 +61,15 @@ export const createSurveyResponse: RequestHandler = (req, res) => {
     }
 
     surveyService.createResponse(response);
+    
+    // 🔥 OTOMATIK PROFİL SENKRONIZASYONU - Anket cevaplandığında profili güncelle
+    autoSyncHooks.onSurveyResponseSubmitted({
+      id: response.id || `response_${Date.now()}`,
+      ...response
+    }).catch(error => {
+      console.error('Profile sync failed after survey response:', error);
+    });
+    
     res.json({ success: true, message: 'Anket yanıtı başarıyla kaydedildi' });
   } catch (error) {
     console.error('Error creating survey response:', error);

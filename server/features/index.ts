@@ -39,6 +39,7 @@ import { voiceTranscriptionRoutes } from './voice-transcription/index.js';
 import searchRouter from './search/index.js';
 import { careerGuidanceRoutes } from './career-guidance/routes.js';
 import aiTextPolishRouter from '../routes/ai-text-polish.routes.js';
+import profileSyncRouter from './profile-sync/index.js';
 
 /**
  * Feature Registry
@@ -196,5 +197,8 @@ featureRegistry.use('/career-guidance', careerGuidanceRoutes);
 
 // =================== AI TEXT ENHANCEMENT ===================
 featureRegistry.use('/ai-text', aiTextPolishRouter);
+
+// =================== LIVE PROFILE SYNC ===================
+featureRegistry.use('/profile-sync', profileSyncRouter);
 
 export default featureRegistry;
