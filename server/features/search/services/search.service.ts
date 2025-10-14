@@ -50,24 +50,35 @@ export async function performGlobalSearch(query: string): Promise<SearchResults>
       cs.sessionDate as date,
       GROUP_CONCAT(s.name, ', ') as studentNames
     FROM counseling_sessions cs
-    LEFT JOIN session_participants sp ON cs.id = sp.sessionId
-    LEFT JOIN students s ON sp.studentId = s.id
+    LEFT JOIN counseling_session_students css ON cs.id = css.sessionId
+    LEFT JOIN students s ON css.studentId = s.id
     WHERE LOWER(cs.topic) LIKE ?
-       OR LOWER(cs.notes) LIKE ?
+       OR LOWER(cs.detailedNotes) LIKE ?
     GROUP BY cs.id
     ORDER BY cs.sessionDate DESC
     LIMIT 10
   `).all(`%${lowerQuery}%`, `%${lowerQuery}%`) as any[];
 
-  // Search surveys
-  const surveys = db.prepare(`
-    SELECT id, title, status, createdAt
-    FROM surveys
+  // Search surveys (using survey_templates and survey_distributions)
+  const surveyTemplates = db.prepare(`
+    SELECT id, title, 'template' as status, created_at as createdAt
+    FROM survey_templates
     WHERE LOWER(title) LIKE ?
        OR LOWER(description) LIKE ?
-    ORDER BY createdAt DESC
-    LIMIT 10
+    ORDER BY created_at DESC
+    LIMIT 5
   `).all(`%${lowerQuery}%`, `%${lowerQuery}%`) as any[];
+
+  const surveyDistributions = db.prepare(`
+    SELECT id, title, status, created_at as createdAt
+    FROM survey_distributions
+    WHERE LOWER(title) LIKE ?
+       OR LOWER(description) LIKE ?
+    ORDER BY created_at DESC
+    LIMIT 5
+  `).all(`%${lowerQuery}%`, `%${lowerQuery}%`) as any[];
+
+  const surveys = [...surveyTemplates, ...surveyDistributions];
 
   // Static pages that match the query
   const allPages = [

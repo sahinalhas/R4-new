@@ -656,7 +656,7 @@ export default function CareerGuidanceSection({ studentId, studentName }: Career
                     <CardTitle className="text-sm font-medium">Güçlü Alanlar</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{competencyStats.strongCompetencies.length}</div>
+                    <div className="text-2xl font-bold">{competencyStats.strongCompetencies?.length || 0}</div>
                     <p className="text-xs text-muted-foreground mt-1">Seviye 7+ yetkinlik</p>
                   </CardContent>
                 </Card>
