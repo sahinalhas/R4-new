@@ -59,8 +59,11 @@ export default function GroupSessionForm({
   };
 
   const handleNext = async () => {
+    console.log('handleNext called - Current step:', currentStep);
     const isValid = await validateStep(currentStep);
+    console.log('Validation result:', isValid);
     if (isValid && currentStep < STEPS.length) {
+      console.log('Moving to step:', currentStep + 1);
       setCurrentStep(currentStep + 1);
     }
   };
@@ -79,12 +82,17 @@ export default function GroupSessionForm({
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Form submit - Current step:', currentStep, 'Total steps:', STEPS.length);
     
     // Only submit if we're on the last step
     if (currentStep === STEPS.length) {
+      console.log('Submitting form...');
       form.handleSubmit(onSubmit)();
     } else {
       // Otherwise, go to next step
+      console.log('Going to next step...');
       await handleNext();
     }
   };
@@ -135,7 +143,11 @@ export default function GroupSessionForm({
             {currentStep < STEPS.length ? (
               <Button 
                 type="button"
-                onClick={handleNext}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleNext();
+                }}
               >
                 İleri
                 <ChevronRight className="h-4 w-4 ml-1" />

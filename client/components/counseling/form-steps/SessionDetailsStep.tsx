@@ -62,6 +62,7 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        type="button"
                         variant="outline"
                         className={cn(
                           "justify-start text-left font-normal h-12 border-2 hover:border-emerald-400",

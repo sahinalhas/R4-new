@@ -81,6 +81,7 @@ export default function ParticipantStep({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
+                          type="button"
                           variant="outline"
                           role="combobox"
                           className={cn(
@@ -147,6 +148,7 @@ export default function ParticipantStep({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
+                          type="button"
                           variant="outline"
                           role="combobox"
                           className="justify-between h-12 text-left font-normal border-2 hover:border-blue-400"
@@ -240,6 +242,7 @@ export default function ParticipantStep({
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        type="button"
                         variant="outline"
                         role="combobox"
                         className={cn(
