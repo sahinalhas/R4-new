@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
+import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 
 interface GeneralSettingsTabProps {
   form: UseFormReturn<AppSettings>;

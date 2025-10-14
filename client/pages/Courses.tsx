@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
+import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import {
   Table,
   TableBody,

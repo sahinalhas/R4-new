@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Achievement, SelfAssessment, addAchievement, addSelfAssessment } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
+import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Award, Heart, Trophy } from "lucide-react";

@@ -5,7 +5,7 @@ import { Loader2, Clock, FileText } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
+import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 
 import { completeSessionSchema, type CompleteSessionFormValues, type CounselingSession } from "./types";
