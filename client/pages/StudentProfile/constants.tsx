@@ -23,9 +23,15 @@ import {
   Shield,
   Mail,
   Bot,
+  LayoutDashboard,
 } from "lucide-react";
 
 export const MAIN_TABS = [
+  {
+    value: "dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+  },
   {
     value: "genel",
     label: "Genel Bilgiler",

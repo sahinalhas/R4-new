@@ -4,16 +4,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { useStudentProfile, useStudentData } from "@/hooks/student-profile";
-import { StudentHeader, StudentStats } from "./components";
-import { ProfileDashboard } from "./components/ProfileDashboard";
+import { StudentHeader } from "./components";
 import { StudentProfileTabs } from "./StudentProfileTabs";
-import { EnhancedRiskCard } from "@/components/analytics/EnhancedRiskCard";
-import { PersonalizedLearningCard } from "@/components/learning/PersonalizedLearningCard";
-import { AdvancedAnalyticsCard } from "@/components/analytics/AdvancedAnalyticsCard";
-import { SocialNetworkMap } from "@/components/social/SocialNetworkMap";
-import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
-import LiveProfileCard from "@/components/live-profile/LiveProfileCard";
-import ProfileUpdateTimeline from "@/components/live-profile/ProfileUpdateTimeline";
 
 export default function StudentProfile() {
   const { id } = useParams();
@@ -93,54 +85,14 @@ export default function StudentProfile() {
   return (
     <div className="space-y-4">
       <StudentHeader student={student} />
-      
-      {/* 🔥 CANLI ÖĞRENCİ PROFİLİ - "Öğrenci Kimdir?" */}
-      <LiveProfileCard studentId={studentId as string} />
-      
-      <ProfileDashboard
-        studentId={studentId as string}
-        scores={scoresData?.scores}
-        completeness={scoresData?.completeness}
-        isLoading={loadingScores}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <EnhancedRiskCard studentId={studentId as string} />
-        <PersonalizedLearningCard studentId={studentId as string} />
-      </div>
-
-      <AdvancedAnalyticsCard studentId={studentId as string} />
-      
-      {/* 🔥 PROFİL GÜNCELLEME GEÇMİŞİ - Timeline */}
-      <ProfileUpdateTimeline studentId={studentId as string} />
-      
-      <SocialNetworkMap studentId={studentId as string} />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Sesli Not ve AI Analizi</CardTitle>
-          <CardDescription>
-            Öğrenci ile ilgili sesli not alın, otomatik transkript ve AI analizi alın
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <VoiceRecorder
-            studentId={studentId as string}
-            sessionType="INDIVIDUAL"
-            onTranscriptionComplete={(result) => {
-              console.log('Voice note completed:', result);
-              // Buraya isterseniz bir backend kayıt işlemi eklenebilir
-              handleUpdate();
-            }}
-          />
-        </CardContent>
-      </Card>
 
       <StudentProfileTabs
         student={student}
         studentId={studentId as string}
         data={data}
         onUpdate={handleUpdate}
+        scoresData={scoresData}
+        loadingScores={loadingScores}
       />
     </div>
   );

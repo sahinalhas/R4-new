@@ -39,11 +39,23 @@ import ParentCommunication from "@/components/ai/ParentCommunication";
 import InterventionRecommendations from "@/components/ai/InterventionRecommendations";
 import AutoReportGenerator from "@/components/ai/AutoReportGenerator";
 
+import { ProfileDashboard } from "./components/ProfileDashboard";
+import { EnhancedRiskCard } from "@/components/analytics/EnhancedRiskCard";
+import { PersonalizedLearningCard } from "@/components/learning/PersonalizedLearningCard";
+import { AdvancedAnalyticsCard } from "@/components/analytics/AdvancedAnalyticsCard";
+import { SocialNetworkMap } from "@/components/social/SocialNetworkMap";
+import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
+import LiveProfileCard from "@/components/live-profile/LiveProfileCard";
+import ProfileUpdateTimeline from "@/components/live-profile/ProfileUpdateTimeline";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+
 interface StudentProfileTabsProps {
   student: Student;
   studentId: string;
   data: StudentData;
   onUpdate: () => void;
+  scoresData?: any;
+  loadingScores?: boolean;
 }
 
 export function StudentProfileTabs({
@@ -51,9 +63,11 @@ export function StudentProfileTabs({
   studentId,
   data,
   onUpdate,
+  scoresData,
+  loadingScores,
 }: StudentProfileTabsProps) {
   return (
-    <Tabs defaultValue="genel" className="space-y-4">
+    <Tabs defaultValue="dashboard" className="space-y-4">
       <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
         {MAIN_TABS.map(({ value, label, icon: Icon }) => (
           <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
@@ -61,6 +75,47 @@ export function StudentProfileTabs({
           </TabsTrigger>
         ))}
       </TabsList>
+
+      <TabsContent value="dashboard" className="mt-4 space-y-4">
+        <LiveProfileCard studentId={studentId} />
+        
+        <ProfileDashboard
+          studentId={studentId}
+          scores={scoresData?.scores}
+          completeness={scoresData?.completeness}
+          isLoading={loadingScores}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <EnhancedRiskCard studentId={studentId} />
+          <PersonalizedLearningCard studentId={studentId} />
+        </div>
+
+        <AdvancedAnalyticsCard studentId={studentId} />
+        
+        <ProfileUpdateTimeline studentId={studentId} />
+        
+        <SocialNetworkMap studentId={studentId} />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Sesli Not ve AI Analizi</CardTitle>
+            <CardDescription>
+              Öğrenci ile ilgili sesli not alın, otomatik transkript ve AI analizi alın
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <VoiceRecorder
+              studentId={studentId}
+              sessionType="INDIVIDUAL"
+              onTranscriptionComplete={(result) => {
+                console.log('Voice note completed:', result);
+                onUpdate();
+              }}
+            />
+          </CardContent>
+        </Card>
+      </TabsContent>
 
       <TabsContent value="genel" className="mt-4">
         <Tabs defaultValue="ogrenci" className="space-y-4">
