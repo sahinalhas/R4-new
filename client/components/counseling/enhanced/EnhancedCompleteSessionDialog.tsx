@@ -236,6 +236,8 @@ export default function EnhancedCompleteSessionDialog({
                             if (data.success && data.data) {
                               const formData = data.data;
                               
+                              const isFallback = formData.detailedNotes?.startsWith('[Otomatik Form Doldurma Başarısız]');
+                              
                               if (formData.sessionFlow) form.setValue("sessionFlow", formData.sessionFlow);
                               if (formData.detailedNotes) form.setValue("detailedNotes", formData.detailedNotes);
                               if (formData.achievedOutcomes) form.setValue("achievedOutcomes", formData.achievedOutcomes);
@@ -260,7 +262,11 @@ export default function EnhancedCompleteSessionDialog({
                               if (formData.followUpNeeded !== undefined) form.setValue("followUpNeeded", formData.followUpNeeded);
                               if (formData.followUpPlan) form.setValue("followUpPlan", formData.followUpPlan);
 
-                              alert('✅ Form otomatik dolduruldu! Lütfen kontrol edin ve gerekirse düzenleyin.');
+                              if (isFallback) {
+                                alert('⚠️ AI form doldurma kısmen başarısız oldu. Sesli not manuel olarak eklendi - lütfen formu kendiniz tamamlayın.');
+                              } else {
+                                alert('✅ Form otomatik dolduruldu! Lütfen kontrol edin ve gerekirse düzenleyin.');
+                              }
                             } else {
                               throw new Error(data.error || 'Form doldurma başarısız');
                             }
