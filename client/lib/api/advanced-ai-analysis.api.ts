@@ -59,14 +59,16 @@ export async function generatePredictiveTimeline(studentId: string): Promise<Pre
  */
 export async function generateDailyActionPlan(
   date?: string,
-  counselorName?: string
+  counselorName?: string,
+  forceRegenerate?: boolean
 ): Promise<CounselorDailyPlan> {
   const response = await fetch(`${API_BASE}/daily-action-plan`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       date: date || new Date().toISOString().split('T')[0],
-      counselorName
+      counselorName,
+      forceRegenerate: forceRegenerate || false
     })
   });
 

@@ -17,8 +17,13 @@ export default function DailyActionPlan() {
     queryFn: () => selectedDate === new Date().toISOString().split('T')[0] 
       ? getTodayActionPlan() 
       : generateDailyActionPlan(selectedDate),
-    staleTime: 5 * 60 * 1000
+    staleTime: 60 * 60 * 1000
   });
+
+  const handleRefresh = async () => {
+    await generateDailyActionPlan(selectedDate, undefined, true);
+    refetch();
+  };
 
   const getActionIcon = (type: HourlyAction['actionType']) => {
     switch (type) {
@@ -84,10 +89,10 @@ export default function DailyActionPlan() {
             className="px-4 py-2 border rounded-md"
           />
           <button
-            onClick={() => refetch()}
+            onClick={handleRefresh}
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
           >
-            Yenile
+            Yeni Plan Oluştur
           </button>
         </div>
       </div>
