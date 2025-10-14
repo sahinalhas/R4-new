@@ -69,7 +69,7 @@ export default function SessionOutcomeDialog({
       form.reset(formData);
       setRating(initialData?.effectivenessRating);
     }
-  }, [open, session, initialData, form]);
+  }, [open, session, initialData]);
 
   const handleClose = () => {
     onOpenChange(false);
