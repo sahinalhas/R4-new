@@ -77,16 +77,28 @@ export function createCounselingTables(db: Database.Database): void {
     );
   `);
 
+  db.exec(`DROP TABLE IF EXISTS home_visits`);
+  
   db.exec(`
     CREATE TABLE IF NOT EXISTS home_visits (
       id TEXT PRIMARY KEY,
       studentId TEXT NOT NULL,
-      visitDate TEXT NOT NULL,
-      visitReason TEXT NOT NULL,
-      observations TEXT,
-      familyInteraction TEXT,
+      date TEXT NOT NULL,
+      time TEXT,
+      visitDuration INTEGER,
+      visitors TEXT,
+      familyPresent TEXT,
       homeEnvironment TEXT,
+      familyInteraction TEXT,
+      observations TEXT,
       recommendations TEXT,
+      concerns TEXT,
+      resources TEXT,
+      followUpActions TEXT,
+      nextVisitPlanned TEXT,
+      notes TEXT,
+      createdBy TEXT,
+      createdAt TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (studentId) REFERENCES students (id) ON DELETE CASCADE
