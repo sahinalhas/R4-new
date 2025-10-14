@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -295,7 +295,7 @@ export default function AileKatilimiSection({ studentId, familyParticipation, on
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="Notlar" {...field} />
+                    <EnhancedTextarea placeholder="Notlar" {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

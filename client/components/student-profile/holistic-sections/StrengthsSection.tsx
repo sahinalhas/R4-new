@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -123,7 +123,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Kişisel Güçlü Yönler</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Karakter, değerler, kişilik özellikleri..." {...field} />
+                      <EnhancedTextarea placeholder="Karakter, değerler, kişilik özellikleri..." {...field} aiContext="notes">
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -137,7 +137,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Akademik Güçlü Yönler</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Başarılı olduğu dersler, yetenekler..." {...field} />
+                      <EnhancedTextarea placeholder="Başarılı olduğu dersler, yetenekler..." {...field} aiContext="notes">
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,7 +151,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Sosyal Güçlü Yönler</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="İlişki kurma, iletişim, empati..." {...field} />
+                      <EnhancedTextarea placeholder="İlişki kurma, iletişim, empati..." {...field} aiContext="notes">
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -165,7 +165,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Beceriler & Yetenekler</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Özel beceriler, yetenekler..." {...field} />
+                      <EnhancedTextarea placeholder="Özel beceriler, yetenekler..." {...field} aiContext="notes">
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -179,7 +179,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Başarı Hikayeleri</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Öğrencinin başarı öyküleri, gurur duyduğu anlar..." {...field} />
+                      <EnhancedTextarea placeholder="Öğrencinin başarı öyküleri, gurur duyduğu anlar..." {...field} aiContext="notes">
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -193,7 +193,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Destek Sistemleri</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Aile, arkadaşlar, mentorlar..." {...field} />
+                      <EnhancedTextarea placeholder="Aile, arkadaşlar, mentorlar..." {...field} aiContext="notes">
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -207,7 +207,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Notlar</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Ek notlar..." {...field} />
+                      <EnhancedTextarea placeholder="Ek notlar..." {...field} aiContext="notes">
                     </FormControl>
                     <FormMessage />
                   </FormItem>

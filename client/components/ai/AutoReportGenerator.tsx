@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from "@/components/ui/enhanced-textarea";
 import { FileText, Download, Loader2, Calendar, ClipboardCheck } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 

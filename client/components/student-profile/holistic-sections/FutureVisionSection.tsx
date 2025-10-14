@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Target, Edit, Plus } from "lucide-react";
@@ -57,49 +57,49 @@ export default function FutureVisionSection({ studentId, onUpdate }: { studentId
               <FormField control={form.control} name="shortTermGoals" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kısa Vadeli Hedefler</FormLabel>
-                  <FormControl><Textarea placeholder="Bu yıl, bu dönem için hedefler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Bu yıl, bu dönem için hedefler..." {...field} aiContext="academic" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="longTermGoals" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Uzun Vadeli Hedefler</FormLabel>
-                  <FormControl><Textarea placeholder="5-10 yıllık hedefler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="5-10 yıllık hedefler..." {...field} aiContext="academic" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="careerAspirations" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kariyer Aspirasyonları</FormLabel>
-                  <FormControl><Textarea placeholder="Meslek hedefleri, kariyer planı..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Meslek hedefleri, kariyer planı..." {...field} aiContext="academic" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="dreamJob" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Hayalindeki Meslek</FormLabel>
-                  <FormControl><Textarea placeholder="İdeal meslek..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="İdeal meslek..." {...field} aiContext="academic" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="universityPreferences" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Üniversite Tercihleri</FormLabel>
-                  <FormControl><Textarea placeholder="Hedef üniversiteler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Hedef üniversiteler..." {...field} aiContext="academic" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="fearsAndConcerns" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Korkular ve Kaygılar</FormLabel>
-                  <FormControl><Textarea placeholder="Geleceğe dair korkular..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Geleceğe dair korkular..." {...field} aiContext="counseling" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="motivationSources" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Motivasyon Kaynakları</FormLabel>
-                  <FormControl><Textarea placeholder="Neyin motive ettiği..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Neyin motive ettiği..." {...field} aiContext="counseling" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar</FormLabel>
-                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>

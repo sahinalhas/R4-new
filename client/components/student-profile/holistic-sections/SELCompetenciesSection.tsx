@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -115,13 +115,13 @@ export default function SELCompetenciesSection({ studentId, onUpdate }: { studen
               <FormField control={form.control} name="stressManagementStrategies" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Stres Yönetim Stratejileri</FormLabel>
-                  <FormControl><Textarea placeholder="Kullandığı stratejiler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Kullandığı stratejiler..." {...field} aiContext="counseling"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar</FormLabel>
-                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="counseling"></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>

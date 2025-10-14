@@ -8,7 +8,7 @@ import { tr } from "date-fns/locale";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -168,10 +168,11 @@ export default function SessionOutcomeDialog({
                   <FormItem>
                     <FormLabel>İlerleme Notları</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <EnhancedTextarea
                         {...field}
                         placeholder="Öğrencinin gösterdiği ilerleme ve gelişim hakkında notlar..."
                         className="min-h-[100px] resize-y"
+                        aiContext="counseling"
                       />
                     </FormControl>
                     <FormMessage />
@@ -186,10 +187,11 @@ export default function SessionOutcomeDialog({
                   <FormItem>
                     <FormLabel>Ulaşılan Hedefler</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <EnhancedTextarea
                         {...field}
                         placeholder="Bu görüşmede ulaşılan hedefler ve başarılar..."
                         className="min-h-[100px] resize-y"
+                        aiContext="counseling"
                       />
                     </FormControl>
                     <FormMessage />
@@ -204,10 +206,11 @@ export default function SessionOutcomeDialog({
                   <FormItem>
                     <FormLabel>Sonraki Adımlar</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <EnhancedTextarea
                         {...field}
                         placeholder="Öğrenci için önerilen sonraki adımlar..."
                         className="min-h-[100px] resize-y"
+                        aiContext="counseling"
                       />
                     </FormControl>
                     <FormMessage />
@@ -222,10 +225,11 @@ export default function SessionOutcomeDialog({
                   <FormItem>
                     <FormLabel>Öneriler ve Tavsiyeler</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <EnhancedTextarea
                         {...field}
                         placeholder="Öğrenci, veli veya öğretmenler için öneriler..."
                         className="min-h-[100px] resize-y"
+                        aiContext="counseling"
                       />
                     </FormControl>
                     <FormMessage />

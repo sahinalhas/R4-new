@@ -4,7 +4,7 @@ import { z } from "zod";
 import { BehaviorIncident, addBehaviorIncident } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -211,7 +211,7 @@ export default function DavranisTakibiSection({ studentId, behaviorIncidents, on
                 <FormItem>
                   <FormLabel>Davranış Açıklaması</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Davranışı detaylı olarak açıklayın" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Davranışı detaylı olarak açıklayın" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -225,7 +225,7 @@ export default function DavranisTakibiSection({ studentId, behaviorIncidents, on
                 <FormItem>
                   <FormLabel>Öncül (Antecedent)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Davranıştan önce ne oldu?" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Davranıştan önce ne oldu?" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,7 +239,7 @@ export default function DavranisTakibiSection({ studentId, behaviorIncidents, on
                 <FormItem>
                   <FormLabel>Sonuç (Consequence)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Davranıştan sonra ne oldu?" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Davranıştan sonra ne oldu?" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -253,7 +253,7 @@ export default function DavranisTakibiSection({ studentId, behaviorIncidents, on
                 <FormItem>
                   <FormLabel>Kullanılan Müdahale</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Uygulanan müdahaleyi açıklayın" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Uygulanan müdahaleyi açıklayın" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -325,7 +325,7 @@ export default function DavranisTakibiSection({ studentId, behaviorIncidents, on
                 <FormItem>
                   <FormLabel>Notlar ve Patern Analizi</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Ek notlar ve gözlemler" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Ek notlar ve gözlemler" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

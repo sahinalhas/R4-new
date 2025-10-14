@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -241,7 +241,7 @@ export default function EvZiyaretleriSection({ studentId, homeVisits, onUpdate }
                 <FormItem>
                   <FormLabel>Gözlemler</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Ev ziyareti sırasındaki gözlemlerinizi yazın" {...field} />
+                    <EnhancedTextarea placeholder="Ev ziyareti sırasındaki gözlemlerinizi yazın" {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -255,7 +255,7 @@ export default function EvZiyaretleriSection({ studentId, homeVisits, onUpdate }
                 <FormItem>
                   <FormLabel>Öneriler</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Aileye yönelik önerilerinizi yazın" {...field} />
+                    <EnhancedTextarea placeholder="Aileye yönelik önerilerinizi yazın" {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -269,7 +269,7 @@ export default function EvZiyaretleriSection({ studentId, homeVisits, onUpdate }
                 <FormItem>
                   <FormLabel>Tespit Edilen Sorunlar</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Varsa sorunları belirtin" {...field} />
+                    <EnhancedTextarea placeholder="Varsa sorunları belirtin" {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -283,7 +283,7 @@ export default function EvZiyaretleriSection({ studentId, homeVisits, onUpdate }
                 <FormItem>
                   <FormLabel>Sağlanan Kaynaklar/Yardımlar</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Aileye sağlanan destek ve kaynaklar" {...field} />
+                    <EnhancedTextarea placeholder="Aileye sağlanan destek ve kaynaklar" {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

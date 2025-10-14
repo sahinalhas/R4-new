@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { TagInput } from "@/components/ui/tag-input";
 import { toast } from "sonner";
@@ -255,7 +255,7 @@ export default function StandardizedTalentsSection({
                 <FormItem>
                   <FormLabel>Ek Notlar</FormLabel>
                   <FormControl>
-                    <Textarea {...field} rows={3} />
+                    <EnhancedTextarea {...field} rows={3} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

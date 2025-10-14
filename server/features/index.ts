@@ -38,6 +38,7 @@ import { socialNetworkRoutes } from './social-network/index.js';
 import { voiceTranscriptionRoutes } from './voice-transcription/index.js';
 import searchRouter from './search/index.js';
 import { careerGuidanceRoutes } from './career-guidance/routes.js';
+import aiTextPolishRouter from '../routes/ai-text-polish.routes.js';
 
 /**
  * Feature Registry
@@ -192,5 +193,8 @@ featureRegistry.use('/voice-transcription', voiceTranscriptionRoutes);
 
 // =================== CAREER DEVELOPMENT & GUIDANCE ===================
 featureRegistry.use('/career-guidance', careerGuidanceRoutes);
+
+// =================== AI TEXT ENHANCEMENT ===================
+featureRegistry.use('/ai-text', aiTextPolishRouter);
 
 export default featureRegistry;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -91,13 +91,13 @@ export default function SocialRelationsSection({ studentId, onUpdate }: { studen
               <FormField control={form.control} name="socialGroupDynamics" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sosyal Grup Dinamikleri</FormLabel>
-                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar</FormLabel>
-                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>

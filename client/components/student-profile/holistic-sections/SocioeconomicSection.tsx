@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -105,19 +105,19 @@ export default function SocioeconomicSection({ studentId, onUpdate }: { studentI
               <FormField control={form.control} name="financialBarriers" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Finansal Engeller</FormLabel>
-                  <FormControl><Textarea placeholder="Maddi zorluklar, engeller..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Maddi zorluklar, engeller..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="resourcesAndSupports" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kaynaklar ve Destekler</FormLabel>
-                  <FormControl><Textarea placeholder="Mevcut kaynaklar, alınan destekler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Mevcut kaynaklar, alınan destekler..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar (Gizli)</FormLabel>
-                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { RiskFactors, addRiskFactors } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -227,7 +227,7 @@ export default function RiskDegerlendirmeSection({ studentId, riskFactors, onUpd
                 <FormItem>
                   <FormLabel>Akademik Risk Faktörleri</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Akademik risk faktörlerini açıklayın" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Akademik risk faktörlerini açıklayın" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -241,7 +241,7 @@ export default function RiskDegerlendirmeSection({ studentId, riskFactors, onUpd
                 <FormItem>
                   <FormLabel>Davranışsal Faktörler</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Davranışsal faktörleri açıklayın" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Davranışsal faktörleri açıklayın" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -255,7 +255,7 @@ export default function RiskDegerlendirmeSection({ studentId, riskFactors, onUpd
                 <FormItem>
                   <FormLabel>Koruyucu Faktörler</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Koruyucu faktörleri belirtin" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Koruyucu faktörleri belirtin" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -269,7 +269,7 @@ export default function RiskDegerlendirmeSection({ studentId, riskFactors, onUpd
                 <FormItem>
                   <FormLabel>Gerekli Müdahaleler</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Önerilen müdahaleleri listeleyin" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Önerilen müdahaleleri listeleyin" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

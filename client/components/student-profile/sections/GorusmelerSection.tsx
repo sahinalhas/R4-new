@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -136,7 +136,7 @@ export default function GorusmelerSection({ studentId, notes, onUpdate }: Gorusm
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="Görüşme notu" {...field} />
+                    <EnhancedTextarea placeholder="Görüşme notu" {...field} aiContext="counseling" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

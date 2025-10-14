@@ -1,7 +1,7 @@
 import { SpecialEducation, addSpecialEducation } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -147,7 +147,7 @@ export default function OzelEgitimSection({ studentId, specialEducation, onUpdat
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="BEP Hedefleri" rows={3} {...field} />
+                    <EnhancedTextarea placeholder="BEP Hedefleri" rows={3} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -160,7 +160,7 @@ export default function OzelEgitimSection({ studentId, specialEducation, onUpdat
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="Tanı" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Tanı" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,7 +210,7 @@ export default function OzelEgitimSection({ studentId, specialEducation, onUpdat
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="RAM Rapor Özeti" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="RAM Rapor Özeti" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -223,7 +223,7 @@ export default function OzelEgitimSection({ studentId, specialEducation, onUpdat
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="Destek Hizmetleri" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Destek Hizmetleri" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -236,7 +236,7 @@ export default function OzelEgitimSection({ studentId, specialEducation, onUpdat
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="Uyarlamalar" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Uyarlamalar" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,7 +262,7 @@ export default function OzelEgitimSection({ studentId, specialEducation, onUpdat
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="Notlar" rows={2} {...field} />
+                    <EnhancedTextarea placeholder="Notlar" rows={2} {...field} aiContext="notes" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

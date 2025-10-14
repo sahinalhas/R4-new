@@ -9,7 +9,7 @@ import { tr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -286,11 +286,12 @@ export default function ReminderDialog({
                   <FormItem>
                     <FormLabel>Açıklama (Opsiyonel)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <EnhancedTextarea 
                         {...field} 
                         placeholder="Hatırlatma hakkında ek bilgiler..."
                         rows={3}
                         className="resize-none"
+                        aiContext="notes"
                       />
                     </FormControl>
                     <FormMessage />

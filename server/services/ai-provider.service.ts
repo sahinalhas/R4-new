@@ -187,3 +187,5 @@ export class AIProviderService {
     yield* this.adapter.chatStream(request);
   }
 }
+
+export const aiProviderService = AIProviderService.getInstance();

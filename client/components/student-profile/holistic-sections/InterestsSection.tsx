@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Palette, Edit, Plus } from "lucide-react";
@@ -57,43 +57,43 @@ export default function InterestsSection({ studentId, onUpdate }: { studentId: s
               <FormField control={form.control} name="hobbies" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Hobiler</FormLabel>
-                  <FormControl><Textarea placeholder="Öğrencinin hobileri..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Öğrencinin hobileri..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="passions" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tutkular</FormLabel>
-                  <FormControl><Textarea placeholder="Tutkuyla ilgilendiği alanlar..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Tutkuyla ilgilendiği alanlar..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="favoriteSubjects" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Favori Dersler</FormLabel>
-                  <FormControl><Textarea placeholder="En çok sevdiği dersler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="En çok sevdiği dersler..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="specialTalents" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Özel Yetenekler</FormLabel>
-                  <FormControl><Textarea placeholder="Özel beceri ve yetenekler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Özel beceri ve yetenekler..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="sportsActivities" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Spor Aktiviteleri</FormLabel>
-                  <FormControl><Textarea placeholder="Spor ve fiziksel aktiviteler..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Spor ve fiziksel aktiviteler..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="clubMemberships" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kulüp Üyelikleri</FormLabel>
-                  <FormControl><Textarea placeholder="Okul kulüpleri, topluluklar..." {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Okul kulüpleri, topluluklar..." {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar</FormLabel>
-                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>
