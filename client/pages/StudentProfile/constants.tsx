@@ -89,11 +89,6 @@ export const EGITSEL_TABS = [
     icon: FileText,
   },
   {
-    value: "mudahaleler",
-    label: "Müdahaleler",
-    icon: ShieldAlert,
-  },
-  {
     value: "ai-mudahale",
     label: "AI Müdahale Planı",
     icon: Bot,
