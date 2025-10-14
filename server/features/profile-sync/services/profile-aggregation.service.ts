@@ -8,13 +8,15 @@ import { DataValidationService } from './data-validation.service.js';
 import { FieldMapperService } from './field-mapper.service.js';
 import { AIProviderService } from '../../../services/ai-provider.service.js';
 import { StandardizedProfileRepository } from '../../standardized-profile/repository/standardized-profile.repository.js';
+import * as profileSyncRepo from '../repository/profile-sync.repository.js';
 import getDatabase from '../../../lib/database/index.js';
 import type { 
   ProfileUpdateRequest, 
   ProfileUpdateResult, 
   UnifiedStudentIdentity,
   DataConflict,
-  ProfileDomain
+  ProfileDomain,
+  ProfileSyncLog
 } from '../types/index.js';
 import type {
   StandardizedHealthProfile,
@@ -328,7 +330,10 @@ export class ProfileAggregationService {
       // AI ile öğrenci kimliğini oluştur
       const identity = await this.generateStudentIdentity(studentId, allData);
 
-      // Database'e kaydet (şimdilik sadece return ediyoruz)
+      // Database'e kaydet
+      profileSyncRepo.saveUnifiedIdentity(identity);
+      console.log(`✅ Unified identity saved for student ${studentId}`);
+
       return identity;
     } catch (error) {
       console.error('Unified identity refresh error:', error);
@@ -464,7 +469,26 @@ SADECE JSON döndür.`;
       confidence: validation.confidence
     });
     
-    // TODO: Database'e log kaydet
+    // Her domain için ayrı log kaydı
+    for (const domain of updatedDomains) {
+      const log: Omit<ProfileSyncLog, 'created_at'> = {
+        id: randomUUID(),
+        studentId: request.studentId,
+        source: request.source,
+        sourceId: request.sourceId,
+        domain,
+        action: 'updated',
+        validationScore: validation.confidence || 0,
+        aiReasoning: validation.reasoning || '',
+        extractedInsights: validation.extractedInsights || {},
+        timestamp: request.timestamp || new Date().toISOString(),
+        processedBy: 'ai'
+      };
+      
+      profileSyncRepo.saveSyncLog(log);
+    }
+    
+    console.log(`✅ Saved ${updatedDomains.length} sync logs`);
   }
 
   /**

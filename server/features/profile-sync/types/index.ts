@@ -97,18 +97,24 @@ export interface ProfileSyncLog {
   action: 'created' | 'updated' | 'validated' | 'rejected';
   validationScore: number;
   aiReasoning: string;
+  extractedInsights?: Record<string, any>;
   timestamp: string;
   processedBy: 'ai' | 'manual';
+  created_at?: string;
 }
 
 export interface ConflictResolution {
   id: string;
   studentId: string;
   conflictType: string;
+  domain?: ProfileDomain;
   oldValue: any;
   newValue: any;
   resolvedValue: any;
   resolutionMethod: 'ai_auto' | 'time_based' | 'confidence_based' | 'manual';
+  severity?: 'low' | 'medium' | 'high';
   reasoning: string;
   timestamp: string;
+  resolvedBy?: 'ai' | 'manual';
+  created_at?: string;
 }
