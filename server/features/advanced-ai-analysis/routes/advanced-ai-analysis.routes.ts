@@ -64,15 +64,16 @@ export const generatePredictiveTimeline: RequestHandler = async (req, res) => {
 
 /**
  * POST /api/advanced-ai-analysis/daily-action-plan
- * Günlük eylem planı
+ * Günlük eylem planı oluştur (forceRegenerate parametresi ile yeniden oluşturma)
  */
 export const generateDailyActionPlan: RequestHandler = async (req, res) => {
   try {
-    const { date, counselorName } = req.body;
+    const { date, counselorName, forceRegenerate } = req.body;
     
     const plan = await actionPlannerService.generateDailyPlan(
       date || new Date().toISOString().split('T')[0],
-      counselorName
+      counselorName,
+      forceRegenerate || false
     );
     
     res.json({
@@ -167,16 +168,17 @@ export const generateMultiStudentComparison: RequestHandler = async (req, res) =
 
 /**
  * GET /api/advanced-ai-analysis/action-plan/today
- * Bugünkü eylem planı (hızlı erişim)
+ * Bugünkü eylem planını getir (cached)
  */
 export const getTodayActionPlan: RequestHandler = async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const plan = await actionPlannerService.generateDailyPlan(today);
+    const plan = await actionPlannerService.generateDailyPlan(today, undefined, false);
     
     res.json({
       success: true,
-      data: plan
+      data: plan,
+      cached: true
     });
   } catch (error: any) {
     console.error('Today action plan error:', error);
