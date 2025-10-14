@@ -17,6 +17,8 @@ import { migration016 } from './016-add-missing-coaching-columns';
 import { migration017 } from './017-daily-insights';
 import { up as migration018up, down as migration018down } from './018-notification-automation';
 import { migration019 } from './019-enhanced-session-completion';
+import { migration as migration020 } from './020-social-network-analysis';
+import { migration021 } from './021-fix-missing-features';
 
 const migration018 = {
   version: 18,
@@ -43,7 +45,9 @@ const migrations = [
   migration016,
   migration017,
   migration018,
-  migration019
+  migration019,
+  migration020,
+  migration021
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {
