@@ -26,6 +26,8 @@ Preferred communication style: Simple, everyday language.
     - **Auto-Sync Engine:** Automatic triggers when counseling sessions complete, surveys submitted, or exam results added - profile instantly updates.
     - **AI Validation:** Gemini-powered data validation checks meaningfulness and realism before profile updates (scoring 0-100%).
     - **Intelligent Aggregation:** Combines data from multiple sources with conflict resolution and weighted domain scoring.
+    - **Field Mapping System:** Intelligent mapping of AI-extracted insights to standardized database fields. AI can detect phrases like "doktor kontrolü yaptı" and automatically update the `lastHealthCheckup` field in health profile.
+    - **Dual Update Strategy:** Updates BOTH the unified identity card AND specific profile fields (health, academic, social_emotional, talents_interests) ensuring complete data synchronization.
     - **Real-Time Dashboard:** "Who is this student?" - Live profile card showing identity summary, current state, scores, strengths/challenges, AI recommendations.
     - **Update Timeline:** Complete history of profile changes with AI reasoning, validation scores, and extracted insights.
     - **Database Schema:** Unified identity table, sync logs, conflict tracking, and processing queue for reliable updates.
