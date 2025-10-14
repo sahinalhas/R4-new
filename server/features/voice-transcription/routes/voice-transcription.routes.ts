@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { VoiceTranscriptionService } from '../../../services/voice-transcription.service.js';
 import { VoiceAnalysisService } from '../../../services/voice-analysis.service.js';
+import { SessionFormAutoFillService } from '../../../services/session-form-auto-fill.service.js';
 import type { VoiceNoteRequest, VoiceNoteResponse } from '../types/index.js';
 
 const router = Router();
 const transcriptionService = new VoiceTranscriptionService();
 const analysisService = new VoiceAnalysisService();
+const formAutoFillService = new SessionFormAutoFillService();
 
 /**
  * GET /api/voice-transcription/provider
@@ -125,6 +127,37 @@ router.post('/analyze-only', async (req, res) => {
 
   } catch (error: any) {
     console.error('Analysis hatası:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/voice-transcription/auto-fill-form
+ * Sesli not transkriptini alıp tüm görüşme formunu otomatik doldur
+ */
+router.post('/auto-fill-form', async (req, res) => {
+  try {
+    const { transcriptionText, sessionType } = req.body;
+
+    if (!transcriptionText) {
+      return res.status(400).json({
+        success: false,
+        error: 'transcriptionText parametresi gerekli'
+      });
+    }
+
+    const formData = await formAutoFillService.autoFillForm(transcriptionText, sessionType);
+
+    res.json({
+      success: true,
+      data: formData
+    });
+
+  } catch (error: any) {
+    console.error('Form auto-fill hatası:', error);
     res.status(500).json({
       success: false,
       error: error.message
