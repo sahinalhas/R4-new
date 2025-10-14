@@ -127,3 +127,138 @@ export async function getAllIdentities(): Promise<UnifiedStudentIdentity[]> {
     return [];
   }
 }
+
+// Conflict Resolution Types
+export interface ConflictResolution {
+  id: string;
+  studentId: string;
+  conflictType: string;
+  domain?: string;
+  oldValue: any;
+  newValue: any;
+  resolvedValue?: any;
+  resolutionMethod: string;
+  severity: string;
+  reasoning?: string;
+  timestamp: string;
+  resolvedBy?: string;
+}
+
+export interface ManualCorrectionRequest {
+  studentId: string;
+  domain: string;
+  field: string;
+  oldValue: any;
+  newValue: any;
+  reason: string;
+  correctedBy: string;
+}
+
+// Manual Correction APIs
+export async function correctAIExtraction(correction: ManualCorrectionRequest): Promise<void> {
+  const response = await fetch('/api/profile-sync/correction', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(correction),
+  });
+  if (!response.ok) throw new Error('Failed to save correction');
+}
+
+export async function getCorrectionHistory(studentId: string): Promise<any[]> {
+  const response = await fetch(`/api/profile-sync/corrections/${studentId}`);
+  if (!response.ok) throw new Error('Failed to fetch correction history');
+  const data = await response.json();
+  return data.corrections || [];
+}
+
+export async function undoLastUpdate(studentId: string, logId: string, performedBy: string): Promise<void> {
+  const response = await fetch('/api/profile-sync/undo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ studentId, logId, performedBy }),
+  });
+  if (!response.ok) throw new Error('Failed to undo update');
+}
+
+// Conflict Resolution APIs
+export async function getPendingConflicts(studentId?: string): Promise<ConflictResolution[]> {
+  try {
+    const url = studentId 
+      ? `/api/profile-sync/conflicts/pending?studentId=${studentId}`
+      : '/api/profile-sync/conflicts/pending';
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch pending conflicts');
+    const data = await response.json();
+    return data.conflicts || [];
+  } catch (error) {
+    console.error('Error fetching pending conflicts:', error);
+    return [];
+  }
+}
+
+export async function resolveConflictManually(
+  conflictId: string, 
+  selectedValue: any, 
+  resolvedBy: string,
+  reason?: string
+): Promise<void> {
+  const response = await fetch('/api/profile-sync/conflicts/resolve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ conflictId, selectedValue, resolvedBy, reason }),
+  });
+  if (!response.ok) throw new Error('Failed to resolve conflict');
+}
+
+export async function bulkResolveConflicts(
+  resolutions: Array<{ conflictId: string; selectedValue: any }>,
+  resolvedBy: string
+): Promise<void> {
+  const response = await fetch('/api/profile-sync/conflicts/bulk-resolve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resolutions, resolvedBy }),
+  });
+  if (!response.ok) throw new Error('Failed to bulk resolve conflicts');
+}
+
+// Class Analytics APIs
+export async function getClassProfileSummary(classId: string): Promise<any> {
+  try {
+    const response = await fetch(`/api/profile-sync/class/${encodeURIComponent(classId)}/summary`);
+    if (!response.ok) throw new Error('Failed to fetch class summary');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching class summary:', error);
+    return null;
+  }
+}
+
+export async function getClassTrends(classId: string, period?: string): Promise<any> {
+  try {
+    const url = period
+      ? `/api/profile-sync/class/${encodeURIComponent(classId)}/trends?period=${period}`
+      : `/api/profile-sync/class/${encodeURIComponent(classId)}/trends`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch class trends');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching class trends:', error);
+    return null;
+  }
+}
+
+export async function compareClasses(classIds: string[]): Promise<any> {
+  try {
+    const params = new URLSearchParams({ classes: classIds.join(',') });
+    const response = await fetch(`/api/profile-sync/class/compare?${params}`);
+    if (!response.ok) throw new Error('Failed to compare classes');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error comparing classes:', error);
+    return null;
+  }
+}

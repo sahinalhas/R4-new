@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 import * as examsService from '../services/exams.service.js';
+import { autoSyncHooks } from '../../profile-sync/services/auto-sync-hooks.service.js';
 
 export const getExamResultsByStudent: RequestHandler = (req, res) => {
   try {
@@ -49,6 +50,22 @@ export const getExamProgressAnalysis: RequestHandler = (req, res) => {
 export const createExamResult: RequestHandler = (req, res) => {
   try {
     const result = examsService.createExamResult(req.body);
+    
+    // 🔥 OTOMATIK PROFİL SENKRONIZASYONU - Sınav sonucu eklendiğinde profili güncelle
+    if (result.success && req.body.studentId) {
+      autoSyncHooks.onExamResultAdded({
+        id: result.id,
+        studentId: req.body.studentId,
+        examName: req.body.examName,
+        score: req.body.totalScore,
+        subject: req.body.examType,
+        date: req.body.examDate,
+        ...req.body
+      }).catch(error => {
+        console.error('Profile sync failed after exam result:', error);
+      });
+    }
+    
     res.json(result);
   } catch (error) {
     console.error('Error creating exam result:', error);

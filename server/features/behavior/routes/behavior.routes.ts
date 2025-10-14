@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as service from '../services/behavior.service.js';
+import { autoSyncHooks } from '../../profile-sync/services/auto-sync-hooks.service.js';
 
 const router = Router();
 
@@ -29,6 +30,22 @@ router.post('/', (req, res) => {
   try {
     const incident = req.body;
     const result = service.addBehaviorIncident(incident);
+    
+    // 🔥 OTOMATIK PROFİL SENKRONIZASYONU - Davranış kaydı eklendiğinde profili güncelle
+    if (result.success && incident.studentId && incident.id) {
+      autoSyncHooks.onBehaviorIncidentRecorded({
+        id: incident.id,
+        studentId: incident.studentId,
+        behaviorType: incident.behaviorType,
+        description: incident.behaviorDescription || incident.description,
+        severity: incident.severity,
+        date: incident.date,
+        ...incident
+      }).catch(error => {
+        console.error('Profile sync failed after behavior incident:', error);
+      });
+    }
+    
     res.json(result);
   } catch (error) {
     console.error('Error adding behavior incident:', error);
