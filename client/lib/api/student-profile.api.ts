@@ -27,8 +27,8 @@ import {
   getBehaviorIncidentsByStudent,
   getExamResultsByStudent,
 } from './risk.api';
+import type { MeetingNote } from '@shared/types/meeting-notes.types';
 import type {
-  MeetingNote,
   SurveyResult,
   AttendanceRecord,
   AcademicRecord,

@@ -1,6 +1,7 @@
-import type { RiskFactors } from "@shared/types";
 import { apiClient, createApiHandler } from "./api-client";
 import { API_ERROR_MESSAGES } from "../constants/messages.constants";
+
+type RiskFactors = any;
 
 export async function getRiskFactorsByStudent(studentId: string): Promise<RiskFactors[]> {
   return createApiHandler(
