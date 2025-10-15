@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -63,6 +63,26 @@ export default function MotivationProfileSection({
       additionalNotes: motivationData?.additionalNotes || "",
     },
   });
+
+  // Form verilerini motivationData prop'u değiştiğinde güncelle
+  useEffect(() => {
+    form.reset({
+      assessmentDate: motivationData?.assessmentDate || new Date().toISOString().slice(0, 10),
+      primaryMotivators: motivationData?.primaryMotivators ? JSON.parse(motivationData.primaryMotivators) : [],
+      careerAspirations: motivationData?.careerAspirations ? JSON.parse(motivationData.careerAspirations) : [],
+      academicGoals: motivationData?.academicGoals ? JSON.parse(motivationData.academicGoals) : [],
+      goalClarityLevel: motivationData?.goalClarityLevel || 5,
+      intrinsicMotivationLevel: motivationData?.intrinsicMotivationLevel || 5,
+      extrinsicMotivationLevel: motivationData?.extrinsicMotivationLevel || 5,
+      persistenceLevel: motivationData?.persistenceLevel || 5,
+      futureOrientationLevel: motivationData?.futureOrientationLevel || 5,
+      shortTermGoals: motivationData?.shortTermGoals || "",
+      longTermGoals: motivationData?.longTermGoals || "",
+      obstacles: motivationData?.obstacles || "",
+      supportNeeds: motivationData?.supportNeeds || "",
+      additionalNotes: motivationData?.additionalNotes || "",
+    });
+  }, [motivationData, form]);
 
   const onSubmit = async (data: MotivationProfileFormValues) => {
     setIsSubmitting(true);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -71,6 +71,30 @@ export default function RiskProtectiveProfileSection({
       additionalNotes: riskData?.additionalNotes || "",
     },
   });
+
+  // Form verilerini riskData prop'u değiştiğinde güncelle
+  useEffect(() => {
+    form.reset({
+      assessmentDate: riskData?.assessmentDate || new Date().toISOString().slice(0, 10),
+      identifiedRiskFactors: riskData?.identifiedRiskFactors ? JSON.parse(riskData.identifiedRiskFactors) : [],
+      protectiveFactors: riskData?.protectiveFactors ? JSON.parse(riskData.protectiveFactors) : [],
+      recommendedInterventions: riskData?.recommendedInterventions ? JSON.parse(riskData.recommendedInterventions) : [],
+      overallRiskLevel: riskData?.overallRiskLevel || 5,
+      academicRiskLevel: riskData?.academicRiskLevel || 5,
+      behavioralRiskLevel: riskData?.behavioralRiskLevel || 5,
+      emotionalRiskLevel: riskData?.emotionalRiskLevel || 5,
+      socialRiskLevel: riskData?.socialRiskLevel || 5,
+      familySupport: riskData?.familySupport || 5,
+      peerSupport: riskData?.peerSupport || 5,
+      schoolEngagement: riskData?.schoolEngagement || 5,
+      resilienceLevel: riskData?.resilienceLevel || 5,
+      copingSkills: riskData?.copingSkills || 5,
+      riskAssessmentNotes: riskData?.riskAssessmentNotes || "",
+      interventionPlan: riskData?.interventionPlan || "",
+      monitoringFrequency: riskData?.monitoringFrequency || undefined,
+      additionalNotes: riskData?.additionalNotes || "",
+    });
+  }, [riskData, form]);
 
   const onSubmit = async (data: RiskProtectiveProfileFormValues) => {
     setIsSubmitting(true);

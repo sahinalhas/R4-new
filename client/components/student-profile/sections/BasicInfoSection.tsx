@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Student, upsertStudent } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,29 @@ export default function BasicInfoSection({ student, onUpdate }: BasicInfoSection
       acilTelefon: student.acilTelefon || "",
     },
   });
+
+  // Form verilerini öğrenci prop'u değiştiğinde güncelle
+  useEffect(() => {
+    form.reset({
+      ad: student.ad || "",
+      soyad: student.soyad || "",
+      sinif: student.sinif || "",
+      cinsiyet: student.cinsiyet,
+      dogumTarihi: student.dogumTarihi || "",
+      telefon: student.telefon || "",
+      eposta: student.eposta || "",
+      il: student.il || "",
+      ilce: student.ilce || "",
+      adres: student.adres || "",
+      rehberOgretmen: student.rehberOgretmen || "",
+      risk: student.risk,
+      etiketler: (student.etiketler || []).join(", "),
+      veliAdi: student.veliAdi || "",
+      veliTelefon: student.veliTelefon || "",
+      acilKisi: student.acilKisi || "",
+      acilTelefon: student.acilTelefon || "",
+    });
+  }, [student, form]);
 
   const onSubmit = async (data: BasicInfoFormValues) => {
     try {
