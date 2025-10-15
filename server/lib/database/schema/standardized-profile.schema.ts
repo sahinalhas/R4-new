@@ -165,6 +165,13 @@ CREATE TABLE IF NOT EXISTS motivation_profiles (
   goalCommitmentLevel INTEGER,
   careerAspirations TEXT, -- JSON array
   universityPreferences TEXT, -- JSON array
+  academicGoals TEXT, -- JSON array (added in migration 024)
+  persistenceLevel INTEGER, -- 1-10 scale (added in migration 024)
+  futureOrientationLevel INTEGER, -- 1-10 scale (added in migration 024)
+  shortTermGoals TEXT, -- Text field (added in migration 024)
+  longTermGoals TEXT, -- Text field (added in migration 024)
+  obstacles TEXT, -- Text field (added in migration 024)
+  supportNeeds TEXT, -- Text field (added in migration 024)
   additionalNotes TEXT,
   assessedBy TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
