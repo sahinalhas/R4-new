@@ -3,6 +3,13 @@
 ## Overview
 Rehber360 is a comprehensive Turkish-language student guidance and management system for educational institutions. It provides tools for student tracking, counseling, risk assessment, behavioral monitoring, and academic performance analysis. A key feature is its AI-powered profile analysis, which generates standardized student profiles from diverse data sources. The system also includes an AI Assistant for local, AI-powered student counseling, supporting both OpenAI and Ollama (Llama 3.1) models. Built as a full-stack TypeScript application with React, Express.js, and SQLite, Rehber360 aims to drive data standardization and evidence-based interventions for student success.
 
+## Recent Changes (October 15, 2025)
+- **Form State Synchronization Fix:** Fixed KisilikProfiliSection to properly sync form state with props using useEffect
+  - Changed state type from string to number to prevent NaN values during save
+  - Added null handling with ?? operator to preserve zero values while providing defaults
+  - Fixed student switching behavior - form now correctly updates when navigating between students
+- **Vite HMR Configuration:** Added REPLIT_DEV_DOMAIN to HMR host configuration for proper WebSocket connection in Replit environment
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
