@@ -6,7 +6,7 @@ export * from "./types/study.types";
 export * from "./types/coaching.types";
 export * from "./types/family.types";
 
-export type { HealthInfo, RiskFactors, SpecialEducation } from "@shared/types";
+export type { SpecialEducation } from "@shared/types";
 
 export * from "./api/students.api";
 export * from "./api/notes.api";

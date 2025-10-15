@@ -44,9 +44,9 @@ router.get('/home-visits/student/:studentId', readLimit, familyRoutes.getHomeVis
 router.post('/home-visits', writeLimit, familyRoutes.createHomeVisit);
 router.put('/home-visits/:id', writeLimit, familyRoutes.updateHomeVisit);
 
-router.get('/family-participation/student/:studentId', readLimit, familyRoutes.getFamilyParticipationByStudent);
-router.post('/family-participation', writeLimit, familyRoutes.createFamilyParticipation);
-router.put('/family-participation/:id', writeLimit, familyRoutes.updateFamilyParticipation);
+router.get('/family-participations/student/:studentId', readLimit, familyRoutes.getFamilyParticipationByStudent);
+router.post('/family-participations', writeLimit, familyRoutes.createFamilyParticipation);
+router.put('/family-participations/:id', writeLimit, familyRoutes.updateFamilyParticipation);
 
 // ============= ACHIEVEMENTS & RECOMMENDATIONS ROUTES =============
 router.get('/coaching-recommendations/student/:studentId', readLimit, achievementsRoutes.getCoachingRecommendationsByStudent);
