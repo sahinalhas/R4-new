@@ -100,19 +100,19 @@ export default function DailyActionPlan() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg border shadow-sm">
           <div className="text-sm text-muted-foreground">Toplam Aksiyon</div>
-          <div className="text-2xl font-bold mt-1">{plan.dailySummary.totalActions}</div>
+          <div className="text-2xl font-bold mt-1">{plan.dailySummary?.totalActions || 0}</div>
         </div>
         <div className="bg-red-50 p-4 rounded-lg border border-red-200 shadow-sm">
           <div className="text-sm text-red-700">Kritik Öncelikli</div>
-          <div className="text-2xl font-bold mt-1 text-red-600">{plan.dailySummary.criticalCount}</div>
+          <div className="text-2xl font-bold mt-1 text-red-600">{plan.dailySummary?.criticalCount || 0}</div>
         </div>
         <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 shadow-sm">
           <div className="text-sm text-orange-700">Yüksek Öncelikli</div>
-          <div className="text-2xl font-bold mt-1 text-orange-600">{plan.dailySummary.highPriorityCount}</div>
+          <div className="text-2xl font-bold mt-1 text-orange-600">{plan.dailySummary?.highPriorityCount || 0}</div>
         </div>
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 shadow-sm">
           <div className="text-sm text-blue-700">İş Yükü</div>
-          <div className="text-xl font-semibold mt-1 text-blue-600">{plan.dailySummary.estimatedWorkload}</div>
+          <div className="text-xl font-semibold mt-1 text-blue-600">{plan.dailySummary?.estimatedWorkload || 'Hesaplanıyor'}</div>
         </div>
       </div>
 
@@ -122,7 +122,7 @@ export default function DailyActionPlan() {
           Sabah Brifing
         </h2>
         
-        {plan.morningBriefing.urgentMatters.length > 0 && (
+        {plan.morningBriefing?.urgentMatters?.length > 0 && (
           <div className="mb-4">
             <h3 className="font-semibold text-red-600 mb-2">🚨 Acil Konular</h3>
             <ul className="list-disc list-inside space-y-1">
@@ -133,7 +133,7 @@ export default function DailyActionPlan() {
           </div>
         )}
 
-        {plan.morningBriefing.keyStudentsToMonitor.length > 0 && (
+        {plan.morningBriefing?.keyStudentsToMonitor?.length > 0 && (
           <div className="mb-4">
             <h3 className="font-semibold mb-2">👀 İzlenecek Öğrenciler</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -148,14 +148,16 @@ export default function DailyActionPlan() {
           </div>
         )}
 
-        <div>
-          <h3 className="font-semibold mb-2">✅ Hazırlık Görevleri</h3>
-          <ul className="list-disc list-inside space-y-1">
-            {plan.morningBriefing.preparationTasks.map((task, i) => (
-              <li key={i} className="text-sm">{task}</li>
-            ))}
-          </ul>
-        </div>
+        {plan.morningBriefing?.preparationTasks?.length > 0 && (
+          <div>
+            <h3 className="font-semibold mb-2">✅ Hazırlık Görevleri</h3>
+            <ul className="list-disc list-inside space-y-1">
+              {plan.morningBriefing.preparationTasks.map((task, i) => (
+                <li key={i} className="text-sm">{task}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm">
@@ -166,7 +168,7 @@ export default function DailyActionPlan() {
           </h2>
         </div>
         <div className="divide-y">
-          {plan.hourlySchedule.map((action, i) => (
+          {plan.hourlySchedule?.map((action, i) => (
             <div
               key={i}
               className={`p-4 border-l-4 hover:bg-gray-50 transition-colors ${getPriorityColor(action.priority)}`}
@@ -208,14 +210,14 @@ export default function DailyActionPlan() {
                     </div>
                   </div>
 
-                  {action.preparationNeeded.length > 0 && (
+                  {action.preparationNeeded?.length > 0 && (
                     <div className="mt-2 text-sm">
                       <span className="text-muted-foreground">Hazırlık:</span>{' '}
                       {action.preparationNeeded.join(', ')}
                     </div>
                   )}
 
-                  {action.resources.length > 0 && (
+                  {action.resources?.length > 0 && (
                     <div className="mt-1 text-sm">
                       <span className="text-muted-foreground">Kaynaklar:</span>{' '}
                       {action.resources.join(', ')}
@@ -230,7 +232,7 @@ export default function DailyActionPlan() {
                 </div>
               </div>
             </div>
-          ))}
+          )) || <div className="p-8 text-center text-muted-foreground">Henüz saatlik program oluşturulmamış</div>}
         </div>
       </div>
 
@@ -241,20 +243,24 @@ export default function DailyActionPlan() {
             Esneklik Önerileri
           </h3>
           <div className="space-y-3 text-sm">
-            <div>
-              <div className="font-medium text-muted-foreground mb-1">Tampon Zamanlar:</div>
-              <div>{plan.flexibilityRecommendations.bufferTimes.join(', ')}</div>
-            </div>
-            <div>
-              <div className="font-medium text-muted-foreground mb-1">Beklenmedik Durumlar:</div>
-              <ul className="space-y-1">
-                {plan.flexibilityRecommendations.contingencyPlans.map((cp, i) => (
-                  <li key={i}>
-                    <span className="font-medium">{cp.scenario}:</span> {cp.action}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {plan.flexibilityRecommendations?.bufferTimes?.length > 0 && (
+              <div>
+                <div className="font-medium text-muted-foreground mb-1">Tampon Zamanlar:</div>
+                <div>{plan.flexibilityRecommendations.bufferTimes.join(', ')}</div>
+              </div>
+            )}
+            {plan.flexibilityRecommendations?.contingencyPlans?.length > 0 && (
+              <div>
+                <div className="font-medium text-muted-foreground mb-1">Beklenmedik Durumlar:</div>
+                <ul className="space-y-1">
+                  {plan.flexibilityRecommendations.contingencyPlans.map((cp, i) => (
+                    <li key={i}>
+                      <span className="font-medium">{cp.scenario}:</span> {cp.action}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
@@ -264,24 +270,26 @@ export default function DailyActionPlan() {
             Gün Sonu Kontrol
           </h3>
           <ul className="space-y-2">
-            {plan.endOfDayChecklist.map((item, i) => (
+            {plan.endOfDayChecklist?.map((item, i) => (
               <li key={i} className="flex items-start gap-2">
                 <input type="checkbox" className="mt-1" />
                 <span className="text-sm">{item}</span>
               </li>
-            ))}
+            )) || <li className="text-sm text-muted-foreground">Kontrol listesi hazırlanıyor...</li>}
           </ul>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-lg border">
-        <h3 className="font-semibold mb-3">🌅 Yarına Hazırlık</h3>
-        <ul className="list-disc list-inside space-y-1 text-sm">
-          {plan.tomorrowPrep.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ul>
-      </div>
+      {plan.tomorrowPrep?.length > 0 && (
+        <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-lg border">
+          <h3 className="font-semibold mb-3">🌅 Yarına Hazırlık</h3>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            {plan.tomorrowPrep.map((item, i) => (
+              <li key={i}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
