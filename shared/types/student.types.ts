@@ -55,6 +55,8 @@ export interface BackendStudent {
   phone?: string;
   birthDate?: string;
   address?: string;
+  il?: string;
+  ilce?: string;
   className?: string;
   enrollmentDate: string;
   status?: 'active' | 'inactive' | 'graduated';
@@ -83,6 +85,8 @@ export function backendToUnified(backend: BackendStudent): UnifiedStudent {
     telefon: backend.phone,
     eposta: backend.email,
     adres: backend.address,
+    il: backend.il,
+    ilce: backend.ilce,
     dogumTarihi: backend.birthDate,
     veliTelefon: backend.parentContact,
     kayitTarihi: backend.enrollmentDate || new Date().toISOString().split('T')[0],
@@ -99,6 +103,8 @@ export function unifiedToBackend(unified: UnifiedStudent): BackendStudent {
     email: unified.eposta,
     phone: unified.telefon,
     address: unified.adres,
+    il: unified.il,
+    ilce: unified.ilce,
     className: unified.sinif,
     enrollmentDate: unified.kayitTarihi || new Date().toISOString().split('T')[0],
     status: unified.durum === 'aktif' ? 'active' : unified.durum === 'pasif' ? 'inactive' : unified.durum === 'mezun' ? 'graduated' : 'active',

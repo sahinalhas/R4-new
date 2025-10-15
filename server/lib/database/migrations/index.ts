@@ -20,12 +20,21 @@ import { migration019 } from './019-enhanced-session-completion';
 import { migration as migration020 } from './020-social-network-analysis';
 import { migration021 } from './021-fix-missing-features';
 import { migration022 } from './022-daily-action-plans';
+import { migration023 } from './023-add-province-district-columns';
+import { up as migration024up, down as migration024down } from './024-update-motivation-profile-fields';
 
 const migration018 = {
   version: 18,
   name: 'notification-automation',
   up: migration018up,
   down: migration018down
+};
+
+const migration024 = {
+  version: 24,
+  name: 'update-motivation-profile-fields',
+  up: migration024up,
+  down: migration024down
 };
 
 const migrations = [
@@ -49,7 +58,9 @@ const migrations = [
   migration019,
   migration020,
   migration021,
-  migration022
+  migration022,
+  migration023,
+  migration024
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {

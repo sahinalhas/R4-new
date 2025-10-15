@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { aiProviderService } from '../services/ai-provider.service.js';
+import { getAIProviderService } from '../services/ai-provider.service.js';
 
 const router = Router();
 
@@ -32,7 +32,7 @@ Görevin:
 
 SADECE düzeltilmiş metni döndür, ek açıklama yapma.`;
 
-    const response = await aiProviderService.chat({
+    const response = await getAIProviderService().chat({
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: text },

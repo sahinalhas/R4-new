@@ -329,19 +329,89 @@ export class StandardizedProfileRepository {
     const stmt = this.db.prepare(`
       SELECT * FROM motivation_profiles 
       WHERE studentId = ? 
-      ORDER BY assessmentDate DESC 
+      ORDER BY assessmentDate DESC, updated_at DESC 
       LIMIT 1
     `);
     return stmt.get(studentId) as MotivationProfile | null;
+  }
+
+  upsertMotivationProfile(profile: MotivationProfile): void {
+    const stmt = this.db.prepare(`
+      INSERT INTO motivation_profiles (
+        id, studentId, assessmentDate, primaryMotivationSources, careerAspirations,
+        academicGoals, goalClarityLevel, intrinsicMotivation, extrinsicMotivation,
+        persistenceLevel, futureOrientationLevel, shortTermGoals, longTermGoals,
+        obstacles, supportNeeds, additionalNotes, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(id) DO UPDATE SET
+        assessmentDate = excluded.assessmentDate,
+        primaryMotivationSources = excluded.primaryMotivationSources,
+        careerAspirations = excluded.careerAspirations,
+        academicGoals = excluded.academicGoals,
+        goalClarityLevel = excluded.goalClarityLevel,
+        intrinsicMotivation = excluded.intrinsicMotivation,
+        extrinsicMotivation = excluded.extrinsicMotivation,
+        persistenceLevel = excluded.persistenceLevel,
+        futureOrientationLevel = excluded.futureOrientationLevel,
+        shortTermGoals = excluded.shortTermGoals,
+        longTermGoals = excluded.longTermGoals,
+        obstacles = excluded.obstacles,
+        supportNeeds = excluded.supportNeeds,
+        additionalNotes = excluded.additionalNotes,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+
+    stmt.run(
+      profile.id,
+      profile.studentId,
+      profile.assessmentDate,
+      JSON.stringify(profile.primaryMotivationSources || []),
+      JSON.stringify(profile.careerAspirations || []),
+      JSON.stringify(profile.academicGoals || []),
+      profile.goalClarityLevel,
+      profile.intrinsicMotivation,
+      profile.extrinsicMotivation,
+      profile.persistenceLevel,
+      profile.futureOrientationLevel,
+      profile.shortTermGoals,
+      profile.longTermGoals,
+      profile.obstacles,
+      profile.supportNeeds,
+      profile.additionalNotes
+    );
   }
 
   getRiskProtectiveProfile(studentId: string): RiskProtectiveProfile | null {
     const stmt = this.db.prepare(`
       SELECT * FROM risk_protective_profiles 
       WHERE studentId = ? 
-      ORDER BY assessmentDate DESC 
+      ORDER BY assessmentDate DESC, updated_at DESC 
       LIMIT 1
     `);
     return stmt.get(studentId) as RiskProtectiveProfile | null;
+  }
+
+  upsertRiskProtectiveProfile(profile: RiskProtectiveProfile): void {
+    const stmt = this.db.prepare(`
+      INSERT INTO risk_protective_profiles (
+        id, studentId, assessmentDate, activeProtectiveFactors,
+        recommendedInterventions, additionalNotes, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(id) DO UPDATE SET
+        assessmentDate = excluded.assessmentDate,
+        activeProtectiveFactors = excluded.activeProtectiveFactors,
+        recommendedInterventions = excluded.recommendedInterventions,
+        additionalNotes = excluded.additionalNotes,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+
+    stmt.run(
+      profile.id,
+      profile.studentId,
+      profile.assessmentDate,
+      JSON.stringify(profile.activeProtectiveFactors || []),
+      JSON.stringify(profile.recommendedInterventions || []),
+      profile.additionalNotes
+    );
   }
 }

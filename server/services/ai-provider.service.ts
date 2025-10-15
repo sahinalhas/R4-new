@@ -188,4 +188,11 @@ export class AIProviderService {
   }
 }
 
-export const aiProviderService = AIProviderService.getInstance();
+let _aiProviderServiceInstance: AIProviderService | null = null;
+
+export function getAIProviderService(): AIProviderService {
+  if (!_aiProviderServiceInstance) {
+    _aiProviderServiceInstance = AIProviderService.getInstance();
+  }
+  return _aiProviderServiceInstance;
+}

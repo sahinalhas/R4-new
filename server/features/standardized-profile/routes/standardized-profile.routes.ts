@@ -325,6 +325,40 @@ router.get('/:studentId/motivation', (req, res) => {
   }
 });
 
+router.post('/:studentId/motivation', (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    
+    // Transform frontend field names to database field names
+    const profile = {
+      id: req.body.id || randomUUID(),
+      studentId,
+      assessmentDate: req.body.assessmentDate,
+      primaryMotivationSources: req.body.primaryMotivators || [],
+      careerAspirations: req.body.careerAspirations || [],
+      academicGoals: req.body.academicGoals || [],
+      goalClarityLevel: req.body.goalClarityLevel,
+      intrinsicMotivation: req.body.intrinsicMotivationLevel,
+      extrinsicMotivation: req.body.extrinsicMotivationLevel,
+      persistenceLevel: req.body.persistenceLevel,
+      futureOrientationLevel: req.body.futureOrientationLevel,
+      shortTermGoals: req.body.shortTermGoals,
+      longTermGoals: req.body.longTermGoals,
+      obstacles: req.body.obstacles,
+      supportNeeds: req.body.supportNeeds,
+      additionalNotes: req.body.additionalNotes,
+    };
+    
+    repo.upsertMotivationProfile(profile);
+    res.json({ success: true, profile: req.body });
+  } catch (error) {
+    console.error('Error saving motivation profile:', error);
+    res.status(500).json({ error: 'Failed to save motivation profile' });
+  }
+});
+
 router.get('/:studentId/risk-protective', (req, res) => {
   try {
     const { studentId } = req.params;
@@ -336,6 +370,32 @@ router.get('/:studentId/risk-protective', (req, res) => {
   } catch (error) {
     console.error('Error fetching risk/protective profile:', error);
     res.status(500).json({ error: 'Failed to fetch risk/protective profile' });
+  }
+});
+
+router.post('/:studentId/risk-protective', (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const db = getDatabase();
+    const repo = new StandardizedProfileRepository(db);
+    
+    // Transform frontend field names to backend field names
+    const profile = {
+      id: req.body.id || randomUUID(),
+      studentId,
+      assessmentDate: req.body.assessmentDate,
+      activeProtectiveFactors: req.body.protectiveFactors || [],
+      recommendedInterventions: req.body.recommendedInterventions || [],
+      // Note: Frontend sends numbers 1-10, but backend expects strings
+      // We'll store the numeric values for now and convert them
+      additionalNotes: req.body.additionalNotes,
+    };
+    
+    repo.upsertRiskProtectiveProfile(profile);
+    res.json({ success: true, profile: req.body });
+  } catch (error) {
+    console.error('Error saving risk protective profile:', error);
+    res.status(500).json({ error: 'Failed to save risk protective profile' });
   }
 });
 

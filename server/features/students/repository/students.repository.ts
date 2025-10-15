@@ -13,18 +13,20 @@ function ensureInitialized(): void {
     getStudents: db.prepare('SELECT * FROM students ORDER BY name'),
     getStudent: db.prepare('SELECT * FROM students WHERE id = ?'),
     insertStudent: db.prepare(`
-      INSERT INTO students (id, name, email, phone, birthDate, address, className, enrollmentDate, status, avatar, parentContact, notes, gender)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO students (id, name, email, phone, birthDate, address, il, ilce, className, enrollmentDate, status, avatar, parentContact, notes, gender)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
     upsertStudent: db.prepare(`
-      INSERT INTO students (id, name, email, phone, birthDate, address, className, enrollmentDate, status, avatar, parentContact, notes, gender)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO students (id, name, email, phone, birthDate, address, il, ilce, className, enrollmentDate, status, avatar, parentContact, notes, gender)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         email = excluded.email,
         phone = excluded.phone,
         birthDate = excluded.birthDate,
         address = excluded.address,
+        il = excluded.il,
+        ilce = excluded.ilce,
         className = excluded.className,
         status = excluded.status,
         avatar = excluded.avatar,
@@ -33,7 +35,7 @@ function ensureInitialized(): void {
         gender = excluded.gender
     `),
     updateStudent: db.prepare(`
-      UPDATE students SET name = ?, email = ?, phone = ?, birthDate = ?, address = ?, className = ?, 
+      UPDATE students SET name = ?, email = ?, phone = ?, birthDate = ?, address = ?, il = ?, ilce = ?, className = ?, 
                          status = ?, avatar = ?, parentContact = ?, notes = ?, gender = ?
       WHERE id = ?
     `),
@@ -94,7 +96,7 @@ export function saveStudents(students: Student[]): void {
           
           statements.upsertStudent.run(
             student.id, student.name, student.email, student.phone,
-            student.birthDate, student.address, student.className,
+            student.birthDate, student.address, student.il, student.ilce, student.className,
             student.enrollmentDate, student.status, student.avatar,
             student.parentContact, student.notes, student.gender
           );
@@ -126,14 +128,14 @@ export function saveStudent(student: Student): void {
     if (existing) {
       statements.updateStudent.run(
         student.name, student.email, student.phone, student.birthDate,
-        student.address, student.className, student.status,
+        student.address, student.il, student.ilce, student.className, student.status,
         student.avatar, student.parentContact, student.notes, student.gender,
         student.id
       );
     } else {
       statements.insertStudent.run(
         student.id, student.name, student.email, student.phone,
-        student.birthDate, student.address, student.className,
+        student.birthDate, student.address, student.il, student.ilce, student.className,
         student.enrollmentDate, student.status, student.avatar,
         student.parentContact, student.notes, student.gender
       );

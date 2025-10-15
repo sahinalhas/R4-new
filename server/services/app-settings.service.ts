@@ -67,6 +67,27 @@ export class AppSettingsService {
     const settings = this.getSettings();
     let result = settings.aiProvider || this.getDefaultSettings().aiProvider;
     
+    // Check if saved provider requires an API key that's missing
+    if (result?.provider === 'gemini') {
+      const hasGeminiKey = !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0);
+      if (!hasGeminiKey) {
+        console.warn('⚠️ Gemini provider selected but API key not configured, falling back to Ollama');
+        result.provider = 'ollama';
+        result.model = 'llama3';
+        this.saveAIProvider(result.provider, result.model, result.ollamaBaseUrl);
+      }
+    }
+    
+    if (result?.provider === 'openai') {
+      const hasOpenAIKey = !!(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim().length > 0);
+      if (!hasOpenAIKey) {
+        console.warn('⚠️ OpenAI provider selected but API key not configured, falling back to Ollama');
+        result.provider = 'ollama';
+        result.model = 'llama3';
+        this.saveAIProvider(result.provider, result.model, result.ollamaBaseUrl);
+      }
+    }
+    
     // Auto-migrate deprecated Gemini models to current version
     if (result?.model === 'gemini-1.5-flash' || result?.model === 'gemini-1.5-pro') {
       console.log('🔄 Auto-migrating deprecated Gemini model:', result.model, '→ gemini-2.5-flash');
