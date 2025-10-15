@@ -4,10 +4,10 @@ import type { NotificationPreference, NotificationLog, NotificationTemplate } fr
 export const notificationsApi = {
   // Notification Preferences
   getPreferences: (userId: number) => 
-    apiClient.get<NotificationPreference>(`/notifications/preferences/${userId}`),
+    apiClient.get<NotificationPreference>(`/api/notifications/preferences/${userId}`),
   
   updatePreferences: (userId: number, data: Partial<NotificationPreference>) => 
-    apiClient.put<NotificationPreference>(`/notifications/preferences/${userId}`, data),
+    apiClient.put<NotificationPreference>(`/api/notifications/preferences/${userId}`, data),
 
   // Notification Logs
   getNotificationLogs: async (params?: { 
@@ -25,7 +25,7 @@ export const notificationsApi = {
     if (params?.limit) query.set('limit', params.limit.toString());
     
     const response = await apiClient.get<{ success: boolean; data: NotificationLog[] }>(
-      `/notifications/logs?${query.toString()}`
+      `/api/notifications/logs?${query.toString()}`
     );
     return response.data;
   },
@@ -39,20 +39,20 @@ export const notificationsApi = {
     subject?: string;
     body: string;
     priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
-  }) => apiClient.post<NotificationLog>('/notifications/send', data),
+  }) => apiClient.post<NotificationLog>('/api/notifications/send', data),
 
   // Templates
   getTemplates: () => 
-    apiClient.get<NotificationTemplate[]>('/notifications/templates'),
+    apiClient.get<NotificationTemplate[]>('/api/notifications/templates'),
 
   createTemplate: (data: Omit<NotificationTemplate, 'id' | 'created_at' | 'updated_at'>) =>
-    apiClient.post<NotificationTemplate>('/notifications/templates', data),
+    apiClient.post<NotificationTemplate>('/api/notifications/templates', data),
 
   updateTemplate: (id: number, data: Partial<NotificationTemplate>) =>
-    apiClient.put<NotificationTemplate>(`/notifications/templates/${id}`, data),
+    apiClient.put<NotificationTemplate>(`/api/notifications/templates/${id}`, data),
 
   deleteTemplate: (id: number) =>
-    apiClient.delete(`/notifications/templates/${id}`),
+    apiClient.delete(`/api/notifications/templates/${id}`),
 
   // Stats
   getNotificationStats: async (dateFrom?: string) => {
@@ -66,14 +66,14 @@ export const notificationsApi = {
         byChannel: Record<string, number>;
         byType: Record<string, number>;
       };
-    }>(`/notifications/stats${dateFrom ? `?dateFrom=${dateFrom}` : ''}`);
+    }>(`/api/notifications/stats${dateFrom ? `?dateFrom=${dateFrom}` : ''}`);
     return response.data;
   },
 
   // Retry failed notifications
   retryFailed: async () => {
     const response = await apiClient.post<{ success: boolean; data: { retried: number } }>(
-      '/notifications/retry-failed',
+      '/api/notifications/retry-failed',
       {}
     );
     return response.data;
@@ -82,7 +82,7 @@ export const notificationsApi = {
   // Parent dashboard access
   generateParentAccess: (studentId: number, expiresInDays?: number) =>
     apiClient.post<{ token: string; link: string; expires_at: string }>(
-      '/notifications/parent-access',
+      '/api/notifications/parent-access',
       { studentId, expiresInDays }
     ),
 
@@ -93,8 +93,8 @@ export const notificationsApi = {
       token: string;
       expires_at: string;
       created_at: string;
-    }>>(`/notifications/parent-access/${studentId}`),
+    }>>(`/api/notifications/parent-access/${studentId}`),
 
   revokeParentAccess: (tokenId: number) =>
-    apiClient.delete(`/notifications/parent-access/${tokenId}`),
+    apiClient.delete(`/api/notifications/parent-access/${tokenId}`),
 };

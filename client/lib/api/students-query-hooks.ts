@@ -16,7 +16,7 @@ async function saveStudentToAPI(student: BackendStudent): Promise<void> {
 }
 
 async function updateStudentOnAPI(student: BackendStudent): Promise<void> {
-  return apiClient.put(`/api/students/${student.id}`, student, { showErrorToast: false });
+  return apiClient.post('/api/students', student, { showErrorToast: false });
 }
 
 async function deleteStudentFromAPI(id: string): Promise<void> {

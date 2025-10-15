@@ -45,7 +45,6 @@ import type {
   HomeVisit,
   FamilyParticipation,
   SpecialEducation,
-  RiskFactors,
   BehaviorIncident,
   ExamResult,
 } from '../storage';
@@ -57,7 +56,7 @@ export interface StudentProfileData {
   academicRecords: AcademicRecord[];
   interventions: Intervention[];
   specialEducation: SpecialEducation[];
-  riskFactors: RiskFactors | null;
+  riskFactors: any | null;
   behaviorIncidents: BehaviorIncident[];
   examResults: ExamResult[];
   coachingRecommendations: CoachingRecommendation[];
