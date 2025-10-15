@@ -363,6 +363,29 @@ Yanıtını JSON formatında ver (TypeScript CounselorDailyPlan tipine uygun).`;
         
         const fallbackPlan = this.generateFallbackDailyPlan(date, counselorName, priorityStudents);
         
+        const normalizeHourlySchedule = (schedule: any[]): HourlyAction[] => {
+          return schedule.map((action: any) => ({
+            ...action,
+            preparationNeeded: Array.isArray(action.preparationNeeded) 
+              ? action.preparationNeeded 
+              : (action.preparationNeeded ? [action.preparationNeeded] : []),
+            resources: Array.isArray(action.resources) 
+              ? action.resources 
+              : (action.resources ? [action.resources] : [])
+          }));
+        };
+
+        const normalizePriorities = (priorities: any): DailyPriorities => {
+          if (!priorities) return fallbackPlan.priorities;
+          
+          return {
+            criticalActions: Array.isArray(priorities.criticalActions) ? normalizeHourlySchedule(priorities.criticalActions) : [],
+            highPriorityActions: Array.isArray(priorities.highPriorityActions) ? normalizeHourlySchedule(priorities.highPriorityActions) : [],
+            routineActions: Array.isArray(priorities.routineActions) ? normalizeHourlySchedule(priorities.routineActions) : [],
+            opportunisticActions: Array.isArray(priorities.opportunisticActions) ? normalizeHourlySchedule(priorities.opportunisticActions) : []
+          };
+        };
+
         const validatedPlan = {
           date,
           counselorName,
@@ -370,9 +393,9 @@ Yanıtını JSON formatında ver (TypeScript CounselorDailyPlan tipine uygun).`;
           dailySummary: parsed.dailySummary || fallbackPlan.dailySummary,
           morningBriefing: parsed.morningBriefing || fallbackPlan.morningBriefing,
           hourlySchedule: Array.isArray(parsed.hourlySchedule) && parsed.hourlySchedule.length > 0 
-            ? parsed.hourlySchedule 
+            ? normalizeHourlySchedule(parsed.hourlySchedule)
             : fallbackPlan.hourlySchedule,
-          priorities: parsed.priorities || fallbackPlan.priorities,
+          priorities: normalizePriorities(parsed.priorities),
           flexibilityRecommendations: parsed.flexibilityRecommendations || fallbackPlan.flexibilityRecommendations,
           endOfDayChecklist: Array.isArray(parsed.endOfDayChecklist) && parsed.endOfDayChecklist.length > 0
             ? parsed.endOfDayChecklist 

@@ -213,14 +213,14 @@ export default function DailyActionPlan() {
                   {action.preparationNeeded?.length > 0 && (
                     <div className="mt-2 text-sm">
                       <span className="text-muted-foreground">Hazırlık:</span>{' '}
-                      {action.preparationNeeded.join(', ')}
+                      {Array.isArray(action.preparationNeeded) ? action.preparationNeeded.join(', ') : action.preparationNeeded}
                     </div>
                   )}
 
                   {action.resources?.length > 0 && (
                     <div className="mt-1 text-sm">
                       <span className="text-muted-foreground">Kaynaklar:</span>{' '}
-                      {action.resources.join(', ')}
+                      {Array.isArray(action.resources) ? action.resources.join(', ') : action.resources}
                     </div>
                   )}
 
