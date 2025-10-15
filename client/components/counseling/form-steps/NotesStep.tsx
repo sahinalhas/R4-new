@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 
 import PastMeetingHistory from "../form-widgets/PastMeetingHistory";
 import type { IndividualSessionFormValues, GroupSessionFormValues, Student } from "../types";
+import { SESSION_MODE_LABELS, type SessionMode } from "@shared/constants/common.constants";
 
 interface NotesStepProps {
   form: UseFormReturn<IndividualSessionFormValues | GroupSessionFormValues>;
@@ -27,7 +28,6 @@ export default function NotesStep({
 }: NotesStepProps) {
   const formValues = form.getValues();
   
-  // Get student info for individual sessions
   const getStudentInfo = () => {
     if (sessionType === 'individual' && 'studentId' in formValues) {
       const student = students.find(s => s.id === formValues.studentId);
@@ -39,12 +39,7 @@ export default function NotesStep({
   const studentList = getStudentInfo();
 
   const getSessionModeLabel = (mode: string) => {
-    switch (mode) {
-      case 'yüz_yüze': return 'Yüz Yüze';
-      case 'online': return 'Online';
-      case 'telefon': return 'Telefon';
-      default: return mode;
-    }
+    return SESSION_MODE_LABELS[mode as SessionMode] || mode;
   };
 
   return (

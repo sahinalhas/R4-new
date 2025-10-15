@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Clock, CheckCircle2, FileText, Bell, BarChart3, Download } from "lucide-react";
 import { format } from "date-fns";
+import { SESSION_MODE_LABELS } from "@shared/constants/common.constants";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { SESSION_MODES, PARTICIPANT_TYPES } from "@shared/constants/common.constants";
 
 export const individualSessionSchema = z.object({
   studentId: z.string().min(1, "Öğrenci seçilmelidir"),
   topic: z.string().min(1, "Konu seçilmelidir"),
-  participantType: z.string().default("öğrenci"),
+  participantType: z.string().default(PARTICIPANT_TYPES.OGRENCI),
   relationshipType: z.string().optional(),
   parentName: z.string().optional(),
   parentRelationship: z.string().optional(),
@@ -17,7 +18,7 @@ export const individualSessionSchema = z.object({
   sessionTime: z.string().min(1, "Görüşme saati seçilmelidir"),
   sessionDetails: z.string().optional(),
 }).refine((data) => {
-  if (data.participantType === "veli") {
+  if (data.participantType === PARTICIPANT_TYPES.VELI) {
     return !!data.parentName && !!data.parentRelationship;
   }
   return true;
@@ -25,7 +26,7 @@ export const individualSessionSchema = z.object({
   message: "Veli seçildiğinde veli adı ve yakınlık derecesi zorunludur",
   path: ["parentName"],
 }).refine((data) => {
-  if (data.participantType === "öğretmen") {
+  if (data.participantType === PARTICIPANT_TYPES.OGRETMEN) {
     return !!data.teacherName;
   }
   return true;
@@ -33,7 +34,7 @@ export const individualSessionSchema = z.object({
   message: "Öğretmen seçildiğinde öğretmen adı zorunludur",
   path: ["teacherName"],
 }).refine((data) => {
-  if (data.participantType === "diğer") {
+  if (data.participantType === PARTICIPANT_TYPES.DIGER) {
     return !!data.otherParticipantDescription;
   }
   return true;
@@ -46,7 +47,7 @@ export const groupSessionSchema = z.object({
   groupName: z.string().optional(),
   studentIds: z.array(z.string()).min(1, "En az bir öğrenci seçilmelidir"),
   topic: z.string().min(1, "Konu seçilmelidir"),
-  participantType: z.string().default("öğrenci"),
+  participantType: z.string().default(PARTICIPANT_TYPES.OGRENCI),
   parentName: z.string().optional(),
   parentRelationship: z.string().optional(),
   teacherName: z.string().optional(),
@@ -59,7 +60,7 @@ export const groupSessionSchema = z.object({
   sessionTime: z.string().min(1, "Görüşme saati seçilmelidir"),
   sessionDetails: z.string().optional(),
 }).refine((data) => {
-  if (data.participantType === "veli") {
+  if (data.participantType === PARTICIPANT_TYPES.VELI) {
     return !!data.parentName && !!data.parentRelationship;
   }
   return true;
@@ -67,7 +68,7 @@ export const groupSessionSchema = z.object({
   message: "Veli seçildiğinde veli adı ve yakınlık derecesi zorunludur",
   path: ["parentName"],
 }).refine((data) => {
-  if (data.participantType === "öğretmen") {
+  if (data.participantType === PARTICIPANT_TYPES.OGRETMEN) {
     return !!data.teacherName;
   }
   return true;
@@ -75,7 +76,7 @@ export const groupSessionSchema = z.object({
   message: "Öğretmen seçildiğinde öğretmen adı zorunludur",
   path: ["teacherName"],
 }).refine((data) => {
-  if (data.participantType === "diğer") {
+  if (data.participantType === PARTICIPANT_TYPES.DIGER) {
     return !!data.otherParticipantDescription;
   }
   return true;

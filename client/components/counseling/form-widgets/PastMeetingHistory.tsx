@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getStudentSessionHistory } from "@/lib/api/counseling.api";
 import { getNotesByStudent } from "@/lib/api/notes.api";
 import type { MeetingNote } from "@shared/types/meeting-notes.types";
+import { SESSION_MODE_LABELS, type SessionMode } from "@shared/constants/common.constants";
 
 interface PastMeetingHistoryProps {
   studentId: string;
@@ -34,12 +35,7 @@ export default function PastMeetingHistory({ studentId, studentName }: PastMeeti
   const isLoading = sessionLoading || notesLoading;
 
   const getSessionModeLabel = (mode: string) => {
-    switch (mode) {
-      case 'yüz_yüze': return 'Yüz Yüze';
-      case 'online': return 'Online';
-      case 'telefon': return 'Telefon';
-      default: return mode;
-    }
+    return SESSION_MODE_LABELS[mode as SessionMode] || mode;
   };
 
   const formatDuration = (minutes: number) => {
