@@ -38,8 +38,8 @@ export class AIProviderService {
     const savedSettings = AppSettingsService.getAIProvider();
     
     // API anahtarları varsa otomatik olarak o provider'ı kullan
-    const hasGeminiKey = !!process.env.GEMINI_API_KEY;
-    const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+    const hasGeminiKey = !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0);
+    const hasOpenAIKey = !!(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim().length > 0);
     
     let defaultProvider: AIProvider;
     let defaultModel: string;

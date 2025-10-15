@@ -11,14 +11,15 @@ export class GeminiAdapter extends BaseAIAdapter {
   constructor(model: string, temperature: number = 0) {
     super(model, temperature);
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
+    if (!apiKey || apiKey.trim().length === 0) {
+      console.warn('⚠️ Gemini API key not configured - AI features will be limited');
       throw new Error('Gemini API key not configured');
     }
     this.ai = new GoogleGenAI({ apiKey });
   }
 
   async isAvailable(): Promise<boolean> {
-    return !!process.env.GEMINI_API_KEY;
+    return !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0);
   }
 
   async listModels(): Promise<string[]> {
