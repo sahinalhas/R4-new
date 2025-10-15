@@ -16,6 +16,8 @@ export default function AISettingsTab() {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isChecking, setIsChecking] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'unchecked' | 'success' | 'error'>('unchecked');
+  const [currentActiveProvider, setCurrentActiveProvider] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     loadCurrentSettings();
@@ -27,9 +29,14 @@ export default function AISettingsTab() {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data) {
-          setProvider(data.data.provider || 'gemini');
-          setModel(data.data.currentModel || 'gemini-2.0-flash-exp');
-          if (data.data.provider === 'ollama' && data.data.ollamaBaseUrl) {
+          const currentProvider = data.data.provider || 'gemini';
+          const currentModel = data.data.currentModel || 'gemini-2.0-flash-exp';
+          
+          setProvider(currentProvider);
+          setModel(currentModel);
+          setCurrentActiveProvider(`${currentProvider} (${currentModel})`);
+          
+          if (currentProvider === 'ollama' && data.data.ollamaBaseUrl) {
             setOllamaUrl(data.data.ollamaBaseUrl);
           }
           if (data.data.availableModels) {
@@ -39,6 +46,7 @@ export default function AISettingsTab() {
       }
     } catch (error) {
       console.error('Failed to load AI settings:', error);
+      toast.error('AI ayarları yüklenemedi');
     }
   };
 
@@ -94,6 +102,7 @@ export default function AISettingsTab() {
   };
 
   const saveSettings = async () => {
+    setIsSaving(true);
     try {
       const settings = {
         provider,
@@ -108,22 +117,52 @@ export default function AISettingsTab() {
       });
 
       if (response.ok) {
-        toast.success('AI ayarları kaydedildi! Değişiklikler hemen aktif oldu.');
+        const providerName = provider === 'ollama' ? 'Ollama' : provider === 'gemini' ? 'Gemini' : 'OpenAI';
+        toast.success(`✅ AI Ayarları Kaydedildi!\n${providerName} (${model}) aktif olarak ayarlandı. Bu ayar kalıcıdır.`);
+        
         // Ayarları yeniden yükle
         await loadCurrentSettings();
+        
         // Bağlantı durumunu sıfırla
         setConnectionStatus('unchecked');
       } else {
-        throw new Error('Failed to save settings');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to save settings');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Save error:', error);
-      toast.error('Ayarlar kaydedilemedi');
+      toast.error(`Ayarlar kaydedilemedi: ${error.message}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Mevcut Aktif Provider Bilgisi */}
+      {currentActiveProvider && (
+        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <Brain className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Şu Anda Aktif AI Provider</p>
+                <p className="text-lg font-bold text-foreground">{currentActiveProvider}</p>
+              </div>
+            </div>
+            <Badge variant="default" className="bg-green-500">
+              <CheckCircle className="mr-1 h-3 w-3" />
+              Aktif
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Bu ayar kalıcıdır. Uygulama yeniden başlatılsa bile bu AI provider kullanılacaktır.
+          </p>
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -277,9 +316,23 @@ export default function AISettingsTab() {
             </div>
           )}
 
-          <div className="flex justify-end">
-            <Button onClick={saveSettings}>
-              Ayarları Kaydet
+          <div className="flex justify-end gap-2">
+            <Button 
+              onClick={saveSettings}
+              disabled={isSaving}
+              className="min-w-[140px]"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Kaydediliyor...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Ayarları Kaydet
+                </>
+              )}
             </Button>
           </div>
         </CardContent>

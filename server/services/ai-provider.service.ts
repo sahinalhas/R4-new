@@ -37,7 +37,7 @@ export class AIProviderService {
   private constructor(config?: Partial<AIProviderConfig>) {
     const savedSettings = AppSettingsService.getAIProvider();
     
-    // API anahtarları varsa otomatik olarak o provider'ı kullan
+    // API anahtarlarını kontrol et
     const hasGeminiKey = !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0);
     const hasOpenAIKey = !!(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim().length > 0);
     
@@ -45,25 +45,29 @@ export class AIProviderService {
     let defaultModel: string;
     
     if (config?.provider) {
-      // 1. Öncelik: Config'den gelen provider (programatik kullanım)
+      // 1. ÖNCELİK: Programatik config (özel kullanımlar için)
       defaultProvider = config.provider;
       defaultModel = config.model || this.getDefaultModelForProvider(config.provider);
-    } else if (hasGeminiKey) {
-      // 2. Öncelik: Gemini API key varsa DAIMA Gemini kullan
-      defaultProvider = 'gemini';
-      defaultModel = 'gemini-2.5-flash';
-    } else if (hasOpenAIKey) {
-      // 3. Öncelik: OpenAI API key varsa OpenAI kullan
-      defaultProvider = 'openai';
-      defaultModel = 'gpt-4o-mini';
     } else if (savedSettings?.provider) {
-      // 4. Öncelik: Kullanıcının ayarlardan seçtiği provider (sadece API key yoksa)
+      // 2. ÖNCELİK: KULLANICI AYARLARI (Ayarlar sayfasından seçilen - EN ÖNEMLİ!)
       defaultProvider = savedSettings.provider as AIProvider;
       defaultModel = savedSettings.model || this.getDefaultModelForProvider(savedSettings.provider as AIProvider);
+      console.log(`📋 Kullanıcı ayarlarından yüklendi: ${defaultProvider} (${defaultModel})`);
+    } else if (hasGeminiKey) {
+      // 3. Öncelik: İlk kurulumda Gemini API key varsa Gemini
+      defaultProvider = 'gemini';
+      defaultModel = 'gemini-2.5-flash';
+      console.log('🔑 Gemini API key bulundu, varsayılan olarak ayarlandı');
+    } else if (hasOpenAIKey) {
+      // 4. Öncelik: İlk kurulumda OpenAI API key varsa OpenAI
+      defaultProvider = 'openai';
+      defaultModel = 'gpt-4o-mini';
+      console.log('🔑 OpenAI API key bulundu, varsayılan olarak ayarlandı');
     } else {
       // 5. Son seçenek: Ollama (local)
       defaultProvider = 'ollama';
       defaultModel = 'llama3';
+      console.log('🏠 Varsayılan olarak Ollama (local) kullanılıyor');
     }
     
     // Model'i belirle - sadece aynı provider için kaydedilmiş model kullanılabilir
