@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { apiClient } from '@/lib/api/api-client';
+import { BACKUP_ENDPOINTS } from '@/lib/constants/api-endpoints';
 
 interface BackupMetadata {
   id: string;
@@ -60,27 +62,18 @@ export default function BackupManagement() {
   const { data: backups = [], isLoading } = useQuery({
     queryKey: ['backups'],
     queryFn: async () => {
-      const response = await fetch('/api/backup/list');
-      if (!response.ok) throw new Error('Failed to fetch backups');
-      return response.json() as Promise<BackupMetadata[]>;
+      return await apiClient.get<BackupMetadata[]>(BACKUP_ENDPOINTS.LIST);
     },
   });
   
   const createBackupMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/backup/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          userName: user?.name,
-          type: 'manual',
-          options: { compress: true },
-        }),
+      return await apiClient.post(BACKUP_ENDPOINTS.CREATE, {
+        userId: user?.id,
+        userName: user?.name,
+        type: 'manual',
+        options: { compress: true },
       });
-      
-      if (!response.ok) throw new Error('Failed to create backup');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backups'] });
@@ -90,10 +83,10 @@ export default function BackupManagement() {
       });
       setCreatingBackup(false);
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Hata',
-        description: 'Yedekleme oluşturulamadı',
+        description: error.message || 'Yedekleme oluşturulamadı',
         variant: 'destructive',
       });
       setCreatingBackup(false);
@@ -102,17 +95,10 @@ export default function BackupManagement() {
   
   const restoreBackupMutation = useMutation({
     mutationFn: async (backupId: string) => {
-      const response = await fetch(`/api/backup/restore/${backupId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          userName: user?.name,
-        }),
+      return await apiClient.post(BACKUP_ENDPOINTS.RESTORE(backupId), {
+        userId: user?.id,
+        userName: user?.name,
       });
-      
-      if (!response.ok) throw new Error('Failed to restore backup');
-      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -120,10 +106,10 @@ export default function BackupManagement() {
         description: 'Veritabanı geri yüklendi',
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Hata',
-        description: 'Geri yükleme başarısız',
+        description: error.message || 'Geri yükleme başarısız',
         variant: 'destructive',
       });
     },
@@ -131,17 +117,7 @@ export default function BackupManagement() {
   
   const deleteBackupMutation = useMutation({
     mutationFn: async (backupId: string) => {
-      const response = await fetch(`/api/backup/${backupId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          userName: user?.name,
-        }),
-      });
-      
-      if (!response.ok) throw new Error('Failed to delete backup');
-      return response.json();
+      return await apiClient.delete(BACKUP_ENDPOINTS.DELETE(backupId));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backups'] });
@@ -150,10 +126,10 @@ export default function BackupManagement() {
         description: 'Yedek dosyası silindi',
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Hata',
-        description: 'Yedek dosyası silinemedi',
+        description: error.message || 'Yedek dosyası silinemedi',
         variant: 'destructive',
       });
     },

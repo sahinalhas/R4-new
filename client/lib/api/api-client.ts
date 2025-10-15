@@ -5,6 +5,12 @@ import {
   createDefaultErrorInterceptor,
   createDefaultSuccessInterceptor
 } from "./api-interceptors";
+import { 
+  parseApiError, 
+  handleNetworkError, 
+  showErrorToast 
+} from "../utils/api-error-handler";
+import { ApiError, isApiErrorResponse } from "../types/api-types";
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -12,6 +18,7 @@ export interface ApiRequestConfig<T = unknown> extends ToastConfig {
   method?: HttpMethod;
   body?: T;
   headers?: Record<string, string>;
+  timeout?: number;
 }
 
 export interface ApiResponse<T> {
@@ -40,6 +47,7 @@ class ApiClient {
       showErrorToast = true,
       errorMessage,
       errorDescription,
+      timeout = 30000,
     } = config;
 
     const toastConfig: ToastConfig = {
@@ -51,13 +59,15 @@ class ApiClient {
     };
 
     const errorInterceptor = createDefaultErrorInterceptor(toastConfig);
-    const successInterceptor = createDefaultSuccessInterceptor(toastConfig);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
       let requestConfig: RequestInit = {
         method,
         headers: { ...this.baseHeaders, ...headers },
         body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
       };
 
       requestConfig = await this.interceptors.applyRequestInterceptors(requestConfig, endpoint);
@@ -66,13 +76,23 @@ class ApiClient {
       
       response = await this.interceptors.applyResponseInterceptors(response, endpoint);
 
+      // Parse response
+      const contentType = response.headers.get('content-type');
+      const data = contentType?.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : await response.text();
+
+      // Handle error responses
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMsg = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
-        throw new Error(errorMsg);
+        const apiError = parseApiError(response, data);
+        throw apiError;
       }
 
-      const data = await response.json().catch(() => null);
+      // Check for API error format even in 200 responses
+      if (typeof data === 'object' && data !== null && isApiErrorResponse(data)) {
+        const apiError = parseApiError(response, data);
+        throw apiError;
+      }
 
       if (toastConfig.showSuccessToast && toastConfig.successMessage) {
         toast.success(toastConfig.successMessage);
@@ -80,9 +100,31 @@ class ApiClient {
 
       return data as TResponse;
     } catch (error) {
-      await errorInterceptor(error as Error, endpoint, method);
-      await this.interceptors.applyErrorInterceptors(error as Error, endpoint, method);
-      throw error;
+      clearTimeout(timeoutId);
+      
+      // Handle as ApiError or convert to ApiError
+      const apiError = error instanceof Error && 'code' in error
+        ? error as ApiError
+        : handleNetworkError(error as Error);
+
+      // Show error toast if configured
+      if (toastConfig.showErrorToast) {
+        if (toastConfig.errorMessage) {
+          toast.error(toastConfig.errorMessage, {
+            description: toastConfig.errorDescription
+          });
+        } else {
+          showErrorToast(apiError);
+        }
+      }
+
+      // Apply interceptors
+      await errorInterceptor(apiError, endpoint, method);
+      await this.interceptors.applyErrorInterceptors(apiError, endpoint, method);
+      
+      throw apiError;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -131,6 +173,9 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
+/**
+ * Create a safe API handler with proper error handling
+ */
 export function createApiHandler<TResponse>(
   fetcher: () => Promise<TResponse>,
   fallback: TResponse,
@@ -140,11 +185,29 @@ export function createApiHandler<TResponse>(
     try {
       return await fetcher();
     } catch (error) {
-      console.error(errorMessage || 'API error:', error);
+      const apiError = error instanceof Error && 'code' in error
+        ? error as ApiError
+        : handleNetworkError(error as Error);
+      
+      console.error(errorMessage || 'API error:', apiError);
+      
       if (errorMessage) {
         toast.error(errorMessage);
+      } else {
+        showErrorToast(apiError);
       }
+      
       return fallback;
     }
   };
+}
+
+/**
+ * Type-safe wrapper for safe fetch
+ */
+export async function safeFetch<T>(
+  endpoint: string,
+  config?: ApiRequestConfig
+): Promise<T> {
+  return apiClient.request<T>(endpoint, config);
 }

@@ -152,8 +152,9 @@ export default function PublicSurvey() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Yanıt gönderilirken hata oluştu');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || errorData.message || 'Yanıt gönderilirken hata oluştu';
+        throw new Error(errorMessage);
       }
 
       setIsSubmitted(true);
@@ -161,9 +162,9 @@ export default function PublicSurvey() {
         title: "Başarılı", 
         description: "Anket yanıtınız başarıyla gönderildi" 
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting survey response:', error);
-      const errorMessage = error.message || 'Yanıt gönderilirken hata oluştu';
+      const errorMessage = error instanceof Error ? error.message : 'Yanıt gönderilirken hata oluştu';
       setValidationError(errorMessage);
       toast({ 
         title: "Hata", 

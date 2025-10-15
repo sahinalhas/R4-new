@@ -1,20 +1,33 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Rocket } from 'lucide-react';
+import { Loader2, Rocket, UserPlus } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const { login, quickDemoLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const state = location.state as { message?: string; email?: string };
+    if (state?.message) {
+      setSuccessMessage(state.message);
+      if (state.email) {
+        setEmail(state.email);
+      }
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +104,12 @@ export default function Login() {
               />
             </div>
 
+            {successMessage && (
+              <Alert className="border-green-500 bg-green-50 text-green-900">
+                <AlertDescription>{successMessage}</AlertDescription>
+              </Alert>
+            )}
+
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -132,6 +151,29 @@ export default function Login() {
           <p className="text-xs text-center text-muted-foreground mt-4">
             Demo hesabı: <span className="font-mono">rehber@okul.edu.tr</span>
           </p>
+
+          <div className="relative mt-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Hesabınız yok mu?
+              </span>
+            </div>
+          </div>
+
+          <Link to="/register" className="mt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full"
+              disabled={isLoading}
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Yeni Hesap Oluştur
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>

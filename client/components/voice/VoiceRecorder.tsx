@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Textarea } from '../ui/textarea';
 import { Mic, Square, Loader2, CheckCircle, AlertTriangle, Edit2, Trash2, Save, X } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { apiClient } from '@/lib/api/api-client';
+import { VOICE_ENDPOINTS } from '@/lib/constants/api-endpoints';
 
 interface VoiceRecorderProps {
   onTranscriptionComplete?: (result: TranscriptionResult) => void;
@@ -53,12 +55,11 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
 
   const checkProvider = async () => {
     try {
-      const response = await fetch('/api/voice-transcription/provider');
-      const data = await response.json();
+      const data = await apiClient.get<{ provider: string; useBrowserAPI: boolean }>('/api/voice-transcription/provider');
       
-      if (data.success) {
-        setProvider(data.data.provider);
-        setUseBrowserAPI(data.data.useBrowserAPI);
+      if (data) {
+        setProvider(data.provider);
+        setUseBrowserAPI(data.useBrowserAPI);
       }
     } catch (error) {
       console.error('Provider kontrol hatası:', error);
@@ -200,11 +201,12 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
             });
           }
 
-        } catch (error: any) {
+        } catch (error) {
           console.error('Transcription hatası:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Transkript oluşturulamadı';
           toast({
             title: 'Hata',
-            description: error.message || 'Transkript oluşturulamadı',
+            description: errorMessage,
             variant: 'destructive',
           });
         } finally {
@@ -221,19 +223,12 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
   };
 
   const sendBrowserTranscription = async (text: string): Promise<TranscriptionResult> => {
-    const response = await fetch('/api/voice-transcription/transcribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        browserTranscription: text,
-        studentId,
-        sessionType
-      }),
+    const data = await apiClient.post<TranscriptionResult>(VOICE_ENDPOINTS.TRANSCRIBE, {
+      browserTranscription: text,
+      studentId,
+      sessionType
     });
-
-    const data = await response.json();
-    if (!data.success) throw new Error(data.error);
-    return data.data;
+    return data;
   };
 
   const sendAudioFile = async (audioBlob: Blob): Promise<TranscriptionResult> => {
@@ -241,31 +236,20 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
     
     return new Promise((resolve, reject) => {
       reader.onloadend = async () => {
-        const base64Audio = (reader.result as string).split(',')[1];
-        
-        const response = await fetch('/api/voice-transcription/transcribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        try {
+          const base64Audio = (reader.result as string).split(',')[1];
+          
+          const data = await apiClient.post<TranscriptionResult>(VOICE_ENDPOINTS.TRANSCRIBE, {
             audioData: base64Audio,
             mimeType: audioBlob.type,
             studentId,
             sessionType
-          }),
-        });
-
-        const data = await response.json();
-        
-        // Handle browser-only fallback response
-        if (data.success && data.data.useBrowserAPI) {
-          reject(new Error('Tarayıcı ses tanıma API\'si gereklidir. Lütfen Chrome/Edge kullanın.'));
-          return;
-        }
-        
-        if (!data.success) {
-          reject(new Error(data.error));
-        } else {
-          resolve(data.data);
+          });
+          
+          resolve(data);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Transcription failed';
+          reject(new Error(errorMessage));
         }
       };
 

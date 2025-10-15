@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Students from "./pages/Students";
 import StudentProfile from "./pages/StudentProfile";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 const CounselingSessions = lazy(() => import("./pages/CounselingSessions"));
 const Surveys = lazy(() => import("./pages/Surveys"));
@@ -65,6 +66,7 @@ const App = () => {
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route element={<Layout />}>
                   <Route path="/" element={<Index />} />
                   <Route path="/ogrenci" element={<Students />} />
