@@ -40,6 +40,7 @@ import searchRouter from './search/index.js';
 import { careerGuidanceRoutes } from './career-guidance/routes.js';
 import aiTextPolishRouter from '../routes/ai-text-polish.routes.js';
 import profileSyncRouter from './profile-sync/index.js';
+import aiStatusRouter from '../routes/ai-status.routes.js';
 
 /**
  * Feature Registry
@@ -200,5 +201,8 @@ featureRegistry.use('/ai-text', aiTextPolishRouter);
 
 // =================== LIVE PROFILE SYNC ===================
 featureRegistry.use('/profile-sync', profileSyncRouter);
+
+// =================== AI STATUS ===================
+featureRegistry.use('/ai', aiStatusRouter);
 
 export default featureRegistry;

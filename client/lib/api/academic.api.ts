@@ -49,7 +49,7 @@ export async function addAcademic(a: AcademicRecord): Promise<void> {
 export async function getInterventionsByStudent(studentId: string): Promise<Intervention[]> {
   return createApiHandler(
     async () => {
-      const interventions = await apiClient.get<Intervention[]>(`/api/students/${studentId}/interventions`, { showErrorToast: false });
+      const interventions = await apiClient.get<Intervention[]>(`/api/intervention-tracking/student/${studentId}`, { showErrorToast: false });
       return Array.isArray(interventions) ? interventions : [];
     },
     [],
@@ -58,7 +58,7 @@ export async function getInterventionsByStudent(studentId: string): Promise<Inte
 }
 
 export async function addIntervention(i: Intervention): Promise<void> {
-  return apiClient.post('/api/students/interventions', i, {
+  return apiClient.post('/api/intervention-tracking/start', i, {
     showSuccessToast: true,
     successMessage: API_ERROR_MESSAGES.INTERVENTION.ADD_SUCCESS,
     errorMessage: API_ERROR_MESSAGES.INTERVENTION.ADD_ERROR,

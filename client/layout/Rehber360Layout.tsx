@@ -74,6 +74,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth-context";
+import AIStatusIndicator from "@/components/AIStatusIndicator";
 
 function Brand() {
   const { state } = useSidebar();
@@ -553,6 +554,7 @@ export default function Rehber360Layout() {
                   )}
                 </div>
               )}
+              <AIStatusIndicator />
               <Button
                 variant="ghost"
                 size="icon"
