@@ -22,6 +22,7 @@ import { migration021 } from './021-fix-missing-features';
 import { migration022 } from './022-daily-action-plans';
 import { migration023 } from './023-add-province-district-columns';
 import { up as migration024up, down as migration024down } from './024-update-motivation-profile-fields';
+import { migration025 } from './025-add-family-context-profiles';
 
 const migration018 = {
   version: 18,
