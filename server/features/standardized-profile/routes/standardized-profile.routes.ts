@@ -24,12 +24,12 @@ router.get('/intervention-stats', (req, res) => {
     for (const student of students) {
       const interventions = repo.getStandardizedInterventions(student.id);
       totalOpen += interventions.filter(i => 
-        i.status !== "Tamamlandı" && i.status !== "İptal Edildi"
+        i.status !== "TAMAMLANDI" && i.status !== "İPTAL"
       ).length;
       
       const completed = interventions.filter(i => {
-        if (i.status !== "Tamamlandı") return false;
-        const intDate = new Date(i.date);
+        if (i.status !== "TAMAMLANDI") return false;
+        const intDate = new Date(i.startDate);
         return intDate.getMonth() === currentMonth && intDate.getFullYear() === currentYear;
       });
       completedThisMonth += completed.length;
@@ -338,6 +338,7 @@ router.post('/:studentId/motivation', (req, res) => {
       assessmentDate: req.body.assessmentDate,
       primaryMotivationSources: req.body.primaryMotivators || [],
       careerAspirations: req.body.careerAspirations || [],
+      universityPreferences: req.body.universityPreferences || [],
       academicGoals: req.body.academicGoals || [],
       goalClarityLevel: req.body.goalClarityLevel,
       intrinsicMotivation: req.body.intrinsicMotivationLevel,
