@@ -46,6 +46,7 @@ import RiskSummaryWidget from "@/components/RiskSummaryWidget";
 import DailyActionPlanWidget from "@/components/dashboard/DailyActionPlanWidget";
 import SchoolWideAIInsights from "@/components/dashboard/SchoolWideAIInsights";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import AISuggestionPanel from "@/components/ai-suggestions/AISuggestionPanel";
 import { apiClient } from "@/lib/api/api-client";
 import { STUDENT_ENDPOINTS, SURVEY_ENDPOINTS, COUNSELING_ENDPOINTS } from "@/lib/constants/api-endpoints";
 
@@ -571,6 +572,14 @@ export default function Index() {
         transition={{ delay: 0.7 }}
       >
         <DailyActionPlanWidget />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.75 }}
+      >
+        <AISuggestionPanel />
       </motion.div>
 
       <motion.div

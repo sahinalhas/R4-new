@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/lib/auth-context';
 import { 
   getPendingSuggestions, 
   getStudentSuggestions,
@@ -57,6 +58,7 @@ interface AISuggestionPanelProps {
 
 export default function AISuggestionPanel({ studentId, className }: AISuggestionPanelProps) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [selectedSuggestion, setSelectedSuggestion] = useState<AISuggestion | null>(null);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
@@ -80,7 +82,7 @@ export default function AISuggestionPanel({ studentId, className }: AISuggestion
   // Onayla mutation
   const approveMutation = useMutation({
     mutationFn: ({ id, notes, rating }: { id: string; notes: string; rating: number }) =>
-      approveSuggestion(id, 'current-user', notes, rating),
+      approveSuggestion(id, user?.id || 'unknown', notes, rating),
     onSuccess: () => {
       toast.success('Öneri onaylandı ve uygulandı');
       queryClient.invalidateQueries({ queryKey: ['suggestions'] });
@@ -95,7 +97,7 @@ export default function AISuggestionPanel({ studentId, className }: AISuggestion
   // Reddet mutation
   const rejectMutation = useMutation({
     mutationFn: ({ id, notes, rating }: { id: string; notes: string; rating: number }) =>
-      rejectSuggestion(id, 'current-user', notes, rating),
+      rejectSuggestion(id, user?.id || 'unknown', notes, rating),
     onSuccess: () => {
       toast.success('Öneri reddedildi');
       queryClient.invalidateQueries({ queryKey: ['suggestions'] });
@@ -108,7 +110,10 @@ export default function AISuggestionPanel({ studentId, className }: AISuggestion
   });
 
   const handleReview = () => {
-    if (!selectedSuggestion) return;
+    if (!selectedSuggestion || !user?.id) {
+      toast.error('Kullanıcı bilgisi alınamadı');
+      return;
+    }
 
     if (reviewAction === 'approve') {
       approveMutation.mutate({
