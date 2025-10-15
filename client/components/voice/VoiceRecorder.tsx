@@ -55,11 +55,11 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
 
   const checkProvider = async () => {
     try {
-      const data = await apiClient.get<{ provider: string; useBrowserAPI: boolean }>('/api/voice-transcription/provider');
+      const response = await apiClient.get<{ success: boolean; data: { provider: string; useBrowserAPI: boolean } }>('/api/voice-transcription/provider');
       
-      if (data) {
-        setProvider(data.provider || '');
-        setUseBrowserAPI(data.useBrowserAPI);
+      if (response?.data) {
+        setProvider(response.data.provider || '');
+        setUseBrowserAPI(response.data.useBrowserAPI);
       }
     } catch (error) {
       console.error('Provider kontrol hatası:', error);
@@ -223,12 +223,12 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
   };
 
   const sendBrowserTranscription = async (text: string): Promise<TranscriptionResult> => {
-    const data = await apiClient.post<TranscriptionResult>(VOICE_ENDPOINTS.TRANSCRIBE, {
+    const response = await apiClient.post<{ success: boolean; data: TranscriptionResult }>(VOICE_ENDPOINTS.TRANSCRIBE, {
       browserTranscription: text,
       studentId,
       sessionType
     });
-    return data;
+    return response.data;
   };
 
   const sendAudioFile = async (audioBlob: Blob): Promise<TranscriptionResult> => {
@@ -239,14 +239,14 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
         try {
           const base64Audio = (reader.result as string).split(',')[1];
           
-          const data = await apiClient.post<TranscriptionResult>(VOICE_ENDPOINTS.TRANSCRIBE, {
+          const response = await apiClient.post<{ success: boolean; data: TranscriptionResult }>(VOICE_ENDPOINTS.TRANSCRIBE, {
             audioData: base64Audio,
             mimeType: audioBlob.type,
             studentId,
             sessionType
           });
           
-          resolve(data);
+          resolve(response.data);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Transcription failed';
           reject(new Error(errorMessage));
@@ -259,7 +259,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
   };
 
   const handleEdit = () => {
-    if (transcriptionResult) {
+    if (transcriptionResult?.transcription?.text) {
       setEditedText(transcriptionResult.transcription.text);
       setIsEditing(true);
     }
@@ -421,13 +421,13 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
                 />
               ) : (
                 <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                  {transcriptionResult.transcription.text}
+                  {transcriptionResult?.transcription?.text || 'Transkript mevcut değil'}
                 </p>
               )}
               
               <p className="text-xs text-muted-foreground">
-                Sağlayıcı: {transcriptionResult.transcription.provider.toUpperCase()}
-                {transcriptionResult.transcription.duration && ` • ${transcriptionResult.transcription.duration}ms`}
+                Sağlayıcı: {transcriptionResult?.transcription?.provider?.toUpperCase() || 'Bilinmiyor'}
+                {transcriptionResult?.transcription?.duration && ` • ${transcriptionResult.transcription.duration}ms`}
               </p>
             </div>
 

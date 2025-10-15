@@ -220,6 +220,12 @@ export default function EnhancedCompleteSessionDialog({
                           setIsAutoFilling(true);
                           
                           try {
+                            if (!result?.transcription?.text) {
+                              console.error('Transcription result is invalid:', result);
+                              setIsAutoFilling(false);
+                              return;
+                            }
+
                             const sessionType = session?.sessionType === 'individual' ? 'INDIVIDUAL' : session?.sessionType === 'group' ? 'GROUP' : session?.participantType === 'veli' ? 'PARENT' : 'OTHER';
                             
                             const response = await fetch('/api/voice-transcription/auto-fill-form', {
