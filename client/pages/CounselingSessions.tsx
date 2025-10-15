@@ -40,6 +40,9 @@ import type {
   OutcomeFormValues,
   SessionFilters,
 } from "@/components/counseling/types";
+import { apiClient } from "@/lib/api/api-client";
+import { COUNSELING_ENDPOINTS, STUDENT_ENDPOINTS } from "@/lib/constants/api-endpoints";
+import { buildUrl } from "@/lib/constants/api-endpoints";
 
 export default function CounselingSessions() {
   const [activeTab, setActiveTab] = useState("active");
@@ -63,46 +66,26 @@ export default function CounselingSessions() {
   const queryClient = useQueryClient();
 
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery<CounselingSession[]>({
-    queryKey: ['/api/counseling-sessions', appliedFilters],
-    queryFn: async () => {
-      const queryParams = new URLSearchParams();
-      Object.entries(appliedFilters).forEach(([key, value]) => {
-        if (value && value !== 'all' && value !== '') {
-          queryParams.append(key, value);
-        }
-      });
-      const url = `/api/counseling-sessions${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch sessions');
-      return response.json();
-    },
+    queryKey: [COUNSELING_ENDPOINTS.BASE, appliedFilters],
+    queryFn: () => apiClient.get<CounselingSession[]>(
+      buildUrl(COUNSELING_ENDPOINTS.BASE, appliedFilters as any),
+      { showErrorToast: false }
+    ),
   });
 
   const { data: students = [] } = useQuery<Student[]>({
-    queryKey: ['/api/students'],
-    queryFn: async () => {
-      const response = await fetch('/api/students');
-      if (!response.ok) throw new Error('Failed to fetch students');
-      return response.json();
-    },
+    queryKey: [STUDENT_ENDPOINTS.BASE],
+    queryFn: () => apiClient.get<Student[]>(STUDENT_ENDPOINTS.BASE, { showErrorToast: false }),
   });
 
   const { data: classHours = [] } = useQuery<ClassHour[]>({
     queryKey: ['/api/class-hours'],
-    queryFn: async () => {
-      const response = await fetch('/api/class-hours');
-      if (!response.ok) throw new Error('Failed to fetch class hours');
-      return response.json();
-    },
+    queryFn: () => apiClient.get<ClassHour[]>('/api/class-hours', { showErrorToast: false }),
   });
 
   const { data: topics = [] } = useQuery<CounselingTopic[]>({
-    queryKey: ['/api/counseling-sessions/topics'],
-    queryFn: async () => {
-      const response = await fetch('/api/counseling-sessions/topics');
-      if (!response.ok) throw new Error('Failed to fetch topics');
-      return response.json();
-    },
+    queryKey: [COUNSELING_ENDPOINTS.TOPICS],
+    queryFn: () => apiClient.get<CounselingTopic[]>(COUNSELING_ENDPOINTS.TOPICS, { showErrorToast: false }),
   });
 
   const { data: reminders = [] } = useQuery<CounselingReminder[]>({

@@ -25,6 +25,8 @@ import rehypeRaw from 'rehype-raw';
 import MeetingPrepPanel from '@/components/ai/MeetingPrepPanel';
 import PriorityStudentsWidget from '@/components/ai/PriorityStudentsWidget';
 import ResourceRecommendations from '@/components/ai/ResourceRecommendations';
+import { apiClient } from '@/lib/api/api-client';
+import { AI_ENDPOINTS, STUDENT_ENDPOINTS } from '@/lib/constants/api-endpoints';
 
 interface Message {
   id: string;
@@ -136,22 +138,14 @@ export default function AIAssistant() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const { data: modelsData } = useQuery<AIModelsResponse>({
-    queryKey: ['/api/ai-assistant/models'],
-    queryFn: async () => {
-      const res = await fetch('/api/ai-assistant/models');
-      if (!res.ok) throw new Error('Failed to fetch models');
-      return res.json();
-    },
+    queryKey: [AI_ENDPOINTS.MODELS],
+    queryFn: () => apiClient.get<AIModelsResponse>(AI_ENDPOINTS.MODELS, { showErrorToast: false }),
     refetchInterval: 10000
   });
 
   const { data: studentsData } = useQuery<any[]>({
-    queryKey: ['/api/students'],
-    queryFn: async () => {
-      const res = await fetch('/api/students');
-      if (!res.ok) throw new Error('Failed to fetch students');
-      return res.json();
-    }
+    queryKey: [STUDENT_ENDPOINTS.BASE],
+    queryFn: () => apiClient.get<any[]>(STUDENT_ENDPOINTS.BASE, { showErrorToast: false })
   });
 
   const totalWords = useMemo(() => {

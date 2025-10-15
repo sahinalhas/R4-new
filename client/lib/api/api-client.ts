@@ -8,7 +8,7 @@ import {
 import { 
   parseApiError, 
   handleNetworkError, 
-  showErrorToast 
+  showErrorToast as displayErrorToast 
 } from "../utils/api-error-handler";
 import { ApiError, isApiErrorResponse } from "../types/api-types";
 
@@ -114,7 +114,7 @@ class ApiClient {
             description: toastConfig.errorDescription
           });
         } else {
-          showErrorToast(apiError);
+          displayErrorToast(apiError);
         }
       }
 
@@ -194,7 +194,7 @@ export function createApiHandler<TResponse>(
       if (errorMessage) {
         toast.error(errorMessage);
       } else {
-        showErrorToast(apiError);
+        displayErrorToast(apiError);
       }
       
       return fallback;

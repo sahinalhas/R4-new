@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, TrendingUp, Users, Calendar, Brain, FileText, School } from 'lucide-react';
 import BulkAnalysisDashboard from '@/components/ai/BulkAnalysisDashboard';
+import { apiClient } from '@/lib/api/api-client';
+import { AI_ENDPOINTS } from '@/lib/constants/api-endpoints';
 
 interface DailyInsightsSummary {
   date: string;
@@ -35,9 +37,11 @@ export default function AIInsightsDashboard() {
 
   const loadInsights = async () => {
     try {
-      const response = await fetch('/api/daily-insights/today');
-      if (response.ok) {
-        const data = await response.json();
+      const data = await apiClient.get<{ data: DailyInsightsSummary }>(
+        AI_ENDPOINTS.DAILY_INSIGHTS,
+        { showErrorToast: false }
+      );
+      if (data?.data) {
         setInsights(data.data);
       }
     } catch (error) {
@@ -50,7 +54,15 @@ export default function AIInsightsDashboard() {
   const generateNewInsights = async () => {
     setGenerating(true);
     try {
-      await fetch('/api/daily-insights/generate', { method: 'POST' });
+      await apiClient.post(
+        AI_ENDPOINTS.GENERATE_INSIGHTS,
+        {},
+        {
+          showSuccessToast: true,
+          successMessage: 'Yeni analiz oluşturuldu',
+          showErrorToast: true,
+        }
+      );
       await loadInsights();
     } catch (error) {
       console.error('Failed to generate insights:', error);

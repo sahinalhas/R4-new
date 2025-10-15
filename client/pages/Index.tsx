@@ -46,6 +46,8 @@ import RiskSummaryWidget from "@/components/RiskSummaryWidget";
 import DailyActionPlanWidget from "@/components/dashboard/DailyActionPlanWidget";
 import SchoolWideAIInsights from "@/components/dashboard/SchoolWideAIInsights";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { apiClient } from "@/lib/api/api-client";
+import { STUDENT_ENDPOINTS, SURVEY_ENDPOINTS, COUNSELING_ENDPOINTS } from "@/lib/constants/api-endpoints";
 
 interface DashboardStats {
   studentCount: number;
@@ -123,14 +125,13 @@ export default function Index() {
     async function fetchDashboardData() {
       setIsLoading(true);
       try {
-        const [studentsRes, distributionsRes, counselingSessionsRes] = await Promise.all([
-          fetch('/api/students'),
-          fetch('/api/survey-distributions'),
-          fetch('/api/counseling-sessions'),
+        const [studentsData, distributions, sessions] = await Promise.all([
+          apiClient.get<Student[]>(STUDENT_ENDPOINTS.BASE, { showErrorToast: false }),
+          apiClient.get<any[]>(SURVEY_ENDPOINTS.DISTRIBUTIONS, { showErrorToast: false }),
+          apiClient.get<CounselingSession[]>(COUNSELING_ENDPOINTS.BASE, { showErrorToast: false }),
         ]);
 
-        if (studentsRes.ok) {
-          const studentsData = await studentsRes.json();
+        if (studentsData) {
           setStudents(studentsData);
           setStats(prev => ({ ...prev, studentCount: studentsData.length }));
 
@@ -143,15 +144,12 @@ export default function Index() {
           setRiskDistribution(riskCount);
         }
 
-        if (distributionsRes.ok) {
-          const distributions = await distributionsRes.json();
+        if (distributions) {
           const activeCount = distributions.filter((d: any) => d.status === 'ACTIVE').length;
           setStats(prev => ({ ...prev, activeSurveyCount: activeCount }));
         }
 
-        if (counselingSessionsRes.ok) {
-          const sessions: CounselingSession[] = await counselingSessionsRes.json();
-          
+        if (sessions) {
           const today = new Date().toISOString().split('T')[0];
           const activeTodayCount = sessions.filter(s => 
             s.sessionDate?.startsWith(today) && s.status === 'ACTIVE'
@@ -184,9 +182,12 @@ export default function Index() {
     
     async function fetchInterventionStats() {
       try {
-        const response = await fetch('/api/standardized-profile/intervention-stats');
-        if (response.ok) {
-          const data = await response.json();
+        const data = await apiClient.get<{
+          openInterventions: number;
+          completedThisMonth: number;
+        }>('/api/standardized-profile/intervention-stats', { showErrorToast: false });
+        
+        if (data) {
           setStats(prev => ({ 
             ...prev, 
             openInterventionCount: data.openInterventions,

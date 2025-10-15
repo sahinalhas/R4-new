@@ -17,6 +17,8 @@ import {
 } from '../lib/api/advanced-ai-analysis.api';
 import { Checkbox } from '../components/ui/checkbox';
 import { ScrollArea } from '../components/ui/scroll-area';
+import { apiClient } from '../lib/api/api-client';
+import { STUDENT_ENDPOINTS } from '../lib/constants/api-endpoints';
 
 export default function AdvancedAIAnalysis() {
   const [analysisMode, setAnalysisMode] = useState<'class' | 'multi-student'>('class');
@@ -25,12 +27,8 @@ export default function AdvancedAIAnalysis() {
 
   // Fetch students data
   const { data: studentsData } = useQuery({
-    queryKey: ['/api/students'],
-    queryFn: async () => {
-      const res = await fetch('/api/students');
-      if (!res.ok) throw new Error('Failed to fetch students');
-      return res.json();
-    }
+    queryKey: [STUDENT_ENDPOINTS.BASE],
+    queryFn: () => apiClient.get(STUDENT_ENDPOINTS.BASE, { showErrorToast: false })
   });
 
   const students = studentsData || [];

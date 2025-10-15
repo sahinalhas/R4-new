@@ -33,6 +33,8 @@ import ProfileChangeTimeline from "@/components/profile-sync/ProfileChangeTimeli
 import ConflictResolutionPanel from "@/components/profile-sync/ConflictResolutionPanel";
 import ManualCorrectionPanel from "@/components/profile-sync/ManualCorrectionPanel";
 import ConflictResolutionUI from "@/components/profile-sync/ConflictResolutionUI";
+import { apiClient } from "@/lib/api/api-client";
+import { AI_ENDPOINTS } from "@/lib/constants/api-endpoints";
 
 interface UnifiedScores {
   akademikSkor: number;
@@ -115,20 +117,19 @@ export function ProfileDashboard({
   const handleRiskAnalysis = async () => {
     setAnalyzingRisk(true);
     try {
-      const response = await fetch('/api/ai-assistant/analyze-risk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId })
-      });
-
-      if (!response.ok) throw new Error('Risk analizi başarısız');
-
-      const data = await response.json();
-      toast.success('Risk analizi tamamlandı');
+      await apiClient.post(
+        AI_ENDPOINTS.ANALYZE_RISK,
+        { studentId },
+        {
+          showSuccessToast: true,
+          successMessage: 'Risk analizi tamamlandı',
+          showErrorToast: true,
+        }
+      );
       
       navigate(`/ai-asistan?student=${studentId}&action=risk`);
-    } catch (error: any) {
-      toast.error(error.message || 'Risk analizi yapılamadı');
+    } catch (error) {
+      console.error('Risk analysis error:', error);
     } finally {
       setAnalyzingRisk(false);
     }

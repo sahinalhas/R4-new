@@ -32,6 +32,10 @@ import {
 import { useForm } from "react-hook-form";
 import { Student, loadStudents, saveStudents, refreshStudentsFromAPI, upsertStudent } from "@/lib/storage";
 import { frontendToBackend } from "@/lib/types/student.types";
+import { apiClient } from "@/lib/api/api-client";
+import { STUDENT_ENDPOINTS } from "@/lib/constants/api-endpoints";
+import type { ApiResponse } from "@/lib/types/api-types";
+import { toast } from "sonner";
 
 function useDebounced<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -321,7 +325,7 @@ export default function Students() {
     }
 
     try {
-      const response = await fetch(`/api/students/${studentToDelete.id}`, {
+      const response = await fetch(STUDENT_ENDPOINTS.BY_ID(studentToDelete.id), {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmationName: expectedName })
@@ -330,18 +334,17 @@ export default function Students() {
       const result = await response.json();
       
       if (result.success) {
-        // Başarılı silme - UI'den kaldır
         setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
         setDeleteDialogOpen(false);
         setStudentToDelete(null);
         setConfirmationName("");
-        alert(`${expectedName} başarıyla silindi.`);
+        toast.success(`${expectedName} başarıyla silindi.`);
       } else {
-        alert(result.error || "Silme işlemi başarısız oldu.");
+        toast.error(result.error || "Silme işlemi başarısız oldu.");
       }
     } catch (error) {
       console.error('Delete error:', error);
-      alert("Silme işlemi sırasında hata oluştu.");
+      toast.error("Silme işlemi sırasında hata oluştu.");
     }
   };
 
@@ -546,24 +549,20 @@ export default function Students() {
     try {
       const backendStudents = updatedStudents.map(s => frontendToBackend(s));
       
-      const response = await fetch('/api/students/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(backendStudents)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Backend kaydetme başarısız');
-      }
+      await apiClient.post<ApiResponse>(
+        STUDENT_ENDPOINTS.BULK,
+        backendStudents,
+        {
+          showSuccessToast: true,
+          successMessage: `${imported.length} öğrenci başarıyla içe aktarıldı.`,
+          showErrorToast: true,
+        }
+      );
       
       await refreshStudentsFromAPI();
       setStudents(updatedStudents);
-      
-      alert(`${imported.length} öğrenci başarıyla içe aktarıldı.`);
     } catch (error) {
       console.error('Backend save error:', error);
-      alert(`Öğrenciler backend'e kaydedilemedi: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     } catch (error) {

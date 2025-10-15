@@ -40,6 +40,8 @@ import {
   StudentInfo 
 } from "@/lib/survey-types";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from "@/lib/api/api-client";
+import { SURVEY_ENDPOINTS } from "@/lib/constants/api-endpoints";
 
 const surveyResponseSchema = z.object({
   studentInfo: z.object({
@@ -90,28 +92,24 @@ export default function PublicSurvey() {
       setError(null);
 
       // Load survey distribution by public link
-      const distributionResponse = await fetch(`/api/survey-distributions/link/${publicLink}`, { signal });
-      if (!distributionResponse.ok) {
-        const errorData = await distributionResponse.json();
-        throw new Error(errorData.error || 'Anket bulunamadı');
-      }
-      const distributionData = await distributionResponse.json();
+      const distributionData = await apiClient.get<SurveyDistribution>(
+        SURVEY_ENDPOINTS.DISTRIBUTION_BY_LINK(publicLink!),
+        { showErrorToast: false }
+      );
       setDistribution(distributionData);
 
       // Load survey template
-      const templateResponse = await fetch(`/api/survey-templates/${distributionData.templateId}`, { signal });
-      if (!templateResponse.ok) {
-        throw new Error('Anket şablonu yüklenemedi');
-      }
-      const templateData = await templateResponse.json();
+      const templateData = await apiClient.get<SurveyTemplate>(
+        SURVEY_ENDPOINTS.TEMPLATE_BY_ID(distributionData.templateId),
+        { showErrorToast: false }
+      );
       setTemplate(templateData);
 
       // Load questions
-      const questionsResponse = await fetch(`/api/survey-questions/${distributionData.templateId}`, { signal });
-      if (!questionsResponse.ok) {
-        throw new Error('Anket soruları yüklenemedi');
-      }
-      const questionsData = await questionsResponse.json();
+      const questionsData = await apiClient.get<SurveyQuestion[]>(
+        SURVEY_ENDPOINTS.QUESTIONS(distributionData.templateId),
+        { showErrorToast: false }
+      );
       setQuestions(questionsData.sort((a: SurveyQuestion, b: SurveyQuestion) => a.orderIndex - b.orderIndex));
 
       setLoading(false);
@@ -143,19 +141,15 @@ export default function PublicSurvey() {
         submittedAt: new Date().toISOString(),
       };
 
-      const response = await fetch('/api/survey-responses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(responseData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || errorData.message || 'Yanıt gönderilirken hata oluştu';
-        throw new Error(errorMessage);
-      }
+      await apiClient.post(
+        SURVEY_ENDPOINTS.RESPONSES,
+        responseData,
+        {
+          showSuccessToast: true,
+          successMessage: "Anket yanıtınız başarıyla gönderildi",
+          showErrorToast: false,
+        }
+      );
 
       setIsSubmitted(true);
       toast({ 
