@@ -41,6 +41,7 @@ import { careerGuidanceRoutes } from './career-guidance/routes.js';
 import aiTextPolishRouter from '../routes/ai-text-polish.routes.js';
 import profileSyncRouter from './profile-sync/index.js';
 import aiStatusRouter from '../routes/ai-status.routes.js';
+import { aiSuggestionsRoutes } from './ai-suggestions/index.js';
 
 /**
  * Feature Registry
@@ -157,6 +158,7 @@ featureRegistry.use('/advanced-reports', advancedReportsRouter);
 
 // =================== AI FEATURES ===================
 featureRegistry.use('/ai-assistant', aiAssistantRouter);
+featureRegistry.use('/ai-suggestions', aiSuggestionsRoutes);
 
 // =================== DAILY INSIGHTS & PROACTIVE ALERTS ===================
 featureRegistry.use('/daily-insights', dailyInsightsRouter);
