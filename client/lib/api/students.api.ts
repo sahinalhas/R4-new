@@ -2,7 +2,7 @@ import type { Student, BackendStudent } from "../types/student.types";
 import { backendToFrontend, frontendToBackend } from "../types/student.types";
 import { apiClient } from "./api-client";
 import { API_ERROR_MESSAGES } from "../constants/messages.constants";
-import { toast } from "sonner";
+import { handleApiError } from "../utils/error-utils";
 
 let studentsCache: Student[] | null = null;
 
@@ -10,8 +10,13 @@ async function fetchStudentsFromAPI(): Promise<BackendStudent[]> {
   try {
     return await apiClient.get<BackendStudent[]>('/api/students', { showErrorToast: false });
   } catch (error) {
-    console.error('Error fetching students from API:', error);
-    return [];
+    handleApiError(error, {
+      title: API_ERROR_MESSAGES.STUDENT.LOAD_ERROR,
+      description: API_ERROR_MESSAGES.STUDENT.LOAD_ERROR_DESCRIPTION,
+      context: 'fetchStudentsFromAPI',
+      showToast: true
+    });
+    throw error;
   }
 }
 
@@ -38,17 +43,11 @@ export async function loadStudentsAsync(): Promise<void> {
     
     window.dispatchEvent(new CustomEvent('studentsUpdated'));
   } catch (error) {
-    console.error('Failed to load students from API:', error);
-    
-    toast.error(API_ERROR_MESSAGES.STUDENT.LOAD_ERROR, {
-      description: API_ERROR_MESSAGES.STUDENT.LOAD_ERROR_DESCRIPTION,
-      duration: 5000
-    });
-    
-    if (!studentsCache || studentsCache.length === 0) {
+    if (!studentsCache) {
       studentsCache = [];
-      window.dispatchEvent(new CustomEvent('studentsUpdated'));
     }
+    window.dispatchEvent(new CustomEvent('studentsLoadFailed'));
+    throw error;
   }
 }
 
@@ -65,11 +64,10 @@ async function saveStudentsAsync(students: Student[]): Promise<void> {
     const backendStudents = students.map(frontendToBackend);
     await saveStudentsToAPI(backendStudents);
   } catch (error) {
-    console.error('Error saving students to API:', error);
-    
-    toast.error(API_ERROR_MESSAGES.STUDENT.SAVE_ERROR, {
+    handleApiError(error, {
+      title: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR,
       description: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR_DESCRIPTION,
-      duration: 5000
+      context: 'saveStudentsAsync'
     });
     
     throw error;
@@ -94,28 +92,21 @@ export async function upsertStudent(stu: Student): Promise<void> {
     window.dispatchEvent(new CustomEvent('studentsUpdated'));
     
   } catch (error) {
-    console.error('Error saving student:', error);
+    handleApiError(error, {
+      title: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR,
+      description: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR_DESCRIPTION,
+      context: 'upsertStudent'
+    });
     throw error;
   }
 }
 
 export async function refreshStudentsFromAPI(): Promise<Student[]> {
-  try {
-    const backendStudents = await fetchStudentsFromAPI();
-    const frontendStudents = backendStudents.map(backendToFrontend);
-    studentsCache = frontendStudents;
-    
-    return frontendStudents;
-  } catch (error) {
-    console.error('Failed to refresh students from API:', error);
-    
-    toast.error(API_ERROR_MESSAGES.STUDENT.REFRESH_ERROR, {
-      description: API_ERROR_MESSAGES.STUDENT.REFRESH_ERROR_DESCRIPTION,
-      duration: 5000
-    });
-    
-    throw error;
-  }
+  const backendStudents = await fetchStudentsFromAPI();
+  const frontendStudents = backendStudents.map(backendToFrontend);
+  studentsCache = frontendStudents;
+  
+  return frontendStudents;
 }
 
 export async function deleteStudent(id: string): Promise<void> {
@@ -123,7 +114,7 @@ export async function deleteStudent(id: string): Promise<void> {
     await apiClient.delete(`/api/students/${id}`, {
       showSuccessToast: true,
       successMessage: API_ERROR_MESSAGES.STUDENT.DELETE_SUCCESS,
-      errorMessage: API_ERROR_MESSAGES.STUDENT.DELETE_ERROR,
+      showErrorToast: false,
     });
     
     if (studentsCache) {
@@ -131,7 +122,11 @@ export async function deleteStudent(id: string): Promise<void> {
       window.dispatchEvent(new CustomEvent('studentsUpdated'));
     }
   } catch (error) {
-    console.error('Error deleting student:', error);
+    handleApiError(error, {
+      title: API_ERROR_MESSAGES.STUDENT.DELETE_ERROR,
+      description: API_ERROR_MESSAGES.GENERIC.DELETE_ERROR_DESCRIPTION,
+      context: 'deleteStudent'
+    });
     throw error;
   }
 }

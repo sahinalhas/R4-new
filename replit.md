@@ -8,6 +8,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 15, 2025:**
+- ✅ **Critical Error Fixes Completed:**
+  - Fixed student type consolidation: Unified Student types from client and shared folders, implemented safe data transformation functions (backendToFrontend, frontendToBackend)
+  - Fixed division-by-zero errors: Added safety guards in social network analysis (calculateClusterCohesion, calculateNetworkDensity) and pattern analysis
+  - Fixed findCluster crashes: Added defensive checks for empty arrays and safe pop() operations
+  - Implemented subject-specific trend analysis: Updated generateAcademicTrends to use turkishScore, mathScore, scienceScore instead of removed 'subject' column
+  - Clarified PDF export strategy: Advanced reports use Excel export; counseling sessions have working jsPDF client-side implementation
+  - ✅ **Standardized Error Handling System:**
+    - Created comprehensive error utility library (`client/lib/utils/error-utils.ts`) with handleApiError, handleLoadError, handleSaveError, showSuccessToast helpers
+    - Expanded error message constants (`client/lib/constants/messages.constants.ts`) with generic fallback messages
+    - Integrated error utilities into core API layer (students.api.ts) and critical components (ConflictResolutionUI, ManualCorrectionPanel)
+    - Established best practices for consistent error handling across the application
+
 **October 14, 2025:**
 - ✅ **Profile Sync System Completed:** Living Student Profile system fully operational
   - All auto-sync hooks integrated (counseling, surveys, exams, behavior, meetings, attendance)
@@ -22,6 +35,27 @@ Preferred communication style: Simple, everyday language.
 ### Frontend
 - **Technology Stack:** React 18, TypeScript, Vite, Radix UI, Tailwind CSS, TanStack React Query, React Hook Form + Zod, React Router DOM, Framer Motion, Recharts.
 - **Key Decisions:** Feature-based organization with lazy loading, global error boundaries, mobile-first and accessible design (WCAG AAA), React Query for server state, Context API for authentication, and various performance optimizations (memoization, background processing, virtual scrolling).
+- **Error Handling Best Practices:**
+  - **Always use error utilities** from `client/lib/utils/error-utils.ts` instead of direct toast calls
+  - **Use standardized messages** from `client/lib/constants/messages.constants.ts` for consistency
+  - **Pattern to follow:**
+    ```typescript
+    import { handleApiError, showSuccessToast } from '@/lib/utils/error-utils';
+    import { API_ERROR_MESSAGES } from '@/lib/constants/messages.constants';
+    
+    try {
+      // API call
+      showSuccessToast('Success title', 'Description');
+    } catch (error) {
+      handleApiError(error, {
+        title: API_ERROR_MESSAGES.SPECIFIC.ERROR,
+        description: API_ERROR_MESSAGES.SPECIFIC.ERROR_DESCRIPTION,
+        context: 'functionName'
+      });
+    }
+    ```
+  - **Helper functions available:** `handleLoadError()`, `handleSaveError()`, `handleDeleteError()`, `handleUpdateError()`, `createSafeHandler()`
+  - **Never use generic messages** like "Hata" or "Bir hata oluştu" directly
 
 ### Backend
 - **Technology Stack:** Express.js v5, SQLite with `better-sqlite3`, TypeScript, Zod.

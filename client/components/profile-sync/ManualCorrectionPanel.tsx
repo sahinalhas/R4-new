@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit3, Save, X } from 'lucide-react';
+import { handleApiError, showSuccessToast } from '@/lib/utils/error-utils';
+import { API_ERROR_MESSAGES } from '@/lib/constants/messages.constants';
 import { toast } from 'sonner';
 
 interface ManualCorrectionPanelProps {
@@ -45,16 +47,23 @@ export default function ManualCorrectionPanel({ studentId, onCorrectionSaved }: 
       });
 
       if (response.ok) {
-        toast.success('Düzeltme başarıyla kaydedildi');
+        showSuccessToast('Düzeltme başarıyla kaydedildi', 'AI düzeltmesi profilde güncellenmiştir');
         setIsOpen(false);
         resetForm();
         onCorrectionSaved?.();
       } else {
-        toast.error('Düzeltme kaydedilemedi');
+        handleApiError(new Error('Düzeltme kaydedilemedi'), {
+          title: API_ERROR_MESSAGES.GENERIC.SAVE_ERROR,
+          description: API_ERROR_MESSAGES.GENERIC.SAVE_ERROR_DESCRIPTION,
+          context: 'saveCorrection'
+        });
       }
     } catch (error) {
-      console.error('Correction error:', error);
-      toast.error('Bir hata oluştu');
+      handleApiError(error, {
+        title: API_ERROR_MESSAGES.GENERIC.OPERATION_ERROR,
+        description: API_ERROR_MESSAGES.GENERIC.OPERATION_ERROR_DESCRIPTION,
+        context: 'saveCorrection'
+      });
     } finally {
       setSaving(false);
     }

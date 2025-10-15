@@ -6,6 +6,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertTriangle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { handleApiError, showSuccessToast } from '@/lib/utils/error-utils';
+import { API_ERROR_MESSAGES } from '@/lib/constants/messages.constants';
 import { toast } from 'sonner';
 
 interface ConflictResolutionUIProps {
@@ -42,9 +44,19 @@ export default function ConflictResolutionUI({ studentId }: ConflictResolutionUI
       if (response.ok) {
         const data = await response.json();
         setConflicts(data);
+      } else {
+        handleApiError(new Error(`HTTP ${response.status}`), {
+          title: 'Çelişkiler yüklenemedi',
+          description: API_ERROR_MESSAGES.GENERIC.LOAD_ERROR_DESCRIPTION,
+          context: 'fetchPendingConflicts'
+        });
       }
     } catch (error) {
-      console.error('Error fetching conflicts:', error);
+      handleApiError(error, {
+        title: API_ERROR_MESSAGES.GENERIC.LOAD_ERROR,
+        description: API_ERROR_MESSAGES.GENERIC.LOAD_ERROR_DESCRIPTION,
+        context: 'fetchPendingConflicts'
+      });
     } finally {
       setLoading(false);
     }
@@ -75,16 +87,23 @@ export default function ConflictResolutionUI({ studentId }: ConflictResolutionUI
       });
 
       if (response.ok) {
-        toast.success('Çelişki çözüldü');
+        showSuccessToast('Çelişki çözüldü', 'Seçilen değer başarıyla kaydedildi');
         setConflicts(conflicts.filter(c => c.id !== conflictId));
         setSelectedConflict(null);
         setResolutionReason('');
       } else {
-        toast.error('Çelişki çözülemedi');
+        handleApiError(new Error('Çelişki çözülemedi'), {
+          title: 'Çelişki çözülemedi',
+          description: 'Lütfen tekrar deneyin',
+          context: 'resolveConflict'
+        });
       }
     } catch (error) {
-      console.error('Error resolving conflict:', error);
-      toast.error('Bir hata oluştu');
+      handleApiError(error, {
+        title: API_ERROR_MESSAGES.GENERIC.OPERATION_ERROR,
+        description: API_ERROR_MESSAGES.GENERIC.OPERATION_ERROR_DESCRIPTION,
+        context: 'resolveConflict'
+      });
     } finally {
       setResolving(false);
     }
