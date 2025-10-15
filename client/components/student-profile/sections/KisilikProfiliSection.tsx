@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MultipleIntelligence, addMultipleIntelligence } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,14 +16,38 @@ export default function KisilikProfiliSection({
   multipleIntelligence, 
   onUpdate 
 }: KisilikProfiliSectionProps) {
-  const [linguistic, setLinguistic] = useState<string>("5");
-  const [logicalMathematical, setLogicalMathematical] = useState<string>("5");
-  const [spatial, setSpatial] = useState<string>("5");
-  const [musical, setMusical] = useState<string>("5");
-  const [bodilyKinesthetic, setBodilyKinesthetic] = useState<string>("5");
-  const [interpersonal, setInterpersonal] = useState<string>("5");
-  const [intrapersonal, setIntrapersonal] = useState<string>("5");
-  const [naturalistic, setNaturalistic] = useState<string>("5");
+  const [linguistic, setLinguistic] = useState<number>(5);
+  const [logicalMathematical, setLogicalMathematical] = useState<number>(5);
+  const [spatial, setSpatial] = useState<number>(5);
+  const [musical, setMusical] = useState<number>(5);
+  const [bodilyKinesthetic, setBodilyKinesthetic] = useState<number>(5);
+  const [interpersonal, setInterpersonal] = useState<number>(5);
+  const [intrapersonal, setIntrapersonal] = useState<number>(5);
+  const [naturalistic, setNaturalistic] = useState<number>(5);
+
+  // Form verilerini multipleIntelligence prop'u değiştiğinde güncelle
+  useEffect(() => {
+    if (multipleIntelligence) {
+      setLinguistic(multipleIntelligence.linguistic ?? 5);
+      setLogicalMathematical(multipleIntelligence.logicalMathematical ?? 5);
+      setSpatial(multipleIntelligence.spatial ?? 5);
+      setMusical(multipleIntelligence.musicalRhythmic ?? 5);
+      setBodilyKinesthetic(multipleIntelligence.bodilyKinesthetic ?? 5);
+      setInterpersonal(multipleIntelligence.interpersonal ?? 5);
+      setIntrapersonal(multipleIntelligence.intrapersonal ?? 5);
+      setNaturalistic(multipleIntelligence.naturalistic ?? 5);
+    } else {
+      // Veri yoksa varsayılan değerlere döndür
+      setLinguistic(5);
+      setLogicalMathematical(5);
+      setSpatial(5);
+      setMusical(5);
+      setBodilyKinesthetic(5);
+      setInterpersonal(5);
+      setIntrapersonal(5);
+      setNaturalistic(5);
+    }
+  }, [multipleIntelligence]);
 
   const handleSave = () => {
     const multipleIntel: MultipleIntelligence = {
@@ -63,7 +87,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10" 
                 value={linguistic}
-                onChange={(e) => setLinguistic(e.target.value)}
+                onChange={(e) => setLinguistic(Number(e.target.value))}
               />
             </div>
             <div className="space-y-1">
@@ -73,7 +97,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10"
                 value={logicalMathematical}
-                onChange={(e) => setLogicalMathematical(e.target.value)}
+                onChange={(e) => setLogicalMathematical(Number(e.target.value))}
               />
             </div>
             <div className="space-y-1">
@@ -83,7 +107,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10"
                 value={spatial}
-                onChange={(e) => setSpatial(e.target.value)}
+                onChange={(e) => setSpatial(Number(e.target.value))}
               />
             </div>
             <div className="space-y-1">
@@ -93,7 +117,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10"
                 value={musical}
-                onChange={(e) => setMusical(e.target.value)}
+                onChange={(e) => setMusical(Number(e.target.value))}
               />
             </div>
             <div className="space-y-1">
@@ -103,7 +127,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10"
                 value={bodilyKinesthetic}
-                onChange={(e) => setBodilyKinesthetic(e.target.value)}
+                onChange={(e) => setBodilyKinesthetic(Number(e.target.value))}
               />
             </div>
             <div className="space-y-1">
@@ -113,7 +137,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10"
                 value={interpersonal}
-                onChange={(e) => setInterpersonal(e.target.value)}
+                onChange={(e) => setInterpersonal(Number(e.target.value))}
               />
             </div>
             <div className="space-y-1">
@@ -123,7 +147,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10"
                 value={intrapersonal}
-                onChange={(e) => setIntrapersonal(e.target.value)}
+                onChange={(e) => setIntrapersonal(Number(e.target.value))}
               />
             </div>
             <div className="space-y-1">
@@ -133,7 +157,7 @@ export default function KisilikProfiliSection({
                 min="1" 
                 max="10"
                 value={naturalistic}
-                onChange={(e) => setNaturalistic(e.target.value)}
+                onChange={(e) => setNaturalistic(Number(e.target.value))}
               />
             </div>
           </div>
