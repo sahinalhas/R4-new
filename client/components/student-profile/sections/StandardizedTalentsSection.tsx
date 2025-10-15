@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -44,26 +45,52 @@ export default function StandardizedTalentsSection({
 }: StandardizedTalentsSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: savedTalentsData, refetch } = useQuery({
+    queryKey: ['/api/standardized-profile/talents-interests', studentId],
+    queryFn: async () => {
+      const response = await fetch(`/api/standardized-profile/${studentId}/talents-interests`);
+      if (!response.ok) throw new Error('Failed to fetch talents data');
+      return response.json();
+    },
+    enabled: !!studentId,
+  });
+
   const form = useForm<TalentsInterestsFormValues>({
     resolver: zodResolver(talentsInterestsSchema),
     defaultValues: {
-      assessmentDate: talentsData?.assessmentDate || new Date().toISOString().slice(0, 10),
-      creativeTalents: talentsData?.creativeTalents ? JSON.parse(talentsData.creativeTalents) : [],
-      physicalTalents: talentsData?.physicalTalents ? JSON.parse(talentsData.physicalTalents) : [],
-      primaryInterests: talentsData?.primaryInterests ? JSON.parse(talentsData.primaryInterests) : [],
-      exploratoryInterests: talentsData?.exploratoryInterests ? JSON.parse(talentsData.exploratoryInterests) : [],
-      weeklyEngagementHours: talentsData?.weeklyEngagementHours || 0,
-      clubMemberships: talentsData?.clubMemberships ? JSON.parse(talentsData.clubMemberships) : [],
-      competitionsParticipated: talentsData?.competitionsParticipated ? JSON.parse(talentsData.competitionsParticipated) : [],
-      additionalNotes: talentsData?.additionalNotes || "",
+      assessmentDate: new Date().toISOString().slice(0, 10),
+      creativeTalents: [],
+      physicalTalents: [],
+      primaryInterests: [],
+      exploratoryInterests: [],
+      weeklyEngagementHours: 0,
+      clubMemberships: [],
+      competitionsParticipated: [],
+      additionalNotes: "",
     },
   });
+
+  useEffect(() => {
+    if (savedTalentsData && Object.keys(savedTalentsData).length > 0) {
+      form.reset({
+        assessmentDate: savedTalentsData.assessmentDate || new Date().toISOString().slice(0, 10),
+        creativeTalents: savedTalentsData.creativeTalents ? JSON.parse(savedTalentsData.creativeTalents) : [],
+        physicalTalents: savedTalentsData.physicalTalents ? JSON.parse(savedTalentsData.physicalTalents) : [],
+        primaryInterests: savedTalentsData.primaryInterests ? JSON.parse(savedTalentsData.primaryInterests) : [],
+        exploratoryInterests: savedTalentsData.exploratoryInterests ? JSON.parse(savedTalentsData.exploratoryInterests) : [],
+        weeklyEngagementHours: savedTalentsData.weeklyEngagementHours || 0,
+        clubMemberships: savedTalentsData.clubMemberships ? JSON.parse(savedTalentsData.clubMemberships) : [],
+        competitionsParticipated: savedTalentsData.competitionsParticipated ? JSON.parse(savedTalentsData.competitionsParticipated) : [],
+        additionalNotes: savedTalentsData.additionalNotes || "",
+      });
+    }
+  }, [savedTalentsData, form]);
 
   const onSubmit = async (data: TalentsInterestsFormValues) => {
     setIsSubmitting(true);
     try {
       const payload = {
-        id: talentsData?.id || self.crypto.randomUUID(),
+        id: savedTalentsData?.id || talentsData?.id || self.crypto.randomUUID(),
         studentId,
         ...data,
       };
@@ -77,6 +104,7 @@ export default function StandardizedTalentsSection({
       if (!response.ok) throw new Error('Failed to save');
 
       toast.success("Yetenek ve ilgi alanları kaydedildi");
+      await refetch();
       onUpdate();
     } catch (error) {
       toast.error("Kayıt sırasında hata oluştu");

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -47,28 +48,56 @@ export default function StandardizedAcademicSection({
 }: StandardizedAcademicSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: savedAcademicData, refetch } = useQuery({
+    queryKey: ['/api/standardized-profile/academic', studentId],
+    queryFn: async () => {
+      const response = await fetch(`/api/standardized-profile/${studentId}/academic`);
+      if (!response.ok) throw new Error('Failed to fetch academic data');
+      return response.json();
+    },
+    enabled: !!studentId,
+  });
+
   const form = useForm<AcademicProfileFormValues>({
     resolver: zodResolver(academicProfileSchema),
     defaultValues: {
-      assessmentDate: academicData?.assessmentDate || new Date().toISOString().slice(0, 10),
-      strongSubjects: academicData?.strongSubjects ? JSON.parse(academicData.strongSubjects) : [],
-      weakSubjects: academicData?.weakSubjects ? JSON.parse(academicData.weakSubjects) : [],
-      strongSkills: academicData?.strongSkills ? JSON.parse(academicData.strongSkills) : [],
-      weakSkills: academicData?.weakSkills ? JSON.parse(academicData.weakSkills) : [],
-      primaryLearningStyle: academicData?.primaryLearningStyle || "",
-      secondaryLearningStyle: academicData?.secondaryLearningStyle || "",
-      overallMotivation: academicData?.overallMotivation || 5,
-      studyHoursPerWeek: academicData?.studyHoursPerWeek || 0,
-      homeworkCompletionRate: academicData?.homeworkCompletionRate || 50,
-      additionalNotes: academicData?.additionalNotes || "",
+      assessmentDate: new Date().toISOString().slice(0, 10),
+      strongSubjects: [],
+      weakSubjects: [],
+      strongSkills: [],
+      weakSkills: [],
+      primaryLearningStyle: "",
+      secondaryLearningStyle: "",
+      overallMotivation: 5,
+      studyHoursPerWeek: 0,
+      homeworkCompletionRate: 50,
+      additionalNotes: "",
     },
   });
+
+  useEffect(() => {
+    if (savedAcademicData && Object.keys(savedAcademicData).length > 0) {
+      form.reset({
+        assessmentDate: savedAcademicData.assessmentDate || new Date().toISOString().slice(0, 10),
+        strongSubjects: savedAcademicData.strongSubjects ? JSON.parse(savedAcademicData.strongSubjects) : [],
+        weakSubjects: savedAcademicData.weakSubjects ? JSON.parse(savedAcademicData.weakSubjects) : [],
+        strongSkills: savedAcademicData.strongSkills ? JSON.parse(savedAcademicData.strongSkills) : [],
+        weakSkills: savedAcademicData.weakSkills ? JSON.parse(savedAcademicData.weakSkills) : [],
+        primaryLearningStyle: savedAcademicData.primaryLearningStyle || "",
+        secondaryLearningStyle: savedAcademicData.secondaryLearningStyle || "",
+        overallMotivation: savedAcademicData.overallMotivation || 5,
+        studyHoursPerWeek: savedAcademicData.studyHoursPerWeek || 0,
+        homeworkCompletionRate: savedAcademicData.homeworkCompletionRate || 50,
+        additionalNotes: savedAcademicData.additionalNotes || "",
+      });
+    }
+  }, [savedAcademicData, form]);
 
   const onSubmit = async (data: AcademicProfileFormValues) => {
     setIsSubmitting(true);
     try {
       const payload = {
-        id: academicData?.id || self.crypto.randomUUID(),
+        id: savedAcademicData?.id || academicData?.id || self.crypto.randomUUID(),
         studentId,
         ...data,
       };
@@ -82,6 +111,7 @@ export default function StandardizedAcademicSection({
       if (!response.ok) throw new Error('Failed to save');
 
       toast.success("Akademik profil kaydedildi");
+      await refetch();
       onUpdate();
     } catch (error) {
       toast.error("Kayıt sırasında hata oluştu");

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -53,34 +54,68 @@ export default function StandardizedHealthSection({
 }: StandardizedHealthSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: savedHealthData, refetch } = useQuery({
+    queryKey: ['/api/standardized-profile/health', studentId],
+    queryFn: async () => {
+      const response = await fetch(`/api/standardized-profile/${studentId}/health`);
+      if (!response.ok) throw new Error('Failed to fetch health data');
+      return response.json();
+    },
+    enabled: !!studentId,
+  });
+
   const form = useForm<HealthProfileFormValues>({
     resolver: zodResolver(healthProfileSchema),
     defaultValues: {
-      bloodType: healthData?.bloodType || "",
-      chronicDiseases: healthData?.chronicDiseases ? JSON.parse(healthData.chronicDiseases) : [],
-      allergies: healthData?.allergies ? JSON.parse(healthData.allergies) : [],
-      currentMedications: healthData?.currentMedications ? JSON.parse(healthData.currentMedications) : [],
-      medicalHistory: healthData?.medicalHistory || "",
-      specialNeeds: healthData?.specialNeeds || "",
-      physicalLimitations: healthData?.physicalLimitations || "",
-      emergencyContact1Name: healthData?.emergencyContact1Name || "",
-      emergencyContact1Phone: healthData?.emergencyContact1Phone || "",
-      emergencyContact1Relation: healthData?.emergencyContact1Relation || "",
-      emergencyContact2Name: healthData?.emergencyContact2Name || "",
-      emergencyContact2Phone: healthData?.emergencyContact2Phone || "",
-      emergencyContact2Relation: healthData?.emergencyContact2Relation || "",
-      physicianName: healthData?.physicianName || "",
-      physicianPhone: healthData?.physicianPhone || "",
-      lastHealthCheckup: healthData?.lastHealthCheckup || "",
-      additionalNotes: healthData?.additionalNotes || "",
+      bloodType: "",
+      chronicDiseases: [],
+      allergies: [],
+      currentMedications: [],
+      medicalHistory: "",
+      specialNeeds: "",
+      physicalLimitations: "",
+      emergencyContact1Name: "",
+      emergencyContact1Phone: "",
+      emergencyContact1Relation: "",
+      emergencyContact2Name: "",
+      emergencyContact2Phone: "",
+      emergencyContact2Relation: "",
+      physicianName: "",
+      physicianPhone: "",
+      lastHealthCheckup: "",
+      additionalNotes: "",
     },
   });
+
+  useEffect(() => {
+    if (savedHealthData && Object.keys(savedHealthData).length > 0) {
+      form.reset({
+        bloodType: savedHealthData.bloodType || "",
+        chronicDiseases: savedHealthData.chronicDiseases ? JSON.parse(savedHealthData.chronicDiseases) : [],
+        allergies: savedHealthData.allergies ? JSON.parse(savedHealthData.allergies) : [],
+        currentMedications: savedHealthData.currentMedications ? JSON.parse(savedHealthData.currentMedications) : [],
+        medicalHistory: savedHealthData.medicalHistory || "",
+        specialNeeds: savedHealthData.specialNeeds || "",
+        physicalLimitations: savedHealthData.physicalLimitations || "",
+        emergencyContact1Name: savedHealthData.emergencyContact1Name || "",
+        emergencyContact1Phone: savedHealthData.emergencyContact1Phone || "",
+        emergencyContact1Relation: savedHealthData.emergencyContact1Relation || "",
+        emergencyContact2Name: savedHealthData.emergencyContact2Name || "",
+        emergencyContact2Phone: savedHealthData.emergencyContact2Phone || "",
+        emergencyContact2Relation: savedHealthData.emergencyContact2Relation || "",
+        physicianName: savedHealthData.physicianName || "",
+        physicianPhone: savedHealthData.physicianPhone || "",
+        lastHealthCheckup: savedHealthData.lastHealthCheckup || "",
+        additionalNotes: savedHealthData.additionalNotes || "",
+      });
+    }
+  }, [savedHealthData, form]);
 
   const onSubmit = async (data: HealthProfileFormValues) => {
     setIsSubmitting(true);
     try {
       const payload = {
-        id: healthData?.id || self.crypto.randomUUID(),
+        id: savedHealthData?.id || healthData?.id || self.crypto.randomUUID(),
         studentId,
         ...data,
       };
@@ -94,6 +129,7 @@ export default function StandardizedHealthSection({
       if (!response.ok) throw new Error('Failed to save');
 
       toast.success("Sağlık profili kaydedildi");
+      await refetch();
       onUpdate();
     } catch (error) {
       toast.error("Kayıt sırasında hata oluştu");

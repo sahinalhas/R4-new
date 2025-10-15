@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,16 @@ export default function StandardizedBehaviorSection({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
+  const { data: savedBehaviorData = [], refetch } = useQuery({
+    queryKey: ['/api/standardized-profile/behavior-incidents', studentId],
+    queryFn: async () => {
+      const response = await fetch(`/api/standardized-profile/${studentId}/behavior-incidents`);
+      if (!response.ok) throw new Error('Failed to fetch behavior incidents');
+      return response.json();
+    },
+    enabled: !!studentId,
+  });
+
   const form = useForm<BehaviorIncidentFormValues>({
     resolver: zodResolver(behaviorIncidentSchema),
     defaultValues: {
@@ -84,6 +95,7 @@ export default function StandardizedBehaviorSection({
       toast.success("Davranış kaydı eklendi");
       form.reset();
       setShowForm(false);
+      await refetch();
       onUpdate();
     } catch (error) {
       toast.error("Kayıt sırasında hata oluştu");
@@ -102,6 +114,7 @@ export default function StandardizedBehaviorSection({
       if (!response.ok) throw new Error('Failed to delete');
 
       toast.success("Davranış kaydı silindi");
+      await refetch();
       onUpdate();
     } catch (error) {
       toast.error("Silme işlemi başarısız");
@@ -135,9 +148,9 @@ export default function StandardizedBehaviorSection({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {behaviorData.length > 0 ? (
+            {savedBehaviorData.length > 0 ? (
               <div className="space-y-3">
-                {behaviorData.map((incident: any) => (
+                {savedBehaviorData.map((incident: any) => (
                   <Card key={incident.id} className="border-l-4 border-l-orange-500">
                     <CardContent className="pt-4">
                       <div className="flex justify-between items-start mb-3">

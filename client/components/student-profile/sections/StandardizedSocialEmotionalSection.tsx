@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -47,32 +48,64 @@ export default function StandardizedSocialEmotionalSection({
 }: StandardizedSocialEmotionalSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: savedSocialEmotionalData, refetch } = useQuery({
+    queryKey: ['/api/standardized-profile/social-emotional', studentId],
+    queryFn: async () => {
+      const response = await fetch(`/api/standardized-profile/${studentId}/social-emotional`);
+      if (!response.ok) throw new Error('Failed to fetch social-emotional data');
+      return response.json();
+    },
+    enabled: !!studentId,
+  });
+
   const form = useForm<SocialEmotionalFormValues>({
     resolver: zodResolver(socialEmotionalSchema),
     defaultValues: {
-      assessmentDate: socialEmotionalData?.assessmentDate || new Date().toISOString().slice(0, 10),
-      strongSocialSkills: socialEmotionalData?.strongSocialSkills ? JSON.parse(socialEmotionalData.strongSocialSkills) : [],
-      developingSocialSkills: socialEmotionalData?.developingSocialSkills ? JSON.parse(socialEmotionalData.developingSocialSkills) : [],
-      empathyLevel: socialEmotionalData?.empathyLevel || 5,
-      selfAwarenessLevel: socialEmotionalData?.selfAwarenessLevel || 5,
-      emotionRegulationLevel: socialEmotionalData?.emotionRegulationLevel || 5,
-      conflictResolutionLevel: socialEmotionalData?.conflictResolutionLevel || 5,
-      leadershipLevel: socialEmotionalData?.leadershipLevel || 5,
-      teamworkLevel: socialEmotionalData?.teamworkLevel || 5,
-      communicationLevel: socialEmotionalData?.communicationLevel || 5,
-      friendCircleSize: socialEmotionalData?.friendCircleSize || undefined,
-      friendCircleQuality: socialEmotionalData?.friendCircleQuality || undefined,
-      socialRole: socialEmotionalData?.socialRole || undefined,
-      bullyingStatus: socialEmotionalData?.bullyingStatus || undefined,
-      additionalNotes: socialEmotionalData?.additionalNotes || "",
+      assessmentDate: new Date().toISOString().slice(0, 10),
+      strongSocialSkills: [],
+      developingSocialSkills: [],
+      empathyLevel: 5,
+      selfAwarenessLevel: 5,
+      emotionRegulationLevel: 5,
+      conflictResolutionLevel: 5,
+      leadershipLevel: 5,
+      teamworkLevel: 5,
+      communicationLevel: 5,
+      friendCircleSize: undefined,
+      friendCircleQuality: undefined,
+      socialRole: undefined,
+      bullyingStatus: undefined,
+      additionalNotes: "",
     },
   });
+
+  useEffect(() => {
+    if (savedSocialEmotionalData && Object.keys(savedSocialEmotionalData).length > 0) {
+      form.reset({
+        assessmentDate: savedSocialEmotionalData.assessmentDate || new Date().toISOString().slice(0, 10),
+        strongSocialSkills: savedSocialEmotionalData.strongSocialSkills ? JSON.parse(savedSocialEmotionalData.strongSocialSkills) : [],
+        developingSocialSkills: savedSocialEmotionalData.developingSocialSkills ? JSON.parse(savedSocialEmotionalData.developingSocialSkills) : [],
+        empathyLevel: savedSocialEmotionalData.empathyLevel || 5,
+        selfAwarenessLevel: savedSocialEmotionalData.selfAwarenessLevel || 5,
+        emotionRegulationLevel: savedSocialEmotionalData.emotionRegulationLevel || 5,
+        conflictResolutionLevel: savedSocialEmotionalData.conflictResolutionLevel || 5,
+        leadershipLevel: savedSocialEmotionalData.leadershipLevel || 5,
+        teamworkLevel: savedSocialEmotionalData.teamworkLevel || 5,
+        communicationLevel: savedSocialEmotionalData.communicationLevel || 5,
+        friendCircleSize: savedSocialEmotionalData.friendCircleSize || undefined,
+        friendCircleQuality: savedSocialEmotionalData.friendCircleQuality || undefined,
+        socialRole: savedSocialEmotionalData.socialRole || undefined,
+        bullyingStatus: savedSocialEmotionalData.bullyingStatus || undefined,
+        additionalNotes: savedSocialEmotionalData.additionalNotes || "",
+      });
+    }
+  }, [savedSocialEmotionalData, form]);
 
   const onSubmit = async (data: SocialEmotionalFormValues) => {
     setIsSubmitting(true);
     try {
       const payload = {
-        id: socialEmotionalData?.id || self.crypto.randomUUID(),
+        id: savedSocialEmotionalData?.id || socialEmotionalData?.id || self.crypto.randomUUID(),
         studentId,
         ...data,
       };
@@ -86,6 +119,7 @@ export default function StandardizedSocialEmotionalSection({
       if (!response.ok) throw new Error('Failed to save');
 
       toast.success("Sosyal-duygusal profil kaydedildi");
+      await refetch();
       onUpdate();
     } catch (error) {
       toast.error("Kayıt sırasında hata oluştu");
