@@ -84,8 +84,8 @@ export default function InterventionRecommendations({ studentId, studentName }: 
               <Target className="h-5 w-5" />
               Müdahale Planı - {plan.studentName}
             </CardTitle>
-            <Badge variant={plan.urgencyLevel === 'immediate' ? 'destructive' : 'default'}>
-              {getUrgencyLabel(plan.urgencyLevel)}
+            <Badge variant={plan?.urgencyLevel?.toLowerCase() === 'immediate' ? 'destructive' : 'default'}>
+              {getUrgencyLabel(plan?.urgencyLevel)}
             </Badge>
           </div>
         </CardHeader>
@@ -113,8 +113,8 @@ export default function InterventionRecommendations({ studentId, studentName }: 
                     <div className="flex-1">
                       <CardTitle className="text-base mb-1">{rec.title}</CardTitle>
                       <div className="flex gap-2 mb-2">
-                        <Badge variant={getPriorityColor(rec.priority)}>
-                          {getPriorityLabel(rec.priority)}
+                        <Badge variant={getPriorityColor(rec?.priority)}>
+                          {getPriorityLabel(rec?.priority)}
                         </Badge>
                         <Badge variant="outline">{rec.category}</Badge>
                         {rec.evidenceBased && <Badge variant="secondary">Kanıta Dayalı</Badge>}

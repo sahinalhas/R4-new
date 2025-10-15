@@ -6,7 +6,7 @@
 /**
  * Öncelik seviyesine göre renk döndürür
  */
-export function getPriorityColor(priority: string): string {
+export function getPriorityColor(priority: string): 'default' | 'destructive' | 'outline' | 'secondary' {
   const normalizedPriority = priority?.toUpperCase();
   
   switch (normalizedPriority) {
@@ -29,34 +29,9 @@ export function getPriorityColor(priority: string): string {
 }
 
 /**
- * Öncelik seviyesine göre badge background class döndürür
- */
-export function getPriorityBadgeClass(priority: string): string {
-  const normalizedPriority = priority?.toUpperCase();
-  
-  switch (normalizedPriority) {
-    case 'CRITICAL':
-    case 'ACİL':
-    case 'KRİTİK':
-      return 'bg-red-500 text-white';
-    case 'HIGH':
-    case 'YÜKSEK':
-      return 'bg-orange-500 text-white';
-    case 'MEDIUM':
-    case 'ORTA':
-      return 'bg-yellow-500 text-black';
-    case 'LOW':
-    case 'DÜŞÜK':
-      return 'bg-green-500 text-white';
-    default:
-      return 'bg-gray-500 text-white';
-  }
-}
-
-/**
  * Durum seviyesine göre renk döndürür
  */
-export function getStatusColor(status: string): string {
+export function getStatusColor(status: string): 'default' | 'destructive' | 'outline' | 'secondary' {
   const normalizedStatus = status?.toUpperCase();
   
   switch (normalizedStatus) {
@@ -90,8 +65,10 @@ export function getScoreColor(score: number): string {
 /**
  * Öncelik seviyesini Türkçe'ye çevirir
  */
-export function getPriorityLabel(priority: string): string {
-  const normalizedPriority = priority?.toLowerCase();
+export function getPriorityLabel(priority: string | undefined | null): string {
+  if (!priority) return 'Belirtilmemiş';
+  
+  const normalizedPriority = priority.toLowerCase();
   
   switch (normalizedPriority) {
     case 'critical':
@@ -107,15 +84,17 @@ export function getPriorityLabel(priority: string): string {
     case 'düşük':
       return 'Düşük';
     default:
-      return priority;
+      return priority || 'Belirtilmemiş';
   }
 }
 
 /**
  * Aciliyet seviyesini Türkçe'ye çevirir
  */
-export function getUrgencyLabel(urgency: string): string {
-  const normalizedUrgency = urgency?.toLowerCase();
+export function getUrgencyLabel(urgency: string | undefined | null): string {
+  if (!urgency) return 'Belirtilmemiş';
+  
+  const normalizedUrgency = urgency.toLowerCase();
   
   switch (normalizedUrgency) {
     case 'immediate':
@@ -127,22 +106,7 @@ export function getUrgencyLabel(urgency: string): string {
     case 'low':
       return 'Düşük';
     default:
-      return urgency;
+      return urgency || 'Belirtilmemiş';
   }
 }
 
-/**
- * Suggestion type'a göre icon component name döndürür
- */
-export function getSuggestionTypeIcon(type: string): string {
-  switch (type?.toUpperCase()) {
-    case 'PROFILE_UPDATE':
-      return 'User';
-    case 'RISK_ALERT':
-      return 'AlertCircle';
-    case 'INTERVENTION_PLAN':
-      return 'TrendingUp';
-    default:
-      return 'Info';
-  }
-}

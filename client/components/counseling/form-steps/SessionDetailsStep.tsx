@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SESSION_MODES } from "@shared/constants/common.constants";
 
 import type { IndividualSessionFormValues, GroupSessionFormValues } from "../types";
 
@@ -136,7 +137,7 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                 >
                   <div>
                     <RadioGroupItem
-                      value="yüz_yüze"
+                      value={SESSION_MODES.YUZ_YUZE}
                       id="yuz_yuze"
                       className="peer sr-only"
                     />
@@ -151,7 +152,7 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                   </div>
                   <div>
                     <RadioGroupItem
-                      value="online"
+                      value={SESSION_MODES.ONLINE}
                       id="online"
                       className="peer sr-only"
                     />
@@ -166,7 +167,7 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                   </div>
                   <div>
                     <RadioGroupItem
-                      value="telefon"
+                      value={SESSION_MODES.TELEFON}
                       id="telefon"
                       className="peer sr-only"
                     />
@@ -200,9 +201,9 @@ export default function SessionDetailsStep({ form }: SessionDetailsStepProps) {
                 <Input 
                   {...field} 
                   placeholder={
-                    sessionMode === "online" 
+                    sessionMode === SESSION_MODES.ONLINE 
                       ? "Zoom, Teams, vb." 
-                      : sessionMode === "telefon"
+                      : sessionMode === SESSION_MODES.TELEFON
                       ? "Telefon görüşmesi"
                       : "Rehberlik Servisi"
                   }

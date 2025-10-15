@@ -50,7 +50,7 @@ import {
 import { toast } from 'sonner';
 import type { AISuggestion } from '../../../shared/types/ai-suggestion.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getPriorityBadgeClass, getSuggestionTypeIcon } from '@/lib/ai/ai-utils';
+import { getPriorityColor, getPriorityLabel } from '@/lib/ai/ai-utils';
 
 interface AISuggestionPanelProps {
   studentId?: string;
@@ -216,8 +216,8 @@ export default function AISuggestionPanel({ studentId, className }: AISuggestion
                               </p>
                             </div>
                           </div>
-                          <Badge className={getPriorityBadgeClass(suggestion.priority)}>
-                            {suggestion.priority}
+                          <Badge variant={getPriorityColor(suggestion?.priority)}>
+                            {getPriorityLabel(suggestion?.priority)}
                           </Badge>
                         </div>
                       </CardHeader>
