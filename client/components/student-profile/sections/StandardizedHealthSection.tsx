@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -10,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { toast } from "sonner";
 import { Activity } from "lucide-react";
 import { 
   BLOOD_TYPES,
@@ -18,6 +15,7 @@ import {
   ALLERGIES,
   MEDICATION_TYPES
 } from "@shared/constants/student-profile-taxonomy";
+import { useStandardizedProfileSection } from "@/hooks/useStandardizedProfileSection";
 
 const healthProfileSchema = z.object({
   bloodType: z.string().optional(),
@@ -52,18 +50,6 @@ export default function StandardizedHealthSection({
   healthData,
   onUpdate 
 }: StandardizedHealthSectionProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: savedHealthData, refetch } = useQuery({
-    queryKey: ['/api/standardized-profile/health', studentId],
-    queryFn: async () => {
-      const response = await fetch(`/api/standardized-profile/${studentId}/health`);
-      if (!response.ok) throw new Error('Failed to fetch health data');
-      return response.json();
-    },
-    enabled: !!studentId,
-  });
-
   const form = useForm<HealthProfileFormValues>({
     resolver: zodResolver(healthProfileSchema),
     defaultValues: {
@@ -87,57 +73,14 @@ export default function StandardizedHealthSection({
     },
   });
 
-  useEffect(() => {
-    if (savedHealthData && Object.keys(savedHealthData).length > 0) {
-      form.reset({
-        bloodType: savedHealthData.bloodType || "",
-        chronicDiseases: savedHealthData.chronicDiseases ? JSON.parse(savedHealthData.chronicDiseases) : [],
-        allergies: savedHealthData.allergies ? JSON.parse(savedHealthData.allergies) : [],
-        currentMedications: savedHealthData.currentMedications ? JSON.parse(savedHealthData.currentMedications) : [],
-        medicalHistory: savedHealthData.medicalHistory || "",
-        specialNeeds: savedHealthData.specialNeeds || "",
-        physicalLimitations: savedHealthData.physicalLimitations || "",
-        emergencyContact1Name: savedHealthData.emergencyContact1Name || "",
-        emergencyContact1Phone: savedHealthData.emergencyContact1Phone || "",
-        emergencyContact1Relation: savedHealthData.emergencyContact1Relation || "",
-        emergencyContact2Name: savedHealthData.emergencyContact2Name || "",
-        emergencyContact2Phone: savedHealthData.emergencyContact2Phone || "",
-        emergencyContact2Relation: savedHealthData.emergencyContact2Relation || "",
-        physicianName: savedHealthData.physicianName || "",
-        physicianPhone: savedHealthData.physicianPhone || "",
-        lastHealthCheckup: savedHealthData.lastHealthCheckup || "",
-        additionalNotes: savedHealthData.additionalNotes || "",
-      });
-    }
-  }, [savedHealthData, form]);
-
-  const onSubmit = async (data: HealthProfileFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        id: savedHealthData?.id || healthData?.id || self.crypto.randomUUID(),
-        studentId,
-        ...data,
-      };
-
-      const response = await fetch(`/api/standardized-profile/${studentId}/health`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Failed to save');
-
-      toast.success("Sağlık profili kaydedildi");
-      await refetch();
-      onUpdate();
-    } catch (error) {
-      toast.error("Kayıt sırasında hata oluştu");
-      console.error("Error saving health profile:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { isSubmitting, onSubmit } = useStandardizedProfileSection({
+    studentId,
+    sectionName: 'Sağlık profili',
+    apiEndpoint: 'health',
+    form,
+    defaultValues: form.getValues(),
+    onUpdate,
+  });
 
   return (
     <Card>

@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -10,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { TagInput } from "@/components/ui/tag-input";
-import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { 
   CREATIVE_TALENTS, 
   PHYSICAL_TALENTS,
   INTEREST_AREAS 
 } from "@shared/constants/student-profile-taxonomy";
+import { useStandardizedProfileSection } from "@/hooks/useStandardizedProfileSection";
 
 const talentsInterestsSchema = z.object({
   assessmentDate: z.string(),
@@ -43,18 +41,6 @@ export default function StandardizedTalentsSection({
   talentsData,
   onUpdate 
 }: StandardizedTalentsSectionProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: savedTalentsData, refetch } = useQuery({
-    queryKey: ['/api/standardized-profile/talents-interests', studentId],
-    queryFn: async () => {
-      const response = await fetch(`/api/standardized-profile/${studentId}/talents-interests`);
-      if (!response.ok) throw new Error('Failed to fetch talents data');
-      return response.json();
-    },
-    enabled: !!studentId,
-  });
-
   const form = useForm<TalentsInterestsFormValues>({
     resolver: zodResolver(talentsInterestsSchema),
     defaultValues: {
@@ -70,49 +56,14 @@ export default function StandardizedTalentsSection({
     },
   });
 
-  useEffect(() => {
-    if (savedTalentsData && Object.keys(savedTalentsData).length > 0) {
-      form.reset({
-        assessmentDate: savedTalentsData.assessmentDate || new Date().toISOString().slice(0, 10),
-        creativeTalents: savedTalentsData.creativeTalents ? JSON.parse(savedTalentsData.creativeTalents) : [],
-        physicalTalents: savedTalentsData.physicalTalents ? JSON.parse(savedTalentsData.physicalTalents) : [],
-        primaryInterests: savedTalentsData.primaryInterests ? JSON.parse(savedTalentsData.primaryInterests) : [],
-        exploratoryInterests: savedTalentsData.exploratoryInterests ? JSON.parse(savedTalentsData.exploratoryInterests) : [],
-        weeklyEngagementHours: savedTalentsData.weeklyEngagementHours || 0,
-        clubMemberships: savedTalentsData.clubMemberships ? JSON.parse(savedTalentsData.clubMemberships) : [],
-        competitionsParticipated: savedTalentsData.competitionsParticipated ? JSON.parse(savedTalentsData.competitionsParticipated) : [],
-        additionalNotes: savedTalentsData.additionalNotes || "",
-      });
-    }
-  }, [savedTalentsData, form]);
-
-  const onSubmit = async (data: TalentsInterestsFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        id: savedTalentsData?.id || talentsData?.id || self.crypto.randomUUID(),
-        studentId,
-        ...data,
-      };
-
-      const response = await fetch(`/api/standardized-profile/${studentId}/talents-interests`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Failed to save');
-
-      toast.success("Yetenek ve ilgi alanları kaydedildi");
-      await refetch();
-      onUpdate();
-    } catch (error) {
-      toast.error("Kayıt sırasında hata oluştu");
-      console.error("Error saving talents:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { isSubmitting, onSubmit } = useStandardizedProfileSection({
+    studentId,
+    sectionName: 'Yetenek ve ilgi alanları',
+    apiEndpoint: 'talents-interests',
+    form,
+    defaultValues: form.getValues(),
+    onUpdate,
+  });
 
   return (
     <Card>

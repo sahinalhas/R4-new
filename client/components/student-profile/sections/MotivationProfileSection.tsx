@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { toast } from "sonner";
 import { Target } from "lucide-react";
+import { useStandardizedProfileSection } from "@/hooks/useStandardizedProfileSection";
 
 const motivationProfileSchema = z.object({
   assessmentDate: z.string(),
@@ -42,74 +41,34 @@ export default function MotivationProfileSection({
   motivationData,
   onUpdate 
 }: MotivationProfileSectionProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<MotivationProfileFormValues>({
     resolver: zodResolver(motivationProfileSchema),
     defaultValues: {
-      assessmentDate: motivationData?.assessmentDate || new Date().toISOString().slice(0, 10),
-      primaryMotivators: motivationData?.primaryMotivationSources ? JSON.parse(motivationData.primaryMotivationSources) : [],
-      careerAspirations: motivationData?.careerAspirations ? JSON.parse(motivationData.careerAspirations) : [],
-      academicGoals: motivationData?.academicGoals ? JSON.parse(motivationData.academicGoals) : [],
-      goalClarityLevel: motivationData?.goalClarityLevel || 5,
-      intrinsicMotivationLevel: motivationData?.intrinsicMotivation || 5,
-      extrinsicMotivationLevel: motivationData?.extrinsicMotivation || 5,
-      persistenceLevel: motivationData?.persistenceLevel || 5,
-      futureOrientationLevel: motivationData?.futureOrientationLevel || 5,
-      shortTermGoals: motivationData?.shortTermGoals || "",
-      longTermGoals: motivationData?.longTermGoals || "",
-      obstacles: motivationData?.obstacles || "",
-      supportNeeds: motivationData?.supportNeeds || "",
-      additionalNotes: motivationData?.additionalNotes || "",
+      assessmentDate: new Date().toISOString().slice(0, 10),
+      primaryMotivators: [],
+      careerAspirations: [],
+      academicGoals: [],
+      goalClarityLevel: 5,
+      intrinsicMotivationLevel: 5,
+      extrinsicMotivationLevel: 5,
+      persistenceLevel: 5,
+      futureOrientationLevel: 5,
+      shortTermGoals: "",
+      longTermGoals: "",
+      obstacles: "",
+      supportNeeds: "",
+      additionalNotes: "",
     },
   });
 
-  // Form verilerini motivationData prop'u değiştiğinde güncelle
-  useEffect(() => {
-    form.reset({
-      assessmentDate: motivationData?.assessmentDate || new Date().toISOString().slice(0, 10),
-      primaryMotivators: motivationData?.primaryMotivationSources ? JSON.parse(motivationData.primaryMotivationSources) : [],
-      careerAspirations: motivationData?.careerAspirations ? JSON.parse(motivationData.careerAspirations) : [],
-      academicGoals: motivationData?.academicGoals ? JSON.parse(motivationData.academicGoals) : [],
-      goalClarityLevel: motivationData?.goalClarityLevel || 5,
-      intrinsicMotivationLevel: motivationData?.intrinsicMotivation || 5,
-      extrinsicMotivationLevel: motivationData?.extrinsicMotivation || 5,
-      persistenceLevel: motivationData?.persistenceLevel || 5,
-      futureOrientationLevel: motivationData?.futureOrientationLevel || 5,
-      shortTermGoals: motivationData?.shortTermGoals || "",
-      longTermGoals: motivationData?.longTermGoals || "",
-      obstacles: motivationData?.obstacles || "",
-      supportNeeds: motivationData?.supportNeeds || "",
-      additionalNotes: motivationData?.additionalNotes || "",
-    });
-  }, [motivationData, form]);
-
-  const onSubmit = async (data: MotivationProfileFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        id: motivationData?.id || self.crypto.randomUUID(),
-        studentId,
-        ...data,
-      };
-
-      const response = await fetch(`/api/standardized-profile/${studentId}/motivation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Failed to save');
-
-      toast.success("Motivasyon profili kaydedildi");
-      onUpdate();
-    } catch (error) {
-      toast.error("Kayıt sırasında hata oluştu");
-      console.error("Error saving motivation profile:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { isSubmitting, onSubmit } = useStandardizedProfileSection({
+    studentId,
+    sectionName: 'Motivasyon profili',
+    apiEndpoint: 'motivation',
+    form,
+    defaultValues: form.getValues(),
+    onUpdate,
+  });
 
   const motivatorOptions = [
     { value: 'AKADEMİK_BAŞARI', label: 'Akademik Başarı', category: 'İçsel' },

@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -11,9 +9,9 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { toast } from "sonner";
 import { Heart } from "lucide-react";
 import { SOCIAL_SKILLS } from "@shared/constants/student-profile-taxonomy";
+import { useStandardizedProfileSection } from "@/hooks/useStandardizedProfileSection";
 
 const socialEmotionalSchema = z.object({
   assessmentDate: z.string(),
@@ -46,18 +44,6 @@ export default function StandardizedSocialEmotionalSection({
   socialEmotionalData,
   onUpdate 
 }: StandardizedSocialEmotionalSectionProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: savedSocialEmotionalData, refetch } = useQuery({
-    queryKey: ['/api/standardized-profile/social-emotional', studentId],
-    queryFn: async () => {
-      const response = await fetch(`/api/standardized-profile/${studentId}/social-emotional`);
-      if (!response.ok) throw new Error('Failed to fetch social-emotional data');
-      return response.json();
-    },
-    enabled: !!studentId,
-  });
-
   const form = useForm<SocialEmotionalFormValues>({
     resolver: zodResolver(socialEmotionalSchema),
     defaultValues: {
@@ -79,55 +65,14 @@ export default function StandardizedSocialEmotionalSection({
     },
   });
 
-  useEffect(() => {
-    if (savedSocialEmotionalData && Object.keys(savedSocialEmotionalData).length > 0) {
-      form.reset({
-        assessmentDate: savedSocialEmotionalData.assessmentDate || new Date().toISOString().slice(0, 10),
-        strongSocialSkills: savedSocialEmotionalData.strongSocialSkills ? JSON.parse(savedSocialEmotionalData.strongSocialSkills) : [],
-        developingSocialSkills: savedSocialEmotionalData.developingSocialSkills ? JSON.parse(savedSocialEmotionalData.developingSocialSkills) : [],
-        empathyLevel: savedSocialEmotionalData.empathyLevel || 5,
-        selfAwarenessLevel: savedSocialEmotionalData.selfAwarenessLevel || 5,
-        emotionRegulationLevel: savedSocialEmotionalData.emotionRegulationLevel || 5,
-        conflictResolutionLevel: savedSocialEmotionalData.conflictResolutionLevel || 5,
-        leadershipLevel: savedSocialEmotionalData.leadershipLevel || 5,
-        teamworkLevel: savedSocialEmotionalData.teamworkLevel || 5,
-        communicationLevel: savedSocialEmotionalData.communicationLevel || 5,
-        friendCircleSize: savedSocialEmotionalData.friendCircleSize || undefined,
-        friendCircleQuality: savedSocialEmotionalData.friendCircleQuality || undefined,
-        socialRole: savedSocialEmotionalData.socialRole || undefined,
-        bullyingStatus: savedSocialEmotionalData.bullyingStatus || undefined,
-        additionalNotes: savedSocialEmotionalData.additionalNotes || "",
-      });
-    }
-  }, [savedSocialEmotionalData, form]);
-
-  const onSubmit = async (data: SocialEmotionalFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        id: savedSocialEmotionalData?.id || socialEmotionalData?.id || self.crypto.randomUUID(),
-        studentId,
-        ...data,
-      };
-
-      const response = await fetch(`/api/standardized-profile/${studentId}/social-emotional`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Failed to save');
-
-      toast.success("Sosyal-duygusal profil kaydedildi");
-      await refetch();
-      onUpdate();
-    } catch (error) {
-      toast.error("Kayıt sırasında hata oluştu");
-      console.error("Error saving social-emotional profile:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { isSubmitting, onSubmit } = useStandardizedProfileSection({
+    studentId,
+    sectionName: 'Sosyal-duygusal profil',
+    apiEndpoint: 'social-emotional',
+    form,
+    defaultValues: form.getValues(),
+    onUpdate,
+  });
 
   return (
     <Card>

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { toast } from "sonner";
 import { Shield, AlertTriangle } from "lucide-react";
+import { useStandardizedProfileSection } from "@/hooks/useStandardizedProfileSection";
 
 const riskProtectiveProfileSchema = z.object({
   assessmentDate: z.string(),
@@ -46,82 +45,38 @@ export default function RiskProtectiveProfileSection({
   riskData,
   onUpdate 
 }: RiskProtectiveProfileSectionProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<RiskProtectiveProfileFormValues>({
     resolver: zodResolver(riskProtectiveProfileSchema),
     defaultValues: {
-      assessmentDate: riskData?.assessmentDate || new Date().toISOString().slice(0, 10),
-      identifiedRiskFactors: riskData?.identifiedRiskFactors ? JSON.parse(riskData.identifiedRiskFactors) : [],
-      protectiveFactors: riskData?.protectiveFactors ? JSON.parse(riskData.protectiveFactors) : [],
-      recommendedInterventions: riskData?.recommendedInterventions ? JSON.parse(riskData.recommendedInterventions) : [],
-      overallRiskLevel: riskData?.overallRiskLevel || 5,
-      academicRiskLevel: riskData?.academicRiskLevel || 5,
-      behavioralRiskLevel: riskData?.behavioralRiskLevel || 5,
-      emotionalRiskLevel: riskData?.emotionalRiskLevel || 5,
-      socialRiskLevel: riskData?.socialRiskLevel || 5,
-      familySupport: riskData?.familySupport || 5,
-      peerSupport: riskData?.peerSupport || 5,
-      schoolEngagement: riskData?.schoolEngagement || 5,
-      resilienceLevel: riskData?.resilienceLevel || 5,
-      copingSkills: riskData?.copingSkills || 5,
-      riskAssessmentNotes: riskData?.riskAssessmentNotes || "",
-      interventionPlan: riskData?.interventionPlan || "",
-      monitoringFrequency: riskData?.monitoringFrequency || undefined,
-      additionalNotes: riskData?.additionalNotes || "",
+      assessmentDate: new Date().toISOString().slice(0, 10),
+      identifiedRiskFactors: [],
+      protectiveFactors: [],
+      recommendedInterventions: [],
+      overallRiskLevel: 5,
+      academicRiskLevel: 5,
+      behavioralRiskLevel: 5,
+      emotionalRiskLevel: 5,
+      socialRiskLevel: 5,
+      familySupport: 5,
+      peerSupport: 5,
+      schoolEngagement: 5,
+      resilienceLevel: 5,
+      copingSkills: 5,
+      riskAssessmentNotes: "",
+      interventionPlan: "",
+      monitoringFrequency: undefined,
+      additionalNotes: "",
     },
   });
 
-  // Form verilerini riskData prop'u değiştiğinde güncelle
-  useEffect(() => {
-    form.reset({
-      assessmentDate: riskData?.assessmentDate || new Date().toISOString().slice(0, 10),
-      identifiedRiskFactors: riskData?.identifiedRiskFactors ? JSON.parse(riskData.identifiedRiskFactors) : [],
-      protectiveFactors: riskData?.protectiveFactors ? JSON.parse(riskData.protectiveFactors) : [],
-      recommendedInterventions: riskData?.recommendedInterventions ? JSON.parse(riskData.recommendedInterventions) : [],
-      overallRiskLevel: riskData?.overallRiskLevel || 5,
-      academicRiskLevel: riskData?.academicRiskLevel || 5,
-      behavioralRiskLevel: riskData?.behavioralRiskLevel || 5,
-      emotionalRiskLevel: riskData?.emotionalRiskLevel || 5,
-      socialRiskLevel: riskData?.socialRiskLevel || 5,
-      familySupport: riskData?.familySupport || 5,
-      peerSupport: riskData?.peerSupport || 5,
-      schoolEngagement: riskData?.schoolEngagement || 5,
-      resilienceLevel: riskData?.resilienceLevel || 5,
-      copingSkills: riskData?.copingSkills || 5,
-      riskAssessmentNotes: riskData?.riskAssessmentNotes || "",
-      interventionPlan: riskData?.interventionPlan || "",
-      monitoringFrequency: riskData?.monitoringFrequency || undefined,
-      additionalNotes: riskData?.additionalNotes || "",
-    });
-  }, [riskData, form]);
-
-  const onSubmit = async (data: RiskProtectiveProfileFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        id: riskData?.id || self.crypto.randomUUID(),
-        studentId,
-        ...data,
-      };
-
-      const response = await fetch(`/api/standardized-profile/${studentId}/risk-protective`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Failed to save');
-
-      toast.success("Risk ve koruyucu faktörler kaydedildi");
-      onUpdate();
-    } catch (error) {
-      toast.error("Kayıt sırasında hata oluştu");
-      console.error("Error saving risk protective profile:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { isSubmitting, onSubmit } = useStandardizedProfileSection({
+    studentId,
+    sectionName: 'Risk ve koruyucu faktörler profili',
+    apiEndpoint: 'risk-protective',
+    form,
+    defaultValues: form.getValues(),
+    onUpdate,
+  });
 
   const riskFactorOptions = [
     { value: 'DÜŞÜK_AKADEMİK_BAŞARI', label: 'Düşük Akademik Başarı', category: 'Akademik' },

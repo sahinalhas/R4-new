@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -11,13 +9,13 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { toast } from "sonner";
 import { GraduationCap } from "lucide-react";
 import { 
   ACADEMIC_SUBJECTS, 
   ACADEMIC_SKILLS,
   LEARNING_STYLES 
 } from "@shared/constants/student-profile-taxonomy";
+import { useStandardizedProfileSection } from "@/hooks/useStandardizedProfileSection";
 
 const academicProfileSchema = z.object({
   assessmentDate: z.string(),
@@ -46,18 +44,6 @@ export default function StandardizedAcademicSection({
   academicData,
   onUpdate 
 }: StandardizedAcademicSectionProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: savedAcademicData, refetch } = useQuery({
-    queryKey: ['/api/standardized-profile/academic', studentId],
-    queryFn: async () => {
-      const response = await fetch(`/api/standardized-profile/${studentId}/academic`);
-      if (!response.ok) throw new Error('Failed to fetch academic data');
-      return response.json();
-    },
-    enabled: !!studentId,
-  });
-
   const form = useForm<AcademicProfileFormValues>({
     resolver: zodResolver(academicProfileSchema),
     defaultValues: {
@@ -75,51 +61,14 @@ export default function StandardizedAcademicSection({
     },
   });
 
-  useEffect(() => {
-    if (savedAcademicData && Object.keys(savedAcademicData).length > 0) {
-      form.reset({
-        assessmentDate: savedAcademicData.assessmentDate || new Date().toISOString().slice(0, 10),
-        strongSubjects: savedAcademicData.strongSubjects ? JSON.parse(savedAcademicData.strongSubjects) : [],
-        weakSubjects: savedAcademicData.weakSubjects ? JSON.parse(savedAcademicData.weakSubjects) : [],
-        strongSkills: savedAcademicData.strongSkills ? JSON.parse(savedAcademicData.strongSkills) : [],
-        weakSkills: savedAcademicData.weakSkills ? JSON.parse(savedAcademicData.weakSkills) : [],
-        primaryLearningStyle: savedAcademicData.primaryLearningStyle || "",
-        secondaryLearningStyle: savedAcademicData.secondaryLearningStyle || "",
-        overallMotivation: savedAcademicData.overallMotivation || 5,
-        studyHoursPerWeek: savedAcademicData.studyHoursPerWeek || 0,
-        homeworkCompletionRate: savedAcademicData.homeworkCompletionRate || 50,
-        additionalNotes: savedAcademicData.additionalNotes || "",
-      });
-    }
-  }, [savedAcademicData, form]);
-
-  const onSubmit = async (data: AcademicProfileFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        id: savedAcademicData?.id || academicData?.id || self.crypto.randomUUID(),
-        studentId,
-        ...data,
-      };
-
-      const response = await fetch(`/api/standardized-profile/${studentId}/academic`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error('Failed to save');
-
-      toast.success("Akademik profil kaydedildi");
-      await refetch();
-      onUpdate();
-    } catch (error) {
-      toast.error("Kayıt sırasında hata oluştu");
-      console.error("Error saving academic profile:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { isSubmitting, onSubmit } = useStandardizedProfileSection({
+    studentId,
+    sectionName: 'Akademik profil',
+    apiEndpoint: 'academic',
+    form,
+    defaultValues: form.getValues(),
+    onUpdate,
+  });
 
   return (
     <Card>
