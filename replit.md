@@ -4,6 +4,15 @@
 Rehber360 is a comprehensive Turkish-language student guidance and management system for educational institutions. It provides tools for student tracking, counseling, risk assessment, behavioral monitoring, and academic performance analysis. A key feature is its AI-powered profile analysis, which generates standardized student profiles from diverse data sources. The system also includes an AI Assistant for local, AI-powered student counseling, supporting both OpenAI and Ollama (Llama 3.1) models. Built as a full-stack TypeScript application with React, Express.js, and SQLite, Rehber360 aims to drive data standardization and evidence-based interventions for student success.
 
 ## Recent Changes (October 15, 2025)
+- **Code Quality Refactoring - AI Components & Constants:** Comprehensive code quality improvements and standardization
+  - **AI Utilities Centralization:** Created shared AI utility functions (`ai-utils.ts`) for consistent badge colors, priority labels, and status handling across all AI components
+  - **AI Data Fetching Hook:** Implemented `useAIRecommendations` hook to eliminate duplicated React Query logic across AI widgets
+  - **Null Safety Improvements:** Added robust null/undefined handling to all AI utility functions with fallback values ("Belirtilmemiş")
+  - **Design System Compliance:** Updated all AI components (PriorityStudentsWidget, InterventionRecommendations, AISuggestionPanel) to use typed Badge variants instead of raw Tailwind classes
+  - **Constants Migration:** Replaced magic strings with SESSION_MODES constants in SessionDetailsStep component
+  - **Documentation:** Created comprehensive constants usage guide (`shared/constants/README.md`) with safety checklist, migration examples, and best practices
+  - **Type Safety:** Fixed TypeScript return types for all utility functions to ensure design-system compliance
+  - Architect-approved refactoring ensuring consistent AI component behavior and preventing UI breaks from unexpected backend data
 - **AI Architecture Refactor - Guidance Assistant Model:** Complete architectural transformation from autonomous AI decision-maker to "Guidance Teacher Assistant" model
   - Implemented AI Suggestion Queue system with database schema, repository, and service layer
   - Refactored AutoSyncHooksService to generate suggestions instead of automatic profile updates
