@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { SpecialEducation, addSpecialEducation } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,25 @@ export default function OzelEgitimSection({ studentId, specialEducation, onUpdat
       notes: existingRecord?.notes || "",
     },
   });
+
+  // Form verilerini specialEducation prop'u değiştiğinde güncelle
+  useEffect(() => {
+    const record = specialEducation && specialEducation.length > 0 ? specialEducation[0] : null;
+    form.reset({
+      hasIEP: record?.hasIEP || false,
+      iepStartDate: record?.iepStartDate || "",
+      iepEndDate: record?.iepEndDate || "",
+      iepGoals: record?.iepGoals || "",
+      diagnosis: record?.diagnosis || "",
+      ramReportDate: record?.ramReportDate || "",
+      ramReportSummary: record?.ramReportSummary || "",
+      supportServices: record?.supportServices || "",
+      accommodations: record?.accommodations || "",
+      status: record?.status || "AKTİF",
+      nextReviewDate: record?.nextReviewDate || "",
+      notes: record?.notes || "",
+    });
+  }, [specialEducation, form]);
 
   const onSubmit = async (data: SpecialEducationFormValues) => {
     try {
