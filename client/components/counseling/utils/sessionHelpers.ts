@@ -3,6 +3,10 @@ import { SESSION_DURATION, TIME_CONVERSION, SESSION_COLORS } from "@/lib/constan
 import { ANALYTICS_MESSAGES } from "@/lib/constants/messages.constants";
 
 export function getCurrentClassHour(classHours: ClassHour[]): ClassHour | undefined {
+  if (!classHours || !Array.isArray(classHours)) {
+    return undefined;
+  }
+  
   const now = new Date();
   const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   

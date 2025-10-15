@@ -80,8 +80,8 @@ export default function CounselingSessions() {
   });
 
   const { data: classHours = [] } = useQuery<ClassHour[]>({
-    queryKey: ['/api/class-hours'],
-    queryFn: () => apiClient.get<ClassHour[]>('/api/class-hours', { showErrorToast: false }),
+    queryKey: ['/api/counseling-sessions/class-hours'],
+    queryFn: () => apiClient.get<ClassHour[]>('/api/counseling-sessions/class-hours', { showErrorToast: false }),
   });
 
   const { data: topics = [] } = useQuery<CounselingTopic[]>({
