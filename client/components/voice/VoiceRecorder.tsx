@@ -58,7 +58,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
       const data = await apiClient.get<{ provider: string; useBrowserAPI: boolean }>('/api/voice-transcription/provider');
       
       if (data) {
-        setProvider(data.provider);
+        setProvider(data.provider || '');
         setUseBrowserAPI(data.useBrowserAPI);
       }
     } catch (error) {
@@ -135,7 +135,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
         title: 'Kayıt Başladı',
         description: useBrowserAPI 
           ? 'Konuşmaya başlayabilirsiniz (Tarayıcı API kullanılıyor)'
-          : `Konuşmaya başlayabilirsiniz (${provider.toUpperCase()} ile işlenecek)`,
+          : `Konuşmaya başlayabilirsiniz (${provider ? provider.toUpperCase() : 'AI'} ile işlenecek)`,
       });
 
     } catch (error) {
@@ -315,7 +315,7 @@ export function VoiceRecorder({ onTranscriptionComplete, studentId, sessionType 
         <CardDescription>
           {useBrowserAPI 
             ? 'Tarayıcı ses tanıma kullanılıyor (gerçek zamanlı)'
-            : `${provider.toUpperCase()} AI ile ses tanıma aktif`}
+            : `${provider ? provider.toUpperCase() : 'AI'} ile ses tanıma aktif`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
