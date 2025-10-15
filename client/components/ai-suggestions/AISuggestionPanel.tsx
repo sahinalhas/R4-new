@@ -50,6 +50,7 @@ import {
 import { toast } from 'sonner';
 import type { AISuggestion } from '../../../shared/types/ai-suggestion.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getPriorityBadgeClass, getSuggestionTypeIcon } from '@/lib/ai/ai-utils';
 
 interface AISuggestionPanelProps {
   studentId?: string;
@@ -138,24 +139,6 @@ export default function AISuggestionPanel({ studentId, className }: AISuggestion
     setIsReviewDialogOpen(true);
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'CRITICAL': return 'bg-red-500 text-white';
-      case 'HIGH': return 'bg-orange-500 text-white';
-      case 'MEDIUM': return 'bg-yellow-500 text-black';
-      case 'LOW': return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'PROFILE_UPDATE': return <User className="h-4 w-4" />;
-      case 'RISK_ALERT': return <AlertCircle className="h-4 w-4" />;
-      case 'INTERVENTION_PLAN': return <TrendingUp className="h-4 w-4" />;
-      default: return <Info className="h-4 w-4" />;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -221,7 +204,10 @@ export default function AISuggestionPanel({ studentId, className }: AISuggestion
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2 flex-1">
                             <div className="p-2 bg-primary/10 rounded-md">
-                              {getTypeIcon(suggestion.suggestionType)}
+                              {suggestion.suggestionType === 'PROFILE_UPDATE' ? <User className="h-4 w-4" /> :
+                               suggestion.suggestionType === 'RISK_ALERT' ? <AlertCircle className="h-4 w-4" /> :
+                               suggestion.suggestionType === 'INTERVENTION_PLAN' ? <TrendingUp className="h-4 w-4" /> :
+                               <Info className="h-4 w-4" />}
                             </div>
                             <div className="flex-1">
                               <h4 className="font-medium text-sm">{suggestion.title}</h4>
@@ -230,7 +216,7 @@ export default function AISuggestionPanel({ studentId, className }: AISuggestion
                               </p>
                             </div>
                           </div>
-                          <Badge className={getPriorityColor(suggestion.priority)}>
+                          <Badge className={getPriorityBadgeClass(suggestion.priority)}>
                             {suggestion.priority}
                           </Badge>
                         </div>

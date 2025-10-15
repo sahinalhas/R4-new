@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Target, Clock, Users, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { getPriorityColor, getUrgencyLabel, getPriorityLabel } from '@/lib/ai/ai-utils';
 
 interface InterventionRecommendationsProps {
   studentId: string;
@@ -40,15 +41,6 @@ export default function InterventionRecommendations({ studentId, studentName }: 
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'destructive';
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      default: return 'secondary';
     }
   };
 
@@ -93,9 +85,7 @@ export default function InterventionRecommendations({ studentId, studentName }: 
               Müdahale Planı - {plan.studentName}
             </CardTitle>
             <Badge variant={plan.urgencyLevel === 'immediate' ? 'destructive' : 'default'}>
-              {plan.urgencyLevel === 'immediate' ? 'Acil' : 
-               plan.urgencyLevel === 'soon' ? 'Öncelikli' :
-               plan.urgencyLevel === 'moderate' ? 'Orta' : 'Düşük'}
+              {getUrgencyLabel(plan.urgencyLevel)}
             </Badge>
           </div>
         </CardHeader>
@@ -124,9 +114,7 @@ export default function InterventionRecommendations({ studentId, studentName }: 
                       <CardTitle className="text-base mb-1">{rec.title}</CardTitle>
                       <div className="flex gap-2 mb-2">
                         <Badge variant={getPriorityColor(rec.priority)}>
-                          {rec.priority === 'critical' ? 'Kritik' :
-                           rec.priority === 'high' ? 'Yüksek' :
-                           rec.priority === 'medium' ? 'Orta' : 'Düşük'}
+                          {getPriorityLabel(rec.priority)}
                         </Badge>
                         <Badge variant="outline">{rec.category}</Badge>
                         {rec.evidenceBased && <Badge variant="secondary">Kanıta Dayalı</Badge>}

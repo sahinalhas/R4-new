@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,35 +12,17 @@ import {
 } from 'lucide-react';
 import { getPriorityStudents } from '@/lib/api/ai-assistant.api';
 import { useNavigate } from 'react-router-dom';
+import { useAIRecommendations } from '@/lib/ai/useAIRecommendations';
+import { getStatusColor, getScoreColor } from '@/lib/ai/ai-utils';
 
 export default function PriorityStudentsWidget() {
   const navigate = useNavigate();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isLoading, refetch, isRefetching } = useAIRecommendations({
     queryKey: ['priority-students'],
     queryFn: () => getPriorityStudents(10),
-    refetchInterval: 5 * 60 * 1000, // 5 dakikada bir
+    refetchInterval: 5 * 60 * 1000,
   });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ACİL':
-        return 'destructive';
-      case 'DİKKAT':
-        return 'default';
-      case 'İYİ':
-        return 'secondary';
-      default:
-        return 'outline';
-    }
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 100) return 'text-red-600 dark:text-red-400';
-    if (score >= 70) return 'text-orange-600 dark:text-orange-400';
-    if (score >= 40) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-green-600 dark:text-green-400';
-  };
 
   if (isLoading) {
     return (
