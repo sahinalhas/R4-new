@@ -4,10 +4,12 @@ import type { Student, AcademicRecord, Progress } from '../types/students.types.
 export function normalizeStudentData(student: any): any {
   const normalized = { ...student };
   
+  // ID normalization
   if (normalized.id && typeof normalized.id === 'string') {
     normalized.id = normalized.id.trim();
   }
   
+  // Name handling - support both formats
   if (normalized.name && typeof normalized.name === 'string') {
     normalized.name = normalized.name.trim();
     if (normalized.name.length === 0) {
@@ -21,6 +23,7 @@ export function normalizeStudentData(student: any): any {
     normalized.name = `${trimmedAd} ${trimmedSoyad}`.trim();
   }
   
+  // Turkish to English field mapping
   if (student.sinif && !normalized.className) {
     normalized.className = student.sinif;
   }
@@ -43,8 +46,23 @@ export function normalizeStudentData(student: any): any {
     normalized.parentContact = student.veliTelefon;
   }
   
-  if (!normalized.enrollmentDate) {
+  // Status field mapping
+  if (student.durum && !normalized.status) {
+    normalized.status = student.durum === 'aktif' ? 'active' : 
+                       student.durum === 'pasif' ? 'inactive' : 
+                       student.durum === 'mezun' ? 'graduated' : 'active';
+  }
+  
+  // Enrollment date with fallback
+  if (!normalized.enrollmentDate && !student.kayitTarihi) {
     normalized.enrollmentDate = new Date().toISOString().split('T')[0];
+  } else if (student.kayitTarihi && !normalized.enrollmentDate) {
+    normalized.enrollmentDate = student.kayitTarihi;
+  }
+  
+  // Ensure required fields have defaults
+  if (!normalized.status) {
+    normalized.status = 'active';
   }
   
   return normalized;

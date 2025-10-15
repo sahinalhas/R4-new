@@ -85,8 +85,8 @@ export function backendToUnified(backend: BackendStudent): UnifiedStudent {
     adres: backend.address,
     dogumTarihi: backend.birthDate,
     veliTelefon: backend.parentContact,
-    kayitTarihi: backend.enrollmentDate,
-    durum: backend.status === 'active' ? 'aktif' : backend.status === 'inactive' ? 'pasif' : backend.status === 'graduated' ? 'mezun' : undefined,
+    kayitTarihi: backend.enrollmentDate || new Date().toISOString().split('T')[0],
+    durum: backend.status === 'active' ? 'aktif' : backend.status === 'inactive' ? 'pasif' : backend.status === 'graduated' ? 'mezun' : 'aktif',
     avatar: backend.avatar,
     notlar: backend.notes
   };
@@ -100,7 +100,7 @@ export function unifiedToBackend(unified: UnifiedStudent): BackendStudent {
     phone: unified.telefon,
     address: unified.adres,
     className: unified.sinif,
-    enrollmentDate: unified.kayitTarihi,
+    enrollmentDate: unified.kayitTarihi || new Date().toISOString().split('T')[0],
     status: unified.durum === 'aktif' ? 'active' : unified.durum === 'pasif' ? 'inactive' : unified.durum === 'mezun' ? 'graduated' : 'active',
     parentContact: unified.veliTelefon,
     birthDate: unified.dogumTarihi,

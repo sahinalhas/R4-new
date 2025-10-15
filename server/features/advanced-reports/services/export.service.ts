@@ -8,9 +8,10 @@ import type { ComprehensiveReport, ExportOptions } from '../types/index.js';
 
 export class ExportService {
   async exportToPDF(report: ComprehensiveReport, options: ExportOptions): Promise<Buffer> {
-    // PDF export için jsPDF kullanılacak (client-side)
-    // Bu servis şu an placeholder, frontend'de implement edilecek
-    throw new Error('PDF export is handled on client-side');
+    // PDF export is currently only implemented for counseling sessions on the client-side
+    // Advanced reports PDF export can be implemented using jsPDF similar to counseling sessions
+    // For now, we recommend using Excel export for advanced reports
+    throw new Error('PDF export for advanced reports is not yet implemented. Please use Excel export instead.');
   }
   
   exportToExcel(report: ComprehensiveReport, options: ExportOptions): string {

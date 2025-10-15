@@ -101,8 +101,65 @@ export class PatternAnalysisService {
     }
 
     // Subject-specific analiz (ders bazlı performans takibi)
-    // Not: Şema değişikliği sonrası subject kolonu kaldırıldı
-    // TODO: Subject-specific score'lar (turkishScore, mathScore, etc.) için yeni analiz eklenecek
+    const subjectScores = this.db.prepare(`
+      SELECT 
+        examDate,
+        turkishScore, mathScore, scienceScore, socialScore, foreignLanguageScore
+      FROM exam_results
+      WHERE studentId = ? 
+      AND examDate >= date('now', '-6 months')
+      AND (turkishScore IS NOT NULL OR mathScore IS NOT NULL OR scienceScore IS NOT NULL 
+           OR socialScore IS NOT NULL OR foreignLanguageScore IS NOT NULL)
+      ORDER BY examDate ASC
+    `).all(studentId) as any[];
+
+    if (subjectScores.length >= 3) {
+      const subjects = [
+        { name: 'Türkçe', key: 'turkishScore' },
+        { name: 'Matematik', key: 'mathScore' },
+        { name: 'Fen Bilimleri', key: 'scienceScore' },
+        { name: 'Sosyal Bilimler', key: 'socialScore' },
+        { name: 'Yabancı Dil', key: 'foreignLanguageScore' }
+      ];
+
+      subjects.forEach(subject => {
+        const scores = subjectScores
+          .map(e => e[subject.key])
+          .filter(s => s != null && s > 0);
+        
+        if (scores.length >= 3) {
+          const recentAvg = scores.slice(-2).reduce((a, b) => a + b, 0) / Math.min(2, scores.slice(-2).length);
+          const earlierAvg = scores.slice(0, 2).reduce((a, b) => a + b, 0) / Math.min(2, scores.slice(0, 2).length);
+          const change = recentAvg - earlierAvg;
+
+          if (change > 15) {
+            insights.push({
+              category: 'TREND',
+              severity: 'INFO',
+              title: `${subject.name} Dersi Performans Artışı`,
+              description: `${subject.name} dersinde son sınavlarda belirgin başarı artışı (${change.toFixed(1)} puan).`,
+              evidence: [
+                `Önceki ortalama: ${earlierAvg.toFixed(1)}`,
+                `Son ortalama: ${recentAvg.toFixed(1)}`
+              ],
+              recommendation: `${subject.name} dersindeki bu başarıyı pekiştirin ve diğer derslerde de benzer stratejiler uygulayın.`
+            });
+          } else if (change < -15) {
+            insights.push({
+              category: 'TREND',
+              severity: 'WARNING',
+              title: `${subject.name} Dersi Performans Düşüşü`,
+              description: `${subject.name} dersinde son sınavlarda belirgin düşüş (${Math.abs(change).toFixed(1)} puan).`,
+              evidence: [
+                `Önceki ortalama: ${earlierAvg.toFixed(1)}`,
+                `Son ortalama: ${recentAvg.toFixed(1)}`
+              ],
+              recommendation: `${subject.name} dersi için acil ek destek gerekli. Konuları anlama güçlüğü olabilir.`
+            });
+          }
+        }
+      });
+    }
 
     return insights;
   }

@@ -393,7 +393,10 @@ export class SocialNetworkAnalysisService {
     processed.add(startId);
 
     while (toProcess.length > 0) {
-      const current = toProcess.pop()!;
+      const current = toProcess.pop();
+      // Guard against undefined (though while condition should prevent this)
+      if (!current) break;
+      
       relationships.forEach(rel => {
         if (rel.studentId === current && !processed.has(rel.peerId)) {
           cluster.add(rel.peerId);
@@ -407,6 +410,11 @@ export class SocialNetworkAnalysisService {
   }
 
   private calculateClusterCohesion(members: string[], relationships: any[]): number {
+    // Guard against empty or single-member clusters
+    if (members.length <= 1) {
+      return 0;
+    }
+    
     const possibleConnections = members.length * (members.length - 1);
     const actualConnections = relationships.filter(rel =>
       members.includes(rel.studentId) && members.includes(rel.peerId)
