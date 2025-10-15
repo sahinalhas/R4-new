@@ -9,6 +9,10 @@
 import getDatabase from '../lib/database.js';
 import type { UnifiedStudentScores, ProfileCompleteness } from '../../shared/types/student.types.js';
 import { PatternAnalysisService, type PatternInsight } from './pattern-analysis.service.js';
+import { getLatestSocioeconomicByStudent } from '../features/holistic-profile/repository/socioeconomic.repository.js';
+import { getLatestInterestByStudent } from '../features/holistic-profile/repository/interests.repository.js';
+import { getLatestFutureVisionByStudent } from '../features/holistic-profile/repository/future-vision.repository.js';
+import { getLatestStrengthByStudent } from '../features/holistic-profile/repository/strengths.repository.js';
 
 export interface StudentContext {
   // Temel Bilgiler
@@ -106,6 +110,39 @@ export interface StudentContext {
 
   // Pattern Analysis ve Deep Insights (YENİ!)
   patternInsights?: PatternInsight[];
+
+  // HOLİSTİK PROFİL VERİLERİ (YENİ!)
+  holisticProfile?: {
+    socioeconomic?: {
+      familyIncomeLevel?: string;
+      parentEmploymentStatus?: string;
+      educationLevel?: string;
+      housingCondition?: string;
+      resourceAccess?: string;
+      financialBarriers?: string;
+      supportSystems?: string;
+    };
+    interests?: {
+      hobbies?: string;
+      passions?: string;
+      favoriteSubjects?: string;
+      careerInterests?: string;
+      extracurriculars?: string;
+    };
+    futureVision?: {
+      careerGoals?: string;
+      educationalAspirations?: string;
+      lifeGoals?: string;
+      motivationSources?: string;
+      preparationSteps?: string;
+    };
+    strengths?: {
+      personalStrengths?: string[];
+      academicStrengths?: string[];
+      socialStrengths?: string[];
+      characterTraits?: string[];
+    };
+  };
 }
 
 export class StudentContextService {
@@ -133,7 +170,9 @@ export class StudentContextService {
       talentsInterests: await this.getTalentsInterestsContext(studentId),
       health: await this.getHealthContext(studentId),
       // DERİN PATTERN ANALİZİ - YENİ!
-      patternInsights: await this.patternAnalyzer.analyzeStudentPatterns(studentId)
+      patternInsights: await this.patternAnalyzer.analyzeStudentPatterns(studentId),
+      // HOLİSTİK PROFİL VERİLERİ - YENİ!
+      holisticProfile: await this.getHolisticProfileContext(studentId)
     };
 
     return context;
@@ -405,6 +444,62 @@ export class StudentContextService {
   }
 
   /**
+   * Get holistic profile context (YENİ!)
+   */
+  private async getHolisticProfileContext(studentId: string): Promise<StudentContext['holisticProfile']> {
+    try {
+      // Holistik profil verilerini topla
+      const socioeconomic = getLatestSocioeconomicByStudent(studentId);
+      const interests = getLatestInterestByStudent(studentId);
+      const futureVision = getLatestFutureVisionByStudent(studentId);
+      const strengths = getLatestStrengthByStudent(studentId);
+
+      // Veri yoksa undefined döndür
+      if (!socioeconomic && !interests && !futureVision && !strengths) {
+        return undefined;
+      }
+
+      return {
+        socioeconomic: socioeconomic ? {
+          familyIncomeLevel: socioeconomic.familyIncomeLevel,
+          parentEmploymentStatus: socioeconomic.parentEmploymentStatus,
+          educationLevel: `Anne: ${socioeconomic.motherEducationLevel || 'Bilinmiyor'}, Baba: ${socioeconomic.fatherEducationLevel || 'Bilinmiyor'}`,
+          housingCondition: socioeconomic.housingCondition,
+          resourceAccess: `İnternet: ${socioeconomic.internetAccess || 'Bilinmiyor'}, Cihaz: ${socioeconomic.deviceAccess || 'Bilinmiyor'}`,
+          financialBarriers: socioeconomic.financialBarriers,
+          supportSystems: socioeconomic.resourcesAndSupports
+        } : undefined,
+        
+        interests: interests ? {
+          hobbies: interests.hobbies,
+          passions: interests.passions,
+          favoriteSubjects: interests.favoriteSubjects,
+          careerInterests: interests.careerInterests,
+          extracurriculars: `Kulüpler: ${interests.clubMemberships || 'Yok'}, Gönüllü: ${interests.volunteerWork || 'Yok'}`
+        } : undefined,
+        
+        futureVision: futureVision ? {
+          careerGoals: futureVision.careerAspirations,
+          educationalAspirations: futureVision.educationalGoals,
+          lifeGoals: futureVision.lifeGoals,
+          motivationSources: futureVision.motivationSources,
+          preparationSteps: futureVision.shortTermGoals
+        } : undefined,
+        
+        strengths: strengths ? {
+          personalStrengths: strengths.personalStrengths ? [strengths.personalStrengths] : [],
+          academicStrengths: strengths.academicStrengths ? [strengths.academicStrengths] : [],
+          socialStrengths: strengths.socialStrengths ? [strengths.socialStrengths] : [],
+          characterTraits: strengths.resilienceFactors ? [strengths.resilienceFactors] : []
+        } : undefined
+      };
+    } catch (error) {
+      console.error('Holistik profil verileri alınırken hata:', error);
+      return undefined;
+    }
+  }
+
+  /**
    * Calculate performance trend from exams
    */
   private calculatePerformanceTrend(exams: any[]): 'improving' | 'declining' | 'stable' {
@@ -526,6 +621,96 @@ export class StudentContextService {
       }
       if (context.talentsInterests.careerGoals && context.talentsInterests.careerGoals.length > 0) {
         text += `- Kariyer Hedefleri: ${context.talentsInterests.careerGoals.join(', ')}\n`;
+      }
+    }
+
+    // HOLİSTİK PROFİL VERİLERİ - ÖĞRENCİYİ TANIMAYAN BAĞLAM!
+    if (context.holisticProfile) {
+      text += `\n═══════════════════════════════════════════════════════\n`;
+      text += `## 🌟 HOLİSTİK PROFİL: ÖĞRENCININ TAMAMLAYICI YÖNLER\n`;
+      text += `═══════════════════════════════════════════════════════\n\n`;
+      
+      if (context.holisticProfile.strengths) {
+        text += `### Güçlü Yönler ve Karakter Özellikleri\n`;
+        if (context.holisticProfile.strengths.personalStrengths?.length > 0) {
+          text += `- Kişisel Güçler: ${context.holisticProfile.strengths.personalStrengths.join(', ')}\n`;
+        }
+        if (context.holisticProfile.strengths.academicStrengths?.length > 0) {
+          text += `- Akademik Güçler: ${context.holisticProfile.strengths.academicStrengths.join(', ')}\n`;
+        }
+        if (context.holisticProfile.strengths.socialStrengths?.length > 0) {
+          text += `- Sosyal Güçler: ${context.holisticProfile.strengths.socialStrengths.join(', ')}\n`;
+        }
+        if (context.holisticProfile.strengths.characterTraits?.length > 0) {
+          text += `- Dayanıklılık Faktörleri: ${context.holisticProfile.strengths.characterTraits.join(', ')}\n`;
+        }
+        text += `\n`;
+      }
+
+      if (context.holisticProfile.interests) {
+        text += `### İlgi Alanları ve Hobiler\n`;
+        if (context.holisticProfile.interests.hobbies) {
+          text += `- Hobiler: ${context.holisticProfile.interests.hobbies}\n`;
+        }
+        if (context.holisticProfile.interests.passions) {
+          text += `- Tutkuları: ${context.holisticProfile.interests.passions}\n`;
+        }
+        if (context.holisticProfile.interests.favoriteSubjects) {
+          text += `- Favori Dersler: ${context.holisticProfile.interests.favoriteSubjects}\n`;
+        }
+        if (context.holisticProfile.interests.careerInterests) {
+          text += `- Kariyer İlgi Alanları: ${context.holisticProfile.interests.careerInterests}\n`;
+        }
+        if (context.holisticProfile.interests.extracurriculars) {
+          text += `- Ders Dışı Aktiviteler: ${context.holisticProfile.interests.extracurriculars}\n`;
+        }
+        text += `\n`;
+      }
+
+      if (context.holisticProfile.futureVision) {
+        text += `### Gelecek Vizyonu ve Hedefler\n`;
+        if (context.holisticProfile.futureVision.careerGoals) {
+          text += `- Kariyer Hedefleri: ${context.holisticProfile.futureVision.careerGoals}\n`;
+        }
+        if (context.holisticProfile.futureVision.educationalAspirations) {
+          text += `- Eğitim Hedefleri: ${context.holisticProfile.futureVision.educationalAspirations}\n`;
+        }
+        if (context.holisticProfile.futureVision.lifeGoals) {
+          text += `- Hayat Hedefleri: ${context.holisticProfile.futureVision.lifeGoals}\n`;
+        }
+        if (context.holisticProfile.futureVision.motivationSources) {
+          text += `- Motivasyon Kaynakları: ${context.holisticProfile.futureVision.motivationSources}\n`;
+        }
+        if (context.holisticProfile.futureVision.preparationSteps) {
+          text += `- Hazırlık Adımları: ${context.holisticProfile.futureVision.preparationSteps}\n`;
+        }
+        text += `\n`;
+      }
+
+      if (context.holisticProfile.socioeconomic) {
+        text += `### Sosyoekonomik Durum ve Destek Sistemleri\n`;
+        if (context.holisticProfile.socioeconomic.familyIncomeLevel) {
+          text += `- Aile Gelir Düzeyi: ${context.holisticProfile.socioeconomic.familyIncomeLevel}\n`;
+        }
+        if (context.holisticProfile.socioeconomic.parentEmploymentStatus) {
+          text += `- Ebeveyn İstihdam Durumu: ${context.holisticProfile.socioeconomic.parentEmploymentStatus}\n`;
+        }
+        if (context.holisticProfile.socioeconomic.educationLevel) {
+          text += `- Ebeveyn Eğitim Seviyesi: ${context.holisticProfile.socioeconomic.educationLevel}\n`;
+        }
+        if (context.holisticProfile.socioeconomic.housingCondition) {
+          text += `- Konut Durumu: ${context.holisticProfile.socioeconomic.housingCondition}\n`;
+        }
+        if (context.holisticProfile.socioeconomic.resourceAccess) {
+          text += `- Kaynak Erişimi: ${context.holisticProfile.socioeconomic.resourceAccess}\n`;
+        }
+        if (context.holisticProfile.socioeconomic.financialBarriers) {
+          text += `- Finansal Engeller: ${context.holisticProfile.socioeconomic.financialBarriers}\n`;
+        }
+        if (context.holisticProfile.socioeconomic.supportSystems) {
+          text += `- Destek Sistemleri: ${context.holisticProfile.socioeconomic.supportSystems}\n`;
+        }
+        text += `\n`;
       }
     }
 
