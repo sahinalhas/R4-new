@@ -91,13 +91,13 @@ export default function SocialRelationsSection({ studentId, onUpdate }: { studen
               <FormField control={form.control} name="socialGroupDynamics" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sosyal Grup Dinamikleri</FormLabel>
-                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar</FormLabel>
-                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>

@@ -115,13 +115,13 @@ export default function SELCompetenciesSection({ studentId, onUpdate }: { studen
               <FormField control={form.control} name="stressManagementStrategies" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Stres Yönetim Stratejileri</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Kullandığı stratejiler..." {...field} aiContext="counseling"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Kullandığı stratejiler..." {...field} aiContext="counseling" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar</FormLabel>
-                  <FormControl><EnhancedTextarea {...field} aiContext="counseling"></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="counseling" /></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>

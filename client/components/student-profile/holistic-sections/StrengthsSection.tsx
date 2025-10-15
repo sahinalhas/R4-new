@@ -123,7 +123,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Kişisel Güçlü Yönler</FormLabel>
                     <FormControl>
-                      <EnhancedTextarea placeholder="Karakter, değerler, kişilik özellikleri..." {...field} aiContext="notes">
+                      <EnhancedTextarea placeholder="Karakter, değerler, kişilik özellikleri..." {...field} aiContext="notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -137,7 +137,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Akademik Güçlü Yönler</FormLabel>
                     <FormControl>
-                      <EnhancedTextarea placeholder="Başarılı olduğu dersler, yetenekler..." {...field} aiContext="notes">
+                      <EnhancedTextarea placeholder="Başarılı olduğu dersler, yetenekler..." {...field} aiContext="notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,7 +151,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Sosyal Güçlü Yönler</FormLabel>
                     <FormControl>
-                      <EnhancedTextarea placeholder="İlişki kurma, iletişim, empati..." {...field} aiContext="notes">
+                      <EnhancedTextarea placeholder="İlişki kurma, iletişim, empati..." {...field} aiContext="notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -165,7 +165,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Beceriler & Yetenekler</FormLabel>
                     <FormControl>
-                      <EnhancedTextarea placeholder="Özel beceriler, yetenekler..." {...field} aiContext="notes">
+                      <EnhancedTextarea placeholder="Özel beceriler, yetenekler..." {...field} aiContext="notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -179,7 +179,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Başarı Hikayeleri</FormLabel>
                     <FormControl>
-                      <EnhancedTextarea placeholder="Öğrencinin başarı öyküleri, gurur duyduğu anlar..." {...field} aiContext="notes">
+                      <EnhancedTextarea placeholder="Öğrencinin başarı öyküleri, gurur duyduğu anlar..." {...field} aiContext="notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -193,7 +193,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Destek Sistemleri</FormLabel>
                     <FormControl>
-                      <EnhancedTextarea placeholder="Aile, arkadaşlar, mentorlar..." {...field} aiContext="notes">
+                      <EnhancedTextarea placeholder="Aile, arkadaşlar, mentorlar..." {...field} aiContext="notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -207,7 +207,7 @@ export default function StrengthsSection({ studentId, onUpdate }: StrengthsSecti
                   <FormItem>
                     <FormLabel>Notlar</FormLabel>
                     <FormControl>
-                      <EnhancedTextarea placeholder="Ek notlar..." {...field} aiContext="notes">
+                      <EnhancedTextarea placeholder="Ek notlar..." {...field} aiContext="notes" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

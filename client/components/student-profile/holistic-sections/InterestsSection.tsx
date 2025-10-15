@@ -57,43 +57,43 @@ export default function InterestsSection({ studentId, onUpdate }: { studentId: s
               <FormField control={form.control} name="hobbies" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Hobiler</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Öğrencinin hobileri..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Öğrencinin hobileri..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="passions" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tutkular</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Tutkuyla ilgilendiği alanlar..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Tutkuyla ilgilendiği alanlar..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="favoriteSubjects" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Favori Dersler</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="En çok sevdiği dersler..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="En çok sevdiği dersler..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="specialTalents" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Özel Yetenekler</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Özel beceri ve yetenekler..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Özel beceri ve yetenekler..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="sportsActivities" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Spor Aktiviteleri</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Spor ve fiziksel aktiviteler..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Spor ve fiziksel aktiviteler..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="clubMemberships" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kulüp Üyelikleri</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Okul kulüpleri, topluluklar..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Okul kulüpleri, topluluklar..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar</FormLabel>
-                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>

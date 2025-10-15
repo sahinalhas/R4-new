@@ -4,6 +4,15 @@
 Rehber360 is a comprehensive Turkish-language student guidance and management system for educational institutions. It provides tools for student tracking, counseling, risk assessment, behavioral monitoring, and academic performance analysis. A key feature is its AI-powered profile analysis, which generates standardized student profiles from diverse data sources. The system also includes an AI Assistant for local, AI-powered student counseling, supporting both OpenAI and Ollama (Llama 3.1) models. Built as a full-stack TypeScript application with React, Express.js, and SQLite, Rehber360 aims to drive data standardization and evidence-based interventions for student success.
 
 ## Recent Changes (October 15, 2025)
+- **AI Architecture Refactor - Guidance Assistant Model:** Complete architectural transformation from autonomous AI decision-maker to "Guidance Teacher Assistant" model
+  - Implemented AI Suggestion Queue system with database schema, repository, and service layer
+  - Refactored AutoSyncHooksService to generate suggestions instead of automatic profile updates
+  - Updated AI system prompts to emphasize "Assistant" role - AI now provides recommendations requiring explicit user approval
+  - Built comprehensive backend API infrastructure (/api/ai-suggestions) for suggestion management
+  - Created AISuggestionPanel frontend component with approval workflow, diff visualization, and feedback system
+  - Integrated suggestion panel into main dashboard for real-time suggestion visibility
+  - All data sources (counseling, surveys, exams, behavior) now create suggestions with priority, confidence scores, and reasoning
+  - User maintains full control - can approve, reject, or modify AI suggestions before application
 - **Form State Synchronization Fix:** Fixed KisilikProfiliSection to properly sync form state with props using useEffect
   - Changed state type from string to number to prevent NaN values during save
   - Added null handling with ?? operator to preserve zero values while providing defaults
@@ -33,7 +42,8 @@ Preferred communication style: Simple, everyday language.
 - **Data Standardization:** Utilizes a comprehensive taxonomy (`shared/constants/student-profile-taxonomy.ts`) for consistent values across academic, social-emotional, and behavioral data, enabling deterministic AI analysis.
 
 ### AI and Analytics System
-- **Living Student Profile:** AI-powered profile aggregation system that automatically updates student identity from all data sources including counseling sessions, surveys, exams, behavior incidents, meetings, and attendance. It features AI validation, intelligent aggregation, field mapping, dual update strategy for identity and specific profile fields, a real-time dashboard, update timeline, and manual correction/conflict resolution UI.
+- **AI Suggestion Queue System (NEW):** User-approval-required AI recommendation system where AI acts as an assistant, not decision-maker. All profile updates, insights, and interventions are proposed as suggestions with reasoning, confidence scores, and priority levels. Users review, approve, reject, or modify suggestions through an intuitive dashboard panel. Includes feedback system to track AI suggestion quality over time.
+- **Living Student Profile:** AI-powered profile aggregation system that analyzes data from all sources including counseling sessions, surveys, exams, behavior incidents, meetings, and attendance. Now generates suggestions for profile updates requiring user approval. Features AI validation, intelligent aggregation, field mapping, real-time dashboard, update timeline, and manual correction/conflict resolution UI.
 - **AI Assistant:** A professional-grade virtual guidance counselor with deep psychological and pedagogical expertise. Features include pattern recognition, proactive insights, psychological depth analysis, evidence-based recommendations, contextual awareness, real-time streaming chat, quick-action analyses, and risk analysis. Supports OpenAI, Ollama, and Gemini models with runtime model selection.
 - **Advanced AI Features:** Daily Insights Service, Psychological Depth Analysis, Predictive Risk Timeline, Hourly Action Planner, Student Timeline Analyzer, Comparative Multi-Student Analysis, Notification & Automation System, Deep Analysis Engine, Smart Recommendation Engine, Meeting Prep Assistant, AI Dashboard, Unified Scoring Engine (8 standardized scores), Deterministic Profile Analysis, Early Warning System, and Analytics Caching.
 - **Voice Transcription & AI Analysis:** Provider-aware STT (Gemini, OpenAI Whisper, Web Speech API) with hybrid architecture for real-time transcription and cloud verification. AI-powered analysis for auto-summary, keyword extraction, sentiment analysis, and risk word flagging.

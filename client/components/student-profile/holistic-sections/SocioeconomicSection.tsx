@@ -44,7 +44,7 @@ export default function SocioeconomicSection({ studentId, onUpdate }: { studentI
           <div>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />Sosyoekonomik Faktörler
-              <Lock className="h-4 w-4 text-muted-foreground" title="Gizli bilgi" />
+              <Lock className="h-4 w-4 text-muted-foreground" />
             </CardTitle>
             <CardDescription>Aile ekonomik durumu, kaynaklar ve destekler (Gizli)</CardDescription>
           </div>
@@ -105,19 +105,19 @@ export default function SocioeconomicSection({ studentId, onUpdate }: { studentI
               <FormField control={form.control} name="financialBarriers" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Finansal Engeller</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Maddi zorluklar, engeller..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Maddi zorluklar, engeller..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="resourcesAndSupports" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kaynaklar ve Destekler</FormLabel>
-                  <FormControl><EnhancedTextarea placeholder="Mevcut kaynaklar, alınan destekler..." {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea placeholder="Mevcut kaynaklar, alınan destekler..." {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notlar (Gizli)</FormLabel>
-                  <FormControl><EnhancedTextarea {...field} aiContext="notes"></FormControl>
+                  <FormControl><EnhancedTextarea {...field} aiContext="notes" /></FormControl>
                 </FormItem>
               )} />
               <Button type="submit">Kaydet</Button>
