@@ -59,7 +59,7 @@ export default function RiskDashboard() {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="alerts" className="space-y-4">
+      <Tabs defaultValue="alerts" className="space-y-6">
         <TabsList>
           <TabsTrigger value="alerts">Aktif Uyarılar</TabsTrigger>
           <TabsTrigger value="students">Yüksek Riskli Öğrenciler</TabsTrigger>

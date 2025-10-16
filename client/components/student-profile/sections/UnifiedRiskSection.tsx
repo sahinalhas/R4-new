@@ -91,9 +91,9 @@ export default function UnifiedRiskSection({ studentId, student, onUpdate }: Uni
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Detaylı Risk Sekmeleri */}
-      <Tabs defaultValue="degerlendirme" className="space-y-4">
+      <Tabs defaultValue="degerlendirme" className="space-y-6">
         <TabsList className="grid grid-cols-3 gap-2 h-auto min-h-[2.5rem]">
           <TabsTrigger value="degerlendirme" className="flex items-center gap-2 justify-center">
             <Shield className="h-4 w-4" />

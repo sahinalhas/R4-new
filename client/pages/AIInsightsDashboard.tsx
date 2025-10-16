@@ -84,7 +84,7 @@ export default function AIInsightsDashboard() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <Tabs defaultValue="daily" className="w-full">
+      <Tabs defaultValue="daily" className="w-full space-y-6">
         <TabsList className="grid w-full grid-cols-2 max-w-md min-h-[2.5rem]">
           <TabsTrigger value="daily" className="flex items-center gap-2 justify-center">
             <Calendar className="h-4 w-4" />

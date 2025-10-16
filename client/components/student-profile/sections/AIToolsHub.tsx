@@ -53,9 +53,9 @@ export default function AIToolsHub({ studentId, studentName, onUpdate }: AITools
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* AI Araçları Sekmeleri */}
-      <Tabs defaultValue="mudahale" className="space-y-4">
+      <Tabs defaultValue="mudahale" className="space-y-6">
         <TabsList className="grid grid-cols-3 md:grid-cols-4 gap-2 h-auto">
           <TabsTrigger value="mudahale" className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
