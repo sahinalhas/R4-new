@@ -83,8 +83,8 @@ export function StudentProfileTabs({
       {/* Ana Sekmeler */}
       <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
         {MAIN_TABS.map(({ value, label, icon: Icon }) => (
-          <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
-            <Icon className="h-3 w-3" /> {label}
+          <TabsTrigger key={value} value={value} className="flex items-center gap-2">
+            <Icon className="h-4 w-4" /> {label}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -109,9 +109,9 @@ export function StudentProfileTabs({
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background"
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </TabsTrigger>
             ))}
@@ -146,9 +146,9 @@ export function StudentProfileTabs({
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background"
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </TabsTrigger>
             ))}
@@ -189,9 +189,9 @@ export function StudentProfileTabs({
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background"
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </TabsTrigger>
             ))}
@@ -253,9 +253,9 @@ export function StudentProfileTabs({
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background"
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </TabsTrigger>
             ))}
@@ -294,9 +294,9 @@ export function StudentProfileTabs({
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background"
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </TabsTrigger>
             ))}
@@ -336,9 +336,9 @@ export function StudentProfileTabs({
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background"
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </TabsTrigger>
             ))}
