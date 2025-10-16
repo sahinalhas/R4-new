@@ -10,6 +10,9 @@ import { createAnalyticsCacheTable } from './analytics-cache.schema';
 import { initStandardizedProfileTables } from './standardized-profile.schema';
 import { createCareerGuidanceTables, seedCareerProfiles } from './career-guidance.schema';
 import { createProfileSyncTables } from './profile-sync.schema';
+import { createAISuggestionsTable } from './ai-suggestions.schema';
+import { createAnalyticsSnapshotTable } from './analytics-snapshot.schema';
+import { createAuditLogsTable } from './audit-logs.schema';
 
 export function initializeDatabaseSchema(db: Database.Database): void {
   createUsersTable(db);
@@ -24,4 +27,7 @@ export function initializeDatabaseSchema(db: Database.Database): void {
   createCareerGuidanceTables(db);
   seedCareerProfiles(db);
   createProfileSyncTables(db);
+  createAISuggestionsTable(db);
+  createAnalyticsSnapshotTable(db);
+  createAuditLogsTable(db);
 }
