@@ -75,15 +75,7 @@ export default function AdvancedAIAnalysis() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Sparkles className="h-8 w-8 text-primary" />
-            Gelişmiş AI Karşılaştırmalı Analiz
-          </h1>
-          <p className="text-muted-foreground">Sınıf ve öğrenci grupları arasında derin AI destekli karşılaştırma</p>
-        </div>
-        <Tabs value={analysisMode} onValueChange={(v) => setAnalysisMode(v as any)} className="w-auto">
+      <Tabs value={analysisMode} onValueChange={(v) => setAnalysisMode(v as any)} className="w-auto space-y-6">
           <TabsList>
             <TabsTrigger value="class" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -94,10 +86,18 @@ export default function AdvancedAIAnalysis() {
               Çoklu Öğrenci
             </TabsTrigger>
           </TabsList>
-        </Tabs>
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-primary" />
+            Gelişmiş AI Karşılaştırmalı Analiz
+          </h1>
+          <p className="text-muted-foreground">Sınıf ve öğrenci grupları arasında derin AI destekli karşılaştırma</p>
+        </div>
       </div>
 
-      {analysisMode === 'class' && (
+      <TabsContent value="class">
         <Card>
           <CardHeader>
             <CardTitle>Sınıf Seçimi</CardTitle>
@@ -118,9 +118,9 @@ export default function AdvancedAIAnalysis() {
             </Select>
           </CardContent>
         </Card>
-      )}
+      </TabsContent>
 
-      {analysisMode === 'multi-student' && (
+      <TabsContent value="multi-student">
         <Card>
           <CardHeader>
             <CardTitle>Öğrenci Seçimi</CardTitle>
@@ -153,7 +153,8 @@ export default function AdvancedAIAnalysis() {
             )}
           </CardContent>
         </Card>
-      )}
+      </TabsContent>
+      </Tabs>
 
       {error && (
         <Card className="border-destructive">
