@@ -19,6 +19,8 @@ import { Checkbox } from '../components/ui/checkbox';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { apiClient } from '../lib/api/api-client';
 import { STUDENT_ENDPOINTS } from '../lib/constants/api-endpoints';
+import { AIToolsLayout } from '@/components/ai-tools/AIToolsLayout';
+import { AIToolsLoadingState } from '@/components/ai-tools/AIToolsLoadingState';
 
 export default function AdvancedAIAnalysis() {
   const [analysisMode, setAnalysisMode] = useState<'class' | 'multi-student'>('class');
@@ -64,27 +66,19 @@ export default function AdvancedAIAnalysis() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">AI analizi yapılıyor...</p>
-        </div>
-      </div>
+      <AIToolsLoadingState 
+        icon={Sparkles}
+        message="AI analizi yapılıyor..."
+      />
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Sparkles className="h-8 w-8 text-primary" />
-            Gelişmiş AI Karşılaştırmalı Analiz
-          </h1>
-          <p className="text-muted-foreground">Sınıf ve öğrenci grupları arasında derin AI destekli karşılaştırma</p>
-        </div>
-      </div>
-
+    <AIToolsLayout
+      title="Gelişmiş AI Karşılaştırmalı Analiz"
+      description="Sınıf ve öğrenci grupları arasında derin AI destekli karşılaştırma"
+      icon={Sparkles}
+    >
       <Tabs value={analysisMode} onValueChange={(v) => setAnalysisMode(v as any)} className="w-auto space-y-6">
         <TabsList>
           <TabsTrigger value="class" className="flex items-center gap-2">
@@ -359,6 +353,6 @@ export default function AdvancedAIAnalysis() {
           )}
         </div>
       )}
-    </div>
+    </AIToolsLayout>
   );
 }
