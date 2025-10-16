@@ -44,8 +44,8 @@ export default function AIToolsPage() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6 min-h-[2.5rem]">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
+        <TabsList className="grid w-full grid-cols-5 min-h-[2.5rem]">
           <TabsTrigger value="risk" className="flex items-center gap-2 justify-center">
             <ShieldAlert className="h-4 w-4" />
             <span className="hidden sm:inline">Risk Takip</span>
