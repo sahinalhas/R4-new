@@ -306,10 +306,10 @@ export class BackupService {
       return 'anonymized@example.com';
     }
     if (fieldName.includes('phone')) {
-      return '0555XXXXXXX';
+      return '05XXXXXXXXX';
     }
     if (fieldName.includes('tc_no')) {
-      return 'XXXXXXXXXXX';
+      return 'XXXXXXXXXXXX';
     }
     if (fieldName.includes('address')) {
       return 'Gizli Adres';

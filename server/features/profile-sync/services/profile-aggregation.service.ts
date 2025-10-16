@@ -30,12 +30,14 @@ export class ProfileAggregationService {
   private fieldMapper: FieldMapperService;
   private aiProvider: AIProviderService;
   private profileRepo: StandardizedProfileRepository;
+  private db: ReturnType<typeof getDatabase>;
 
   constructor() {
     this.validationService = new DataValidationService();
     this.fieldMapper = new FieldMapperService();
     this.aiProvider = AIProviderService.getInstance();
-    this.profileRepo = new StandardizedProfileRepository(getDatabase());
+    this.db = getDatabase();
+    this.profileRepo = new StandardizedProfileRepository(this.db);
   }
 
   /**
@@ -345,13 +347,54 @@ export class ProfileAggregationService {
    * Tüm profil verilerini toplar
    */
   private async gatherAllProfileData(studentId: string): Promise<any> {
-    // TODO: Tüm repository'lerden veri topla
+    const studentStmt = this.db.prepare('SELECT * FROM students WHERE id = ?');
+    const student = studentStmt.get(studentId);
+
+    const academicStmt = this.db.prepare(`
+      SELECT er.*, e.name as examName, e.type as examType 
+      FROM exam_results er 
+      LEFT JOIN exams e ON er.examId = e.id 
+      WHERE er.studentId = ? 
+      ORDER BY er.examDate DESC LIMIT 10
+    `);
+    const academicRecords = academicStmt.all(studentId);
+
+    const behaviorStmt = this.db.prepare(`
+      SELECT * FROM behavior_incidents 
+      WHERE studentId = ? 
+      ORDER BY date DESC LIMIT 10
+    `);
+    const behaviorRecords = behaviorStmt.all(studentId);
+
+    const counselingStmt = this.db.prepare(`
+      SELECT * FROM counseling_sessions 
+      WHERE studentId = ? 
+      ORDER BY sessionDate DESC LIMIT 10
+    `);
+    const counselingRecords = counselingStmt.all(studentId);
+
+    const achievementsStmt = this.db.prepare(`
+      SELECT * FROM achievements 
+      WHERE studentId = ? 
+      ORDER BY date DESC LIMIT 10
+    `);
+    const achievements = achievementsStmt.all(studentId);
+
+    const attendanceStmt = this.db.prepare(`
+      SELECT * FROM attendance_records 
+      WHERE studentId = ? 
+      ORDER BY date DESC LIMIT 30
+    `);
+    const attendance = attendanceStmt.all(studentId);
+
     return {
       studentId,
-      // academic: await academicRepo.getProfile(studentId),
-      // socialEmotional: await socialRepo.getProfile(studentId),
-      // behavioral: await behaviorRepo.getProfile(studentId),
-      // etc...
+      student,
+      academic: academicRecords,
+      behavior: behaviorRecords,
+      counseling: counselingRecords,
+      achievements,
+      attendance
     };
   }
 
