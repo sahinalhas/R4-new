@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShieldAlert, Bot, Brain, Sparkles, CalendarDays } from 'lucide-react';
 import RiskDashboard from './RiskDashboard';
@@ -7,8 +8,32 @@ import AIInsightsDashboard from './AIInsightsDashboard';
 import AdvancedAIAnalysis from './AdvancedAIAnalysis';
 import DailyActionPlan from './DailyActionPlan';
 
+const VALID_TABS = ['risk', 'ai-asistan', 'ai-insights', 'gelismis-analiz', 'gunluk-plan'] as const;
+
 export default function AIToolsPage() {
-  const [activeTab, setActiveTab] = useState('risk');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const getValidTab = (tab: string | null): string => {
+    if (tab && VALID_TABS.includes(tab as any)) {
+      return tab;
+    }
+    return 'risk';
+  };
+
+  const [activeTab, setActiveTab] = useState(getValidTab(searchParams.get('tab')));
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const validTab = getValidTab(tab);
+    if (validTab !== activeTab) {
+      setActiveTab(validTab);
+    }
+  }, [searchParams, activeTab]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams({ tab: value });
+  };
 
   return (
     <div className="space-y-6">
@@ -19,7 +44,7 @@ export default function AIToolsPage() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="risk" className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4" />

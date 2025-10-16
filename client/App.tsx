@@ -90,23 +90,23 @@ const App = () => {
                   />
                   <Route
                     path="/risk"
-                    element={<Navigate to="/ai-araclari" replace />}
+                    element={<Navigate to="/ai-araclari?tab=risk" replace />}
                   />
                   <Route
                     path="/ai-asistan"
-                    element={<Navigate to="/ai-araclari" replace />}
+                    element={<Navigate to="/ai-araclari?tab=ai-asistan" replace />}
                   />
                   <Route
                     path="/ai-insights"
-                    element={<Navigate to="/ai-araclari" replace />}
+                    element={<Navigate to="/ai-araclari?tab=ai-insights" replace />}
                   />
                   <Route
                     path="/gunluk-plan"
-                    element={<Navigate to="/ai-araclari" replace />}
+                    element={<Navigate to="/ai-araclari?tab=gunluk-plan" replace />}
                   />
                   <Route
                     path="/gelismis-analiz"
-                    element={<Navigate to="/ai-araclari" replace />}
+                    element={<Navigate to="/ai-araclari?tab=gelismis-analiz" replace />}
                   />
                   <Route
                     path="/ogrenci/:studentId/gelismis-analiz"
