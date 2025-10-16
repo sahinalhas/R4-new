@@ -168,9 +168,6 @@ export function StudentProfileTabs({
           <TabsContent value="ilerleme">
             <IlerlemeTakibiSection
               studentId={studentId}
-              achievements={data.achievements}
-              selfAssessments={data.selfAssessments}
-              todaysAssessment={data.todaysAssessment}
               onUpdate={onUpdate}
             />
           </TabsContent>
@@ -178,7 +175,6 @@ export function StudentProfileTabs({
           <TabsContent value="anketler">
             <AnketlerSection
               studentId={studentId}
-              surveyResults={data.surveyResults}
               onUpdate={onUpdate}
             />
           </TabsContent>
@@ -264,40 +260,6 @@ export function StudentProfileTabs({
               </TabsTrigger>
             ))}
           </TabsList>
-
-          <TabsContent value="veli-bilgileri">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Veli Bilgileri ve İletişim Özeti
-                </CardTitle>
-                <CardDescription>
-                  Veli bilgileri ve iletişim geçmişi özeti
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">Veli Adı</label>
-                    <div className="text-base font-medium">{student.veliAdi || "Belirtilmemiş"}</div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">Veli Telefon</label>
-                    <div className="text-base font-medium">{student.veliTelefon || "Belirtilmemiş"}</div>
-                  </div>
-                </div>
-                
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Veli bilgilerini düzenlemek için "Kimlik & Temel Bilgiler" sekmesine gidiniz.
-                    Veli görüşmeleri için "Görüşmeler" sekmesine bakınız.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="gorusmeler">
             <UnifiedMeetingsSection

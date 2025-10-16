@@ -27,7 +27,6 @@ interface SurveyDistribution {
 
 interface AnketlerSectionProps {
   studentId: string;
-  surveyResults: any[];
   onUpdate: () => void;
 }
 

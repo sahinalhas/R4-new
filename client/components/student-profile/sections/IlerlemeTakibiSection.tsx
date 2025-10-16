@@ -11,9 +11,6 @@ import { Award, Trophy, TrendingUp } from "lucide-react";
 
 interface IlerlemeTakibiSectionProps {
   studentId: string;
-  achievements: Achievement[];
-  selfAssessments: any[];
-  todaysAssessment: any;
   onUpdate: () => void;
 }
 

@@ -185,11 +185,6 @@ export const RISK_MUDAHALE_TABS = [
 // AİLE & İLETİŞİM ALT SEKMELERİ
 export const AILE_ILETISIM_TABS = [
   {
-    value: "veli-bilgileri",
-    label: "Veli Bilgileri",
-    icon: Users,
-  },
-  {
     value: "gorusmeler",
     label: "Tüm Görüşmeler",
     icon: MessageCircle,
