@@ -4,6 +4,14 @@
 Rehber360 is a comprehensive Turkish-language student guidance and management system for educational institutions. It provides tools for student tracking, counseling, risk assessment, behavioral monitoring, and academic performance analysis. A key feature is its AI-powered profile analysis, which generates standardized student profiles from diverse data sources. The system also includes an AI Assistant for local, AI-powered student counseling, supporting both OpenAI and Ollama (Llama 3.1) models. Built as a full-stack TypeScript application with React, Express.js, and SQLite, Rehber360 aims to drive data standardization and evidence-based interventions for student success.
 
 ## Recent Changes (October 16, 2025)
+- **AI Tools Page Modern Redesign:** Complete visual and UX overhaul to match design language of Settings and Student Profile pages
+  - **Gradient Header:** Added modern gradient header (primary/accent) matching Settings page style
+  - **Responsive Tab System:** Modernized tab list with flex-wrap, responsive design, bg-muted/50 background, and data-driven structure
+  - **Consistent Icons & Labels:** Icon-based tabs with responsive text visibility (hidden on mobile, shown on larger screens)
+  - **URL Behavior Update:** Tabs no longer update URL during manual navigation (per user request), but still support deep-links and redirects
+  - **Deep-Link Support:** Initial tab selection honors URL parameters (e.g., `/ai-araclari?tab=ai-asistan`) for bookmarking and App.tsx redirects
+  - **Architecture Approved:** Architect-verified implementation ensuring both manual tab switching and URL-based navigation work correctly
+  - All AI tool components (RiskDashboard, AIAssistant, AIInsightsDashboard, AdvancedAIAnalysis, DailyActionPlan) remain fully functional with lazy loading
 - **Student Profile Page Complete Reorganization:** Comprehensive restructuring following detailed analysis report (ogrenci_profil_analiz_raporu.md)
   - **New Tab Structure:** Reorganized from 6 to 9 main tabs - Dashboard, Kimlik & Temel Bilgiler, Akademik, Kişisel-Sosyal, Risk-Müdahale, Aile-İletişim, Mesleki, AI Tools, Sistem
   - **Unified Risk Section:** Consolidated 4 separate risk displays into single UnifiedRiskSection with unified scoring (useUnifiedRisk hook)
