@@ -7,6 +7,8 @@ import { AlertTriangle, TrendingUp, Users, Calendar, Brain, FileText, School } f
 import BulkAnalysisDashboard from '@/components/ai/BulkAnalysisDashboard';
 import { apiClient } from '@/lib/api/api-client';
 import { AI_ENDPOINTS } from '@/lib/constants/api-endpoints';
+import { AIToolsLayout } from '@/components/ai-tools/AIToolsLayout';
+import { AIToolsLoadingState } from '@/components/ai-tools/AIToolsLoadingState';
 
 interface DailyInsightsSummary {
   date: string;
@@ -73,29 +75,19 @@ export default function AIInsightsDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Brain className="w-12 h-12 mx-auto mb-4 animate-pulse text-primary" />
-          <p className="text-muted-foreground">Günlük insights yükleniyor...</p>
-        </div>
-      </div>
+      <AIToolsLoadingState 
+        icon={Brain}
+        message="Günlük insights yükleniyor..."
+      />
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Brain className="w-8 h-8" />
-            AI Rehber Asistan Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Günlük otomatik analiz ve akıllı öneriler
-          </p>
-        </div>
-      </div>
-
+    <AIToolsLayout
+      title="AI Rehber Asistan Dashboard"
+      description="Günlük otomatik analiz ve akıllı öneriler"
+      icon={Brain}
+    >
       <Tabs defaultValue="daily" className="w-full space-y-6">
         <TabsList className="grid w-full grid-cols-2 max-w-md min-h-[2.5rem]">
           <TabsTrigger value="daily" className="flex items-center gap-2 justify-center">
@@ -305,6 +297,6 @@ export default function AIInsightsDashboard() {
           <BulkAnalysisDashboard />
         </TabsContent>
       </Tabs>
-    </div>
+    </AIToolsLayout>
   );
 }
