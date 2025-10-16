@@ -54,40 +54,6 @@ export default function AIToolsHub({ studentId, studentName, onUpdate }: AITools
 
   return (
     <div className="space-y-4">
-      {/* Hızlı Eylemler */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-primary" />
-            Hızlı AI Eylemleri
-          </CardTitle>
-          <CardDescription>
-            Öğrenci analizi için AI araçlarına hızlı erişim
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={handleAIChat} className="gap-2">
-              <Bot className="h-4 w-4" />
-              AI ile Konuş
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleRiskAnalysis}
-              disabled={analyzingRisk}
-              className="gap-2"
-            >
-              {analyzingRisk ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Shield className="h-4 w-4" />
-              )}
-              Risk Analizi Yap
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* AI Araçları Sekmeleri */}
       <Tabs defaultValue="mudahale" className="space-y-4">
         <TabsList className="grid grid-cols-3 md:grid-cols-4 gap-2 h-auto">
@@ -151,6 +117,40 @@ export default function AIToolsHub({ studentId, studentName, onUpdate }: AITools
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Hızlı Eylemler */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary" />
+            Hızlı AI Eylemleri
+          </CardTitle>
+          <CardDescription>
+            Öğrenci analizi için AI araçlarına hızlı erişim
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={handleAIChat} className="gap-2">
+              <Bot className="h-4 w-4" />
+              AI ile Konuş
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleRiskAnalysis}
+              disabled={analyzingRisk}
+              className="gap-2"
+            >
+              {analyzingRisk ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Shield className="h-4 w-4" />
+              )}
+              Risk Analizi Yap
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

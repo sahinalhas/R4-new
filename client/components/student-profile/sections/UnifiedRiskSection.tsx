@@ -92,6 +92,47 @@ export default function UnifiedRiskSection({ studentId, student, onUpdate }: Uni
 
   return (
     <div className="space-y-4">
+      {/* Detaylı Risk Sekmeleri */}
+      <Tabs defaultValue="degerlendirme" className="space-y-4">
+        <TabsList className="grid grid-cols-3 gap-2 h-auto min-h-[2.5rem]">
+          <TabsTrigger value="degerlendirme" className="flex items-center gap-2 justify-center">
+            <Shield className="h-4 w-4" />
+            Risk Değerlendirme
+          </TabsTrigger>
+          <TabsTrigger value="davranis" className="flex items-center gap-2 justify-center">
+            <AlertTriangle className="h-4 w-4" />
+            Davranış Takibi
+          </TabsTrigger>
+          <TabsTrigger value="koruyucu" className="flex items-center gap-2 justify-center">
+            <Info className="h-4 w-4" />
+            Koruyucu Faktörler
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="degerlendirme">
+          <RiskDegerlendirmeSection
+            studentId={studentId}
+            riskFactors={riskData.riskFactors}
+            onUpdate={onUpdate}
+          />
+        </TabsContent>
+
+        <TabsContent value="davranis">
+          <DavranisTakibiSection
+            studentId={studentId}
+            behaviorIncidents={[]} // Will be loaded inside the component
+            onUpdate={onUpdate}
+          />
+        </TabsContent>
+
+        <TabsContent value="koruyucu">
+          <RiskProtectiveProfileSection
+            studentId={studentId}
+            onUpdate={onUpdate}
+          />
+        </TabsContent>
+      </Tabs>
+
       {/* Risk Özeti */}
       <Card className={`border-2 ${
         riskData.riskCategory === "critical" ? "border-red-400" :
@@ -203,47 +244,6 @@ export default function UnifiedRiskSection({ studentId, student, onUpdate }: Uni
           </Alert>
         </CardContent>
       </Card>
-
-      {/* Detaylı Risk Sekmeleri */}
-      <Tabs defaultValue="degerlendirme" className="space-y-4">
-        <TabsList className="grid grid-cols-3 gap-2 h-auto min-h-[2.5rem]">
-          <TabsTrigger value="degerlendirme" className="flex items-center gap-2 justify-center">
-            <Shield className="h-4 w-4" />
-            Risk Değerlendirme
-          </TabsTrigger>
-          <TabsTrigger value="davranis" className="flex items-center gap-2 justify-center">
-            <AlertTriangle className="h-4 w-4" />
-            Davranış Takibi
-          </TabsTrigger>
-          <TabsTrigger value="koruyucu" className="flex items-center gap-2 justify-center">
-            <Info className="h-4 w-4" />
-            Koruyucu Faktörler
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="degerlendirme">
-          <RiskDegerlendirmeSection
-            studentId={studentId}
-            riskFactors={riskData.riskFactors}
-            onUpdate={onUpdate}
-          />
-        </TabsContent>
-
-        <TabsContent value="davranis">
-          <DavranisTakibiSection
-            studentId={studentId}
-            behaviorIncidents={[]} // Will be loaded inside the component
-            onUpdate={onUpdate}
-          />
-        </TabsContent>
-
-        <TabsContent value="koruyucu">
-          <RiskProtectiveProfileSection
-            studentId={studentId}
-            onUpdate={onUpdate}
-          />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }
