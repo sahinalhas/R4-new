@@ -24,58 +24,97 @@ import {
   Mail,
   Bot,
   LayoutDashboard,
+  Settings,
+  Home,
 } from "lucide-react";
 
+// YENİ DÜZENLENMİŞ ANA SEKMELER
 export const MAIN_TABS = [
   {
     value: "dashboard",
-    label: "Dashboard",
+    label: "Özet",
     icon: LayoutDashboard,
+    description: "Öğrenci özeti ve önemli göstergeler"
   },
   {
-    value: "genel",
-    label: "Genel Bilgiler",
+    value: "kimlik",
+    label: "Kimlik & Temel Bilgiler",
     icon: User,
+    description: "Kişisel bilgiler, iletişim, veli ve sağlık"
   },
   {
-    value: "aile",
+    value: "akademik",
+    label: "Akademik Profil",
+    icon: GraduationCap,
+    description: "Akademik performans ve çalışma programı"
+  },
+  {
+    value: "kisisel-sosyal",
+    label: "Kişisel & Sosyal",
+    icon: Brain,
+    description: "Sosyal-duygusal gelişim, kişilik ve yetenekler"
+  },
+  {
+    value: "risk-mudahale",
+    label: "Risk & Müdahale",
+    icon: Shield,
+    description: "Risk değerlendirme, davranış ve müdahale planı"
+  },
+  {
+    value: "aile-iletisim",
     label: "Aile & İletişim",
     icon: Heart,
-  },
-  {
-    value: "egitsel",
-    label: "Eğitsel Rehberlik",
-    icon: GraduationCap,
-  },
-  {
-    value: "kisisel-gelisim",
-    label: "Kişisel Gelişim",
-    icon: Brain,
+    description: "Veli bilgileri, görüşmeler ve aile katılımı"
   },
   {
     value: "mesleki",
     label: "Mesleki Rehberlik",
     icon: Briefcase,
+    description: "Kariyer planlama ve hedefler"
+  },
+  {
+    value: "ai-tools",
+    label: "AI Araçları",
+    icon: Bot,
+    description: "AI asistan, raporlar ve analizler"
+  },
+  {
+    value: "sistem",
+    label: "Sistem",
+    icon: Settings,
+    description: "Profil geçmişi ve teknik ayarlar"
   },
 ] as const;
 
-export const GENEL_TABS = [
+// KİMLİK & TEMEL BİLGİLER ALT SEKMELERİ
+export const KIMLIK_TABS = [
   {
-    value: "ogrenci",
-    label: "Öğrenci",
+    value: "kisisel",
+    label: "Kişisel Bilgiler",
     icon: User,
   },
   {
+    value: "iletisim-veli",
+    label: "İletişim & Veli",
+    icon: Users,
+  },
+  {
     value: "saglik",
-    label: "Sağlık",
+    label: "Sağlık Profili",
     icon: Activity,
+  },
+  {
+    value: "ozel-durum",
+    label: "Özel Durum",
+    icon: FileText,
   },
 ] as const;
 
-export const EGITSEL_TABS = [
+// AKADEMİK PROFİL ALT SEKMELERİ
+export const AKADEMIK_TABS = [
   {
-    value: "akademik",
-    label: "Akademik",
+    value: "performans",
+    label: "Akademik Performans",
     icon: TrendingUp,
   },
   {
@@ -84,18 +123,8 @@ export const EGITSEL_TABS = [
     icon: BookOpen,
   },
   {
-    value: "ozel-egitim",
-    label: "Özel Eğitim",
-    icon: FileText,
-  },
-  {
-    value: "ai-mudahale",
-    label: "AI Müdahale Planı",
-    icon: Bot,
-  },
-  {
     value: "ilerleme",
-    label: "İlerleme",
+    label: "İlerleme & Başarılar",
     icon: Trophy,
   },
   {
@@ -103,13 +132,86 @@ export const EGITSEL_TABS = [
     label: "Anketler",
     icon: PieChart,
   },
+] as const;
+
+// KİŞİSEL & SOSYAL ALT SEKMELERİ
+export const KISISEL_SOSYAL_TABS = [
   {
-    value: "ai-raporlar",
-    label: "AI Raporlar",
+    value: "sosyal-duygusal",
+    label: "Sosyal-Duygusal",
+    icon: Heart,
+  },
+  {
+    value: "kisilik",
+    label: "Kişilik Profili",
+    icon: Brain,
+  },
+  {
+    value: "yetenek-ilgi",
+    label: "Yetenek & İlgi",
     icon: Sparkles,
+  },
+  {
+    value: "motivasyon",
+    label: "Motivasyon",
+    icon: Target,
+  },
+  {
+    value: "360-degerlendirme",
+    label: "360° Değerlendirme",
+    icon: Users,
   },
 ] as const;
 
+// RİSK & MÜDAHALE ALT SEKMELERİ
+export const RISK_MUDAHALE_TABS = [
+  {
+    value: "risk-degerlendirme",
+    label: "Risk Değerlendirme",
+    icon: AlertTriangle,
+  },
+  {
+    value: "davranis-takip",
+    label: "Davranış Takibi",
+    icon: ClipboardList,
+  },
+  {
+    value: "koruyucu-faktorler",
+    label: "Koruyucu Faktörler",
+    icon: Shield,
+  },
+  {
+    value: "mudahale-plani",
+    label: "Müdahale Planı",
+    icon: FileText,
+  },
+] as const;
+
+// AİLE & İLETİŞİM ALT SEKMELERİ
+export const AILE_ILETISIM_TABS = [
+  {
+    value: "veli-bilgileri",
+    label: "Veli Bilgileri",
+    icon: Users,
+  },
+  {
+    value: "gorusmeler",
+    label: "Tüm Görüşmeler",
+    icon: MessageCircle,
+  },
+  {
+    value: "ev-ziyaretleri",
+    label: "Ev Ziyaretleri",
+    icon: Home,
+  },
+  {
+    value: "aile-katilim",
+    label: "Aile Katılımı",
+    icon: Star,
+  },
+] as const;
+
+// MESLEKİ REHBERLİK ALT SEKMELERİ
 export const MESLEKI_TABS = [
   {
     value: "hedefler",
@@ -123,58 +225,61 @@ export const MESLEKI_TABS = [
   },
 ] as const;
 
-export const KISISEL_GELISIM_TABS = [
+// AI ARAÇLARI ALT SEKMELERİ
+export const AI_TOOLS_TABS = [
   {
-    value: "sosyal-duygusal",
-    label: "Sosyal-Duygusal",
-    icon: Heart,
+    value: "ai-asistan",
+    label: "AI Asistan",
+    icon: Bot,
   },
   {
-    value: "davranis",
-    label: "Davranış",
-    icon: ClipboardList,
+    value: "risk-analiz",
+    label: "Risk Analizi",
+    icon: ShieldAlert,
   },
   {
-    value: "risk",
-    label: "Risk & Koruyucu",
-    icon: AlertTriangle,
+    value: "mudahale-onerileri",
+    label: "Müdahale Önerileri",
+    icon: Sparkles,
   },
   {
-    value: "gorusmeler",
-    label: "Görüşmeler",
-    icon: MessageCircle,
+    value: "raporlar",
+    label: "Otomatik Raporlar",
+    icon: FileText,
   },
   {
-    value: "kisilik",
-    label: "Kişilik",
-    icon: Brain,
+    value: "veli-iletisim",
+    label: "Veli İletişim Asistanı",
+    icon: Mail,
   },
   {
-    value: "360-degerlendirme",
-    label: "360° Değerlendirme",
-    icon: Users,
+    value: "sesli-not",
+    label: "Sesli Not & Analiz",
+    icon: Activity,
   },
 ] as const;
 
-export const AILE_TABS = [
+// SİSTEM ALT SEKMELERİ (Teknik kullanıcılar için)
+export const SISTEM_TABS = [
   {
-    value: "veli-gorusmeleri",
-    label: "Veli Görüşmeleri",
-    icon: Users,
+    value: "profil-gecmisi",
+    label: "Profil Geçmişi",
+    icon: Database,
   },
   {
-    value: "ev-ziyaretleri",
-    label: "Ev Ziyaretleri",
-    icon: Heart,
+    value: "manuel-duzeltme",
+    label: "Manuel Düzeltme",
+    icon: Settings,
   },
   {
-    value: "aile-katilim",
-    label: "Aile Katılımı",
-    icon: Star,
-  },
-  {
-    value: "ai-iletisim",
-    label: "AI İletişim Asistanı",
-    icon: Mail,
+    value: "celiski-cozum",
+    label: "Çelişki Çözümü",
+    icon: AlertTriangle,
   },
 ] as const;
+
+// ESKI SEKMELER - GERIYE DÖNÜK UYUMLULUK İÇİN (Yavaşça kaldırılacak)
+export const GENEL_TABS = KIMLIK_TABS;
+export const EGITSEL_TABS = AKADEMIK_TABS;
+export const KISISEL_GELISIM_TABS = KISISEL_SOSYAL_TABS;
+export const AILE_TABS = AILE_ILETISIM_TABS;
