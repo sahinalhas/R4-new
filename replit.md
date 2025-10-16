@@ -10,13 +10,15 @@ Rehber360 is a comprehensive Turkish-language student guidance and management sy
   - **Unified Meetings Section:** Merged parent meetings, individual counseling, group sessions into UnifiedMeetingsSection (useUnifiedMeetings hook)
   - **AI Tools Hub:** Centralized all AI features (intervention recommendations, auto reports, parent communication, voice notes) into dedicated AIToolsHub
   - **Simplified Dashboard:** Removed technical tools (manual correction, conflict resolution) - moved to dedicated "Sistem" tab
-  - **Streamlined Veli Information:** Removed redundant İletişim-Veli tab - all contact/parent info consolidated in BasicInfoSection (Kişisel Bilgiler)
+  - **Streamlined Guardian Information:** Removed redundant "Veli Bilgileri" subtab from Aile-İletişim section - all guardian/contact info consolidated in BasicInfoSection (Kişisel Bilgiler tab) with full editing capability
   - **Fixed Authentication:** Updated useUnifiedRisk and useUnifiedMeetings hooks to use apiClient instead of raw fetch for proper auth headers
   - **Backend Integration:** IlerlemeTakibiSection now uses coaching API (getAchievementsByStudent, addAchievement) instead of localStorage
-  - **Survey System Integration:** AnketlerSection fully synchronized with main survey system API (survey-responses, survey-distributions)
+  - **Survey System Integration:** AnketlerSection fully synchronized with main survey system API (survey-responses, survey-distributions) - counselors can view student surveys and fill surveys on behalf of students
   - **Removed Student Self-Assessment:** Eliminated "Günlük Değerlendirme" feature - system is counselor-operated, not student-facing
+  - **Props Cleanup:** Removed redundant props from IlerlemeTakibiSection and AnketlerSection - components now fetch data directly from backend APIs
   - **Information Architecture:** Each piece of information appears only once, related items grouped logically, counselor-centric organization
-  - All P0 priorities from analysis report completed: risk consolidation, meetings consolidation, dashboard simplification, parent information unification, AI tools centralization
+  - **Aile & İletişim Tab:** Now focused on three core areas - Tüm Görüşmeler (unified meetings), Ev Ziyaretleri (home visits), Aile Katılımı (family participation)
+  - All P0 priorities from analysis report completed: risk consolidation, meetings consolidation, dashboard simplification, guardian information unification, AI tools centralization, survey system integration
 
 ## Recent Changes (October 15, 2025)
 - **Code Quality Refactoring - AI Components & Constants:** Comprehensive code quality improvements and standardization
