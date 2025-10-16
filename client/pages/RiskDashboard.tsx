@@ -59,18 +59,18 @@ export default function RiskDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Risk Değerlendirme ve Erken Uyarı Sistemi</h1>
-        <p className="text-muted-foreground mt-2">
-          Öğrenci risk analizi, erken uyarılar ve müdahale önerileri
-        </p>
-      </div>
-
       <Tabs defaultValue="alerts" className="space-y-4">
         <TabsList>
           <TabsTrigger value="alerts">Aktif Uyarılar</TabsTrigger>
           <TabsTrigger value="students">Yüksek Riskli Öğrenciler</TabsTrigger>
         </TabsList>
+
+        <div>
+        <h1 className="text-3xl font-bold">Risk Değerlendirme ve Erken Uyarı Sistemi</h1>
+        <p className="text-muted-foreground mt-2">
+          Öğrenci risk analizi, erken uyarılar ve müdahale önerileri
+        </p>
+      </div>
 
         <TabsContent value="alerts" className="space-y-4">
           <Card>
