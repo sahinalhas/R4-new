@@ -418,7 +418,27 @@ export default function AIAssistant() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6">
+      <Tabs defaultValue="chat" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="chat" className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Sohbet
+          </TabsTrigger>
+          <TabsTrigger value="meeting-prep" className="gap-2">
+            <Calendar className="h-4 w-4" />
+            Toplantı Hazırlık
+          </TabsTrigger>
+          <TabsTrigger value="priority" className="gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Öncelikli Öğrenciler
+          </TabsTrigger>
+          <TabsTrigger value="resources" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            Kaynaklar
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="mb-6">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl backdrop-blur-sm">
@@ -504,26 +524,6 @@ export default function AIAssistant() {
           )}
         </div>
       </div>
-
-      <Tabs defaultValue="chat" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="chat" className="gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Sohbet
-          </TabsTrigger>
-          <TabsTrigger value="meeting-prep" className="gap-2">
-            <Calendar className="h-4 w-4" />
-            Toplantı Hazırlık
-          </TabsTrigger>
-          <TabsTrigger value="priority" className="gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            Öncelikli Öğrenciler
-          </TabsTrigger>
-          <TabsTrigger value="resources" className="gap-2">
-            <BookOpen className="h-4 w-4" />
-            Kaynaklar
-          </TabsTrigger>
-        </TabsList>
 
         <TabsContent value="chat" className="space-y-4">
           {showSearch && (
