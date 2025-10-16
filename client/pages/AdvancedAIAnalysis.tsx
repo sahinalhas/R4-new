@@ -75,18 +75,6 @@ export default function AdvancedAIAnalysis() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <Tabs value={analysisMode} onValueChange={(v) => setAnalysisMode(v as any)} className="w-auto space-y-6">
-          <TabsList>
-            <TabsTrigger value="class" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Sınıf Analizi
-            </TabsTrigger>
-            <TabsTrigger value="multi-student" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Çoklu Öğrenci
-            </TabsTrigger>
-          </TabsList>
-
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -97,7 +85,19 @@ export default function AdvancedAIAnalysis() {
         </div>
       </div>
 
-      <TabsContent value="class">
+      <Tabs value={analysisMode} onValueChange={(v) => setAnalysisMode(v as any)} className="w-auto space-y-6">
+        <TabsList>
+          <TabsTrigger value="class" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Sınıf Analizi
+          </TabsTrigger>
+          <TabsTrigger value="multi-student" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Çoklu Öğrenci
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="class" className="mt-0">
         <Card>
           <CardHeader>
             <CardTitle>Sınıf Seçimi</CardTitle>
@@ -118,10 +118,10 @@ export default function AdvancedAIAnalysis() {
             </Select>
           </CardContent>
         </Card>
-      </TabsContent>
+        </TabsContent>
 
-      <TabsContent value="multi-student">
-        <Card>
+        <TabsContent value="multi-student" className="mt-0">
+          <Card>
           <CardHeader>
             <CardTitle>Öğrenci Seçimi</CardTitle>
             <CardDescription>
@@ -153,7 +153,7 @@ export default function AdvancedAIAnalysis() {
             )}
           </CardContent>
         </Card>
-      </TabsContent>
+        </TabsContent>
       </Tabs>
 
       {error && (
