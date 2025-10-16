@@ -8,6 +8,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Calendar, Clock, AlertTriangle, CheckCircle2, Users, FileText, Phone, Activity } from 'lucide-react';
 import { getTodayActionPlan, generateDailyActionPlan } from '../lib/api/advanced-ai-analysis.api';
 import type { CounselorDailyPlan, HourlyAction } from '../../shared/types/advanced-ai-analysis.types';
+import { AIToolsLayout } from '@/components/ai-tools/AIToolsLayout';
+import { AIToolsLoadingState } from '@/components/ai-tools/AIToolsLoadingState';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function DailyActionPlan() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -48,39 +52,41 @@ export default function DailyActionPlan() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Günlük plan hazırlanıyor...</p>
-        </div>
-      </div>
+      <AIToolsLoadingState 
+        icon={Calendar}
+        message="Günlük plan hazırlanıyor..."
+      />
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <p className="text-red-600">Plan oluşturulamadı</p>
-        <button
-          onClick={() => refetch()}
-          className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-        >
-          Tekrar Dene
-        </button>
-      </div>
+      <AIToolsLayout
+        title="Günlük Eylem Planı"
+        icon={Calendar}
+      >
+        <div className="text-center py-12">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600">Plan oluşturulamadı</p>
+          <Button
+            onClick={() => refetch()}
+            className="mt-4"
+          >
+            Tekrar Dene
+          </Button>
+        </div>
+      </AIToolsLayout>
     );
   }
 
   if (!plan) return null;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Günlük Eylem Planı</h1>
-          <p className="text-muted-foreground mt-1">{plan.counselorName}</p>
-        </div>
+    <AIToolsLayout
+      title="Günlük Eylem Planı"
+      description={plan.counselorName}
+      icon={Calendar}
+      actions={
         <div className="flex items-center gap-4">
           <input
             type="date"
@@ -88,16 +94,14 @@ export default function DailyActionPlan() {
             onChange={(e) => setSelectedDate(e.target.value)}
             className="px-4 py-2 border rounded-md"
           />
-          <button
-            onClick={handleRefresh}
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-          >
+          <Button onClick={handleRefresh}>
             Yeni Plan Oluştur
-          </button>
+          </Button>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      }
+    >
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg border shadow-sm">
           <div className="text-sm text-muted-foreground">Toplam Aksiyon</div>
           <div className="text-2xl font-bold mt-1">{plan.dailySummary?.totalActions || 0}</div>
@@ -290,6 +294,7 @@ export default function DailyActionPlan() {
           </ul>
         </div>
       )}
-    </div>
+      </div>
+    </AIToolsLayout>
   );
 }
