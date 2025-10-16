@@ -109,6 +109,7 @@ function useBreadcrumbs() {
       anketler: "Anket & Test",
       raporlar: "Raporlama",
       ayarlar: "Ayarlar",
+      "ai-araclari": "AI Araçları",
       risk: "Risk Takip",
       "ai-asistan": "AI Asistan",
       "ai-insights": "Günlük AI Raporları",
@@ -288,61 +289,13 @@ export default function Rehber360Layout() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 
-                <Collapsible defaultOpen className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip="AI Araçları">
-                        <Sparkles />
-                        <span>AI Araçları</span>
-                        <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink to="/risk">
-                              <ShieldAlert />
-                              <span>Risk Takip</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink to="/ai-asistan">
-                              <Bot />
-                              <span>AI Asistan</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink to="/ai-insights">
-                              <Brain />
-                              <span>Günlük AI Raporları</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink to="/gelismis-analiz">
-                              <Sparkles />
-                              <span>Derinlemesine Analiz</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink to="/gunluk-plan">
-                              <CalendarDays />
-                              <span>Günlük Plan</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="AI Araçları">
+                    <NavLink to="/ai-araclari">
+                      <Sparkles /> <span>AI Araçları</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Ayarlar">
