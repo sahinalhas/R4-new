@@ -814,36 +814,36 @@ export default function CounselingSessions() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="active" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-5 min-h-[2.5rem]">
+          <TabsTrigger value="active" className="flex items-center gap-2 justify-center">
             <Clock className="h-4 w-4" />
             Aktif Görüşmeler
             {activeSessions.length > 0 && (
               <Badge variant="secondary" className="ml-2">{activeSessions.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="reminders" className="flex items-center gap-2">
+          <TabsTrigger value="reminders" className="flex items-center gap-2 justify-center">
             <Bell className="h-4 w-4" />
             Hatırlatmalar
           </TabsTrigger>
-          <TabsTrigger value="outcomes" className="flex items-center gap-2">
+          <TabsTrigger value="outcomes" className="flex items-center gap-2 justify-center">
             <CheckCircle2 className="h-4 w-4" />
             Sonuçlar
             {outcomes.length > 0 && (
               <Badge variant="secondary" className="ml-2">{outcomes.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
+          <TabsTrigger value="analytics" className="flex items-center gap-2 justify-center">
             <BarChart3 className="h-4 w-4" />
             İstatistikler
           </TabsTrigger>
-          <TabsTrigger value="journal" className="flex items-center gap-2">
+          <TabsTrigger value="journal" className="flex items-center gap-2 justify-center">
             <FileText className="h-4 w-4" />
             Görüşme Defteri
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="space-y-4">
+        <TabsContent value="active" className="space-y-4 min-h-[400px]">
           <ActiveSessionsGrid
             sessions={activeSessions}
             isLoading={sessionsLoading}
@@ -853,7 +853,7 @@ export default function CounselingSessions() {
           />
         </TabsContent>
 
-        <TabsContent value="reminders" className="space-y-4">
+        <TabsContent value="reminders" className="space-y-4 min-h-[400px]">
           <RemindersTab
             reminders={reminders}
             followUps={followUps}
@@ -868,7 +868,7 @@ export default function CounselingSessions() {
           />
         </TabsContent>
 
-        <TabsContent value="outcomes" className="space-y-4">
+        <TabsContent value="outcomes" className="space-y-4 min-h-[400px]">
           <OutcomesTab
             outcomes={outcomes}
             onCreateOutcome={handleCreateOutcome}
@@ -877,11 +877,11 @@ export default function CounselingSessions() {
           />
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4">
+        <TabsContent value="analytics" className="space-y-4 min-h-[400px]">
           <SessionAnalytics />
         </TabsContent>
 
-        <TabsContent value="journal" className="space-y-4">
+        <TabsContent value="journal" className="space-y-4 min-h-[400px]">
           <SessionFiltersComponent
             filters={filters}
             onFiltersChange={setFilters}

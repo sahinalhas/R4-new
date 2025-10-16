@@ -174,7 +174,7 @@ export default function UnifiedRiskSection({ studentId, student, onUpdate }: Uni
           )}
 
           {/* AI Risk Faktörleri */}
-          {riskData.enhancedRisk && riskData.enhancedRisk.factors.length > 0 && (
+          {riskData.enhancedRisk?.factors && riskData.enhancedRisk.factors.length > 0 && (
             <div>
               <div className="text-sm font-medium mb-2">AI Tespit Edilen Risk Faktörleri:</div>
               <div className="space-y-1">
@@ -206,14 +206,17 @@ export default function UnifiedRiskSection({ studentId, student, onUpdate }: Uni
 
       {/* Detaylı Risk Sekmeleri */}
       <Tabs defaultValue="degerlendirme" className="space-y-4">
-        <TabsList className="grid grid-cols-3 gap-2 h-auto">
-          <TabsTrigger value="degerlendirme" className="text-xs">
+        <TabsList className="grid grid-cols-3 gap-2 h-auto min-h-[2.5rem]">
+          <TabsTrigger value="degerlendirme" className="flex items-center gap-2 justify-center">
+            <Shield className="h-4 w-4" />
             Risk Değerlendirme
           </TabsTrigger>
-          <TabsTrigger value="davranis" className="text-xs">
+          <TabsTrigger value="davranis" className="flex items-center gap-2 justify-center">
+            <AlertTriangle className="h-4 w-4" />
             Davranış Takibi
           </TabsTrigger>
-          <TabsTrigger value="koruyucu" className="text-xs">
+          <TabsTrigger value="koruyucu" className="flex items-center gap-2 justify-center">
+            <Info className="h-4 w-4" />
             Koruyucu Faktörler
           </TabsTrigger>
         </TabsList>

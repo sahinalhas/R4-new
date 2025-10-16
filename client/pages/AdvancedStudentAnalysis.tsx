@@ -50,16 +50,16 @@ export default function AdvancedStudentAnalysis() {
       </div>
 
       <Tabs defaultValue="psychological" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="psychological" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-3 min-h-[2.5rem]">
+          <TabsTrigger value="psychological" className="flex items-center gap-2 justify-center">
             <Brain className="w-4 h-4" />
             Psikolojik Derinlik
           </TabsTrigger>
-          <TabsTrigger value="predictive" className="flex items-center gap-2">
+          <TabsTrigger value="predictive" className="flex items-center gap-2 justify-center">
             <TrendingUp className="w-4 h-4" />
             Öngörücü Risk
           </TabsTrigger>
-          <TabsTrigger value="timeline" className="flex items-center gap-2">
+          <TabsTrigger value="timeline" className="flex items-center gap-2 justify-center">
             <Clock className="w-4 h-4" />
             Zaman Çizelgesi
           </TabsTrigger>

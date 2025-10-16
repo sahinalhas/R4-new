@@ -45,46 +45,46 @@ export default function AIToolsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6">
-          <TabsTrigger value="risk" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-5 mb-6 min-h-[2.5rem]">
+          <TabsTrigger value="risk" className="flex items-center gap-2 justify-center">
             <ShieldAlert className="h-4 w-4" />
             <span className="hidden sm:inline">Risk Takip</span>
           </TabsTrigger>
-          <TabsTrigger value="ai-asistan" className="flex items-center gap-2">
+          <TabsTrigger value="ai-asistan" className="flex items-center gap-2 justify-center">
             <Bot className="h-4 w-4" />
             <span className="hidden sm:inline">AI Asistan</span>
           </TabsTrigger>
-          <TabsTrigger value="ai-insights" className="flex items-center gap-2">
+          <TabsTrigger value="ai-insights" className="flex items-center gap-2 justify-center">
             <Brain className="h-4 w-4" />
             <span className="hidden sm:inline">Günlük AI</span>
           </TabsTrigger>
-          <TabsTrigger value="gelismis-analiz" className="flex items-center gap-2">
+          <TabsTrigger value="gelismis-analiz" className="flex items-center gap-2 justify-center">
             <Sparkles className="h-4 w-4" />
             <span className="hidden sm:inline">Derinlemesine</span>
           </TabsTrigger>
-          <TabsTrigger value="gunluk-plan" className="flex items-center gap-2">
+          <TabsTrigger value="gunluk-plan" className="flex items-center gap-2 justify-center">
             <CalendarDays className="h-4 w-4" />
             <span className="hidden sm:inline">Günlük Plan</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="risk" className="mt-0">
+        <TabsContent value="risk" className="mt-0 min-h-[400px]">
           <RiskDashboard />
         </TabsContent>
 
-        <TabsContent value="ai-asistan" className="mt-0">
+        <TabsContent value="ai-asistan" className="mt-0 min-h-[400px]">
           <AIAssistant />
         </TabsContent>
 
-        <TabsContent value="ai-insights" className="mt-0">
+        <TabsContent value="ai-insights" className="mt-0 min-h-[400px]">
           <AIInsightsDashboard />
         </TabsContent>
 
-        <TabsContent value="gelismis-analiz" className="mt-0">
+        <TabsContent value="gelismis-analiz" className="mt-0 min-h-[400px]">
           <AdvancedAIAnalysis />
         </TabsContent>
 
-        <TabsContent value="gunluk-plan" className="mt-0">
+        <TabsContent value="gunluk-plan" className="mt-0 min-h-[400px]">
           <DailyActionPlan />
         </TabsContent>
       </Tabs>

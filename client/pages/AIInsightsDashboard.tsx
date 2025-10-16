@@ -97,18 +97,18 @@ export default function AIInsightsDashboard() {
       </div>
 
       <Tabs defaultValue="daily" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="daily" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 max-w-md min-h-[2.5rem]">
+          <TabsTrigger value="daily" className="flex items-center gap-2 justify-center">
             <Calendar className="h-4 w-4" />
             Günlük Insights
           </TabsTrigger>
-          <TabsTrigger value="bulk" className="flex items-center gap-2">
+          <TabsTrigger value="bulk" className="flex items-center gap-2 justify-center">
             <School className="h-4 w-4" />
             Toplu Analiz
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="daily" className="space-y-6 mt-6">
+        <TabsContent value="daily" className="space-y-6 mt-6 min-h-[400px]">
           <div className="flex justify-end">
             <Button onClick={generateNewInsights} disabled={generating}>
               {generating ? 'Oluşturuluyor...' : 'Yeni Analiz Oluştur'}
@@ -301,7 +301,7 @@ export default function AIInsightsDashboard() {
       )}
         </TabsContent>
 
-        <TabsContent value="bulk" className="mt-6">
+        <TabsContent value="bulk" className="mt-6 min-h-[400px]">
           <BulkAnalysisDashboard />
         </TabsContent>
       </Tabs>

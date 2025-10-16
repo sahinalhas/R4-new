@@ -81,16 +81,16 @@ export function StudentProfileTabs({
   return (
     <Tabs defaultValue="dashboard" className="space-y-4">
       {/* Ana Sekmeler */}
-      <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
+      <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start min-h-[2.5rem]">
         {MAIN_TABS.map(({ value, label, icon: Icon }) => (
-          <TabsTrigger key={value} value={value} className="flex items-center gap-2">
+          <TabsTrigger key={value} value={value} className="flex items-center gap-2 shrink-0">
             <Icon className="h-4 w-4" /> {label}
           </TabsTrigger>
         ))}
       </TabsList>
 
       {/* DASHBOARD - SADELEŞTİRİLMİŞ */}
-      <TabsContent value="dashboard" className="mt-4 space-y-4">
+      <TabsContent value="dashboard" className="mt-4 space-y-4 min-h-[400px]">
         <LiveProfileCard studentId={studentId} />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -102,14 +102,14 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* KİMLİK & TEMEL BİLGİLER */}
-      <TabsContent value="kimlik" className="mt-4">
+      <TabsContent value="kimlik" className="mt-4 min-h-[400px]">
         <Tabs defaultValue="kisisel" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto min-h-[2.5rem]">
             {KIMLIK_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-2 data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background shrink-0"
               >
                 <Icon className="h-4 w-4" />
                 {label}
@@ -139,14 +139,14 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* AKADEMİK PROFİL */}
-      <TabsContent value="akademik" className="mt-4">
+      <TabsContent value="akademik" className="mt-4 min-h-[400px]">
         <Tabs defaultValue="performans" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto min-h-[2.5rem]">
             {AKADEMIK_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-2 data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background shrink-0"
               >
                 <Icon className="h-4 w-4" />
                 {label}
@@ -182,14 +182,14 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* KİŞİSEL & SOSYAL GELİŞİM */}
-      <TabsContent value="kisisel-sosyal" className="mt-4">
+      <TabsContent value="kisisel-sosyal" className="mt-4 min-h-[400px]">
         <Tabs defaultValue="sosyal-duygusal" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto min-h-[2.5rem]">
             {KISISEL_SOSYAL_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-2 data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background shrink-0"
               >
                 <Icon className="h-4 w-4" />
                 {label}
@@ -237,7 +237,7 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* RİSK & MÜDAHALE - BİRLEŞTİRİLMİŞ */}
-      <TabsContent value="risk-mudahale" className="mt-4">
+      <TabsContent value="risk-mudahale" className="mt-4 min-h-[400px]">
         <UnifiedRiskSection
           studentId={studentId}
           student={student}
@@ -246,14 +246,14 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* AİLE & İLETİŞİM - BİRLEŞTİRİLMİŞ */}
-      <TabsContent value="aile-iletisim" className="mt-4">
+      <TabsContent value="aile-iletisim" className="mt-4 min-h-[400px]">
         <Tabs defaultValue="gorusmeler" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto min-h-[2.5rem]">
             {AILE_ILETISIM_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-2 data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background shrink-0"
               >
                 <Icon className="h-4 w-4" />
                 {label}
@@ -287,14 +287,14 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* MESLEKİ REHBERLİK */}
-      <TabsContent value="mesleki" className="mt-4">
+      <TabsContent value="mesleki" className="mt-4 min-h-[400px]">
         <Tabs defaultValue="hedefler" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto min-h-[2.5rem]">
             {MESLEKI_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-2 data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background shrink-0"
               >
                 <Icon className="h-4 w-4" />
                 {label}
@@ -320,7 +320,7 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* AI ARAÇLARI - BİRLEŞTİRİLMİŞ */}
-      <TabsContent value="ai-tools" className="mt-4">
+      <TabsContent value="ai-tools" className="mt-4 min-h-[400px]">
         <AIToolsHub
           studentId={studentId}
           studentName={`${student.ad} ${student.soyad}`}
@@ -329,14 +329,14 @@ export function StudentProfileTabs({
       </TabsContent>
 
       {/* SİSTEM - TEKNİK ARAÇLAR */}
-      <TabsContent value="sistem" className="mt-4">
+      <TabsContent value="sistem" className="mt-4 min-h-[400px]">
         <Tabs defaultValue="profil-gecmisi" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto min-h-[2.5rem]">
             {SISTEM_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
-                className="flex items-center gap-2 data-[state=active]:bg-background"
+                className="flex items-center gap-2 data-[state=active]:bg-background shrink-0"
               >
                 <Icon className="h-4 w-4" />
                 {label}
