@@ -23,6 +23,10 @@ interface TemplatesListProps {
   templates: SurveyTemplate[];
   onRefresh: () => void;
   onDistribute: (template: SurveyTemplate) => void;
+  onEdit: (template: SurveyTemplate) => void;
+  onDuplicate: (template: SurveyTemplate) => void;
+  onDelete: (template: SurveyTemplate) => void;
+  onImportMEBTemplates: () => void;
 }
 
 const getTypeBadge = (type: SurveyTemplateType) => {
@@ -49,7 +53,7 @@ const getTypeBadge = (type: SurveyTemplateType) => {
   );
 };
 
-export default function TemplatesList({ templates, onRefresh, onDistribute }: TemplatesListProps) {
+export default function TemplatesList({ templates, onRefresh, onDistribute, onEdit, onDuplicate, onDelete, onImportMEBTemplates }: TemplatesListProps) {
   return (
     <Card>
       <CardHeader>
@@ -61,7 +65,7 @@ export default function TemplatesList({ templates, onRefresh, onDistribute }: Te
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={onImportMEBTemplates}>
               <Download className="mr-2 h-4 w-4" />
               MEB Şablonları
             </Button>
@@ -121,12 +125,12 @@ export default function TemplatesList({ templates, onRefresh, onDistribute }: Te
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem>Düzenle</DropdownMenuItem>
-                        <DropdownMenuItem>Kopyala</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEdit(template)}>Düzenle</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onDuplicate(template)}>Kopyala</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onDistribute(template)}>
                           Dağıt
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">Sil</DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600" onClick={() => onDelete(template)}>Sil</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

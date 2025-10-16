@@ -37,5 +37,43 @@ export const surveyService = {
     if (!response.ok) {
       throw new Error('Failed to create distribution');
     }
+  },
+
+  async createTemplate(templateData: Partial<SurveyTemplate>): Promise<void> {
+    const response = await fetch('/api/survey-templates', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(templateData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create template');
+    }
+  },
+
+  async updateTemplate(templateId: string, templateData: Partial<SurveyTemplate>): Promise<void> {
+    const response = await fetch(`/api/survey-templates/${templateId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(templateData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update template');
+    }
+  },
+
+  async deleteTemplate(templateId: string): Promise<void> {
+    const response = await fetch(`/api/survey-templates/${templateId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete template');
+    }
   }
 };

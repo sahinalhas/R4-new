@@ -15,6 +15,8 @@ import TemplatesList from "@/components/surveys/TemplatesList";
 import DistributionsList from "@/components/surveys/DistributionsList";
 import TemplateSelector from "@/components/surveys/TemplateSelector";
 import SurveyAIAnalysis from "@/components/ai/SurveyAIAnalysis";
+import { MEB_SURVEY_TEMPLATES } from "@/lib/survey-types";
+import { getMebDefaultQuestions } from "@/components/surveys/templates/meb-templates";
 
 export default function Surveys() {
   const { toast } = useToast();
@@ -25,6 +27,7 @@ export default function Surveys() {
   const [selectedTemplate, setSelectedTemplate] = useState<SurveyTemplate | null>(null);
   const [selectedDistributionForAI, setSelectedDistributionForAI] = useState<any>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<SurveyTemplate | null>(null);
 
   const loading = templatesLoading || distributionsLoading;
 
@@ -71,6 +74,103 @@ export default function Surveys() {
     await loadQuestions(template.id);
     setSelectedTemplate(template);
     setShowTemplateSelector(false);
+  };
+
+  const handleEditTemplate = async (template: SurveyTemplate) => {
+    setEditingTemplate(template);
+  };
+
+  const handleDuplicateTemplate = async (template: SurveyTemplate) => {
+    try {
+      const duplicatedTemplate = {
+        ...template,
+        id: `${template.id}_copy_${Date.now()}`,
+        title: `${template.title} (Kopya)`,
+        createdAt: new Date().toISOString(),
+      };
+      
+      await surveyService.createTemplate(duplicatedTemplate);
+      
+      toast({ 
+        title: "Başarılı", 
+        description: "Anket şablonu kopyalandı" 
+      });
+      
+      await refreshAllData();
+    } catch (error) {
+      console.error("Error duplicating template:", error);
+      toast({ 
+        title: "Hata", 
+        description: "Anket şablonu kopyalanamadı", 
+        variant: "destructive" 
+      });
+    }
+  };
+
+  const handleDeleteTemplate = async (template: SurveyTemplate) => {
+    if (!confirm(`"${template.title}" anket şablonunu silmek istediğinizden emin misiniz?`)) {
+      return;
+    }
+
+    try {
+      await surveyService.deleteTemplate(template.id);
+      
+      toast({ 
+        title: "Başarılı", 
+        description: "Anket şablonu silindi" 
+      });
+      
+      await refreshAllData();
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      toast({ 
+        title: "Hata", 
+        description: "Anket şablonu silinemedi", 
+        variant: "destructive" 
+      });
+    }
+  };
+
+  const handleImportMEBTemplates = async () => {
+    try {
+      let importedCount = 0;
+      
+      for (const [key, templateData] of Object.entries(MEB_SURVEY_TEMPLATES)) {
+        const existingTemplate = templates.find(t => t.title === templateData.title);
+        
+        if (!existingTemplate) {
+          const template: Partial<SurveyTemplate> = {
+            id: `meb_${key.toLowerCase()}_${Date.now()}`,
+            ...templateData,
+            created_at: new Date().toISOString(),
+            isActive: true
+          };
+          
+          await surveyService.createTemplate(template);
+          importedCount++;
+        }
+      }
+      
+      if (importedCount > 0) {
+        toast({ 
+          title: "Başarılı", 
+          description: `${importedCount} adet MEB standart anket şablonu yüklendi` 
+        });
+        await refreshAllData();
+      } else {
+        toast({ 
+          title: "Bilgi", 
+          description: "Tüm MEB şablonları zaten mevcut" 
+        });
+      }
+    } catch (error) {
+      console.error("Error importing MEB templates:", error);
+      toast({ 
+        title: "Hata", 
+        description: "MEB şablonları yüklenemedi", 
+        variant: "destructive" 
+      });
+    }
   };
 
   if (loading) {
@@ -122,6 +222,10 @@ export default function Surveys() {
             templates={templates} 
             onRefresh={refreshAllData}
             onDistribute={handleCreateDistribution}
+            onEdit={handleEditTemplate}
+            onDuplicate={handleDuplicateTemplate}
+            onDelete={handleDeleteTemplate}
+            onImportMEBTemplates={handleImportMEBTemplates}
           />
         </TabsContent>
 
