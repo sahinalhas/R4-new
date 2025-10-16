@@ -164,15 +164,15 @@ export default function MeetingPrepPanel({ selectedStudent, students = [] }: Mee
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="parent" className="gap-2">
+          <TabsTrigger value="parent" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Veli Görüşmesi
           </TabsTrigger>
-          <TabsTrigger value="intervention" className="gap-2">
+          <TabsTrigger value="intervention" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
             Müdahale Planı
           </TabsTrigger>
-          <TabsTrigger value="teacher" className="gap-2">
+          <TabsTrigger value="teacher" className="flex items-center gap-2">
             <UserCog className="h-4 w-4" />
             Öğretmen Toplantısı
           </TabsTrigger>

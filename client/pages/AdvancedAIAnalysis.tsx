@@ -85,11 +85,11 @@ export default function AdvancedAIAnalysis() {
         </div>
         <Tabs value={analysisMode} onValueChange={(v) => setAnalysisMode(v as any)} className="w-auto">
           <TabsList>
-            <TabsTrigger value="class" className="gap-2">
+            <TabsTrigger value="class" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Sınıf Analizi
             </TabsTrigger>
-            <TabsTrigger value="multi-student" className="gap-2">
+            <TabsTrigger value="multi-student" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
               Çoklu Öğrenci
             </TabsTrigger>

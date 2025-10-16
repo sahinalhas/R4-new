@@ -116,15 +116,15 @@ export default function ResourceRecommendations() {
         <Tabs value={category || 'all'} onValueChange={(val) => setCategory(val === 'all' ? '' : val)}>
           <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="all">Tümü</TabsTrigger>
-            <TabsTrigger value="akademik" className="gap-1">
+            <TabsTrigger value="akademik" className="flex items-center gap-2">
               {categoryIcons.akademik}
               Akademik
             </TabsTrigger>
-            <TabsTrigger value="sosyalDuygusal" className="gap-1">
+            <TabsTrigger value="sosyalDuygusal" className="flex items-center gap-2">
               {categoryIcons.sosyalDuygusal}
               Sosyal
             </TabsTrigger>
-            <TabsTrigger value="davranişsal" className="gap-1">
+            <TabsTrigger value="davranişsal" className="flex items-center gap-2">
               {categoryIcons.davranişsal}
               Davranış
             </TabsTrigger>
