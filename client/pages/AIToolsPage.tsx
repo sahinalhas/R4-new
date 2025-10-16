@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShieldAlert, Bot, Brain, Sparkles, CalendarDays } from 'lucide-react';
-import RiskDashboard from './RiskDashboard';
-import AIAssistant from './AIAssistant';
-import AIInsightsDashboard from './AIInsightsDashboard';
-import AdvancedAIAnalysis from './AdvancedAIAnalysis';
-import DailyActionPlan from './DailyActionPlan';
+import { AIToolsLoadingState } from '@/components/ai-tools/AIToolsLoadingState';
+
+const RiskDashboard = lazy(() => import('./RiskDashboard'));
+const AIAssistant = lazy(() => import('./AIAssistant'));
+const AIInsightsDashboard = lazy(() => import('./AIInsightsDashboard'));
+const AdvancedAIAnalysis = lazy(() => import('./AdvancedAIAnalysis'));
+const DailyActionPlan = lazy(() => import('./DailyActionPlan'));
 
 const VALID_TABS = ['risk', 'ai-asistan', 'ai-insights', 'gelismis-analiz', 'gunluk-plan'] as const;
 
@@ -32,7 +34,8 @@ export default function AIToolsPage() {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setSearchParams({ tab: value });
+    // Use replace to avoid polluting browser history with tab changes
+    setSearchParams({ tab: value }, { replace: true });
   };
 
   return (
@@ -68,24 +71,34 @@ export default function AIToolsPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="risk" className="mt-0 min-h-[400px]">
-          <RiskDashboard />
+        <TabsContent value="risk" className="mt-0 min-h-[600px]">
+          <Suspense fallback={<AIToolsLoadingState icon={ShieldAlert} message="Risk verileri yükleniyor..." />}>
+            <RiskDashboard />
+          </Suspense>
         </TabsContent>
 
-        <TabsContent value="ai-asistan" className="mt-0 min-h-[400px]">
-          <AIAssistant />
+        <TabsContent value="ai-asistan" className="mt-0 min-h-[600px]">
+          <Suspense fallback={<AIToolsLoadingState icon={Bot} message="AI Asistan yükleniyor..." />}>
+            <AIAssistant />
+          </Suspense>
         </TabsContent>
 
-        <TabsContent value="ai-insights" className="mt-0 min-h-[400px]">
-          <AIInsightsDashboard />
+        <TabsContent value="ai-insights" className="mt-0 min-h-[600px]">
+          <Suspense fallback={<AIToolsLoadingState icon={Brain} message="Günlük insights yükleniyor..." />}>
+            <AIInsightsDashboard />
+          </Suspense>
         </TabsContent>
 
-        <TabsContent value="gelismis-analiz" className="mt-0 min-h-[400px]">
-          <AdvancedAIAnalysis />
+        <TabsContent value="gelismis-analiz" className="mt-0 min-h-[600px]">
+          <Suspense fallback={<AIToolsLoadingState icon={Sparkles} message="Gelişmiş analiz yükleniyor..." />}>
+            <AdvancedAIAnalysis />
+          </Suspense>
         </TabsContent>
 
-        <TabsContent value="gunluk-plan" className="mt-0 min-h-[400px]">
-          <DailyActionPlan />
+        <TabsContent value="gunluk-plan" className="mt-0 min-h-[600px]">
+          <Suspense fallback={<AIToolsLoadingState icon={CalendarDays} message="Günlük plan yükleniyor..." />}>
+            <DailyActionPlan />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
