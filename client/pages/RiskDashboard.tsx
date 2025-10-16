@@ -5,9 +5,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, TrendingUp, Users, FileText, ChevronRight } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Users, FileText, ChevronRight, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { EarlyWarningAlert } from '@shared/types';
+import { AIToolsLayout } from '@/components/ai-tools/AIToolsLayout';
+import { AIToolsLoadingState } from '@/components/ai-tools/AIToolsLoadingState';
 
 export default function RiskDashboard() {
   const [summary, setSummary] = useState<any>(null);
@@ -51,21 +53,19 @@ export default function RiskDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-muted-foreground">Yükleniyor...</div>
-      </div>
+      <AIToolsLoadingState 
+        icon={ShieldAlert}
+        message="Risk verileri yükleniyor..."
+      />
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Risk Değerlendirme ve Erken Uyarı Sistemi</h1>
-        <p className="text-muted-foreground mt-2">
-          Öğrenci risk analizi, erken uyarılar ve müdahale önerileri
-        </p>
-      </div>
-
+    <AIToolsLayout
+      title="Risk Değerlendirme ve Erken Uyarı Sistemi"
+      description="Öğrenci risk analizi, erken uyarılar ve müdahale önerileri"
+      icon={ShieldAlert}
+    >
       <Tabs defaultValue="alerts" className="space-y-6">
         <TabsList>
           <TabsTrigger value="alerts">Aktif Uyarılar</TabsTrigger>
@@ -229,6 +229,6 @@ export default function RiskDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AIToolsLayout>
   );
 }
