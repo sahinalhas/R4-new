@@ -1,52 +1,65 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MAIN_TABS,
-  GENEL_TABS,
-  EGITSEL_TABS,
+  KIMLIK_TABS,
+  AKADEMIK_TABS,
+  KISISEL_SOSYAL_TABS,
+  RISK_MUDAHALE_TABS,
+  AILE_ILETISIM_TABS,
   MESLEKI_TABS,
-  KISISEL_GELISIM_TABS,
-  AILE_TABS,
+  AI_TOOLS_TABS,
+  SISTEM_TABS,
 } from "./constants";
 import { StudentData } from "@/hooks/student-profile";
 import { Student } from "@/lib/storage";
 
+// Temel bilgi bileşenleri
 import BasicInfoSection from "@/components/student-profile/sections/BasicInfoSection";
+import StandardizedHealthSection from "@/components/student-profile/sections/StandardizedHealthSection";
+import OzelEgitimSection from "@/components/student-profile/sections/OzelEgitimSection";
+
+// Akademik bileşenler
+import StandardizedAcademicSection from "@/components/student-profile/sections/StandardizedAcademicSection";
 import CalismaProgramiSection from "@/components/student-profile/sections/CalismaProgramiSection";
-import KisilikProfiliSection from "@/components/student-profile/sections/KisilikProfiliSection";
-import HedeflerPlanlamaSection from "@/components/student-profile/sections/HedeflerPlanlamaSection";
-import Degerlendirme360Section from "@/components/student-profile/sections/Degerlendirme360Section";
 import IlerlemeTakibiSection from "@/components/student-profile/sections/IlerlemeTakibiSection";
-import GorusmelerSection from "@/components/student-profile/sections/GorusmelerSection";
 import AnketlerSection from "@/components/student-profile/sections/AnketlerSection";
-import VeliGorusmeleriSection from "@/components/student-profile/sections/VeliGorusmeleriSection";
+
+// Kişisel & Sosyal bileşenler
+import StandardizedSocialEmotionalSection from "@/components/student-profile/sections/StandardizedSocialEmotionalSection";
+import KisilikProfiliSection from "@/components/student-profile/sections/KisilikProfiliSection";
+import StandardizedTalentsSection from "@/components/student-profile/sections/StandardizedTalentsSection";
+import MotivationProfileSection from "@/components/student-profile/sections/MotivationProfileSection";
+import Degerlendirme360Section from "@/components/student-profile/sections/Degerlendirme360Section";
+
+// Aile & İletişim bileşenleri
 import EvZiyaretleriSection from "@/components/student-profile/sections/EvZiyaretleriSection";
 import AileKatilimiSection from "@/components/student-profile/sections/AileKatilimiSection";
-import OzelEgitimSection from "@/components/student-profile/sections/OzelEgitimSection";
-import RiskDegerlendirmeSection from "@/components/student-profile/sections/RiskDegerlendirmeSection";
-import DavranisTakibiSection from "@/components/student-profile/sections/DavranisTakibiSection";
 
-import StandardizedAcademicSection from "@/components/student-profile/sections/StandardizedAcademicSection";
-import StandardizedSocialEmotionalSection from "@/components/student-profile/sections/StandardizedSocialEmotionalSection";
-import StandardizedTalentsSection from "@/components/student-profile/sections/StandardizedTalentsSection";
-import StandardizedHealthSection from "@/components/student-profile/sections/StandardizedHealthSection";
-import StandardizedBehaviorSection from "@/components/student-profile/sections/StandardizedBehaviorSection";
-import MotivationProfileSection from "@/components/student-profile/sections/MotivationProfileSection";
-import RiskProtectiveProfileSection from "@/components/student-profile/sections/RiskProtectiveProfileSection";
+// Mesleki bileşenler
+import HedeflerPlanlamaSection from "@/components/student-profile/sections/HedeflerPlanlamaSection";
 import CareerGuidanceSection from "@/components/student-profile/sections/CareerGuidanceSection";
 
-import ParentCommunication from "@/components/ai/ParentCommunication";
-import InterventionRecommendations from "@/components/ai/InterventionRecommendations";
-import AutoReportGenerator from "@/components/ai/AutoReportGenerator";
+// Birleştirilmiş bileşenler (Yeni!)
+import UnifiedRiskSection from "@/components/student-profile/sections/UnifiedRiskSection";
+import UnifiedMeetingsSection from "@/components/student-profile/sections/UnifiedMeetingsSection";
+import AIToolsHub from "@/components/student-profile/sections/AIToolsHub";
 
-import { ProfileDashboard } from "./components/ProfileDashboard";
-import { EnhancedRiskCard } from "@/components/analytics/EnhancedRiskCard";
-import { PersonalizedLearningCard } from "@/components/learning/PersonalizedLearningCard";
-import { AdvancedAnalyticsCard } from "@/components/analytics/AdvancedAnalyticsCard";
-import { SocialNetworkMap } from "@/components/social/SocialNetworkMap";
-import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
+// Dashboard bileşenleri
 import LiveProfileCard from "@/components/live-profile/LiveProfileCard";
 import ProfileUpdateTimeline from "@/components/live-profile/ProfileUpdateTimeline";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { EnhancedRiskCard } from "@/components/analytics/EnhancedRiskCard";
+import { PersonalizedLearningCard } from "@/components/learning/PersonalizedLearningCard";
+
+// Sistem bileşenleri
+import ManualCorrectionPanel from "@/components/profile-sync/ManualCorrectionPanel";
+import ConflictResolutionUI from "@/components/profile-sync/ConflictResolutionUI";
+import ProfileChangeTimeline from "@/components/profile-sync/ProfileChangeTimeline";
+import ConflictResolutionPanel from "@/components/profile-sync/ConflictResolutionPanel";
+import UnifiedProfileCard from "@/components/profile-sync/UnifiedProfileCard";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info, User, Users } from "lucide-react";
 
 interface StudentProfileTabsProps {
   student: Student;
@@ -67,6 +80,7 @@ export function StudentProfileTabs({
 }: StudentProfileTabsProps) {
   return (
     <Tabs defaultValue="dashboard" className="space-y-4">
+      {/* Ana Sekmeler */}
       <TabsList className="flex flex-wrap gap-1 h-auto w-full justify-start">
         {MAIN_TABS.map(({ value, label, icon: Icon }) => (
           <TabsTrigger key={value} value={value} className="flex items-center gap-1 text-xs">
@@ -75,51 +89,23 @@ export function StudentProfileTabs({
         ))}
       </TabsList>
 
+      {/* DASHBOARD - SADELEŞTİRİLMİŞ */}
       <TabsContent value="dashboard" className="mt-4 space-y-4">
         <LiveProfileCard studentId={studentId} />
         
-        <ProfileDashboard
-          studentId={studentId}
-          scores={scoresData?.scores}
-          completeness={scoresData?.completeness}
-          isLoading={loadingScores}
-        />
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <EnhancedRiskCard studentId={studentId} />
           <PersonalizedLearningCard studentId={studentId} />
         </div>
-
-        <AdvancedAnalyticsCard studentId={studentId} />
         
         <ProfileUpdateTimeline studentId={studentId} />
-        
-        <SocialNetworkMap studentId={studentId} />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Sesli Not ve AI Analizi</CardTitle>
-            <CardDescription>
-              Öğrenci ile ilgili sesli not alın, otomatik transkript ve AI analizi alın
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <VoiceRecorder
-              studentId={studentId}
-              sessionType="INDIVIDUAL"
-              onTranscriptionComplete={(result) => {
-                console.log('Voice note completed:', result);
-                onUpdate();
-              }}
-            />
-          </CardContent>
-        </Card>
       </TabsContent>
 
-      <TabsContent value="genel" className="mt-4">
-        <Tabs defaultValue="ogrenci" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1">
-            {GENEL_TABS.map(({ value, label, icon: Icon }) => (
+      {/* KİMLİK & TEMEL BİLGİLER */}
+      <TabsContent value="kimlik" className="mt-4">
+        <Tabs defaultValue="kisisel" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {KIMLIK_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
@@ -131,8 +117,31 @@ export function StudentProfileTabs({
             ))}
           </TabsList>
 
-          <TabsContent value="ogrenci">
+          <TabsContent value="kisisel">
             <BasicInfoSection student={student} onUpdate={onUpdate} />
+          </TabsContent>
+
+          <TabsContent value="iletisim-veli">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  İletişim ve Veli Bilgileri
+                </CardTitle>
+                <CardDescription>
+                  Öğrenci ve veli iletişim bilgileri
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Veli bilgileri "Kişisel Bilgiler" sekmesinde düzenlenebilir.
+                    Detaylı veli iletişimi için "Aile & İletişim" sekmesine bakınız.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="saglik">
@@ -141,13 +150,22 @@ export function StudentProfileTabs({
               onUpdate={onUpdate}
             />
           </TabsContent>
+
+          <TabsContent value="ozel-durum">
+            <OzelEgitimSection
+              studentId={studentId}
+              specialEducation={data.specialEducation}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
         </Tabs>
       </TabsContent>
 
-      <TabsContent value="aile" className="mt-4">
-        <Tabs defaultValue="veli-gorusmeleri" className="space-y-4">
+      {/* AKADEMİK PROFİL */}
+      <TabsContent value="akademik" className="mt-4">
+        <Tabs defaultValue="performans" className="space-y-4">
           <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
-            {AILE_TABS.map(({ value, label, icon: Icon }) => (
+            {AKADEMIK_TABS.map(({ value, label, icon: Icon }) => (
               <TabsTrigger 
                 key={value} 
                 value={value} 
@@ -159,8 +177,152 @@ export function StudentProfileTabs({
             ))}
           </TabsList>
 
-          <TabsContent value="veli-gorusmeleri">
-            <VeliGorusmeleriSection
+          <TabsContent value="performans">
+            <StandardizedAcademicSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="calisma-programi">
+            <CalismaProgramiSection studentId={studentId} />
+          </TabsContent>
+
+          <TabsContent value="ilerleme">
+            <IlerlemeTakibiSection
+              studentId={studentId}
+              achievements={data.achievements}
+              selfAssessments={data.selfAssessments}
+              todaysAssessment={data.todaysAssessment}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="anketler">
+            <AnketlerSection
+              studentId={studentId}
+              surveyResults={data.surveyResults}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      {/* KİŞİSEL & SOSYAL GELİŞİM */}
+      <TabsContent value="kisisel-sosyal" className="mt-4">
+        <Tabs defaultValue="sosyal-duygusal" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {KISISEL_SOSYAL_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="sosyal-duygusal">
+            <StandardizedSocialEmotionalSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="kisilik">
+            <KisilikProfiliSection
+              studentId={studentId}
+              multipleIntelligence={data.multipleIntelligence}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="yetenek-ilgi">
+            <StandardizedTalentsSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="motivasyon">
+            <MotivationProfileSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="360-degerlendirme">
+            <Degerlendirme360Section
+              studentId={studentId}
+              evaluations360={data.evaluations360}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      {/* RİSK & MÜDAHALE - BİRLEŞTİRİLMİŞ */}
+      <TabsContent value="risk-mudahale" className="mt-4">
+        <UnifiedRiskSection
+          studentId={studentId}
+          student={student}
+          onUpdate={onUpdate}
+        />
+      </TabsContent>
+
+      {/* AİLE & İLETİŞİM - BİRLEŞTİRİLMİŞ */}
+      <TabsContent value="aile-iletisim" className="mt-4">
+        <Tabs defaultValue="gorusmeler" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {AILE_ILETISIM_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="veli-bilgileri">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Veli Bilgileri
+                </CardTitle>
+                <CardDescription>
+                  Veli adı ve iletişim bilgileri
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Veli bilgilerini düzenlemek için "Kimlik & Temel Bilgiler" sekmesine gidiniz.
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="border rounded-lg p-4 space-y-2">
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Veli Adı:</span>
+                    <div className="text-base">{student.veliAdi || "Belirtilmemiş"}</div>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Veli Telefon:</span>
+                    <div className="text-base">{student.veliTelefon || "Belirtilmemiş"}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="gorusmeler">
+            <UnifiedMeetingsSection
               studentId={studentId}
               onUpdate={onUpdate}
             />
@@ -181,166 +343,10 @@ export function StudentProfileTabs({
               onUpdate={onUpdate}
             />
           </TabsContent>
-
-          <TabsContent value="ai-iletisim">
-            <ParentCommunication
-              studentId={studentId}
-              studentName={`${student.ad} ${student.soyad}`}
-            />
-          </TabsContent>
         </Tabs>
       </TabsContent>
 
-      <TabsContent value="egitsel" className="mt-4">
-        <Tabs defaultValue="akademik" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
-            {EGITSEL_TABS.map(({ value, label, icon: Icon }) => (
-              <TabsTrigger 
-                key={value} 
-                value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="akademik">
-            <StandardizedAcademicSection
-              studentId={studentId}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-
-          <TabsContent value="calisma-programi">
-            <CalismaProgramiSection studentId={studentId} />
-          </TabsContent>
-
-          <TabsContent value="ozel-egitim">
-            <OzelEgitimSection
-              studentId={studentId}
-              specialEducation={data.specialEducation}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-
-          <TabsContent value="ilerleme">
-            <IlerlemeTakibiSection
-              studentId={studentId}
-              achievements={data.achievements}
-              selfAssessments={data.selfAssessments}
-              todaysAssessment={data.todaysAssessment}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-
-          <TabsContent value="anketler">
-            <AnketlerSection
-              studentId={studentId}
-              surveyResults={data.surveyResults}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-
-          <TabsContent value="ai-mudahale">
-            <InterventionRecommendations
-              studentId={studentId}
-              studentName={`${student.ad} ${student.soyad}`}
-            />
-          </TabsContent>
-
-          <TabsContent value="ai-raporlar">
-            <AutoReportGenerator
-              studentId={studentId}
-              studentName={`${student.ad} ${student.soyad}`}
-            />
-          </TabsContent>
-        </Tabs>
-      </TabsContent>
-
-      <TabsContent value="kisisel-gelisim" className="mt-4">
-        <Tabs defaultValue="sosyal-duygusal" className="space-y-4">
-          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
-            {KISISEL_GELISIM_TABS.map(({ value, label, icon: Icon }) => (
-              <TabsTrigger 
-                key={value} 
-                value={value} 
-                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="sosyal-duygusal">
-            <div className="space-y-6">
-              <StandardizedSocialEmotionalSection
-                studentId={studentId}
-                onUpdate={onUpdate}
-              />
-              <StandardizedTalentsSection
-                studentId={studentId}
-                onUpdate={onUpdate}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="davranis">
-            <div className="space-y-6">
-              <DavranisTakibiSection
-                studentId={studentId}
-                behaviorIncidents={data.behaviorIncidents}
-                onUpdate={onUpdate}
-              />
-              <StandardizedBehaviorSection
-                studentId={studentId}
-                onUpdate={onUpdate}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="risk">
-            <div className="space-y-6">
-              <RiskDegerlendirmeSection
-                studentId={studentId}
-                riskFactors={data.riskFactors}
-                onUpdate={onUpdate}
-              />
-              <RiskProtectiveProfileSection
-                studentId={studentId}
-                onUpdate={onUpdate}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="gorusmeler">
-            <GorusmelerSection
-              studentId={studentId}
-              notes={data.notes}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-
-          <TabsContent value="kisilik">
-            <KisilikProfiliSection
-              studentId={studentId}
-              multipleIntelligence={data.multipleIntelligence}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-
-          <TabsContent value="360-degerlendirme">
-            <Degerlendirme360Section
-              studentId={studentId}
-              evaluations360={data.evaluations360}
-              onUpdate={onUpdate}
-            />
-          </TabsContent>
-        </Tabs>
-      </TabsContent>
-
+      {/* MESLEKİ REHBERLİK */}
       <TabsContent value="mesleki" className="mt-4">
         <Tabs defaultValue="hedefler" className="space-y-4">
           <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
@@ -357,17 +363,11 @@ export function StudentProfileTabs({
           </TabsList>
 
           <TabsContent value="hedefler">
-            <div className="space-y-6">
-              <HedeflerPlanlamaSection
-                studentId={studentId}
-                academicGoals={data.academicGoals}
-                onUpdate={onUpdate}
-              />
-              <MotivationProfileSection
-                studentId={studentId}
-                onUpdate={onUpdate}
-              />
-            </div>
+            <HedeflerPlanlamaSection
+              studentId={studentId}
+              academicGoals={data.academicGoals}
+              onUpdate={onUpdate}
+            />
           </TabsContent>
 
           <TabsContent value="kariyer">
@@ -375,6 +375,51 @@ export function StudentProfileTabs({
               studentId={studentId}
               studentName={`${student.ad} ${student.soyad}`}
             />
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      {/* AI ARAÇLARI - BİRLEŞTİRİLMİŞ */}
+      <TabsContent value="ai-tools" className="mt-4">
+        <AIToolsHub
+          studentId={studentId}
+          studentName={`${student.ad} ${student.soyad}`}
+          onUpdate={onUpdate}
+        />
+      </TabsContent>
+
+      {/* SİSTEM - TEKNİK ARAÇLAR */}
+      <TabsContent value="sistem" className="mt-4">
+        <Tabs defaultValue="profil-gecmisi" className="space-y-4">
+          <TabsList className="w-full justify-start bg-muted/50 p-1 flex-wrap h-auto">
+            {SISTEM_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={value} 
+                value={value} 
+                className="flex items-center gap-1.5 text-xs data-[state=active]:bg-background"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="profil-gecmisi">
+            <div className="space-y-4">
+              <UnifiedProfileCard studentId={studentId} />
+              <ProfileChangeTimeline studentId={studentId} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="manuel-duzeltme">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ManualCorrectionPanel studentId={studentId} />
+              <ConflictResolutionPanel studentId={studentId} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="celiski-cozum">
+            <ConflictResolutionUI studentId={studentId} />
           </TabsContent>
         </Tabs>
       </TabsContent>
