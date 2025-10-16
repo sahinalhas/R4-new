@@ -1,4 +1,9 @@
-import personalizedLearningRoutes from './routes/personalized-learning.routes';
+import { Router } from 'express';
+import { simpleRateLimit } from '../../middleware/validation.js';
+import personalizedLearningRoutes from './routes/personalized-learning.routes.js';
 
-export { personalizedLearningRoutes };
-export default personalizedLearningRoutes;
+const router = Router();
+
+router.use('/', simpleRateLimit(100, 15 * 60 * 1000), personalizedLearningRoutes);
+
+export default router;

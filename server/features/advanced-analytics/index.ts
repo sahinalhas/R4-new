@@ -1,4 +1,9 @@
-import advancedAnalyticsRoutes from './routes/advanced-analytics.routes';
+import { Router } from 'express';
+import { simpleRateLimit } from '../../middleware/validation.js';
+import advancedAnalyticsRoutes from './routes/advanced-analytics.routes.js';
 
-export { advancedAnalyticsRoutes };
-export default advancedAnalyticsRoutes;
+const router = Router();
+
+router.use('/', simpleRateLimit(100, 15 * 60 * 1000), advancedAnalyticsRoutes);
+
+export default router;

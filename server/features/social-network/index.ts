@@ -1,4 +1,9 @@
-import socialNetworkRoutes from './routes/social-network.routes';
+import { Router } from 'express';
+import { simpleRateLimit } from '../../middleware/validation.js';
+import socialNetworkRoutes from './routes/social-network.routes.js';
 
-export { socialNetworkRoutes };
-export default socialNetworkRoutes;
+const router = Router();
+
+router.use('/', simpleRateLimit(100, 15 * 60 * 1000), socialNetworkRoutes);
+
+export default router;

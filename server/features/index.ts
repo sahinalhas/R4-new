@@ -31,17 +31,17 @@ import notificationsRouter from './notifications/index.js';
 import interventionTrackingRouter from './intervention-tracking/index.js';
 import advancedReportsRouter from './advanced-reports/index.js';
 import backupRouter from './backup/routes/backup.routes.js';
-import { enhancedRiskRoutes } from './enhanced-risk/index.js';
-import { personalizedLearningRoutes } from './personalized-learning/index.js';
-import { advancedAnalyticsRoutes } from './advanced-analytics/index.js';
-import { socialNetworkRoutes } from './social-network/index.js';
-import { voiceTranscriptionRoutes } from './voice-transcription/index.js';
+import enhancedRiskRouter from './enhanced-risk/index.js';
+import personalizedLearningRouter from './personalized-learning/index.js';
+import advancedAnalyticsRouter from './advanced-analytics/index.js';
+import socialNetworkRouter from './social-network/index.js';
+import voiceTranscriptionRouter from './voice-transcription/index.js';
 import searchRouter from './search/index.js';
-import { careerGuidanceRoutes } from './career-guidance/routes.js';
+import careerGuidanceRouter from './career-guidance/index.js';
 import aiTextPolishRouter from '../routes/ai-text-polish.routes.js';
 import profileSyncRouter from './profile-sync/index.js';
 import aiStatusRouter from '../routes/ai-status.routes.js';
-import { aiSuggestionsRoutes } from './ai-suggestions/index.js';
+import aiSuggestionsRouter from './ai-suggestions/index.js';
 
 /**
  * Feature Registry
@@ -158,7 +158,7 @@ featureRegistry.use('/advanced-reports', advancedReportsRouter);
 
 // =================== AI FEATURES ===================
 featureRegistry.use('/ai-assistant', aiAssistantRouter);
-featureRegistry.use('/ai-suggestions', aiSuggestionsRoutes);
+featureRegistry.use('/ai-suggestions', aiSuggestionsRouter);
 
 // =================== DAILY INSIGHTS & PROACTIVE ALERTS ===================
 featureRegistry.use('/daily-insights', dailyInsightsRouter);
@@ -181,22 +181,22 @@ featureRegistry.use('/intervention-tracking', interventionTrackingRouter);
 featureRegistry.use('/backup', backupRouter);
 
 // =================== ENHANCED RISK PREDICTION ===================
-featureRegistry.use('/enhanced-risk', enhancedRiskRoutes);
+featureRegistry.use('/enhanced-risk', enhancedRiskRouter);
 
 // =================== PERSONALIZED LEARNING ===================
-featureRegistry.use('/personalized-learning', personalizedLearningRoutes);
+featureRegistry.use('/personalized-learning', personalizedLearningRouter);
 
 // =================== ADVANCED ANALYTICS DASHBOARD ===================
-featureRegistry.use('/advanced-analytics', advancedAnalyticsRoutes);
+featureRegistry.use('/advanced-analytics', advancedAnalyticsRouter);
 
 // =================== SOCIAL NETWORK ANALYSIS ===================
-featureRegistry.use('/social-network', socialNetworkRoutes);
+featureRegistry.use('/social-network', socialNetworkRouter);
 
 // =================== VOICE TRANSCRIPTION & AI ANALYSIS ===================
-featureRegistry.use('/voice-transcription', voiceTranscriptionRoutes);
+featureRegistry.use('/voice-transcription', voiceTranscriptionRouter);
 
 // =================== CAREER DEVELOPMENT & GUIDANCE ===================
-featureRegistry.use('/career-guidance', careerGuidanceRoutes);
+featureRegistry.use('/career-guidance', careerGuidanceRouter);
 
 // =================== AI TEXT ENHANCEMENT ===================
 featureRegistry.use('/ai-text', aiTextPolishRouter);
