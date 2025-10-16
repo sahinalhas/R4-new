@@ -8,25 +8,8 @@ export class TransactionHelper {
     return transaction();
   }
 
-  async executeAsyncTransaction<T>(fn: () => Promise<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      const wrappedFn = () => {
-        fn()
-          .then(resolve)
-          .catch(reject);
-      };
-
-      try {
-        const transaction = this.db.transaction(wrappedFn);
-        transaction();
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
   beginTransaction(): void {
-    this.db.exec('BEGIN TRANSACTION');
+    this.db.exec('BEGIN IMMEDIATE TRANSACTION');
   }
 
   commit(): void {
@@ -60,6 +43,19 @@ export class TransactionHelper {
       throw error;
     }
   }
+}
+
+export function withTransaction<T>(db: Database.Database, fn: () => T): T {
+  const helper = new TransactionHelper(db);
+  return helper.executeWithManualTransaction(fn);
+}
+
+export async function withAsyncTransaction<T>(
+  db: Database.Database,
+  fn: () => Promise<T>
+): Promise<T> {
+  const helper = new TransactionHelper(db);
+  return helper.executeAsyncWithManualTransaction(fn);
 }
 
 export function createTransactionHelper(db: Database.Database): TransactionHelper {
