@@ -1,73 +1,78 @@
 import { useState } from "react";
-import { Achievement, SelfAssessment, addAchievement, addSelfAssessment } from "@/lib/storage";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Achievement } from "@/lib/storage";
+import { addAchievement as addAchievementAPI, getAchievementsByStudent } from "@/lib/api/coaching.api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { EnhancedTextarea as Textarea } from "@/components/ui/enhanced-textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Award, Heart, Trophy } from "lucide-react";
+import { Award, Trophy, TrendingUp } from "lucide-react";
 
 interface IlerlemeTakibiSectionProps {
   studentId: string;
   achievements: Achievement[];
-  selfAssessments: SelfAssessment[];
-  todaysAssessment: SelfAssessment | undefined;
+  selfAssessments: any[];
+  todaysAssessment: any;
   onUpdate: () => void;
 }
 
 export default function IlerlemeTakibiSection({ 
   studentId, 
-  achievements, 
-  selfAssessments,
-  todaysAssessment,
   onUpdate 
 }: IlerlemeTakibiSectionProps) {
-  const [moodRating, setMoodRating] = useState<string>("5");
-  const [motivationLevel, setMotivationLevel] = useState<string>("5");
-  const [stressLevel, setStressLevel] = useState<string>("5");
-  const [confidenceLevel, setConfidenceLevel] = useState<string>("5");
-  const [todayHighlight, setTodayHighlight] = useState<string>("");
-  const [todayChallenge, setTodayChallenge] = useState<string>("");
+  const queryClient = useQueryClient();
+  const [achievementTitle, setAchievementTitle] = useState<string>("");
+  const [achievementDescription, setAchievementDescription] = useState<string>("");
+  const [achievementCategory, setAchievementCategory] = useState<string>("GENEL");
 
-  const addExampleAchievement = () => {
+  // Backend'den başarıları çek
+  const { data: achievements = [], isLoading } = useQuery<Achievement[]>({
+    queryKey: ['achievements', studentId],
+    queryFn: () => getAchievementsByStudent(studentId),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Backend'e başarı ekle
+  const addMutation = useMutation({
+    mutationFn: (achievement: Achievement) => addAchievementAPI(achievement),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['achievements', studentId] });
+      onUpdate();
+    },
+  });
+
+  const categories = [
+    { value: "GENEL", label: "Genel Başarı", color: "#3B82F6" },
+    { value: "AKADEMİK", label: "Akademik", color: "#10B981" },
+    { value: "SOSYAL", label: "Sosyal-Duygusal", color: "#8B5CF6" },
+    { value: "DAVRANIŞ", label: "Davranış", color: "#F59E0B" },
+    { value: "HEDEFLER", label: "Hedef Başarısı", color: "#FFD700" },
+  ];
+
+  const addNewAchievement = () => {
+    if (!achievementTitle.trim()) return;
+
+    const selectedCategory = categories.find(c => c.value === achievementCategory);
+    
     const achievement: Achievement = {
       id: crypto.randomUUID(),
       studentId,
       type: "ROZETLeR",
-      title: "İlk Hedef Tamamlandı",
-      description: "İlk SMART hedefini başarıyla tamamladı",
+      title: achievementTitle,
+      description: achievementDescription,
       icon: "trophy",
-      color: "#FFD700",
-      points: 50,
+      color: selectedCategory?.color || "#3B82F6",
+      points: 0,
       earnedAt: new Date().toISOString(),
-      category: "HEDEFLeR",
-      criteria: "Bir SMART hedefi %100 tamamlama"
+      category: achievementCategory as "AKADEMİK" | "SOSYAL" | "KİŞİSEL" | "ÇALIŞMA" | "HEDEFLeR",
+      criteria: "Rehber öğretmen tarafından eklendi"
     };
-    addAchievement(achievement);
-    onUpdate();
-  };
-
-  const saveDailyAssessment = () => {
-    const assessment: SelfAssessment = {
-      id: crypto.randomUUID(),
-      studentId,
-      assessmentDate: new Date().toISOString().slice(0, 10),
-      moodRating: Number(moodRating),
-      motivationLevel: Number(motivationLevel),
-      stressLevel: Number(stressLevel),
-      confidenceLevel: Number(confidenceLevel),
-      studyDifficulty: 5,
-      socialInteraction: 5,
-      sleepQuality: 5,
-      physicalActivity: 5,
-      dailyGoalsAchieved: 50,
-      todayHighlight: todayHighlight || undefined,
-      todayChallenge: todayChallenge || undefined,
-    };
-    addSelfAssessment(assessment);
-    setTodayHighlight("");
-    setTodayChallenge("");
-    onUpdate();
+    
+    addMutation.mutate(achievement);
+    setAchievementTitle("");
+    setAchievementDescription("");
+    setAchievementCategory("GENEL");
   };
 
   return (
@@ -75,154 +80,108 @@ export default function IlerlemeTakibiSection({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5" />
-            Başarı Rozetleri
+            <TrendingUp className="h-5 w-5" />
+            Başarılar ve İlerlemeler
           </CardTitle>
-          <CardDescription>Kazanılan rozetler ve başarılar</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button onClick={addExampleAchievement}>
-            <Award className="mr-2 h-4 w-4" />
-            Örnek Rozet Ver
-          </Button>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {achievements.map(achievement => (
-              <div key={achievement.id} className="border rounded-lg p-3 text-center space-y-2">
-                <div className="w-12 h-12 mx-auto rounded-full flex items-center justify-center" 
-                     style={{ backgroundColor: achievement.color + "20", color: achievement.color }}>
-                  <Trophy className="h-6 w-6" />
-                </div>
-                <div className="font-medium text-sm">{achievement.title}</div>
-                <div className="text-xs text-muted-foreground">{achievement.description}</div>
-                <Badge variant="secondary">{achievement.category}</Badge>
-                {achievement.points && (
-                  <div className="text-xs text-muted-foreground">{achievement.points} puan</div>
-                )}
-                <div className="text-xs text-muted-foreground">
-                  {new Date(achievement.earnedAt).toLocaleDateString()}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="h-5 w-5" />
-            Günlük Değerlendirme
-          </CardTitle>
-          <CardDescription>Bugünkü ruh halin ve performansın nasıldı?</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {todaysAssessment ? (
-            <div className="p-4 bg-muted rounded-lg space-y-2">
-              <div className="font-medium">Bugünkü Değerlendirmen Tamamlandı!</div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>Ruh Hali: {todaysAssessment.moodRating}/10</div>
-                <div>Motivasyon: {todaysAssessment.motivationLevel}/10</div>
-                <div>Stres: {todaysAssessment.stressLevel}/10</div>
-                <div>Özgüven: {todaysAssessment.confidenceLevel}/10</div>
-              </div>
-              {todaysAssessment.todayHighlight && (
-                <div className="text-sm">
-                  <strong>Günün En İyisi:</strong> {todaysAssessment.todayHighlight}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="space-y-1">
-                  <label className="text-sm">Ruh Hali (1-10)</label>
-                  <Input 
-                    type="number" 
-                    min="1" 
-                    max="10" 
-                    value={moodRating}
-                    onChange={(e) => setMoodRating(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm">Motivasyon (1-10)</label>
-                  <Input 
-                    type="number" 
-                    min="1" 
-                    max="10"
-                    value={motivationLevel}
-                    onChange={(e) => setMotivationLevel(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm">Stres (1-10)</label>
-                  <Input 
-                    type="number" 
-                    min="1" 
-                    max="10"
-                    value={stressLevel}
-                    onChange={(e) => setStressLevel(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm">Özgüven (1-10)</label>
-                  <Input 
-                    type="number" 
-                    min="1" 
-                    max="10"
-                    value={confidenceLevel}
-                    onChange={(e) => setConfidenceLevel(e.target.value)}
-                  />
-                </div>
-              </div>
-
+          <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
+            <h4 className="font-medium">Yeni Başarı Ekle</h4>
+            <div className="space-y-3">
               <div className="space-y-2">
-                <label className="text-sm">Günün En İyi Anı</label>
+                <label className="text-sm font-medium">Başarı Başlığı</label>
+                <Input 
+                  placeholder="Örn: İngilizce sınavında tam puan aldı"
+                  value={achievementTitle}
+                  onChange={(e) => setAchievementTitle(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Açıklama</label>
                 <Textarea
-                  placeholder="Bugün neyi başardın?"
-                  value={todayHighlight}
-                  onChange={(e) => setTodayHighlight(e.target.value)}
+                  placeholder="Başarı hakkında detaylar..."
+                  value={achievementDescription}
+                  onChange={(e) => setAchievementDescription(e.target.value)}
+                  rows={2}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm">Günün Zorluğu</label>
-                <Textarea
-                  placeholder="Bugün hangi zorluklarla karşılaştın?"
-                  value={todayChallenge}
-                  onChange={(e) => setTodayChallenge(e.target.value)}
-                />
+                <label className="text-sm font-medium">Kategori</label>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(category => (
+                    <Button
+                      key={category.value}
+                      type="button"
+                      size="sm"
+                      variant={achievementCategory === category.value ? "default" : "outline"}
+                      onClick={() => setAchievementCategory(category.value)}
+                    >
+                      {category.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
-              <Button onClick={saveDailyAssessment} className="w-full">
-                Günlük Değerlendirmeyi Kaydet
+              <Button 
+                onClick={addNewAchievement} 
+                className="w-full"
+                disabled={addMutation.isPending}
+              >
+                <Award className="mr-2 h-4 w-4" />
+                {addMutation.isPending ? "Kaydediliyor..." : "Başarıyı Kaydet"}
               </Button>
             </div>
-          )}
+          </div>
 
-          <div className="space-y-2">
-            <h4 className="font-medium">Geçmiş Değerlendirmeler</h4>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {selfAssessments.slice(0, 7).map(assessment => (
-                <div key={assessment.id} className="border rounded p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">
-                      {new Date(assessment.assessmentDate).toLocaleDateString()}
+          <div className="space-y-3">
+            <h4 className="font-medium">Kaydedilen Başarılar</h4>
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Başarılar yükleniyor...
+              </div>
+            ) : achievements.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Award className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                <p>Henüz başarı kaydı eklenmemiş</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {achievements.map(achievement => (
+                  <div key={achievement.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div 
+                            className="w-8 h-8 rounded-full flex items-center justify-center" 
+                            style={{ backgroundColor: achievement.color + "20", color: achievement.color }}
+                          >
+                            <Trophy className="h-4 w-4" />
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {achievement.category}
+                          </Badge>
+                        </div>
+                        <div className="font-medium">{achievement.title}</div>
+                        {achievement.description && (
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {achievement.description}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Badge variant="outline">😊 {assessment.moodRating}/10</Badge>
-                      <Badge variant="outline">💪 {assessment.motivationLevel}/10</Badge>
+                    <div className="text-xs text-muted-foreground pt-2 border-t">
+                      {new Date(achievement.earnedAt).toLocaleDateString('tr-TR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
                     </div>
                   </div>
-                  {assessment.todayHighlight && (
-                    <div className="text-xs">
-                      <strong>En İyi:</strong> {assessment.todayHighlight}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

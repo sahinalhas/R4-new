@@ -9,6 +9,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Student } from "@/lib/storage";
+import { apiClient } from "@/lib/api/api-client";
 
 export interface UnifiedRiskData {
   // Manuel risk (Genel Bilgiler'den)
@@ -66,10 +67,7 @@ export function useUnifiedRisk(studentId: string, student?: Student) {
       // Risk faktörlerini al (API'den)
       let riskFactors = null;
       try {
-        const riskResponse = await fetch(`/api/risk-assessment/${studentId}`);
-        if (riskResponse.ok) {
-          riskFactors = await riskResponse.json();
-        }
+        riskFactors = await apiClient.get(`/api/risk-assessment/${studentId}`);
       } catch (error) {
         console.error('Risk factors fetch error:', error);
       }
@@ -77,10 +75,7 @@ export function useUnifiedRisk(studentId: string, student?: Student) {
       // Enhanced risk'i al (AI tabanlı)
       let enhancedRisk = null;
       try {
-        const enhancedResponse = await fetch(`/api/enhanced-risk/${studentId}`);
-        if (enhancedResponse.ok) {
-          enhancedRisk = await enhancedResponse.json();
-        }
+        enhancedRisk = await apiClient.get(`/api/enhanced-risk/${studentId}`);
       } catch (error) {
         console.error('Enhanced risk fetch error:', error);
       }
@@ -88,11 +83,7 @@ export function useUnifiedRisk(studentId: string, student?: Student) {
       // Risk & Protective profile'ı al
       let riskProtectiveProfile = null;
       try {
-        const profileResponse = await fetch(`/api/student-profile/${studentId}/risk-protective`);
-        if (profileResponse.ok) {
-          const data = await profileResponse.json();
-          riskProtectiveProfile = data;
-        }
+        riskProtectiveProfile = await apiClient.get(`/api/student-profile/${studentId}/risk-protective`);
       } catch (error) {
         console.error('Risk protective profile fetch error:', error);
       }

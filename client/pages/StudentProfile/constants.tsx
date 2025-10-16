@@ -94,11 +94,6 @@ export const KIMLIK_TABS = [
     icon: User,
   },
   {
-    value: "iletisim-veli",
-    label: "İletişim & Veli",
-    icon: Users,
-  },
-  {
     value: "saglik",
     label: "Sağlık Profili",
     icon: Activity,

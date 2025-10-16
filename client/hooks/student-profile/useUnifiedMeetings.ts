@@ -8,6 +8,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { MeetingNote } from "@/lib/storage";
+import { apiClient } from "@/lib/api/api-client";
 
 export interface UnifiedMeeting {
   id: string;
@@ -34,9 +35,7 @@ export function useUnifiedMeetings(studentId: string) {
       
       // 1. Counseling Sessions API'den veli görüşmelerini al
       try {
-        const sessionsResponse = await fetch('/api/counseling-sessions');
-        if (sessionsResponse.ok) {
-          const allSessions = await sessionsResponse.json();
+        const allSessions = await apiClient.get('/api/counseling-sessions');
           
           // Bu öğrencinin veli görüşmelerini filtrele
           const studentSessions = allSessions.filter((session: any) => {
@@ -70,16 +69,13 @@ export function useUnifiedMeetings(studentId: string) {
               }
             });
           });
-        }
       } catch (error) {
         console.error('Counseling sessions fetch error:', error);
       }
       
       // 2. Bireysel görüşmeleri counseling sessions'dan al
       try {
-        const sessionsResponse = await fetch('/api/counseling-sessions');
-        if (sessionsResponse.ok) {
-          const allSessions = await sessionsResponse.json();
+        const allSessions = await apiClient.get('/api/counseling-sessions');
           
           // Bu öğrencinin bireysel görüşmelerini filtrele
           const individualSessions = allSessions.filter((session: any) => {
@@ -112,16 +108,13 @@ export function useUnifiedMeetings(studentId: string) {
               }
             });
           });
-        }
       } catch (error) {
         console.error('Individual sessions fetch error:', error);
       }
       
       // 3. Local storage'dan manuel notları al (geriye dönük uyumluluk için)
       try {
-        const notesResponse = await fetch(`/api/notes?studentId=${studentId}`);
-        if (notesResponse.ok) {
-          const localNotes: MeetingNote[] = await notesResponse.json();
+        const localNotes: MeetingNote[] = await apiClient.get(`/api/notes?studentId=${studentId}`);
           
           localNotes.forEach((note) => {
             // Sadece counseling sessions'da olmayan notları ekle
@@ -146,7 +139,6 @@ export function useUnifiedMeetings(studentId: string) {
               });
             }
           });
-        }
       } catch (error) {
         console.error('Local notes fetch error:', error);
       }

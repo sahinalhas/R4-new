@@ -121,29 +121,6 @@ export function StudentProfileTabs({
             <BasicInfoSection student={student} onUpdate={onUpdate} />
           </TabsContent>
 
-          <TabsContent value="iletisim-veli">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  İletişim ve Veli Bilgileri
-                </CardTitle>
-                <CardDescription>
-                  Öğrenci ve veli iletişim bilgileri
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Veli bilgileri "Kişisel Bilgiler" sekmesinde düzenlenebilir.
-                    Detaylı veli iletişimi için "Aile & İletişim" sekmesine bakınız.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="saglik">
             <StandardizedHealthSection
               studentId={studentId}
@@ -293,30 +270,31 @@ export function StudentProfileTabs({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  Veli Bilgileri
+                  Veli Bilgileri ve İletişim Özeti
                 </CardTitle>
                 <CardDescription>
-                  Veli adı ve iletişim bilgileri
+                  Veli bilgileri ve iletişim geçmişi özeti
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Veli Adı</label>
+                    <div className="text-base font-medium">{student.veliAdi || "Belirtilmemiş"}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Veli Telefon</label>
+                    <div className="text-base font-medium">{student.veliTelefon || "Belirtilmemiş"}</div>
+                  </div>
+                </div>
+                
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
                     Veli bilgilerini düzenlemek için "Kimlik & Temel Bilgiler" sekmesine gidiniz.
+                    Veli görüşmeleri için "Görüşmeler" sekmesine bakınız.
                   </AlertDescription>
                 </Alert>
-                
-                <div className="border rounded-lg p-4 space-y-2">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Veli Adı:</span>
-                    <div className="text-base">{student.veliAdi || "Belirtilmemiş"}</div>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Veli Telefon:</span>
-                    <div className="text-base">{student.veliTelefon || "Belirtilmemiş"}</div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
