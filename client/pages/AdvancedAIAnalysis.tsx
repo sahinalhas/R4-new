@@ -31,7 +31,7 @@ export default function AdvancedAIAnalysis() {
     queryFn: () => apiClient.get(STUDENT_ENDPOINTS.BASE, { showErrorToast: false })
   });
 
-  const students = studentsData || [];
+  const students = (studentsData as any[]) || [];
   const classes = [...new Set(students.map((s: any) => s.className).filter(Boolean))];
 
   // Class comparison
