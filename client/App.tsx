@@ -20,12 +20,8 @@ const Reports = lazy(() => import("./pages/Reports"));
 const SettingsPage = lazy(() => import("./pages/Settings"));
 const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const RiskDashboard = lazy(() => import("./pages/RiskDashboard"));
-const AIAssistant = lazy(() => import("./pages/AIAssistant"));
-const AIInsightsDashboard = lazy(() => import("./pages/AIInsightsDashboard"));
-const DailyActionPlan = lazy(() => import("./pages/DailyActionPlan"));
+const AIToolsPage = lazy(() => import("./pages/AIToolsPage"));
 const AdvancedStudentAnalysis = lazy(() => import("./pages/AdvancedStudentAnalysis"));
-const AdvancedAIAnalysis = lazy(() => import("./pages/AdvancedAIAnalysis"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const InterventionTracking = lazy(() => import("./pages/InterventionTracking"));
 const ParentAccess = lazy(() => import("./pages/ParentAccess"));
@@ -85,32 +81,36 @@ const App = () => {
                   />
                   <Route path="/ayarlar" element={<Suspense fallback={<LoadingFallback />}><SettingsPage /></Suspense>} />
                   <Route
-                    path="/risk"
-                    element={<Suspense fallback={<LoadingFallback />}><RiskDashboard /></Suspense>}
+                    path="/ai-araclari"
+                    element={<Suspense fallback={<LoadingFallback />}><AIToolsPage /></Suspense>}
                   />
                   <Route
                     path="/istatistik"
                     element={<Navigate to="/raporlar" replace />}
                   />
                   <Route
+                    path="/risk"
+                    element={<Navigate to="/ai-araclari" replace />}
+                  />
+                  <Route
                     path="/ai-asistan"
-                    element={<Suspense fallback={<LoadingFallback />}><AIAssistant /></Suspense>}
+                    element={<Navigate to="/ai-araclari" replace />}
                   />
                   <Route
                     path="/ai-insights"
-                    element={<Suspense fallback={<LoadingFallback />}><AIInsightsDashboard /></Suspense>}
+                    element={<Navigate to="/ai-araclari" replace />}
                   />
                   <Route
                     path="/gunluk-plan"
-                    element={<Suspense fallback={<LoadingFallback />}><DailyActionPlan /></Suspense>}
+                    element={<Navigate to="/ai-araclari" replace />}
+                  />
+                  <Route
+                    path="/gelismis-analiz"
+                    element={<Navigate to="/ai-araclari" replace />}
                   />
                   <Route
                     path="/ogrenci/:studentId/gelismis-analiz"
                     element={<Suspense fallback={<LoadingFallback />}><AdvancedStudentAnalysis /></Suspense>}
-                  />
-                  <Route
-                    path="/gelismis-analiz"
-                    element={<Suspense fallback={<LoadingFallback />}><AdvancedAIAnalysis /></Suspense>}
                   />
                   <Route
                     path="/bildirimler"
