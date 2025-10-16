@@ -1,6 +1,5 @@
 import { getDatabase as getDbConnection } from './connection';
 import { initializeDatabaseSchema } from './schema';
-import { runDatabaseMigrations } from './migrations';
 import { setupDatabaseTriggers } from './triggers';
 import { setupDatabaseIndexes } from './indexes';
 import { createBackup, cleanupOldBackups, scheduleAutoBackup } from './backup';
@@ -14,7 +13,6 @@ function getDatabase(): Database.Database {
   if (!isInitialized) {
     try {
       initializeDatabaseSchema(db);
-      runDatabaseMigrations(db);
       setupDatabaseTriggers(db);
       setupDatabaseIndexes(db);
       isInitialized = true;
@@ -34,18 +32,12 @@ export function initializeDatabase(): void {
   
   try {
     initializeDatabaseSchema(db);
-    runDatabaseMigrations(db);
     setupDatabaseTriggers(db);
     setupDatabaseIndexes(db);
   } catch (initError) {
     console.error('Failed to initialize database:', initError);
     throw new Error('Failed to initialize database');
   }
-}
-
-export function runMigrations(): void {
-  const db = getDatabase();
-  runDatabaseMigrations(db);
 }
 
 export function setupTriggers(): void {
