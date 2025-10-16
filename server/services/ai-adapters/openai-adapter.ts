@@ -22,26 +22,33 @@ export class OpenAIAdapter extends BaseAIAdapter {
   }
 
   async chat(request: ChatCompletionRequest): Promise<string> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
-      },
-      body: JSON.stringify({
-        model: this.model,
-        temperature: request.temperature ?? this.temperature,
-        messages: request.messages,
-        ...(request.format === 'json' ? { response_format: { type: 'json_object' } } : {})
-      })
-    });
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model,
+          temperature: request.temperature ?? this.temperature,
+          messages: request.messages,
+          ...(request.format === 'json' ? { response_format: { type: 'json_object' } } : {})
+        })
+      });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI API error:', response.status, errorText);
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0]?.message?.content || '';
+    } catch (error) {
+      console.error('OpenAI API call failed:', error);
+      throw new Error(`OpenAI API failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
   }
 
   async *chatStream(request: ChatCompletionRequest): AsyncGenerator<string, void, unknown> {

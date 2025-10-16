@@ -192,11 +192,6 @@ export class AIProviderService {
   }
 }
 
-let _aiProviderServiceInstance: AIProviderService | null = null;
-
-export function getAIProviderService(): AIProviderService {
-  if (!_aiProviderServiceInstance) {
-    _aiProviderServiceInstance = AIProviderService.getInstance();
-  }
-  return _aiProviderServiceInstance;
+export function getAIProviderService(config?: Partial<AIProviderConfig>): AIProviderService {
+  return AIProviderService.getInstance(config);
 }

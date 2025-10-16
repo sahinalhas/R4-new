@@ -27,33 +27,38 @@ export class GeminiAdapter extends BaseAIAdapter {
   }
 
   async chat(request: ChatCompletionRequest): Promise<string> {
-    const systemMessage = request.messages.find(m => m.role === 'system');
-    const userMessages = request.messages.filter(m => m.role !== 'system');
+    try {
+      const systemMessage = request.messages.find(m => m.role === 'system');
+      const userMessages = request.messages.filter(m => m.role !== 'system');
 
-    const contents = userMessages.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+      const contents = userMessages.map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }));
 
-    const config: any = {
-      temperature: request.temperature ?? this.temperature,
-    };
+      const config: any = {
+        temperature: request.temperature ?? this.temperature,
+      };
 
-    if (systemMessage) {
-      config.systemInstruction = systemMessage.content;
+      if (systemMessage) {
+        config.systemInstruction = systemMessage.content;
+      }
+
+      if (request.format === 'json') {
+        config.responseMimeType = 'application/json';
+      }
+
+      const response = await this.ai.models.generateContent({
+        model: this.model,
+        contents: contents,
+        config: config
+      });
+
+      return response.text || '';
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      throw new Error(`Gemini API failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    if (request.format === 'json') {
-      config.responseMimeType = 'application/json';
-    }
-
-    const response = await this.ai.models.generateContent({
-      model: this.model,
-      contents: contents,
-      config: config
-    });
-
-    return response.text || '';
   }
 
   async *chatStream(request: ChatCompletionRequest): AsyncGenerator<string, void, unknown> {

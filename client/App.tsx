@@ -10,10 +10,10 @@ import { Loader2 } from "lucide-react";
 import Layout from "./layout/Rehber360Layout";
 import Index from "./pages/Index";
 import Students from "./pages/Students";
-import StudentProfile from "./pages/StudentProfile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+const StudentProfile = lazy(() => import("./pages/StudentProfile"));
 const CounselingSessions = lazy(() => import("./pages/CounselingSessions"));
 const Surveys = lazy(() => import("./pages/Surveys"));
 const Reports = lazy(() => import("./pages/Reports"));
@@ -70,7 +70,7 @@ const App = () => {
                 <Route element={<Layout />}>
                   <Route path="/" element={<Index />} />
                   <Route path="/ogrenci" element={<Students />} />
-                  <Route path="/ogrenci/:id" element={<StudentProfile />} />
+                  <Route path="/ogrenci/:id" element={<Suspense fallback={<LoadingFallback />}><StudentProfile /></Suspense>} />
                   <Route
                     path="/gorusmeler"
                     element={<Suspense fallback={<LoadingFallback />}><CounselingSessions /></Suspense>}

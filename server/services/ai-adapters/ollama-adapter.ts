@@ -21,14 +21,19 @@ export class OllamaAdapter extends BaseAIAdapter {
   }
 
   async chat(request: ChatCompletionRequest): Promise<string> {
-    const response = await this.ollamaService.chat({
-      model: this.model,
-      messages: request.messages as OllamaMessage[],
-      temperature: request.temperature ?? this.temperature,
-      format: request.format === 'json' ? 'json' : undefined
-    });
+    try {
+      const response = await this.ollamaService.chat({
+        model: this.model,
+        messages: request.messages as OllamaMessage[],
+        temperature: request.temperature ?? this.temperature,
+        format: request.format === 'json' ? 'json' : undefined
+      });
 
-    return response.message.content;
+      return response.message?.content || '';
+    } catch (error) {
+      console.error('Ollama API error:', error);
+      throw new Error(`Ollama API failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   async *chatStream(request: ChatCompletionRequest): AsyncGenerator<string, void, unknown> {
