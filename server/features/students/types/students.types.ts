@@ -5,8 +5,6 @@ export interface Student {
   phone?: string;
   birthDate?: string;
   address?: string;
-  il?: string;
-  ilce?: string;
   className?: string;
   enrollmentDate: string;
   status: 'active' | 'inactive' | 'graduated';

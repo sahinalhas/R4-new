@@ -39,12 +39,6 @@ export function normalizeStudentData(student: any): any {
   if (student.adres && !normalized.address) {
     normalized.address = student.adres;
   }
-  if (student.il && !normalized.il) {
-    normalized.il = student.il;
-  }
-  if (student.ilce && !normalized.ilce) {
-    normalized.ilce = student.ilce;
-  }
   if (student.dogumTarihi && !normalized.birthDate) {
     normalized.birthDate = student.dogumTarihi;
   }
