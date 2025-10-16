@@ -24,6 +24,8 @@ import { migration023 } from './023-add-province-district-columns';
 import { up as migration024up, down as migration024down } from './024-update-motivation-profile-fields';
 import { migration025 } from './025-ai-suggestion-queue';
 import { migration026 } from './026-fix-missing-columns';
+import { migration027 } from './027-add-cascade-deletes';
+import { migration028 } from './028-add-composite-indexes';
 
 const migration018 = {
   version: 18,
@@ -64,7 +66,9 @@ const migrations = [
   migration023,
   migration024,
   migration025,
-  migration026
+  migration026,
+  migration027,
+  migration028
 ];
 
 export function runDatabaseMigrations(db: Database.Database): void {

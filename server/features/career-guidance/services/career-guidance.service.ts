@@ -169,6 +169,14 @@ export class CareerGuidanceService {
   }
 
   /**
+   * Delete Roadmap
+   * Yol Haritasını Sil
+   */
+  deleteRoadmap(roadmapId: string): void {
+    this.roadmapRepo.deleteRoadmap(roadmapId);
+  }
+
+  /**
    * Get Student Competencies
    * Öğrenci Yetkinliklerini Getir
    */

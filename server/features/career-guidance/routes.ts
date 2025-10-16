@@ -385,4 +385,31 @@ router.post('/compare', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * DELETE /api/career-guidance/roadmap/:roadmapId
+ * Kariyer Yol Haritasını Sil
+ */
+router.delete('/roadmap/:roadmapId', async (req: Request, res: Response) => {
+  try {
+    const { roadmapId } = req.params;
+
+    const db = getDatabase();
+    const service = new CareerGuidanceService(db);
+
+    service.deleteRoadmap(roadmapId);
+
+    res.json({
+      success: true,
+      message: 'Yol haritası silindi'
+    });
+  } catch (error) {
+    console.error('Error deleting roadmap:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Yol haritası silinemedi',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 export { router as careerGuidanceRoutes };
