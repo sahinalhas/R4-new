@@ -189,6 +189,6 @@ export function createEarlyWarningTables(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_escalation_logs_student ON escalation_logs(studentId);
     CREATE INDEX IF NOT EXISTS idx_escalation_logs_intervention ON escalation_logs(interventionId);
     CREATE INDEX IF NOT EXISTS idx_escalation_logs_type ON escalation_logs(escalationType);
-    CREATE INDEX IF NOT EXISTS idx_escalation_logs_urgency ON escalation_logs(urgencyLevel);
+    CREATE INDEX IF NOT EXISTS idx_escalation_logs_risk ON escalation_logs(riskLevel);
   `);
 }
