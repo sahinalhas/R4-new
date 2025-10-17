@@ -227,7 +227,11 @@ export function sanitizeAIRequest(req: Request, res: Response, next: NextFunctio
   }
   
   if (req.query && typeof req.query === 'object') {
-    req.query = sanitizeAIPromptObject(req.query as any);
+    const sanitized = sanitizeAIPromptObject(req.query as any);
+    for (const key in req.query) {
+      delete req.query[key];
+    }
+    Object.assign(req.query, sanitized);
   }
   
   next();
@@ -258,16 +262,26 @@ export function sanitizeAllInputs(req: Request, res: Response, next: NextFunctio
         sanitizedQuery[key] = value;
       }
     }
-    req.query = sanitizedQuery;
+    for (const key in req.query) {
+      delete req.query[key];
+    }
+    Object.assign(req.query, sanitizedQuery);
   }
   
   // URL params sanitization
   if (req.params && typeof req.params === 'object') {
+    const sanitizedParams: any = {};
     for (const key in req.params) {
       if (typeof req.params[key] === 'string') {
-        req.params[key] = sanitizeString(req.params[key]);
+        sanitizedParams[key] = sanitizeString(req.params[key]);
+      } else {
+        sanitizedParams[key] = req.params[key];
       }
     }
+    for (const key in req.params) {
+      delete req.params[key];
+    }
+    Object.assign(req.params, sanitizedParams);
   }
   
   next();
