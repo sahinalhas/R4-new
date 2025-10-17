@@ -357,7 +357,7 @@ export default function Rehber360Layout() {
                   <Search className="h-5 w-5" />
                 </Button>
               ) : (
-                <div className="absolute right-0 top-0 z-50 w-[400px] max-w-[calc(100vw-2rem)]">
+                <div className="absolute right-0 top-0 z-50 w-full sm:w-[400px] max-w-[calc(100vw-2rem)]">
                   <div className="relative">
                     <Input
                       id="header-search-input"

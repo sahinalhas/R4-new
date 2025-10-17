@@ -635,7 +635,7 @@ export default function Students() {
                     <UserPlus className="mr-2 h-4 w-4" /> Yeni Öğrenci
                   </Button>
                 </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-2xl">Yeni Öğrenci Ekle</DialogTitle>
               </DialogHeader>
@@ -726,8 +726,8 @@ export default function Students() {
                   />
                 </div>
               </form>
-              <DialogFooter>
-                <Button form="student-form" type="submit" className="w-full sm:w-auto">
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button form="student-form" type="submit" className="w-full sm:w-auto min-h-[44px]">
                   Öğrenci Ekle
                 </Button>
               </DialogFooter>
@@ -871,7 +871,8 @@ export default function Students() {
               )}
             </div>
           ) : (
-            <div className="overflow-auto max-h-[600px] rounded-b-lg">
+            <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-b-lg -mx-4 sm:mx-0">
+              <div className="min-w-[800px]">
               <Table>
                 <TableHeader className="sticky top-0 bg-background z-10 border-b">
                   <TableRow className="hover:bg-transparent">
@@ -956,6 +957,7 @@ export default function Students() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </div>
           )}
         </CardContent>
@@ -963,7 +965,7 @@ export default function Students() {
 
       {/* Öğrenci Düzenleme Dialogu */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl">Öğrenci Bilgilerini Düzenle</DialogTitle>
           </DialogHeader>
@@ -1054,15 +1056,15 @@ export default function Students() {
               />
             </div>
           </form>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => {
               setEditOpen(false);
               setStudentToEdit(null);
               reset();
-            }}>
+            }} className="w-full sm:w-auto min-h-[44px]">
               İptal
             </Button>
-            <Button form="student-edit-form" type="submit">
+            <Button form="student-edit-form" type="submit" className="w-full sm:w-auto min-h-[44px]">
               Değişiklikleri Kaydet
             </Button>
           </DialogFooter>
@@ -1071,7 +1073,7 @@ export default function Students() {
 
       {/* Güvenli Silme Dialogu */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl text-red-600 flex items-center gap-2">
               <div className="rounded-full bg-red-100 p-2">
@@ -1104,11 +1106,11 @@ export default function Students() {
               </div>
             </div>
           )}
-          <DialogFooter className="gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button 
               variant="outline" 
               onClick={() => setDeleteDialogOpen(false)}
-              className="flex-1 sm:flex-none"
+              className="w-full sm:w-auto min-h-[44px]"
             >
               İptal
             </Button>
@@ -1116,7 +1118,7 @@ export default function Students() {
               variant="destructive" 
               onClick={onDeleteConfirm}
               disabled={!confirmationName.trim()}
-              className="flex-1 sm:flex-none"
+              className="w-full sm:w-auto min-h-[44px]"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Kalıcı Olarak Sil
