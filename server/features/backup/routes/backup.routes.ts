@@ -100,7 +100,7 @@ router.delete('/:backupId', requireAuth, requireRole(['admin', 'counselor']), as
   }
 });
 
-router.get('/audit-logs', async (req, res) => {
+router.get('/audit-logs', requireAuth, requireRole(['admin', 'counselor']), async (req, res) => {
   try {
     const { userId, action, resource, startDate, endDate, limit } = req.query;
     
@@ -120,7 +120,7 @@ router.get('/audit-logs', async (req, res) => {
   }
 });
 
-router.get('/audit-report/:userId', async (req, res) => {
+router.get('/audit-report/:userId', requireAuth, requireRole(['admin', 'counselor']), async (req, res) => {
   try {
     const { userId } = req.params;
     const { days = 30 } = req.query;
@@ -133,7 +133,7 @@ router.get('/audit-report/:userId', async (req, res) => {
   }
 });
 
-router.post('/encrypt', async (req, res) => {
+router.post('/encrypt', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
     const { data, fields } = req.body;
     
@@ -149,7 +149,7 @@ router.post('/encrypt', async (req, res) => {
   }
 });
 
-router.post('/decrypt', async (req, res) => {
+router.post('/decrypt', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
     const { data, fields } = req.body;
     
@@ -165,7 +165,7 @@ router.post('/decrypt', async (req, res) => {
   }
 });
 
-router.post('/anonymize', async (req, res) => {
+router.post('/anonymize', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
     const { email, phone } = req.body;
     
