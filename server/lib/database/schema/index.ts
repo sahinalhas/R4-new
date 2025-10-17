@@ -13,6 +13,7 @@ import { createProfileSyncTables } from './profile-sync.schema';
 import { createAISuggestionsTable } from './ai-suggestions.schema';
 import { createAnalyticsSnapshotTable } from './analytics-snapshot.schema';
 import { createAuditLogsTable } from './audit-logs.schema';
+import { createNotificationTables } from './notifications.schema';
 
 export function initializeDatabaseSchema(db: Database.Database): void {
   createUsersTable(db);
@@ -31,4 +32,5 @@ export function initializeDatabaseSchema(db: Database.Database): void {
   createAISuggestionsTable(db);
   createAnalyticsSnapshotTable(db);
   createAuditLogsTable(db);
+  createNotificationTables(db);
 }
