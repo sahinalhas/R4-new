@@ -68,7 +68,7 @@ export async function getCareersByCategory(category: CareerCategory): Promise<Ca
   return getAllCareers({ category });
 }
 
-export async function analyzeCareerMatch(params: AnalyzeCareerMatchParams): Promise<CareerAnalysisResult> {
+export async function analyzeCareerMatch(params: AnalyzeCareerMatchParams): Promise<CareerAnalysisResult | null> {
   return createApiHandler(
     async () => {
       const response = await apiClient.post<{ success: boolean; data: CareerAnalysisResult }>(
@@ -83,14 +83,14 @@ export async function analyzeCareerMatch(params: AnalyzeCareerMatchParams): Prom
         }
       );
       
-      return response.data;
+      return response.data || null;
     },
-    {} as CareerAnalysisResult,
+    null,
     'Kariyer analizi yapılırken hata oluştu'
   )();
 }
 
-export async function generateCareerRoadmap(params: GenerateRoadmapParams): Promise<CareerRoadmap> {
+export async function generateCareerRoadmap(params: GenerateRoadmapParams): Promise<CareerRoadmap | null> {
   return createApiHandler(
     async () => {
       const response = await apiClient.post<{ success: boolean; data: CareerRoadmap }>(
@@ -108,9 +108,9 @@ export async function generateCareerRoadmap(params: GenerateRoadmapParams): Prom
         }
       );
       
-      return response.data;
+      return response.data || null;
     },
-    {} as CareerRoadmap,
+    null,
     'Kariyer yol haritası oluşturulurken hata oluştu'
   )();
 }
@@ -285,7 +285,7 @@ export async function getStudentCompetencyStats(studentId: string): Promise<Comp
   )();
 }
 
-export async function compareCareers(studentId: string, careerIds: string[]): Promise<CareerComparison> {
+export async function compareCareers(studentId: string, careerIds: string[]): Promise<CareerComparison | null> {
   return createApiHandler(
     async () => {
       const response = await apiClient.post<{ success: boolean; data: CareerComparison }>(
@@ -297,9 +297,9 @@ export async function compareCareers(studentId: string, careerIds: string[]): Pr
         }
       );
       
-      return response.data;
+      return response.data || null;
     },
-    {} as CareerComparison,
+    null,
     'Meslekler karşılaştırılırken hata oluştu'
   )();
 }

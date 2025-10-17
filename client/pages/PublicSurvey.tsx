@@ -235,10 +235,13 @@ export default function PublicSurvey() {
   const handleNextQuestion = () => {
     const isStepValid = validateCurrentStep();
     
-    if (isStepValid) {
-      setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1));
+    if (!isStepValid) {
+      return;
     }
-    // Error message is already set by validateCurrentStep
+    
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
   };
 
   const handlePreviousQuestion = () => {

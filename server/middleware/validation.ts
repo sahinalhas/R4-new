@@ -23,6 +23,33 @@ export function sanitizeString(input: string): string {
     .substring(0, 10000); // Limit length to prevent DoS
 }
 
+// Sanitize object recursively
+export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
+  const sanitized: any = Array.isArray(obj) ? [] : {};
+  
+  for (const key in obj) {
+    const value = obj[key];
+    
+    if (typeof value === 'string') {
+      sanitized[key] = sanitizeString(value);
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizeObject(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  
+  return sanitized as T;
+}
+
+// Middleware to sanitize request body
+export function sanitizeRequestBody(req: Request, res: Response, next: NextFunction) {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeObject(req.body);
+  }
+  next();
+}
+
 // Enhanced input validation middleware
 export function validateRequestBody(schema: z.ZodSchema<any>) {
   return (req: Request, res: Response, next: NextFunction) => {

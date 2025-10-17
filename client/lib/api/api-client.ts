@@ -60,9 +60,11 @@ class ApiClient {
 
     const errorInterceptor = createDefaultErrorInterceptor(toastConfig);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    let timeoutId: NodeJS.Timeout | undefined;
 
     try {
+      timeoutId = setTimeout(() => controller.abort(), timeout);
+
       let requestConfig: RequestInit = {
         method,
         headers: { ...this.baseHeaders, ...headers },
@@ -100,7 +102,6 @@ class ApiClient {
 
       return data as TResponse;
     } catch (error) {
-      clearTimeout(timeoutId);
       
       // Handle as ApiError or convert to ApiError
       const apiError = error instanceof Error && 'code' in error

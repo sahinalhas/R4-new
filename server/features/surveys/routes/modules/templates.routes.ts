@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import * as surveyService from '../../services/surveys.service.js';
+import { sanitizeObject } from '../../../../middleware/validation.js';
 
 export const getSurveyTemplates: RequestHandler = (req, res) => {
   try {
@@ -29,7 +30,7 @@ export const getSurveyTemplateById: RequestHandler = (req, res) => {
 
 export const createSurveyTemplate: RequestHandler = (req, res) => {
   try {
-    const template = req.body;
+    const template = sanitizeObject(req.body);
     
     if (!template.title || !template.type) {
       return res.status(400).json({ 
@@ -42,20 +43,22 @@ export const createSurveyTemplate: RequestHandler = (req, res) => {
     res.json({ success: true, message: 'Anket şablonu başarıyla oluşturuldu' });
   } catch (error) {
     console.error('Error creating survey template:', error);
-    res.status(500).json({ success: false, error: 'Anket şablonu oluşturulamadı' });
+    const errorMessage = error instanceof Error ? error.message : 'Anket şablonu oluşturulamadı';
+    res.status(500).json({ success: false, error: errorMessage });
   }
 };
 
 export const updateSurveyTemplateHandler: RequestHandler = (req, res) => {
   try {
     const { id } = req.params;
-    const template = req.body;
+    const template = sanitizeObject(req.body);
     
     surveyService.updateTemplate(id, template);
     res.json({ success: true, message: 'Anket şablonu başarıyla güncellendi' });
   } catch (error) {
     console.error('Error updating survey template:', error);
-    res.status(500).json({ success: false, error: 'Anket şablonu güncellenemedi' });
+    const errorMessage = error instanceof Error ? error.message : 'Anket şablonu güncellenemedi';
+    res.status(500).json({ success: false, error: errorMessage });
   }
 };
 

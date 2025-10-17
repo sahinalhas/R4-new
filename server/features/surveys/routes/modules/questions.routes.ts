@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import * as surveyService from '../../services/surveys.service.js';
+import { sanitizeObject } from '../../../../middleware/validation.js';
 
 export const getQuestionsByTemplateId: RequestHandler = (req, res) => {
   try {
@@ -14,7 +15,7 @@ export const getQuestionsByTemplateId: RequestHandler = (req, res) => {
 
 export const createSurveyQuestion: RequestHandler = (req, res) => {
   try {
-    const question = req.body;
+    const question = sanitizeObject(req.body);
     
     if (!question.templateId || !question.questionText || !question.questionType) {
       return res.status(400).json({ 
@@ -27,20 +28,22 @@ export const createSurveyQuestion: RequestHandler = (req, res) => {
     res.json({ success: true, message: 'Soru başarıyla oluşturuldu' });
   } catch (error) {
     console.error('Error creating survey question:', error);
-    res.status(500).json({ success: false, error: 'Soru oluşturulamadı' });
+    const errorMessage = error instanceof Error ? error.message : 'Soru oluşturulamadı';
+    res.status(500).json({ success: false, error: errorMessage });
   }
 };
 
 export const updateSurveyQuestionHandler: RequestHandler = (req, res) => {
   try {
     const { id } = req.params;
-    const question = req.body;
+    const question = sanitizeObject(req.body);
     
     surveyService.updateQuestion(id, question);
     res.json({ success: true, message: 'Soru başarıyla güncellendi' });
   } catch (error) {
     console.error('Error updating survey question:', error);
-    res.status(500).json({ success: false, error: 'Soru güncellenemedi' });
+    const errorMessage = error instanceof Error ? error.message : 'Soru güncellenemedi';
+    res.status(500).json({ success: false, error: errorMessage });
   }
 };
 
