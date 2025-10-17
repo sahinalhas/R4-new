@@ -47,14 +47,21 @@ export async function loadSubjectsAsync(): Promise<StudySubject[]> {
 }
 
 export async function saveSubjects(v: StudySubject[]): Promise<void> {
-  await apiClient.post('/api/subjects', v, {
-    showSuccessToast: true,
-    successMessage: API_ERROR_MESSAGES.STUDY.SUBJECTS_SAVE_SUCCESS,
-    errorMessage: API_ERROR_MESSAGES.STUDY.SUBJECTS_SAVE_ERROR,
-  });
+  const previousCache = subjectsCache;
   
-  subjectsCache = v;
-  window.dispatchEvent(new CustomEvent('subjectsUpdated'));
+  try {
+    await apiClient.post('/api/subjects', v, {
+      showSuccessToast: true,
+      successMessage: API_ERROR_MESSAGES.STUDY.SUBJECTS_SAVE_SUCCESS,
+      errorMessage: API_ERROR_MESSAGES.STUDY.SUBJECTS_SAVE_ERROR,
+    });
+    
+    subjectsCache = v;
+    window.dispatchEvent(new CustomEvent('subjectsUpdated'));
+  } catch (error) {
+    subjectsCache = previousCache;
+    throw error;
+  }
 }
 
 export async function addSubject(s: StudySubject): Promise<void> {
@@ -113,14 +120,21 @@ export async function loadTopicsAsync(): Promise<StudyTopic[]> {
 }
 
 export async function saveTopics(v: StudyTopic[]): Promise<void> {
-  await apiClient.post('/api/topics', v, {
-    showSuccessToast: true,
-    successMessage: API_ERROR_MESSAGES.STUDY.TOPICS_SAVE_SUCCESS,
-    errorMessage: API_ERROR_MESSAGES.STUDY.TOPICS_SAVE_ERROR,
-  });
+  const previousCache = topicsCache;
   
-  topicsCache = v;
-  window.dispatchEvent(new CustomEvent('topicsUpdated'));
+  try {
+    await apiClient.post('/api/topics', v, {
+      showSuccessToast: true,
+      successMessage: API_ERROR_MESSAGES.STUDY.TOPICS_SAVE_SUCCESS,
+      errorMessage: API_ERROR_MESSAGES.STUDY.TOPICS_SAVE_ERROR,
+    });
+    
+    topicsCache = v;
+    window.dispatchEvent(new CustomEvent('topicsUpdated'));
+  } catch (error) {
+    topicsCache = previousCache;
+    throw error;
+  }
 }
 
 export async function addTopic(t: StudyTopic): Promise<void> {
@@ -189,14 +203,21 @@ async function loadWeeklySlotsAsync(): Promise<void> {
 }
 
 export async function saveWeeklySlots(v: WeeklySlot[]): Promise<void> {
-  await apiClient.post('/api/weekly-slots', v, {
-    showSuccessToast: true,
-    successMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_SAVE_SUCCESS,
-    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_SAVE_ERROR,
-  });
+  const previousCache = weeklySlotsCache;
   
-  weeklySlotsCache = v;
-  window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  try {
+    await apiClient.post('/api/weekly-slots', v, {
+      showSuccessToast: true,
+      successMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_SAVE_SUCCESS,
+      errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_SAVE_ERROR,
+    });
+    
+    weeklySlotsCache = v;
+    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  } catch (error) {
+    weeklySlotsCache = previousCache;
+    throw error;
+  }
 }
 
 export function getWeeklySlotsByStudent(studentId: string) {
@@ -204,46 +225,67 @@ export function getWeeklySlotsByStudent(studentId: string) {
 }
 
 export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
-  await apiClient.post('/api/weekly-slots', w, {
-    showSuccessToast: false,
-    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_ADD_ERROR,
-  });
+  const previousCache = weeklySlotsCache;
   
-  const list = loadWeeklySlots();
-  list.push(w);
-  weeklySlotsCache = list;
-  window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  try {
+    await apiClient.post('/api/weekly-slots', w, {
+      showSuccessToast: false,
+      errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_ADD_ERROR,
+    });
+    
+    const list = loadWeeklySlots();
+    list.push(w);
+    weeklySlotsCache = list;
+    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  } catch (error) {
+    weeklySlotsCache = previousCache;
+    throw error;
+  }
 }
 
 export async function removeWeeklySlot(id: string): Promise<void> {
-  await apiClient.delete(`/api/weekly-slots/${id}`, {
-    showSuccessToast: false,
-    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_DELETE_ERROR,
-  });
+  const previousCache = weeklySlotsCache;
   
-  const list = loadWeeklySlots().filter((w) => w.id !== id);
-  weeklySlotsCache = list;
-  window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  try {
+    await apiClient.delete(`/api/weekly-slots/${id}`, {
+      showSuccessToast: false,
+      errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_DELETE_ERROR,
+    });
+    
+    const list = loadWeeklySlots().filter((w) => w.id !== id);
+    weeklySlotsCache = list;
+    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  } catch (error) {
+    weeklySlotsCache = previousCache;
+    throw error;
+  }
 }
 
 export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): Promise<void> {
-  await apiClient.put(`/api/weekly-slots/${id}`, patch, {
-    showSuccessToast: false,
-    errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_UPDATE_ERROR,
-  });
+  const previousCache = weeklySlotsCache;
   
-  const list = loadWeeklySlots();
-  const i = list.findIndex((w) => w.id === id);
-  if (i >= 0) {
-    list[i] = {
-      ...list[i],
-      ...patch,
-      id: list[i].id,
-      studentId: list[i].studentId,
-      subjectId: list[i].subjectId,
-    };
-    weeklySlotsCache = list;
-    window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+  try {
+    await apiClient.put(`/api/weekly-slots/${id}`, patch, {
+      showSuccessToast: false,
+      errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_UPDATE_ERROR,
+    });
+    
+    const list = loadWeeklySlots();
+    const i = list.findIndex((w) => w.id === id);
+    if (i >= 0) {
+      list[i] = {
+        ...list[i],
+        ...patch,
+        id: list[i].id,
+        studentId: list[i].studentId,
+        subjectId: list[i].subjectId,
+      };
+      weeklySlotsCache = list;
+      window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
+    }
+  } catch (error) {
+    weeklySlotsCache = previousCache;
+    throw error;
   }
 }
 
@@ -274,14 +316,21 @@ async function loadProgressAsync(): Promise<void> {
 }
 
 export async function saveProgress(v: TopicProgress[]): Promise<void> {
-  await apiClient.post('/api/progress', v, {
-    showSuccessToast: true,
-    successMessage: API_ERROR_MESSAGES.STUDY.PROGRESS_SAVE_SUCCESS,
-    errorMessage: API_ERROR_MESSAGES.STUDY.PROGRESS_SAVE_ERROR,
-  });
+  const previousCache = progressCache;
   
-  progressCache = v;
-  window.dispatchEvent(new CustomEvent('progressUpdated'));
+  try {
+    await apiClient.post('/api/progress', v, {
+      showSuccessToast: true,
+      successMessage: API_ERROR_MESSAGES.STUDY.PROGRESS_SAVE_SUCCESS,
+      errorMessage: API_ERROR_MESSAGES.STUDY.PROGRESS_SAVE_ERROR,
+    });
+    
+    progressCache = v;
+    window.dispatchEvent(new CustomEvent('progressUpdated'));
+  } catch (error) {
+    progressCache = previousCache;
+    throw error;
+  }
 }
 
 export function getProgressByStudent(studentId: string) {

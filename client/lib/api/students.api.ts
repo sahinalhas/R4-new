@@ -51,23 +51,23 @@ export async function loadStudentsAsync(): Promise<void> {
   }
 }
 
-export function saveStudents(list: Student[]) {
-  studentsCache = list;
+export async function saveStudents(list: Student[]): Promise<void> {
+  const previousCache = studentsCache;
   
-  saveStudentsAsync(list).catch(error => {
-    console.error('Failed to save students to API:', error);
-  });
-}
-
-async function saveStudentsAsync(students: Student[]): Promise<void> {
   try {
-    const backendStudents = students.map(frontendToBackend);
+    const backendStudents = list.map(frontendToBackend);
     await saveStudentsToAPI(backendStudents);
+    
+    studentsCache = list;
+    window.dispatchEvent(new CustomEvent('studentsUpdated'));
   } catch (error) {
+    studentsCache = previousCache;
+    
     handleApiError(error, {
       title: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR,
       description: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR_DESCRIPTION,
-      context: 'saveStudentsAsync'
+      context: 'saveStudents',
+      showToast: true
     });
     
     throw error;
@@ -75,6 +75,8 @@ async function saveStudentsAsync(students: Student[]): Promise<void> {
 }
 
 export async function upsertStudent(stu: Student): Promise<void> {
+  const previousCache = studentsCache;
+  
   try {
     const backendStudent = frontendToBackend(stu);
     
@@ -92,10 +94,13 @@ export async function upsertStudent(stu: Student): Promise<void> {
     window.dispatchEvent(new CustomEvent('studentsUpdated'));
     
   } catch (error) {
+    studentsCache = previousCache;
+    
     handleApiError(error, {
       title: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR,
       description: API_ERROR_MESSAGES.STUDENT.SAVE_ERROR_DESCRIPTION,
-      context: 'upsertStudent'
+      context: 'upsertStudent',
+      showToast: true
     });
     throw error;
   }
