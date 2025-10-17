@@ -514,6 +514,7 @@ export default function Students() {
         risk: risk ? (risk.toLowerCase() === 'high' || risk.toLowerCase() === 'yüksek' ? 'Yüksek' : 
                risk.toLowerCase() === 'medium' || risk.toLowerCase() === 'orta' ? 'Orta' : 
                'Düşük') as 'Düşük' | 'Orta' | 'Yüksek' : undefined,
+        kayitTarihi: new Date().toISOString(),
       });
     }
 
