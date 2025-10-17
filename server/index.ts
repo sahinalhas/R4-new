@@ -4,6 +4,7 @@ import cors from "cors";
 import featureRegistry from "./features";
 import { getCorsOptions } from "./middleware/cors-config";
 import { securityHeaders } from "./middleware/security-headers";
+import { sanitizeAllInputs } from "./middleware/validation";
 
 /**
  * BACKEND MODULARIZATION - COMPLETE ✅
@@ -41,6 +42,9 @@ export function createServer() {
     limit: '10mb',
     parameterLimit: 1000 // Limit number of parameters
   }));
+
+  // Global input sanitization - tüm endpoint'lerde otomatik sanitizasyon
+  app.use(sanitizeAllInputs);
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {

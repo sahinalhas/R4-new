@@ -8,6 +8,7 @@
 import type { AIAdapter } from './ai-adapters/base-adapter.js';
 import { AIAdapterFactory } from './ai-adapters/adapter-factory.js';
 import { AppSettingsService } from './app-settings.service.js';
+import { aiErrorHandler } from './ai-error-handler.service.js';
 
 export type AIProvider = 'openai' | 'ollama' | 'gemini';
 
@@ -37,62 +38,91 @@ export class AIProviderService {
   private constructor(config?: Partial<AIProviderConfig>) {
     const savedSettings = AppSettingsService.getAIProvider();
     
-    // API anahtarlarını kontrol et
-    const hasGeminiKey = !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0);
-    const hasOpenAIKey = !!(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim().length > 0);
+    // 1. Provider ve model seçimi
+    const provider = this.selectProvider(config, savedSettings);
+    const model = this.selectModel(config, savedSettings, provider);
     
-    let defaultProvider: AIProvider;
-    let defaultModel: string;
-    
-    if (config?.provider) {
-      // 1. ÖNCELİK: Programatik config (özel kullanımlar için)
-      defaultProvider = config.provider;
-      defaultModel = config.model || this.getDefaultModelForProvider(config.provider);
-    } else if (savedSettings?.provider) {
-      // 2. ÖNCELİK: KULLANICI AYARLARI (Ayarlar sayfasından seçilen - EN ÖNEMLİ!)
-      defaultProvider = savedSettings.provider as AIProvider;
-      defaultModel = savedSettings.model || this.getDefaultModelForProvider(savedSettings.provider as AIProvider);
-      console.log(`📋 Kullanıcı ayarlarından yüklendi: ${defaultProvider} (${defaultModel})`);
-    } else if (hasGeminiKey) {
-      // 3. Öncelik: İlk kurulumda Gemini API key varsa Gemini
-      defaultProvider = 'gemini';
-      defaultModel = 'gemini-2.5-flash';
-      console.log('🔑 Gemini API key bulundu, varsayılan olarak ayarlandı');
-    } else if (hasOpenAIKey) {
-      // 4. Öncelik: İlk kurulumda OpenAI API key varsa OpenAI
-      defaultProvider = 'openai';
-      defaultModel = 'gpt-4o-mini';
-      console.log('🔑 OpenAI API key bulundu, varsayılan olarak ayarlandı');
-    } else {
-      // 5. Son seçenek: Ollama (local)
-      defaultProvider = 'ollama';
-      defaultModel = 'llama3';
-      console.log('🏠 Varsayılan olarak Ollama (local) kullanılıyor');
-    }
-    
-    // Model'i belirle - sadece aynı provider için kaydedilmiş model kullanılabilir
-    let finalModel: string;
-    if (config?.model) {
-      // Config'den gelen model öncelikli
-      finalModel = config.model;
-    } else if (savedSettings?.provider === defaultProvider && savedSettings?.model) {
-      // Kaydedilmiş provider ile seçilen provider aynıysa, kaydedilmiş modeli kullan
-      finalModel = savedSettings.model;
-    } else {
-      // Aksi halde provider'a uygun varsayılan modeli kullan
-      finalModel = defaultModel;
-    }
-    
+    // 2. Final config oluştur
     this.config = {
-      provider: defaultProvider,
-      model: finalModel,
+      provider,
+      model,
       temperature: config?.temperature || 0,
       ollamaBaseUrl: config?.ollamaBaseUrl || savedSettings?.ollamaBaseUrl || 'http://localhost:11434'
     };
 
+    // 3. Adapter oluştur
     this.adapter = AIAdapterFactory.createAdapter(this.config);
     
-    console.log(`🤖 AI Provider initialized: ${defaultProvider} (${finalModel})`);
+    console.log(`🤖 AI Provider initialized: ${provider} (${model})`);
+  }
+  
+  /**
+   * Provider seçim öncelik mantığı
+   * Öncelik sırası: config > savedSettings > API keys > ollama
+   */
+  private selectProvider(
+    config?: Partial<AIProviderConfig>,
+    savedSettings?: any
+  ): AIProvider {
+    // 1. ÖNCELİK: Programatik config
+    if (config?.provider) {
+      return config.provider;
+    }
+    
+    // 2. ÖNCELİK: Kullanıcı ayarları (en önemli!)
+    if (savedSettings?.provider) {
+      console.log(`📋 Kullanıcı ayarlarından yüklendi: ${savedSettings.provider}`);
+      return savedSettings.provider as AIProvider;
+    }
+    
+    // 3. ÖNCELİK: API key varlığına göre otomatik seçim
+    const hasGeminiKey = this.hasValidAPIKey('GEMINI_API_KEY');
+    const hasOpenAIKey = this.hasValidAPIKey('OPENAI_API_KEY');
+    
+    if (hasGeminiKey) {
+      console.log('🔑 Gemini API key bulundu, varsayılan olarak ayarlandı');
+      return 'gemini';
+    }
+    
+    if (hasOpenAIKey) {
+      console.log('🔑 OpenAI API key bulundu, varsayılan olarak ayarlandı');
+      return 'openai';
+    }
+    
+    // 4. Son seçenek: Ollama (local, API key gerektirmez)
+    console.log('🏠 Varsayılan olarak Ollama (local) kullanılıyor');
+    return 'ollama';
+  }
+  
+  /**
+   * Model seçim mantığı
+   * Öncelik: config.model > savedSettings.model (eşleşirse) > default
+   */
+  private selectModel(
+    config: Partial<AIProviderConfig> | undefined,
+    savedSettings: any,
+    provider: AIProvider
+  ): string {
+    // 1. Config'den gelen model öncelikli
+    if (config?.model) {
+      return config.model;
+    }
+    
+    // 2. Kaydedilmiş provider ile aynıysa, kaydedilmiş modeli kullan
+    if (savedSettings?.provider === provider && savedSettings?.model) {
+      return savedSettings.model;
+    }
+    
+    // 3. Provider'a uygun varsayılan model
+    return this.getDefaultModelForProvider(provider);
+  }
+  
+  /**
+   * API key varlığını kontrol et
+   */
+  private hasValidAPIKey(keyName: string): boolean {
+    const key = process.env[keyName];
+    return !!(key && key.trim().length > 0);
   }
   
   private getDefaultModelForProvider(provider: AIProvider): string {
@@ -181,14 +211,42 @@ export class AIProviderService {
    * Chat completion
    */
   async chat(request: ChatCompletionRequest): Promise<string> {
-    return await this.adapter.chat(request);
+    try {
+      return await this.adapter.chat(request);
+    } catch (error) {
+      await aiErrorHandler.handleAIError(
+        error as Error,
+        {
+          serviceType: 'chat',
+          provider: this.config.provider,
+          model: this.config.model,
+          operation: 'chat-completion'
+        },
+        false
+      );
+      throw error;
+    }
   }
 
   /**
    * Streaming chat completion
    */
   async *chatStream(request: ChatCompletionRequest): AsyncGenerator<string, void, unknown> {
-    yield* this.adapter.chatStream(request);
+    try {
+      yield* this.adapter.chatStream(request);
+    } catch (error) {
+      await aiErrorHandler.handleAIError(
+        error as Error,
+        {
+          serviceType: 'chat',
+          provider: this.config.provider,
+          model: this.config.model,
+          operation: 'chat-stream'
+        },
+        false
+      );
+      throw error;
+    }
   }
 }
 

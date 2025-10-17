@@ -61,13 +61,14 @@ export function useUnifiedRisk(studentId: string, student?: Student) {
   return useQuery<UnifiedRiskData>({
     queryKey: ['unified-risk', studentId],
     queryFn: async () => {
-      // Manuel risk bilgisini al
-      const manualRisk = student?.risk || null;
+      // Manuel risk bilgisini al ve validate et
+      const manualRisk = validateManualRisk(student?.risk);
       
       // Risk faktörlerini al (API'den)
       let riskFactors = null;
       try {
-        riskFactors = await apiClient.get(`/api/risk-assessment/${studentId}`);
+        const response = await apiClient.get(`/api/risk-assessment/${studentId}`);
+        riskFactors = validateRiskFactors(response);
       } catch (error) {
         console.error('Risk factors fetch error:', error);
       }
@@ -75,7 +76,8 @@ export function useUnifiedRisk(studentId: string, student?: Student) {
       // Enhanced risk'i al (AI tabanlı)
       let enhancedRisk = null;
       try {
-        enhancedRisk = await apiClient.get(`/api/enhanced-risk/${studentId}`);
+        const response = await apiClient.get(`/api/enhanced-risk/${studentId}`);
+        enhancedRisk = validateEnhancedRisk(response);
       } catch (error) {
         console.error('Enhanced risk fetch error:', error);
       }
@@ -83,7 +85,8 @@ export function useUnifiedRisk(studentId: string, student?: Student) {
       // Risk & Protective profile'ı al
       let riskProtectiveProfile = null;
       try {
-        riskProtectiveProfile = await apiClient.get(`/api/student-profile/${studentId}/risk-protective`);
+        const response = await apiClient.get(`/api/student-profile/${studentId}/risk-protective`);
+        riskProtectiveProfile = validateRiskProtectiveProfile(response);
       } catch (error) {
         console.error('Risk protective profile fetch error:', error);
       }
@@ -142,18 +145,23 @@ function calculateUnifiedRiskScore(data: {
   
   // Risk faktörlerinden skor hesapla
   if (data.riskFactors) {
-    const levelToScore = {
-      "DÜŞÜK": 20,
-      "ORTA": 50,
-      "YÜKSEK": 75,
-      "ÇOK_YÜKSEK": 95
+    // Case-insensitive level mapping
+    const getLevelScore = (level: string): number => {
+      const normalized = level.toUpperCase().replace(/\s+/g, '_');
+      const scoreMap: Record<string, number> = {
+        "DÜŞÜK": 20,
+        "ORTA": 50,
+        "YÜKSEK": 75,
+        "ÇOK_YÜKSEK": 95
+      };
+      return scoreMap[normalized] || 0;
     };
     
     const factorScores = [
-      levelToScore[data.riskFactors.academicRiskLevel as keyof typeof levelToScore] || 0,
-      levelToScore[data.riskFactors.behavioralRiskLevel as keyof typeof levelToScore] || 0,
-      levelToScore[data.riskFactors.attendanceRiskLevel as keyof typeof levelToScore] || 0,
-      levelToScore[data.riskFactors.socialEmotionalRiskLevel as keyof typeof levelToScore] || 0,
+      getLevelScore(data.riskFactors.academicRiskLevel),
+      getLevelScore(data.riskFactors.behavioralRiskLevel),
+      getLevelScore(data.riskFactors.attendanceRiskLevel),
+      getLevelScore(data.riskFactors.socialEmotionalRiskLevel),
     ];
     
     const avgFactorScore = factorScores.reduce((a, b) => a + b, 0) / factorScores.length;
@@ -190,9 +198,14 @@ function getInterventionPriority(
   riskFactors: any,
   enhancedRisk: any
 ): "low" | "medium" | "high" | "critical" {
+  // Case-insensitive comparison helper
+  const isLevel = (value: string, target: string) => {
+    return value?.toUpperCase().replace(/\s+/g, '_') === target;
+  };
+  
   // Çok yüksek risk faktörleri varsa kritik
-  if (riskFactors?.behavioralRiskLevel === "ÇOK_YÜKSEK" ||
-      riskFactors?.academicRiskLevel === "ÇOK_YÜKSEK") {
+  if (isLevel(riskFactors?.behavioralRiskLevel, "ÇOK_YÜKSEK") ||
+      isLevel(riskFactors?.academicRiskLevel, "ÇOK_YÜKSEK")) {
     return "critical";
   }
   
@@ -203,4 +216,86 @@ function getInterventionPriority(
   
   // Normal kategori
   return getRiskCategory(score);
+}
+
+// Veri Validasyon Fonksiyonları
+
+function validateManualRisk(risk: any): "Düşük" | "Orta" | "Yüksek" | null {
+  const validRisks = ["Düşük", "Orta", "Yüksek"];
+  if (risk && validRisks.includes(risk)) {
+    return risk as "Düşük" | "Orta" | "Yüksek";
+  }
+  return null;
+}
+
+function validateRiskFactors(data: any): any {
+  if (!data || typeof data !== 'object') return null;
+  
+  // Hem uppercase hem title-case değerleri kabul et (geriye dönük uyumluluk için)
+  const validLevels = [
+    "DÜŞÜK", "ORTA", "YÜKSEK", "ÇOK_YÜKSEK",  // Uppercase
+    "Düşük", "Orta", "Yüksek", "Çok Yüksek"   // Title-case
+  ];
+  
+  // Zorunlu alanlar kontrolü
+  if (!data.academicRiskLevel || !data.behavioralRiskLevel || 
+      !data.attendanceRiskLevel || !data.socialEmotionalRiskLevel) {
+    return null;
+  }
+  
+  // Level validasyonu - case insensitive
+  const normalizeLevel = (level: string) => level.toUpperCase().replace(/\s+/g, '_');
+  
+  if (!validLevels.some(valid => normalizeLevel(valid) === normalizeLevel(data.academicRiskLevel)) ||
+      !validLevels.some(valid => normalizeLevel(valid) === normalizeLevel(data.behavioralRiskLevel)) ||
+      !validLevels.some(valid => normalizeLevel(valid) === normalizeLevel(data.attendanceRiskLevel)) ||
+      !validLevels.some(valid => normalizeLevel(valid) === normalizeLevel(data.socialEmotionalRiskLevel))) {
+    console.warn('Invalid risk level in risk factors:', data);
+    return null;
+  }
+  
+  return data;
+}
+
+function validateEnhancedRisk(data: any): any {
+  if (!data || typeof data !== 'object') return null;
+  
+  // Zorunlu alanlar kontrolü
+  if (typeof data.overallScore !== 'number' || 
+      !data.category || 
+      !data.trend) {
+    return null;
+  }
+  
+  // Score validasyonu
+  if (data.overallScore < 0 || data.overallScore > 100) {
+    console.warn('Invalid enhanced risk score:', data.overallScore);
+    return null;
+  }
+  
+  // Trend validasyonu
+  const validTrends = ["increasing", "stable", "decreasing"];
+  if (!validTrends.includes(data.trend)) {
+    console.warn('Invalid enhanced risk trend:', data.trend);
+    return null;
+  }
+  
+  return data;
+}
+
+function validateRiskProtectiveProfile(data: any): any {
+  if (!data || typeof data !== 'object') return null;
+  
+  // Score validasyonu
+  if (typeof data.riskScore !== 'number' || typeof data.protectiveScore !== 'number') {
+    return null;
+  }
+  
+  if (data.riskScore < 0 || data.riskScore > 100 ||
+      data.protectiveScore < 0 || data.protectiveScore > 100) {
+    console.warn('Invalid risk/protective scores:', data);
+    return null;
+  }
+  
+  return data;
 }

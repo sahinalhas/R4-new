@@ -13,6 +13,7 @@ import { ProfileAggregationService } from './profile-aggregation.service.js';
 import { SuggestionQueueService } from '../../ai-suggestions/services/suggestion-queue.service.js';
 import type { ProfileUpdateRequest, DataSource } from '../types/index.js';
 import type { CreateSuggestionRequest, ProposedChange } from '../../../../shared/types/ai-suggestion.types.js';
+import { asyncOpMonitor } from '../../../services/async-operation-monitor.service.js';
 
 export class AutoSyncHooksService {
   private aggregationService: ProfileAggregationService;
@@ -44,54 +45,63 @@ export class AutoSyncHooksService {
     cooperationLevel?: number;
     [key: string]: any;
   }): Promise<void> {
-    console.log('🎯 Counseling session completed, creating AI suggestion...');
-
     const studentIds = sessionData.studentId 
       ? [sessionData.studentId] 
       : sessionData.studentIds || [];
 
     for (const studentId of studentIds) {
-      try {
-        // Öneri oluştur (otomatik kayıt yok!)
-        const suggestion: CreateSuggestionRequest = {
-          studentId,
-          suggestionType: 'PROFILE_UPDATE',
-          source: 'counseling_session',
-          sourceId: sessionData.id,
-          priority: sessionData.emotionalState === 'ENDIŞELI' || sessionData.emotionalState === 'ÜZGÜN' 
-            ? 'HIGH' 
-            : 'MEDIUM',
+      await asyncOpMonitor.executeAsyncSafely(
+        'counseling-session-sync',
+        async () => {
+          console.log('🎯 Counseling session completed, creating AI suggestion...');
           
-          title: 'Rehberlik Görüşmesi Sonrası Profil Güncelleme',
-          description: `Öğrenci ile yapılan görüşme sonucu profil güncelleme önerisi. ${
-            sessionData.detailedNotes ? sessionData.detailedNotes.substring(0, 100) + '...' : ''
-          }`,
-          reasoning: 'Görüşme notları ve gözlemler temelinde profil bilgilerinin güncellenmesi önerilmektedir.',
-          confidence: 0.85,
-          
-          proposedChanges: this.buildProposedChangesFromSession(sessionData),
-          currentValues: {
+          // Öneri oluştur (otomatik kayıt yok!)
+          const suggestion: CreateSuggestionRequest = {
+            studentId,
+            suggestionType: 'PROFILE_UPDATE',
             source: 'counseling_session',
-            sessionId: sessionData.id
-          },
-          
-          aiModel: 'profile-aggregation',
-          aiVersion: '1.0',
-          analysisData: {
-            sessionData: {
-              notes: sessionData.detailedNotes,
-              tags: sessionData.sessionTags,
-              emotionalState: sessionData.emotionalState,
-              cooperationLevel: sessionData.cooperationLevel
+            sourceId: sessionData.id,
+            priority: sessionData.emotionalState === 'ENDIŞELI' || sessionData.emotionalState === 'ÜZGÜN' 
+              ? 'HIGH' 
+              : 'MEDIUM',
+            
+            title: 'Rehberlik Görüşmesi Sonrası Profil Güncelleme',
+            description: `Öğrenci ile yapılan görüşme sonucu profil güncelleme önerisi. ${
+              sessionData.detailedNotes ? sessionData.detailedNotes.substring(0, 100) + '...' : ''
+            }`,
+            reasoning: 'Görüşme notları ve gözlemler temelinde profil bilgilerinin güncellenmesi önerilmektedir.',
+            confidence: 0.85,
+            
+            proposedChanges: this.buildProposedChangesFromSession(sessionData),
+            currentValues: {
+              source: 'counseling_session',
+              sessionId: sessionData.id
+            },
+            
+            aiModel: 'profile-aggregation',
+            aiVersion: '1.0',
+            analysisData: {
+              sessionData: {
+                notes: sessionData.detailedNotes,
+                tags: sessionData.sessionTags,
+                emotionalState: sessionData.emotionalState,
+                cooperationLevel: sessionData.cooperationLevel
+              }
             }
-          }
-        };
+          };
 
-        const suggestionId = await this.suggestionService.createSuggestion(suggestion);
-        console.log(`✅ AI önerisi oluşturuldu (Görüşme): ${suggestionId} - Öğrenci ${studentId}`);
-      } catch (error) {
-        console.error(`❌ AI önerisi oluşturulamadı (Öğrenci ${studentId}):`, error);
-      }
+          const suggestionId = await this.suggestionService.createSuggestion(suggestion);
+          console.log(`✅ AI önerisi oluşturuldu (Görüşme): ${suggestionId} - Öğrenci ${studentId}`);
+        },
+        {
+          sessionId: sessionData.id,
+          studentId,
+          emotionalState: sessionData.emotionalState
+        },
+        (error) => {
+          console.error(`❌ AI önerisi oluşturulamadı (Öğrenci ${studentId}):`, error);
+        }
+      );
     }
   }
 
@@ -106,8 +116,6 @@ export class AutoSyncHooksService {
     distributionId: string;
     [key: string]: any;
   }): Promise<void> {
-    console.log('📋 Survey response submitted, creating AI suggestion...');
-
     const studentId = responseData.studentId || responseData.studentInfo?.id;
     
     if (!studentId) {
@@ -115,35 +123,39 @@ export class AutoSyncHooksService {
       return;
     }
 
-    try {
-      const suggestion: CreateSuggestionRequest = {
-        studentId,
-        suggestionType: 'PROFILE_UPDATE',
-        source: 'survey_response',
-        sourceId: responseData.id,
-        priority: 'MEDIUM',
+    await asyncOpMonitor.executeAsyncSafely(
+      'survey-response-sync',
+      async () => {
+        console.log('📋 Survey response submitted, creating AI suggestion...');
         
-        title: 'Anket Sonrası Profil Güncelleme',
-        description: 'Öğrencinin anket cevapları temelinde profil güncelleme önerisi.',
-        reasoning: 'Anket verileri öğrencinin ilgi alanları, güçlü yönleri ve gelişim alanları hakkında bilgi içermektedir.',
-        confidence: 0.75,
-        
-        proposedChanges: this.buildProposedChangesFromSurvey(responseData),
-        currentValues: {
+        const suggestion: CreateSuggestionRequest = {
+          studentId,
+          suggestionType: 'PROFILE_UPDATE',
           source: 'survey_response',
-          responseId: responseData.id,
-          distributionId: responseData.distributionId
-        },
-        
-        aiModel: 'profile-aggregation',
-        aiVersion: '1.0'
-      };
+          sourceId: responseData.id,
+          priority: 'MEDIUM',
+          
+          title: 'Anket Sonrası Profil Güncelleme',
+          description: 'Öğrencinin anket cevapları temelinde profil güncelleme önerisi.',
+          reasoning: 'Anket verileri öğrencinin ilgi alanları, güçlü yönleri ve gelişim alanları hakkında bilgi içermektedir.',
+          confidence: 0.75,
+          
+          proposedChanges: this.buildProposedChangesFromSurvey(responseData),
+          currentValues: {
+            source: 'survey_response',
+            responseId: responseData.id,
+            distributionId: responseData.distributionId
+          },
+          
+          aiModel: 'profile-aggregation',
+          aiVersion: '1.0'
+        };
 
-      const suggestionId = await this.suggestionService.createSuggestion(suggestion);
-      console.log(`✅ AI önerisi oluşturuldu (Anket): ${suggestionId}`);
-    } catch (error) {
-      console.error(`❌ AI önerisi oluşturulamadı:`, error);
-    }
+        const suggestionId = await this.suggestionService.createSuggestion(suggestion);
+        console.log(`✅ AI önerisi oluşturuldu (Anket): ${suggestionId}`);
+      },
+      { responseId: responseData.id, studentId, distributionId: responseData.distributionId }
+    );
   }
 
   /**
@@ -158,43 +170,45 @@ export class AutoSyncHooksService {
     date: string;
     [key: string]: any;
   }): Promise<void> {
-    console.log('📝 Exam result added, creating AI suggestion...');
+    await asyncOpMonitor.executeAsyncSafely(
+      'exam-result-sync',
+      async () => {
+        console.log('📝 Exam result added, creating AI suggestion...');
+        
+        // Düşük notlar için yüksek öncelik
+        const isLowScore = examData.score < 50;
+        
+        const suggestion: CreateSuggestionRequest = {
+          studentId: examData.studentId,
+          suggestionType: isLowScore ? 'ACADEMIC_INSIGHT' : 'PROFILE_UPDATE',
+          source: 'exam_result',
+          sourceId: examData.id,
+          priority: isLowScore ? 'HIGH' : 'LOW',
+          
+          title: isLowScore 
+            ? `Düşük Sınav Performansı: ${examData.examName}` 
+            : `Sınav Sonucu Kaydı: ${examData.examName}`,
+          description: `${examData.examName} sınavından ${examData.score} puan aldı. ${
+            isLowScore 
+              ? 'Akademik destek gerekebilir.' 
+              : 'Performans profil verilerine eklenebilir.'
+          }`,
+          reasoning: isLowScore 
+            ? 'Düşük sınav performansı, öğrencinin akademik zorluk yaşadığına işaret edebilir.'
+            : 'Sınav sonucu, öğrencinin akademik gelişimini takip için kayıt altına alınmalıdır.',
+          confidence: 0.9,
+          
+          proposedChanges: this.buildProposedChangesFromExam(examData),
+          
+          aiModel: 'profile-aggregation',
+          aiVersion: '1.0'
+        };
 
-    try {
-      // Düşük notlar için yüksek öncelik
-      const isLowScore = examData.score < 50;
-      
-      const suggestion: CreateSuggestionRequest = {
-        studentId: examData.studentId,
-        suggestionType: isLowScore ? 'ACADEMIC_INSIGHT' : 'PROFILE_UPDATE',
-        source: 'exam_result',
-        sourceId: examData.id,
-        priority: isLowScore ? 'HIGH' : 'LOW',
-        
-        title: isLowScore 
-          ? `Düşük Sınav Performansı: ${examData.examName}` 
-          : `Sınav Sonucu Kaydı: ${examData.examName}`,
-        description: `${examData.examName} sınavından ${examData.score} puan aldı. ${
-          isLowScore 
-            ? 'Akademik destek gerekebilir.' 
-            : 'Performans profil verilerine eklenebilir.'
-        }`,
-        reasoning: isLowScore 
-          ? 'Düşük sınav performansı, öğrencinin akademik zorluk yaşadığına işaret edebilir.'
-          : 'Sınav sonucu, öğrencinin akademik gelişimini takip için kayıt altına alınmalıdır.',
-        confidence: 0.9,
-        
-        proposedChanges: this.buildProposedChangesFromExam(examData),
-        
-        aiModel: 'profile-aggregation',
-        aiVersion: '1.0'
-      };
-
-      const suggestionId = await this.suggestionService.createSuggestion(suggestion);
-      console.log(`✅ AI önerisi oluşturuldu (Sınav): ${suggestionId}`);
-    } catch (error) {
-      console.error(`❌ AI önerisi oluşturulamadı:`, error);
-    }
+        const suggestionId = await this.suggestionService.createSuggestion(suggestion);
+        console.log(`✅ AI önerisi oluşturuldu (Sınav): ${suggestionId}`);
+      },
+      { examId: examData.id, studentId: examData.studentId, examName: examData.examName, score: examData.score }
+    );
   }
 
   /**

@@ -9,6 +9,7 @@ import { AIProviderService } from './ai-provider.service.js';
 import { StudentContextService } from './student-context.service.js';
 import { PatternAnalysisService } from './pattern-analysis.service.js';
 import getDatabase from '../lib/database.js';
+import { aiErrorHandler } from './ai-error-handler.service.js';
 
 export interface StudentComparison {
   studentId: string;
@@ -168,6 +169,18 @@ class ComparativeMultiStudentAnalysisService {
 
       return this.parseAnalysisResponse(classId, students, response);
     } catch (error) {
+      await aiErrorHandler.handleAIError(
+        error as Error,
+        {
+          serviceType: 'comparative-analysis',
+          provider: this.aiProvider.getProvider(),
+          model: this.aiProvider.getModel(),
+          operation: 'analyze-class',
+          additionalData: { classId, studentCount: students.length }
+        },
+        true
+      );
+      
       console.error('Comparative analysis error:', error);
       return this.generateFallbackAnalysis(classId, students, studentContexts);
     }
@@ -211,6 +224,18 @@ class ComparativeMultiStudentAnalysisService {
 
       return this.parseAnalysisResponse('custom', students, response);
     } catch (error) {
+      await aiErrorHandler.handleAIError(
+        error as Error,
+        {
+          serviceType: 'comparative-analysis',
+          provider: this.aiProvider.getProvider(),
+          model: this.aiProvider.getModel(),
+          operation: 'analyze-multiple-students',
+          additionalData: { studentIds: students.map(s => s.id), studentCount: students.length }
+        },
+        true
+      );
+      
       console.error('Multi-student analysis error:', error);
       return this.generateFallbackAnalysis('custom', students, studentContexts);
     }

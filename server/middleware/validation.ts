@@ -158,3 +158,117 @@ export function validateParams(allowedParams: string[]) {
     next();
   };
 }
+
+/**
+ * AI Prompt Sanitization
+ * Prompt injection saldırılarına karşı koruma sağlar
+ */
+export function sanitizeAIPrompt(input: string): string {
+  if (typeof input !== 'string') return '';
+  
+  return input
+    .trim()
+    // HTML ve script tehditlerini temizle
+    .replace(/[<>]/g, '')
+    // Prompt injection pattern'lerini temizle
+    .replace(/ignore\s+(previous|all|above|prior)\s+(instructions?|prompts?|commands?)/gi, '')
+    .replace(/system\s*:\s*/gi, '')
+    .replace(/assistant\s*:\s*/gi, '')
+    .replace(/\[INST\]/gi, '')
+    .replace(/\[\/INST\]/gi, '')
+    .replace(/<\|.*?\|>/g, '')
+    // Rol değiştirme girişimlerini engelle
+    .replace(/you\s+are\s+(now|a|an)\s+/gi, '')
+    .replace(/act\s+as\s+(a|an)\s+/gi, '')
+    .replace(/pretend\s+(to\s+be|you\s+are)\s+/gi, '')
+    // Komut enjeksiyonunu engelle
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/exec\(/gi, '')
+    .replace(/eval\(/gi, '')
+    // Çok uzun girdileri sınırla (DoS önlemi)
+    .substring(0, 5000);
+}
+
+/**
+ * AI Prompt için nesneyi sanitize et
+ */
+export function sanitizeAIPromptObject<T extends Record<string, any>>(obj: T): T {
+  const sanitized: any = Array.isArray(obj) ? [] : {};
+  
+  for (const key in obj) {
+    const value = obj[key];
+    
+    if (typeof value === 'string') {
+      // AI prompt alanları için özel sanitizasyon
+      if (key.toLowerCase().includes('message') || 
+          key.toLowerCase().includes('prompt') ||
+          key.toLowerCase().includes('content') ||
+          key.toLowerCase().includes('query')) {
+        sanitized[key] = sanitizeAIPrompt(value);
+      } else {
+        sanitized[key] = sanitizeString(value);
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizeAIPromptObject(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  
+  return sanitized as T;
+}
+
+/**
+ * Middleware: AI endpoint'leri için özel sanitizasyon
+ */
+export function sanitizeAIRequest(req: Request, res: Response, next: NextFunction) {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeAIPromptObject(req.body);
+  }
+  
+  if (req.query && typeof req.query === 'object') {
+    req.query = sanitizeAIPromptObject(req.query as any);
+  }
+  
+  next();
+}
+
+/**
+ * Comprehensive input validation middleware
+ * Tüm endpoint'lerde kullanılabilir - query params, body ve params'ı sanitize eder
+ */
+export function sanitizeAllInputs(req: Request, res: Response, next: NextFunction) {
+  // Body sanitization
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeObject(req.body);
+  }
+  
+  // Query params sanitization
+  if (req.query && typeof req.query === 'object') {
+    const sanitizedQuery: any = {};
+    for (const key in req.query) {
+      const value = req.query[key];
+      if (typeof value === 'string') {
+        sanitizedQuery[key] = sanitizeString(value);
+      } else if (Array.isArray(value)) {
+        sanitizedQuery[key] = value.map(v => 
+          typeof v === 'string' ? sanitizeString(v) : v
+        );
+      } else {
+        sanitizedQuery[key] = value;
+      }
+    }
+    req.query = sanitizedQuery;
+  }
+  
+  // URL params sanitization
+  if (req.params && typeof req.params === 'object') {
+    for (const key in req.params) {
+      if (typeof req.params[key] === 'string') {
+        req.params[key] = sanitizeString(req.params[key]);
+      }
+    }
+  }
+  
+  next();
+}

@@ -7,7 +7,6 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { MeetingNote } from "@/lib/storage";
 import { apiClient } from "@/lib/api/api-client";
 
 export interface UnifiedMeeting {
@@ -33,12 +32,18 @@ export function useUnifiedMeetings(studentId: string) {
     queryFn: async () => {
       const allMeetings: UnifiedMeeting[] = [];
       
-      // 1. Counseling Sessions API'den veli görüşmelerini al
+      // 1. Tüm counseling sessions'ı al (bir kere)
+      let allSessions: any[] = [];
       try {
-        const allSessions = await apiClient.get('/api/counseling-sessions');
-          
-          // Bu öğrencinin veli görüşmelerini filtrele
-          const studentSessions = allSessions.filter((session: any) => {
+        const response = await apiClient.get('/api/counseling-sessions');
+        allSessions = Array.isArray(response) ? response : [];
+      } catch (error) {
+        console.error('Counseling sessions fetch error:', error);
+      }
+      
+      // 2. Veli görüşmelerini filtrele
+      try {
+        const studentSessions = allSessions.filter((session: any) => {
             const isParentMeeting = session.participantType === 'veli';
             const includesStudent = session.sessionType === 'individual' 
               ? session.student?.id === studentId
@@ -70,15 +75,12 @@ export function useUnifiedMeetings(studentId: string) {
             });
           });
       } catch (error) {
-        console.error('Counseling sessions fetch error:', error);
+        console.error('Parent meetings filter error:', error);
       }
       
-      // 2. Bireysel görüşmeleri counseling sessions'dan al
+      // 3. Bireysel görüşmeleri filtrele
       try {
-        const allSessions = await apiClient.get('/api/counseling-sessions');
-          
-          // Bu öğrencinin bireysel görüşmelerini filtrele
-          const individualSessions = allSessions.filter((session: any) => {
+        const individualSessions = allSessions.filter((session: any) => {
             const isIndividual = session.participantType === 'ogrenci';
             const includesStudent = session.sessionType === 'individual' 
               ? session.student?.id === studentId
@@ -109,14 +111,15 @@ export function useUnifiedMeetings(studentId: string) {
             });
           });
       } catch (error) {
-        console.error('Individual sessions fetch error:', error);
+        console.error('Individual sessions filter error:', error);
       }
       
-      // 3. Local storage'dan manuel notları al (geriye dönük uyumluluk için)
+      // 4. Local storage'dan manuel notları al (geriye dönük uyumluluk için)
       try {
-        const localNotes: MeetingNote[] = await apiClient.get(`/api/notes?studentId=${studentId}`);
+        const response = await apiClient.get(`/api/notes?studentId=${studentId}`);
+        const localNotes = Array.isArray(response) ? response : [];
           
-          localNotes.forEach((note) => {
+          localNotes.forEach((note: any) => {
             // Sadece counseling sessions'da olmayan notları ekle
             const alreadyExists = allMeetings.some(m => 
               m.date === note.date.split('T')[0] && 
@@ -143,14 +146,32 @@ export function useUnifiedMeetings(studentId: string) {
         console.error('Local notes fetch error:', error);
       }
       
+      // Veri tutarlılığı kontrolü
+      const validMeetings = allMeetings.filter(meeting => {
+        // Zorunlu alanlar kontrolü
+        if (!meeting.id || !meeting.date || !meeting.type) {
+          console.warn('Invalid meeting data:', meeting);
+          return false;
+        }
+        
+        // Tarih validasyonu
+        const meetingDate = new Date(meeting.date);
+        if (isNaN(meetingDate.getTime())) {
+          console.warn('Invalid meeting date:', meeting.date);
+          return false;
+        }
+        
+        return true;
+      });
+      
       // Tarihe göre sırala (en yeni en başta)
-      allMeetings.sort((a, b) => {
+      validMeetings.sort((a, b) => {
         const dateA = new Date(`${a.date}T${a.time || '00:00'}`);
         const dateB = new Date(`${b.date}T${b.time || '00:00'}`);
         return dateB.getTime() - dateA.getTime();
       });
       
-      return allMeetings;
+      return validMeetings;
     },
     staleTime: 2 * 60 * 1000, // 2 dakika
     enabled: !!studentId,

@@ -8,6 +8,7 @@ import { AIProviderService } from '../../../services/ai-provider.service.js';
 import { StudentContextService } from '../../../services/student-context.service.js';
 import { OllamaAPIService } from '../../../services/ollama-api.service.js';
 import AIPromptBuilder from '../../../services/ai-prompt-builder.service.js';
+import { sanitizeAIRequest } from '../../../middleware/validation.js';
 
 const router = express.Router();
 const contextService = new StudentContextService();
@@ -128,7 +129,7 @@ router.get('/health', async (req, res) => {
  * POST /api/ai-assistant/chat
  * Chat with AI assistant (non-streaming)
  */
-router.post('/chat', async (req, res) => {
+router.post('/chat', sanitizeAIRequest, async (req, res) => {
   try {
     const { message, studentId, conversationHistory } = req.body;
 
@@ -191,7 +192,7 @@ router.post('/chat', async (req, res) => {
  * POST /api/ai-assistant/chat-stream
  * Streaming chat with AI assistant
  */
-router.post('/chat-stream', async (req, res) => {
+router.post('/chat-stream', sanitizeAIRequest, async (req, res) => {
   try {
     const { message, studentId, conversationHistory } = req.body;
 

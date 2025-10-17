@@ -9,6 +9,7 @@
 import { AIProviderService } from './ai-provider.service.js';
 import { StudentContextService } from './student-context.service.js';
 import getDatabase from '../lib/database.js';
+import { aiErrorHandler } from './ai-error-handler.service.js';
 
 export interface MotivationalProfile {
   intrinsicMotivation: {
@@ -182,6 +183,19 @@ class PsychologicalDepthAnalysisService {
 
       return this.parseAIResponse(studentId, context.student.name, response);
     } catch (error) {
+      await aiErrorHandler.handleAIError(
+        error as Error,
+        {
+          serviceType: 'psychological-analysis',
+          provider: this.aiProvider.getProvider(),
+          model: this.aiProvider.getModel(),
+          operation: 'generate-psychological-analysis',
+          studentId,
+          additionalData: { contextAvailable: !!context }
+        },
+        true
+      );
+      
       console.error('AI analysis error:', error);
       return this.generateFallbackAnalysis(studentId, context);
     }
