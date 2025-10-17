@@ -26,7 +26,7 @@ async function saveStudentsToAPI(students: BackendStudent[]): Promise<void> {
 
 export function loadStudents(): Student[] {
   if (studentsCache !== null) {
-    return studentsCache;
+    return [...studentsCache];
   }
   
   loadStudentsAsync();
@@ -52,7 +52,7 @@ export async function loadStudentsAsync(): Promise<void> {
 }
 
 export async function saveStudents(list: Student[]): Promise<void> {
-  const previousCache = studentsCache;
+  const previousCache = studentsCache ? studentsCache.map(s => ({...s})) : null;
   
   try {
     const backendStudents = list.map(frontendToBackend);
@@ -75,14 +75,14 @@ export async function saveStudents(list: Student[]): Promise<void> {
 }
 
 export async function upsertStudent(stu: Student): Promise<void> {
-  const previousCache = studentsCache;
+  const previousCache = studentsCache ? studentsCache.map(s => ({...s})) : null;
   
   try {
     const backendStudent = frontendToBackend(stu);
     
     await apiClient.post('/api/students', backendStudent, { showErrorToast: false });
     
-    const list = studentsCache || [];
+    const list = studentsCache ? [...studentsCache] : [];
     const idx = list.findIndex((s) => s.id === stu.id);
     if (idx >= 0) {
       list[idx] = { ...list[idx], ...stu };

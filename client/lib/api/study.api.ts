@@ -17,7 +17,7 @@ let progressCache: TopicProgress[] | null = null;
 
 export function loadSubjects(): StudySubject[] {
   if (subjectsCache !== null) {
-    return subjectsCache;
+    return [...subjectsCache];
   }
   
   loadSubjectsAsync();
@@ -47,7 +47,7 @@ export async function loadSubjectsAsync(): Promise<StudySubject[]> {
 }
 
 export async function saveSubjects(v: StudySubject[]): Promise<void> {
-  const previousCache = subjectsCache;
+  const previousCache = subjectsCache ? subjectsCache.map(s => ({...s})) : null;
   
   try {
     await apiClient.post('/api/subjects', v, {
@@ -90,7 +90,7 @@ export async function removeSubject(id: string): Promise<void> {
 
 export function loadTopics(): StudyTopic[] {
   if (topicsCache !== null) {
-    return topicsCache;
+    return [...topicsCache];
   }
   
   loadTopicsAsync();
@@ -120,7 +120,7 @@ export async function loadTopicsAsync(): Promise<StudyTopic[]> {
 }
 
 export async function saveTopics(v: StudyTopic[]): Promise<void> {
-  const previousCache = topicsCache;
+  const previousCache = topicsCache ? topicsCache.map(t => ({...t})) : null;
   
   try {
     await apiClient.post('/api/topics', v, {
@@ -180,7 +180,7 @@ export async function removeTopicsBySubject(subjectId: string): Promise<void> {
 
 export function loadWeeklySlots(): WeeklySlot[] {
   if (weeklySlotsCache !== null) {
-    return weeklySlotsCache;
+    return [...weeklySlotsCache];
   }
   
   loadWeeklySlotsAsync();
@@ -203,7 +203,7 @@ async function loadWeeklySlotsAsync(): Promise<void> {
 }
 
 export async function saveWeeklySlots(v: WeeklySlot[]): Promise<void> {
-  const previousCache = weeklySlotsCache;
+  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(w => ({...w})) : null;
   
   try {
     await apiClient.post('/api/weekly-slots', v, {
@@ -225,7 +225,7 @@ export function getWeeklySlotsByStudent(studentId: string) {
 }
 
 export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
-  const previousCache = weeklySlotsCache;
+  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(slot => ({...slot})) : null;
   
   try {
     await apiClient.post('/api/weekly-slots', w, {
@@ -233,7 +233,7 @@ export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
       errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_ADD_ERROR,
     });
     
-    const list = loadWeeklySlots();
+    const list = weeklySlotsCache ? [...weeklySlotsCache] : [];
     list.push(w);
     weeklySlotsCache = list;
     window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
@@ -244,7 +244,7 @@ export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
 }
 
 export async function removeWeeklySlot(id: string): Promise<void> {
-  const previousCache = weeklySlotsCache;
+  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(slot => ({...slot})) : null;
   
   try {
     await apiClient.delete(`/api/weekly-slots/${id}`, {
@@ -252,7 +252,7 @@ export async function removeWeeklySlot(id: string): Promise<void> {
       errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_DELETE_ERROR,
     });
     
-    const list = loadWeeklySlots().filter((w) => w.id !== id);
+    const list = weeklySlotsCache ? weeklySlotsCache.filter((w) => w.id !== id) : [];
     weeklySlotsCache = list;
     window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
   } catch (error) {
@@ -262,7 +262,7 @@ export async function removeWeeklySlot(id: string): Promise<void> {
 }
 
 export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): Promise<void> {
-  const previousCache = weeklySlotsCache;
+  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(slot => ({...slot})) : null;
   
   try {
     await apiClient.put(`/api/weekly-slots/${id}`, patch, {
@@ -270,7 +270,7 @@ export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): 
       errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_UPDATE_ERROR,
     });
     
-    const list = loadWeeklySlots();
+    const list = weeklySlotsCache ? weeklySlotsCache.map(w => ({...w})) : [];
     const i = list.findIndex((w) => w.id === id);
     if (i >= 0) {
       list[i] = {
@@ -291,7 +291,7 @@ export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): 
 
 export function loadProgress(): TopicProgress[] {
   if (progressCache !== null) {
-    return progressCache;
+    return [...progressCache];
   }
   
   loadProgressAsync();
@@ -316,7 +316,7 @@ async function loadProgressAsync(): Promise<void> {
 }
 
 export async function saveProgress(v: TopicProgress[]): Promise<void> {
-  const previousCache = progressCache;
+  const previousCache = progressCache ? progressCache.map(p => ({...p})) : null;
   
   try {
     await apiClient.post('/api/progress', v, {
@@ -362,18 +362,21 @@ export async function ensureProgressForStudent(studentId: string) {
 
 export async function resetTopicProgress(studentId: string, topicId: string) {
   const list = loadProgress();
-  const p = list.find(
+  const pIndex = list.findIndex(
     (x) => x.studentId === studentId && x.topicId === topicId,
   );
   const topics = loadTopics();
   const t = topics.find((tt) => tt.id === topicId);
-  if (p && t) {
-    p.completed = 0;
-    p.remaining = t.avgMinutes;
-    p.completedFlag = false;
-    p.lastStudied = undefined;
-    p.reviewCount = 0;
-    p.nextReviewDate = undefined;
+  if (pIndex >= 0 && t) {
+    list[pIndex] = {
+      ...list[pIndex],
+      completed: 0,
+      remaining: t.avgMinutes,
+      completedFlag: false,
+      lastStudied: undefined,
+      reviewCount: 0,
+      nextReviewDate: undefined,
+    };
     await saveProgress(list);
   }
 }
@@ -436,23 +439,30 @@ export async function updateProgress(
   minutes: number,
 ) {
   const list = loadProgress();
-  const p = list.find(
+  const pIndex = list.findIndex(
     (x) => x.studentId === studentId && x.topicId === topicId,
   );
   const topics = loadTopics();
   const t = topics.find((tt) => tt.id === topicId);
-  if (!p || !t) return;
-  p.completed += minutes;
-  p.remaining = Math.max(0, t.avgMinutes - p.completed);
-  p.completedFlag = p.remaining === 0 ? true : p.completedFlag;
+  if (pIndex < 0 || !t) return;
+  
+  const p = list[pIndex];
+  const newCompleted = p.completed + minutes;
+  const newRemaining = Math.max(0, t.avgMinutes - newCompleted);
+  const newCompletedFlag = newRemaining === 0 ? true : p.completedFlag;
   
   const today = new Date().toISOString().split('T')[0];
-  p.lastStudied = today;
+  const newReviewCount = newCompletedFlag ? (p.reviewCount || 0) + 1 : p.reviewCount;
   
-  if (p.completedFlag) {
-    p.reviewCount = (p.reviewCount || 0) + 1;
-    p.nextReviewDate = calculateNextReviewDate(p.reviewCount);
-  }
+  list[pIndex] = {
+    ...p,
+    completed: newCompleted,
+    remaining: newRemaining,
+    completedFlag: newCompletedFlag,
+    lastStudied: today,
+    reviewCount: newReviewCount,
+    nextReviewDate: newCompletedFlag ? calculateNextReviewDate(newReviewCount) : p.nextReviewDate,
+  };
   
   await saveProgress(list);
 }
@@ -463,17 +473,20 @@ export async function setCompletedFlag(
   done: boolean,
 ) {
   const list = loadProgress();
-  const p = list.find(
+  const pIndex = list.findIndex(
     (x) => x.studentId === studentId && x.topicId === topicId,
   );
   const topics = loadTopics();
   const t = topics.find((tt) => tt.id === topicId);
-  if (!p || !t) return;
-  p.completedFlag = done;
-  if (done) {
-    p.completed = t.avgMinutes;
-    p.remaining = 0;
-  }
+  if (pIndex < 0 || !t) return;
+  
+  list[pIndex] = {
+    ...list[pIndex],
+    completedFlag: done,
+    completed: done ? t.avgMinutes : list[pIndex].completed,
+    remaining: done ? 0 : list[pIndex].remaining,
+  };
+  
   await saveProgress(list);
 }
 
