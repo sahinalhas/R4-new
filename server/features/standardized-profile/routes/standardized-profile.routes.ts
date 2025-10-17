@@ -385,11 +385,27 @@ router.post('/:studentId/risk-protective', (req, res) => {
       id: req.body.id || randomUUID(),
       studentId,
       assessmentDate: req.body.assessmentDate,
+      // Risk levels
+      academicRiskLevel: req.body.academicRiskLevel || null,
+      behavioralRiskLevel: req.body.behavioralRiskLevel || null,
+      socialEmotionalRiskLevel: req.body.emotionalRiskLevel || null,
+      attendanceRiskLevel: req.body.attendanceRiskLevel || null,
+      dropoutRisk: req.body.dropoutRisk || null,
+      // Protective and risk factors
       activeProtectiveFactors: req.body.protectiveFactors || [],
+      academicRiskFactors: req.body.riskAssessmentNotes || null,
+      behavioralRiskFactors: req.body.behavioralRiskFactors || null,
+      socialRiskFactors: req.body.socialRiskFactors || null,
+      familyRiskFactors: req.body.familyRiskFactors || null,
+      // Overall assessment
+      overallRiskScore: req.body.overallRiskLevel || null,
+      // Interventions and follow-up
       recommendedInterventions: req.body.recommendedInterventions || [],
-      // Note: Frontend sends numbers 1-10, but backend expects strings
-      // We'll store the numeric values for now and convert them
-      additionalNotes: req.body.additionalNotes,
+      assignedCounselor: req.body.assignedCounselor || null,
+      parentNotified: req.body.parentNotified || false,
+      nextAssessmentDate: req.body.nextAssessmentDate || null,
+      additionalNotes: req.body.additionalNotes || null,
+      assessedBy: req.body.assessedBy || null,
     };
     
     repo.upsertRiskProtectiveProfile(profile);

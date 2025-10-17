@@ -235,6 +235,17 @@ export interface MotivationProfile {
   // Future vision
   careerAspirations: string[];
   universityPreferences: string[];
+  academicGoals?: string[]; // Academic goals array
+  
+  // Persistence and future orientation (1-10 scale)
+  persistenceLevel?: number;
+  futureOrientationLevel?: number;
+  
+  // Goal details (text fields)
+  shortTermGoals?: string;
+  longTermGoals?: string;
+  obstacles?: string;
+  supportNeeds?: string;
   
   additionalNotes?: string;
   assessedBy?: string;

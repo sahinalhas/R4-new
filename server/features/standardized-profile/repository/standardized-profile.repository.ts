@@ -394,14 +394,32 @@ export class StandardizedProfileRepository {
   upsertRiskProtectiveProfile(profile: RiskProtectiveProfile): void {
     const stmt = this.db.prepare(`
       INSERT INTO risk_protective_profiles (
-        id, studentId, assessmentDate, activeProtectiveFactors,
-        recommendedInterventions, additionalNotes, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        id, studentId, assessmentDate, academicRiskLevel, behavioralRiskLevel,
+        socialEmotionalRiskLevel, attendanceRiskLevel, dropoutRisk,
+        activeProtectiveFactors, academicRiskFactors, behavioralRiskFactors,
+        socialRiskFactors, familyRiskFactors, overallRiskScore,
+        recommendedInterventions, assignedCounselor, parentNotified,
+        nextAssessmentDate, additionalNotes, assessedBy, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(id) DO UPDATE SET
         assessmentDate = excluded.assessmentDate,
+        academicRiskLevel = excluded.academicRiskLevel,
+        behavioralRiskLevel = excluded.behavioralRiskLevel,
+        socialEmotionalRiskLevel = excluded.socialEmotionalRiskLevel,
+        attendanceRiskLevel = excluded.attendanceRiskLevel,
+        dropoutRisk = excluded.dropoutRisk,
         activeProtectiveFactors = excluded.activeProtectiveFactors,
+        academicRiskFactors = excluded.academicRiskFactors,
+        behavioralRiskFactors = excluded.behavioralRiskFactors,
+        socialRiskFactors = excluded.socialRiskFactors,
+        familyRiskFactors = excluded.familyRiskFactors,
+        overallRiskScore = excluded.overallRiskScore,
         recommendedInterventions = excluded.recommendedInterventions,
+        assignedCounselor = excluded.assignedCounselor,
+        parentNotified = excluded.parentNotified,
+        nextAssessmentDate = excluded.nextAssessmentDate,
         additionalNotes = excluded.additionalNotes,
+        assessedBy = excluded.assessedBy,
         updated_at = CURRENT_TIMESTAMP
     `);
 
@@ -409,9 +427,23 @@ export class StandardizedProfileRepository {
       profile.id,
       profile.studentId,
       profile.assessmentDate,
+      profile.academicRiskLevel || null,
+      profile.behavioralRiskLevel || null,
+      profile.socialEmotionalRiskLevel || null,
+      profile.attendanceRiskLevel || null,
+      profile.dropoutRisk || null,
       JSON.stringify(profile.activeProtectiveFactors || []),
+      profile.academicRiskFactors || null,
+      profile.behavioralRiskFactors || null,
+      profile.socialRiskFactors || null,
+      profile.familyRiskFactors || null,
+      profile.overallRiskScore || null,
       JSON.stringify(profile.recommendedInterventions || []),
-      profile.additionalNotes
+      profile.assignedCounselor || null,
+      profile.parentNotified ? 1 : 0,
+      profile.nextAssessmentDate || null,
+      profile.additionalNotes || null,
+      profile.assessedBy || null
     );
   }
 }
