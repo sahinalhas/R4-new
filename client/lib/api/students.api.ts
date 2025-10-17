@@ -26,7 +26,7 @@ async function saveStudentsToAPI(students: BackendStudent[]): Promise<void> {
 
 export function loadStudents(): Student[] {
   if (studentsCache !== null) {
-    return [...studentsCache];
+    return structuredClone(studentsCache);
   }
   
   loadStudentsAsync();
@@ -52,13 +52,13 @@ export async function loadStudentsAsync(): Promise<void> {
 }
 
 export async function saveStudents(list: Student[]): Promise<void> {
-  const previousCache = studentsCache ? studentsCache.map(s => ({...s})) : null;
+  const previousCache = studentsCache ? structuredClone(studentsCache) : null;
   
   try {
     const backendStudents = list.map(frontendToBackend);
     await saveStudentsToAPI(backendStudents);
     
-    studentsCache = list;
+    studentsCache = structuredClone(list);
     window.dispatchEvent(new CustomEvent('studentsUpdated'));
   } catch (error) {
     studentsCache = previousCache;
@@ -75,7 +75,7 @@ export async function saveStudents(list: Student[]): Promise<void> {
 }
 
 export async function upsertStudent(stu: Student): Promise<void> {
-  const previousCache = studentsCache ? studentsCache.map(s => ({...s})) : null;
+  const previousCache = studentsCache ? structuredClone(studentsCache) : null;
   
   try {
     const backendStudent = frontendToBackend(stu);
@@ -89,7 +89,7 @@ export async function upsertStudent(stu: Student): Promise<void> {
     } else {
       list.unshift(stu);
     }
-    studentsCache = list;
+    studentsCache = structuredClone(list);
     
     window.dispatchEvent(new CustomEvent('studentsUpdated'));
     

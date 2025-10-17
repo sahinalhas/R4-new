@@ -17,7 +17,7 @@ let progressCache: TopicProgress[] | null = null;
 
 export function loadSubjects(): StudySubject[] {
   if (subjectsCache !== null) {
-    return [...subjectsCache];
+    return structuredClone(subjectsCache);
   }
   
   loadSubjectsAsync();
@@ -47,7 +47,7 @@ export async function loadSubjectsAsync(): Promise<StudySubject[]> {
 }
 
 export async function saveSubjects(v: StudySubject[]): Promise<void> {
-  const previousCache = subjectsCache ? subjectsCache.map(s => ({...s})) : null;
+  const previousCache = subjectsCache ? structuredClone(subjectsCache) : null;
   
   try {
     await apiClient.post('/api/subjects', v, {
@@ -56,7 +56,7 @@ export async function saveSubjects(v: StudySubject[]): Promise<void> {
       errorMessage: API_ERROR_MESSAGES.STUDY.SUBJECTS_SAVE_ERROR,
     });
     
-    subjectsCache = v;
+    subjectsCache = structuredClone(v);
     window.dispatchEvent(new CustomEvent('subjectsUpdated'));
   } catch (error) {
     subjectsCache = previousCache;
@@ -90,7 +90,7 @@ export async function removeSubject(id: string): Promise<void> {
 
 export function loadTopics(): StudyTopic[] {
   if (topicsCache !== null) {
-    return [...topicsCache];
+    return structuredClone(topicsCache);
   }
   
   loadTopicsAsync();
@@ -120,7 +120,7 @@ export async function loadTopicsAsync(): Promise<StudyTopic[]> {
 }
 
 export async function saveTopics(v: StudyTopic[]): Promise<void> {
-  const previousCache = topicsCache ? topicsCache.map(t => ({...t})) : null;
+  const previousCache = topicsCache ? structuredClone(topicsCache) : null;
   
   try {
     await apiClient.post('/api/topics', v, {
@@ -129,7 +129,7 @@ export async function saveTopics(v: StudyTopic[]): Promise<void> {
       errorMessage: API_ERROR_MESSAGES.STUDY.TOPICS_SAVE_ERROR,
     });
     
-    topicsCache = v;
+    topicsCache = structuredClone(v);
     window.dispatchEvent(new CustomEvent('topicsUpdated'));
   } catch (error) {
     topicsCache = previousCache;
@@ -180,7 +180,7 @@ export async function removeTopicsBySubject(subjectId: string): Promise<void> {
 
 export function loadWeeklySlots(): WeeklySlot[] {
   if (weeklySlotsCache !== null) {
-    return [...weeklySlotsCache];
+    return structuredClone(weeklySlotsCache);
   }
   
   loadWeeklySlotsAsync();
@@ -203,7 +203,7 @@ async function loadWeeklySlotsAsync(): Promise<void> {
 }
 
 export async function saveWeeklySlots(v: WeeklySlot[]): Promise<void> {
-  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(w => ({...w})) : null;
+  const previousCache = weeklySlotsCache ? structuredClone(weeklySlotsCache) : null;
   
   try {
     await apiClient.post('/api/weekly-slots', v, {
@@ -212,7 +212,7 @@ export async function saveWeeklySlots(v: WeeklySlot[]): Promise<void> {
       errorMessage: API_ERROR_MESSAGES.STUDY.WEEKLY_SLOTS_SAVE_ERROR,
     });
     
-    weeklySlotsCache = v;
+    weeklySlotsCache = structuredClone(v);
     window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
   } catch (error) {
     weeklySlotsCache = previousCache;
@@ -225,7 +225,7 @@ export function getWeeklySlotsByStudent(studentId: string) {
 }
 
 export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
-  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(slot => ({...slot})) : null;
+  const previousCache = weeklySlotsCache ? structuredClone(weeklySlotsCache) : null;
   
   try {
     await apiClient.post('/api/weekly-slots', w, {
@@ -235,7 +235,7 @@ export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
     
     const list = weeklySlotsCache ? [...weeklySlotsCache] : [];
     list.push(w);
-    weeklySlotsCache = list;
+    weeklySlotsCache = structuredClone(list);
     window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
   } catch (error) {
     weeklySlotsCache = previousCache;
@@ -244,7 +244,7 @@ export async function addWeeklySlot(w: WeeklySlot): Promise<void> {
 }
 
 export async function removeWeeklySlot(id: string): Promise<void> {
-  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(slot => ({...slot})) : null;
+  const previousCache = weeklySlotsCache ? structuredClone(weeklySlotsCache) : null;
   
   try {
     await apiClient.delete(`/api/weekly-slots/${id}`, {
@@ -253,7 +253,7 @@ export async function removeWeeklySlot(id: string): Promise<void> {
     });
     
     const list = weeklySlotsCache ? weeklySlotsCache.filter((w) => w.id !== id) : [];
-    weeklySlotsCache = list;
+    weeklySlotsCache = structuredClone(list);
     window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
   } catch (error) {
     weeklySlotsCache = previousCache;
@@ -262,7 +262,7 @@ export async function removeWeeklySlot(id: string): Promise<void> {
 }
 
 export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): Promise<void> {
-  const previousCache = weeklySlotsCache ? weeklySlotsCache.map(slot => ({...slot})) : null;
+  const previousCache = weeklySlotsCache ? structuredClone(weeklySlotsCache) : null;
   
   try {
     await apiClient.put(`/api/weekly-slots/${id}`, patch, {
@@ -280,7 +280,7 @@ export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): 
         studentId: list[i].studentId,
         subjectId: list[i].subjectId,
       };
-      weeklySlotsCache = list;
+      weeklySlotsCache = structuredClone(list);
       window.dispatchEvent(new CustomEvent('weeklySlotsUpdated'));
     }
   } catch (error) {
@@ -291,7 +291,7 @@ export async function updateWeeklySlot(id: string, patch: Partial<WeeklySlot>): 
 
 export function loadProgress(): TopicProgress[] {
   if (progressCache !== null) {
-    return [...progressCache];
+    return structuredClone(progressCache);
   }
   
   loadProgressAsync();
@@ -316,7 +316,7 @@ async function loadProgressAsync(): Promise<void> {
 }
 
 export async function saveProgress(v: TopicProgress[]): Promise<void> {
-  const previousCache = progressCache ? progressCache.map(p => ({...p})) : null;
+  const previousCache = progressCache ? structuredClone(progressCache) : null;
   
   try {
     await apiClient.post('/api/progress', v, {
@@ -325,7 +325,7 @@ export async function saveProgress(v: TopicProgress[]): Promise<void> {
       errorMessage: API_ERROR_MESSAGES.STUDY.PROGRESS_SAVE_ERROR,
     });
     
-    progressCache = v;
+    progressCache = structuredClone(v);
     window.dispatchEvent(new CustomEvent('progressUpdated'));
   } catch (error) {
     progressCache = previousCache;
