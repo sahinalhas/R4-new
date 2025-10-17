@@ -14,6 +14,7 @@ import { createAISuggestionsTable } from './ai-suggestions.schema';
 import { createAnalyticsSnapshotTable } from './analytics-snapshot.schema';
 import { createAuditLogsTable } from './audit-logs.schema';
 import { createNotificationTables } from './notifications.schema';
+import { createEarlyWarningTables } from './early-warning.schema';
 
 export function initializeDatabaseSchema(db: Database.Database): void {
   createUsersTable(db);
@@ -33,4 +34,5 @@ export function initializeDatabaseSchema(db: Database.Database): void {
   createAnalyticsSnapshotTable(db);
   createAuditLogsTable(db);
   createNotificationTables(db);
+  createEarlyWarningTables(db);
 }
