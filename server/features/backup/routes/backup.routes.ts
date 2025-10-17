@@ -7,22 +7,20 @@ import { Router } from 'express';
 import { backupService } from '../services/backup.service';
 import { auditService } from '../services/audit.service';
 import { encryptionService } from '../services/encryption.service';
+import { requireAuth, requireRole, type AuthenticatedRequest } from '../../../middleware/auth.middleware.js';
 
 const router = Router();
 
-router.post('/create', async (req, res) => {
+router.post('/create', requireAuth, requireRole(['admin', 'counselor']), async (req, res) => {
   try {
-    const { userId, type = 'manual', options = {} } = req.body;
+    const authReq = req as AuthenticatedRequest;
+    const { type = 'manual', options = {} } = req.body;
     
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
-    
-    const backup = await backupService.createBackup(userId, type, options);
+    const backup = await backupService.createBackup(authReq.user!.id, type, options);
     
     await auditService.logAccess({
-      userId,
-      userName: req.body.userName || 'Unknown',
+      userId: authReq.user!.id,
+      userName: authReq.user!.name,
       action: 'CREATE_BACKUP',
       resource: 'backup',
       resourceId: backup.id,
@@ -34,30 +32,32 @@ router.post('/create', async (req, res) => {
     res.json(backup);
   } catch (error) {
     console.error('Create backup error:', error);
-    res.status(500).json({ error: 'Failed to create backup' });
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create backup';
+    res.status(500).json({ error: errorMessage });
   }
 });
 
-router.get('/list', async (req, res) => {
+router.get('/list', requireAuth, async (req, res) => {
   try {
     const backups = await backupService.listBackups();
     res.json(backups);
   } catch (error) {
     console.error('List backups error:', error);
-    res.status(500).json({ error: 'Failed to list backups' });
+    const errorMessage = error instanceof Error ? error.message : 'Failed to list backups';
+    res.status(500).json({ error: errorMessage });
   }
 });
 
-router.post('/restore/:backupId', async (req, res) => {
+router.post('/restore/:backupId', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
+    const authReq = req as AuthenticatedRequest;
     const { backupId } = req.params;
-    const { userId, userName } = req.body;
     
     await backupService.restoreBackup(backupId);
     
     await auditService.logAccess({
-      userId,
-      userName,
+      userId: authReq.user!.id,
+      userName: authReq.user!.name,
       action: 'RESTORE_BACKUP',
       resource: 'backup',
       resourceId: backupId,
@@ -69,20 +69,21 @@ router.post('/restore/:backupId', async (req, res) => {
     res.json({ success: true, message: 'Backup restored successfully' });
   } catch (error) {
     console.error('Restore backup error:', error);
-    res.status(500).json({ error: 'Failed to restore backup' });
+    const errorMessage = error instanceof Error ? error.message : 'Failed to restore backup';
+    res.status(500).json({ error: errorMessage });
   }
 });
 
-router.delete('/:backupId', async (req, res) => {
+router.delete('/:backupId', requireAuth, requireRole(['admin', 'counselor']), async (req, res) => {
   try {
+    const authReq = req as AuthenticatedRequest;
     const { backupId } = req.params;
-    const { userId, userName } = req.body;
     
     await backupService.deleteBackup(backupId);
     
     await auditService.logAccess({
-      userId,
-      userName,
+      userId: authReq.user!.id,
+      userName: authReq.user!.name,
       action: 'DELETE_BACKUP',
       resource: 'backup',
       resourceId: backupId,
@@ -94,7 +95,8 @@ router.delete('/:backupId', async (req, res) => {
     res.json({ success: true, message: 'Backup deleted successfully' });
   } catch (error) {
     console.error('Delete backup error:', error);
-    res.status(500).json({ error: 'Failed to delete backup' });
+    const errorMessage = error instanceof Error ? error.message : 'Failed to delete backup';
+    res.status(500).json({ error: errorMessage });
   }
 });
 
