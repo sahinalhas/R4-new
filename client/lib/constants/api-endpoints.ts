@@ -117,7 +117,9 @@ export const ADVANCED_AI_ENDPOINTS = {
   PREDICTIVE_TIMELINE: (studentId: string) => `${API_BASE}/advanced-ai-analysis/predictive-timeline/${studentId}`,
   DAILY_ACTION_PLAN: `${API_BASE}/advanced-ai-analysis/daily-action-plan`,
   STUDENT_TIMELINE: (studentId: string) => `${API_BASE}/advanced-ai-analysis/student-timeline/${studentId}`,
-  COMPARATIVE: `${API_BASE}/advanced-ai-analysis/comparative`,
+  COMPARATIVE_CLASS: (classId: string) => `${API_BASE}/advanced-ai-analysis/comparative-class/${classId}`,
+  COMPARATIVE_STUDENTS: `${API_BASE}/advanced-ai-analysis/comparative-students`,
+  COMPREHENSIVE: (studentId: string) => `${API_BASE}/advanced-ai-analysis/comprehensive/${studentId}`,
 } as const;
 
 /**
@@ -125,10 +127,22 @@ export const ADVANCED_AI_ENDPOINTS = {
  */
 export const PROFILE_SYNC_ENDPOINTS = {
   IDENTITY: (studentId: string) => `${API_BASE}/profile-sync/identity/${studentId}`,
-  REFRESH: (studentId: string) => `${API_BASE}/profile-sync/refresh/${studentId}`,
-  LOGS: (studentId: string) => `${API_BASE}/profile-sync/logs/student/${studentId}`,
-  CONFLICTS: `${API_BASE}/profile-sync/conflicts`,
-  RESOLVE_CONFLICT: `${API_BASE}/profile-sync/resolve-conflict`,
+  IDENTITIES: `${API_BASE}/profile-sync/identities`,
+  REFRESH: (studentId: string) => `${API_BASE}/profile-sync/identity/${studentId}/refresh`,
+  UPDATE: `${API_BASE}/profile-sync/update`,
+  LOGS_BY_STUDENT: (studentId: string) => `${API_BASE}/profile-sync/logs/student/${studentId}`,
+  LOGS_BY_SOURCE: (source: string) => `${API_BASE}/profile-sync/logs/source/${source}`,
+  CONFLICTS_PENDING: `${API_BASE}/profile-sync/conflicts/pending`,
+  CONFLICTS_BY_STUDENT: (studentId: string) => `${API_BASE}/profile-sync/conflicts/student/${studentId}`,
+  CONFLICTS_RESOLVE: `${API_BASE}/profile-sync/conflicts/resolve`,
+  CONFLICTS_BULK_RESOLVE: `${API_BASE}/profile-sync/conflicts/bulk-resolve`,
+  STATISTICS: `${API_BASE}/profile-sync/statistics`,
+  CORRECTION: `${API_BASE}/profile-sync/correction`,
+  CORRECTIONS: (studentId: string) => `${API_BASE}/profile-sync/corrections/${studentId}`,
+  UNDO: `${API_BASE}/profile-sync/undo`,
+  CLASS_SUMMARY: (classId: string) => `${API_BASE}/profile-sync/class/${classId}/summary`,
+  CLASS_TRENDS: (classId: string) => `${API_BASE}/profile-sync/class/${classId}/trends`,
+  CLASS_COMPARE: `${API_BASE}/profile-sync/class/compare`,
 } as const;
 
 /**
@@ -181,3 +195,163 @@ export function buildUrl(
   if (!params) return endpoint;
   return `${endpoint}${buildQueryParams(params)}`;
 }
+
+/**
+ * AI Suggestions Endpoints
+ */
+export const AI_SUGGESTIONS_ENDPOINTS = {
+  PENDING: `${API_BASE}/ai-suggestions/pending`,
+  BY_STUDENT: (studentId: string) => `${API_BASE}/ai-suggestions/student/${studentId}`,
+  BY_ID: (id: string) => `${API_BASE}/ai-suggestions/${id}`,
+  SEARCH: `${API_BASE}/ai-suggestions/search`,
+  CREATE: `${API_BASE}/ai-suggestions/create`,
+  BULK_CREATE: `${API_BASE}/ai-suggestions/bulk-create`,
+  APPROVE: (id: string) => `${API_BASE}/ai-suggestions/${id}/approve`,
+  REJECT: (id: string) => `${API_BASE}/ai-suggestions/${id}/reject`,
+  MODIFY: (id: string) => `${API_BASE}/ai-suggestions/${id}/modify`,
+  REVIEW: (id: string) => `${API_BASE}/ai-suggestions/${id}/review`,
+  STATS: `${API_BASE}/ai-suggestions/stats/overview`,
+  CLEANUP: `${API_BASE}/ai-suggestions/cleanup`,
+} as const;
+
+/**
+ * Enhanced Risk Endpoints
+ */
+export const ENHANCED_RISK_ENDPOINTS = {
+  SCORE: (studentId: string) => `${API_BASE}/enhanced-risk/score/${studentId}`,
+  TREND: (studentId: string) => `${API_BASE}/enhanced-risk/trend/${studentId}`,
+  BATCH_CALCULATE: `${API_BASE}/enhanced-risk/batch-calculate`,
+} as const;
+
+/**
+ * Behavior Endpoints
+ */
+export const BEHAVIOR_ENDPOINTS = {
+  BASE: `${API_BASE}/behavior`,
+  BY_STUDENT: (studentId: string) => `${API_BASE}/behavior/${studentId}`,
+  BY_ID: (id: string) => `${API_BASE}/behavior/${id}`,
+} as const;
+
+/**
+ * Exam Endpoints
+ */
+export const EXAM_ENDPOINTS = {
+  BASE: `${API_BASE}/exams`,
+  BY_STUDENT: (studentId: string) => `${API_BASE}/exams/${studentId}`,
+  BY_TYPE: (studentId: string, examType: string) => `${API_BASE}/exams/${studentId}/type/${examType}`,
+  BY_ID: (id: string) => `${API_BASE}/exams/${id}`,
+} as const;
+
+/**
+ * Attendance Endpoints
+ */
+export const ATTENDANCE_ENDPOINTS = {
+  BASE: `${API_BASE}/attendance`,
+  BY_STUDENT: (studentId: string) => `${API_BASE}/attendance/${studentId}`,
+} as const;
+
+/**
+ * Coaching Endpoints
+ */
+export const COACHING_ENDPOINTS = {
+  PARENT_MEETINGS: {
+    BASE: `${API_BASE}/coaching/parent-meetings`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/coaching/parent-meetings/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/coaching/parent-meetings/${id}`,
+  },
+  HOME_VISITS: {
+    BASE: `${API_BASE}/coaching/home-visits`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/coaching/home-visits/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/coaching/home-visits/${id}`,
+  },
+  FAMILY_PARTICIPATIONS: {
+    BASE: `${API_BASE}/coaching/family-participations`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/coaching/family-participations/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/coaching/family-participations/${id}`,
+  },
+  ACADEMIC_GOALS: {
+    BASE: `${API_BASE}/coaching/academic-goals`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/coaching/academic-goals/student/${studentId}`,
+  },
+  ACHIEVEMENTS: {
+    BY_STUDENT: (studentId: string) => `${API_BASE}/coaching/achievements/student/${studentId}`,
+  },
+  MULTIPLE_INTELLIGENCE: (studentId: string) => `${API_BASE}/coaching/multiple-intelligence/student/${studentId}`,
+  LEARNING_STYLES: (studentId: string) => `${API_BASE}/coaching/learning-styles/student/${studentId}`,
+  SMART_GOALS: `${API_BASE}/coaching/smart-goals`,
+} as const;
+
+/**
+ * Documents Endpoints
+ */
+export const DOCUMENTS_ENDPOINTS = {
+  BASE: `${API_BASE}/documents`,
+  BY_STUDENT: (studentId: string) => `${API_BASE}/documents/${studentId}`,
+  BY_ID: (id: string) => `${API_BASE}/documents/${id}`,
+} as const;
+
+/**
+ * Study Endpoints
+ */
+export const STUDY_ENDPOINTS = {
+  SUBJECTS: `${API_BASE}/subjects`,
+  TOPICS: `${API_BASE}/topics`,
+  ASSIGNMENTS: (studentId: string) => `${API_BASE}/study-assignments/${studentId}`,
+  ASSIGNMENTS_BASE: `${API_BASE}/study-assignments`,
+  WEEKLY_SLOTS: `${API_BASE}/weekly-slots`,
+  WEEKLY_SLOTS_BY_STUDENT: (studentId: string) => `${API_BASE}/weekly-slots/${studentId}`,
+} as const;
+
+/**
+ * Holistic Profile Endpoints
+ */
+export const HOLISTIC_PROFILE_ENDPOINTS = {
+  BY_STUDENT: (studentId: string) => `${API_BASE}/holistic-profile/student/${studentId}`,
+  STRENGTHS: {
+    BASE: `${API_BASE}/holistic-profile/strengths`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/holistic-profile/strengths/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/holistic-profile/strengths/${id}`,
+  },
+  SOCIAL_RELATIONS: {
+    BASE: `${API_BASE}/holistic-profile/social-relations`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/holistic-profile/social-relations/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/holistic-profile/social-relations/${id}`,
+  },
+  INTERESTS: {
+    BASE: `${API_BASE}/holistic-profile/interests`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/holistic-profile/interests/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/holistic-profile/interests/${id}`,
+  },
+  FUTURE_VISION: {
+    BASE: `${API_BASE}/holistic-profile/future-vision`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/holistic-profile/future-vision/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/holistic-profile/future-vision/${id}`,
+  },
+  SEL_COMPETENCIES: {
+    BASE: `${API_BASE}/holistic-profile/sel-competencies`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/holistic-profile/sel-competencies/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/holistic-profile/sel-competencies/${id}`,
+  },
+  SOCIOECONOMIC: {
+    BASE: `${API_BASE}/holistic-profile/socioeconomic`,
+    BY_STUDENT: (studentId: string) => `${API_BASE}/holistic-profile/socioeconomic/student/${studentId}`,
+    BY_ID: (id: string) => `${API_BASE}/holistic-profile/socioeconomic/${id}`,
+  },
+} as const;
+
+/**
+ * Standardized Profile Endpoints
+ */
+export const STANDARDIZED_PROFILE_ENDPOINTS = {
+  BEHAVIOR_INCIDENT: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/behavior-incident`,
+  BEHAVIOR_INCIDENTS: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/behavior-incidents`,
+  ACADEMIC: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/academic`,
+  SOCIAL_EMOTIONAL: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/social-emotional`,
+  TALENTS_INTERESTS: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/talents-interests`,
+  HEALTH: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/health`,
+  INTERVENTIONS: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/interventions`,
+  INTERVENTION: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/intervention`,
+  RISK_PROTECTIVE: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/risk-protective`,
+  MOTIVATION: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/motivation`,
+  AGGREGATE: (studentId: string) => `${API_BASE}/standardized-profile/${studentId}/aggregate`,
+} as const;

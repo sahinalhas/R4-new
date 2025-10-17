@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CheckCircle, X } from 'lucide-react';
+import { PROFILE_SYNC_ENDPOINTS } from '@/lib/constants/api-endpoints';
+import { apiClient, createApiHandler } from '@/lib/api/api-client';
 
 interface ConflictResolution {
   id: string;
@@ -29,17 +31,18 @@ export default function ConflictResolutionPanel({ studentId }: ConflictResolutio
 
   useEffect(() => {
     const fetchConflicts = async () => {
-      try {
-        const response = await fetch(`/api/profile-sync/conflicts/student/${studentId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setConflicts(data);
-        }
-      } catch (error) {
-        console.error('Error fetching conflicts:', error);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      const data = await createApiHandler(
+        async () => {
+          return await apiClient.get<ConflictResolution[]>(
+            PROFILE_SYNC_ENDPOINTS.CONFLICTS_BY_STUDENT(studentId),
+            { showErrorToast: false }
+          );
+        },
+        []
+      )();
+      setConflicts(data);
+      setLoading(false);
     };
 
     fetchConflicts();

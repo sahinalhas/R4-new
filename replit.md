@@ -3,6 +3,18 @@
 ## Overview
 Rehber360 is a comprehensive Turkish-language student guidance and management system for educational institutions. It provides tools for student tracking, counseling, risk assessment, behavioral monitoring, and academic performance analysis. A key feature is its AI-powered profile analysis, which generates standardized student profiles from diverse data sources. The system also includes an AI Assistant for local, AI-powered student counseling, supporting both OpenAI and Ollama (Llama 3.1) models. Built as a full-stack TypeScript application with React, Express.js, and SQLite, Rehber360 aims to drive data standardization and evidence-based interventions for student success.
 
+## Recent Changes (October 17, 2025)
+- **API Client Standardization & Data Fetching Refactor:** Comprehensive modernization of data fetching patterns across the codebase
+  - **API Endpoints Constants:** Created centralized `client/lib/constants/api-endpoints.ts` with all API endpoint definitions, eliminating hardcoded URLs throughout the application
+  - **API Client Migration:** Migrated all direct `fetch()` calls to use `apiClient` wrapper for consistent error handling, toast notifications, and request management
+  - **Profile Sync API:** Refactored `client/lib/api/profile-sync.api.ts` to use `apiClient` and endpoint constants with proper Turkish error messages
+  - **Advanced AI Analysis API:** Modernized `client/lib/api/advanced-ai-analysis.api.ts` with `apiClient`, success/error toasts, and endpoint constants
+  - **AI Suggestions API:** Updated `client/lib/api/ai-suggestions.api.ts` to use `apiClient` with proper type safety and error handling
+  - **Component Fetch Migration:** Migrated direct fetch calls in components (`AIStatusIndicator`, `ConflictResolutionPanel`, `SchoolWideAIInsights`) to use `apiClient`
+  - **Survey Service Migration:** Refactored `client/services/surveyService.ts` to use `apiClient` and endpoint constants instead of raw fetch calls
+  - **Benefits:** Consistent error handling, automatic toast notifications, better type safety, centralized timeout management, and easier debugging
+  - All API calls now support proper Turkish error messages and user-friendly toast notifications
+
 ## Recent Changes (October 16, 2025)
 - **AI Tools Page Modern Redesign:** Complete visual and UX overhaul to match design language of Settings and Student Profile pages
   - **Gradient Header:** Added modern gradient header (primary/accent) matching Settings page style

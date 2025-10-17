@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bot, Sparkles, Circle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { apiClient, createApiHandler } from '@/lib/api/api-client';
 
 interface AIStatus {
   isActive: boolean;
@@ -18,17 +19,20 @@ export default function AIStatusIndicator() {
   });
 
   useEffect(() => {
-    async function fetchAIStatus() {
-      try {
-        const response = await fetch('/api/ai/status');
-        if (response.ok) {
-          const data = await response.json();
-          setAiStatus(data);
+    const fetchAIStatus = async () => {
+      const data = await createApiHandler(
+        async () => {
+          return await apiClient.get<AIStatus>('/api/ai/status', { showErrorToast: false });
+        },
+        {
+          isActive: false,
+          provider: null,
+          model: null,
+          providerName: 'Kapalı'
         }
-      } catch (error) {
-        console.error('AI durumu alınamadı:', error);
-      }
-    }
+      )();
+      setAiStatus(data);
+    };
 
     fetchAIStatus();
     const interval = setInterval(fetchAIStatus, 30000);

@@ -36,13 +36,19 @@ export default function SchoolWideAIInsights({ onHide, className }: SchoolWideAI
   useEffect(() => {
     const fetchDefaultClass = async () => {
       try {
-        const res = await fetch('/api/students');
-        if (res.ok) {
-          const students = await res.json();
-          const classes = [...new Set(students.students?.map((s: any) => s.className).filter(Boolean))];
-          if (classes.length > 0) {
-            setSelectedClass(classes[0] as string);
-          }
+        const { apiClient, createApiHandler } = await import('@/lib/api/api-client');
+        const students = await createApiHandler(
+          async () => {
+            return await apiClient.get<{ students: Array<{ className?: string }> }>(
+              '/api/students',
+              { showErrorToast: false }
+            );
+          },
+          { students: [] }
+        )();
+        const classes = [...new Set(students.students?.map((s: any) => s.className).filter(Boolean))];
+        if (classes.length > 0) {
+          setSelectedClass(classes[0] as string);
         }
       } catch (error) {
         console.error('Sınıflar yüklenirken hata:', error);

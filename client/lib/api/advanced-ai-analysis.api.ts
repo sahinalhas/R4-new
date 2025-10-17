@@ -10,8 +10,8 @@ import type {
   StudentTimeline,
   ComparativeAnalysisReport
 } from '../../../shared/types/advanced-ai-analysis.types.js';
-
-const API_BASE = '/api/advanced-ai-analysis';
+import { apiClient } from './api-client';
+import { ADVANCED_AI_ENDPOINTS } from '../constants/api-endpoints';
 
 export interface ComprehensiveAnalysisResponse {
   psychological: PsychologicalDepthAnalysis;
@@ -20,154 +20,123 @@ export interface ComprehensiveAnalysisResponse {
   generatedAt: string;
 }
 
-/**
- * Psikolojik derinlik analizi oluştur
- */
+interface ApiResponse<T> {
+  data: T;
+}
+
 export async function generatePsychologicalAnalysis(studentId: string): Promise<PsychologicalDepthAnalysis> {
-  const response = await fetch(`${API_BASE}/psychological/${studentId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  if (!response.ok) {
-    throw new Error('Psikolojik analiz oluşturulamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const response = await apiClient.post<ApiResponse<PsychologicalDepthAnalysis>>(
+    ADVANCED_AI_ENDPOINTS.PSYCHOLOGICAL(studentId),
+    undefined,
+    {
+      showSuccessToast: true,
+      successMessage: 'Psikolojik analiz oluşturuldu',
+      errorMessage: 'Psikolojik analiz oluşturulamadı',
+    }
+  );
+  return response.data;
 }
 
-/**
- * Öngörücü risk zaman çizelgesi oluştur
- */
 export async function generatePredictiveTimeline(studentId: string): Promise<PredictiveRiskTimeline> {
-  const response = await fetch(`${API_BASE}/predictive-timeline/${studentId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  if (!response.ok) {
-    throw new Error('Öngörücü zaman çizelgesi oluşturulamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const response = await apiClient.post<ApiResponse<PredictiveRiskTimeline>>(
+    ADVANCED_AI_ENDPOINTS.PREDICTIVE_TIMELINE(studentId),
+    undefined,
+    {
+      showSuccessToast: true,
+      successMessage: 'Öngörücü zaman çizelgesi oluşturuldu',
+      errorMessage: 'Öngörücü zaman çizelgesi oluşturulamadı',
+    }
+  );
+  return response.data;
 }
 
-/**
- * Günlük eylem planı oluştur
- */
 export async function generateDailyActionPlan(
   date?: string,
   counselorName?: string,
   forceRegenerate?: boolean
 ): Promise<CounselorDailyPlan> {
-  const response = await fetch(`${API_BASE}/daily-action-plan`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  const response = await apiClient.post<ApiResponse<CounselorDailyPlan>>(
+    ADVANCED_AI_ENDPOINTS.DAILY_ACTION_PLAN,
+    {
       date: date || new Date().toISOString().split('T')[0],
       counselorName,
       forceRegenerate: forceRegenerate || false
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error('Günlük eylem planı oluşturulamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+    },
+    {
+      showSuccessToast: true,
+      successMessage: 'Günlük eylem planı oluşturuldu',
+      errorMessage: 'Günlük eylem planı oluşturulamadı',
+    }
+  );
+  return response.data;
 }
 
-/**
- * Bugünkü eylem planını al (hızlı erişim)
- */
 export async function getTodayActionPlan(): Promise<CounselorDailyPlan> {
-  const response = await fetch(`${API_BASE}/action-plan/today`);
-
-  if (!response.ok) {
-    throw new Error('Günlük plan alınamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const response = await apiClient.get<ApiResponse<CounselorDailyPlan>>(
+    ADVANCED_AI_ENDPOINTS.DAILY_ACTION_PLAN,
+    {
+      errorMessage: 'Günlük plan alınamadı',
+    }
+  );
+  return response.data;
 }
 
-/**
- * Öğrenci zaman çizelgesi analizi oluştur
- */
 export async function generateStudentTimeline(
   studentId: string,
   startDate?: string,
   endDate?: string
 ): Promise<StudentTimeline> {
-  const response = await fetch(`${API_BASE}/student-timeline/${studentId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ startDate, endDate })
-  });
-
-  if (!response.ok) {
-    throw new Error('Öğrenci zaman çizelgesi oluşturulamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const response = await apiClient.post<ApiResponse<StudentTimeline>>(
+    ADVANCED_AI_ENDPOINTS.STUDENT_TIMELINE(studentId),
+    { startDate, endDate },
+    {
+      showSuccessToast: true,
+      successMessage: 'Öğrenci zaman çizelgesi oluşturuldu',
+      errorMessage: 'Öğrenci zaman çizelgesi oluşturulamadı',
+    }
+  );
+  return response.data;
 }
 
-/**
- * Sınıf karşılaştırmalı analizi oluştur
- */
 export async function generateClassComparison(classId: string): Promise<ComparativeAnalysisReport> {
-  const response = await fetch(`${API_BASE}/comparative-class/${classId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  if (!response.ok) {
-    throw new Error('Sınıf analizi oluşturulamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const response = await apiClient.post<ApiResponse<ComparativeAnalysisReport>>(
+    ADVANCED_AI_ENDPOINTS.COMPARATIVE_CLASS(classId),
+    undefined,
+    {
+      showSuccessToast: true,
+      successMessage: 'Sınıf analizi oluşturuldu',
+      errorMessage: 'Sınıf analizi oluşturulamadı',
+    }
+  );
+  return response.data;
 }
 
-/**
- * Çoklu öğrenci karşılaştırmalı analizi oluştur
- */
 export async function generateMultiStudentComparison(
   studentIds: string[]
 ): Promise<ComparativeAnalysisReport> {
-  const response = await fetch(`${API_BASE}/comparative-students`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ studentIds })
-  });
-
-  if (!response.ok) {
-    throw new Error('Çoklu öğrenci analizi oluşturulamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const response = await apiClient.post<ApiResponse<ComparativeAnalysisReport>>(
+    ADVANCED_AI_ENDPOINTS.COMPARATIVE_STUDENTS,
+    { studentIds },
+    {
+      showSuccessToast: true,
+      successMessage: 'Çoklu öğrenci analizi oluşturuldu',
+      errorMessage: 'Çoklu öğrenci analizi oluşturulamadı',
+    }
+  );
+  return response.data;
 }
 
-/**
- * Kapsamlı analiz (tüm analizleri birlikte)
- */
 export async function generateComprehensiveAnalysis(
   studentId: string
 ): Promise<ComprehensiveAnalysisResponse> {
-  const response = await fetch(`${API_BASE}/comprehensive/${studentId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  if (!response.ok) {
-    throw new Error('Kapsamlı analiz oluşturulamadı');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const response = await apiClient.post<ApiResponse<ComprehensiveAnalysisResponse>>(
+    ADVANCED_AI_ENDPOINTS.COMPREHENSIVE(studentId),
+    undefined,
+    {
+      showSuccessToast: true,
+      successMessage: 'Kapsamlı analiz oluşturuldu',
+      errorMessage: 'Kapsamlı analiz oluşturulamadı',
+    }
+  );
+  return response.data;
 }

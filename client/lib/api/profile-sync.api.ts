@@ -3,6 +3,9 @@
  * Canlı profil senkronizasyon API çağrıları
  */
 
+import { apiClient, createApiHandler } from './api-client';
+import { PROFILE_SYNC_ENDPOINTS, buildQueryParams } from '../constants/api-endpoints';
+
 export interface UnifiedStudentIdentity {
   studentId: string;
   lastUpdated: string;
@@ -52,83 +55,6 @@ export interface SyncStatistics {
   affectedDomains: number;
 }
 
-// Get student identity
-export async function getStudentIdentity(studentId: string): Promise<UnifiedStudentIdentity | null> {
-  try {
-    const response = await fetch(`/api/profile-sync/identity/${studentId}`);
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error('Failed to fetch student identity');
-    }
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching student identity:', error);
-    return null;
-  }
-}
-
-// Refresh student identity
-export async function refreshStudentIdentity(studentId: string): Promise<void> {
-  try {
-    const response = await fetch(`/api/profile-sync/identity/${studentId}/refresh`, {
-      method: 'POST'
-    });
-    if (!response.ok) {
-      throw new Error('Failed to refresh identity');
-    }
-  } catch (error) {
-    console.error('Error refreshing identity:', error);
-    throw error;
-  }
-}
-
-// Get sync logs for student
-export async function getStudentSyncLogs(studentId: string, limit = 50): Promise<ProfileSyncLog[]> {
-  try {
-    const response = await fetch(`/api/profile-sync/logs/student/${studentId}?limit=${limit}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch sync logs');
-    }
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching sync logs:', error);
-    return [];
-  }
-}
-
-// Get sync statistics
-export async function getSyncStatistics(studentId?: string): Promise<SyncStatistics | null> {
-  try {
-    const url = studentId 
-      ? `/api/profile-sync/statistics?studentId=${studentId}`
-      : '/api/profile-sync/statistics';
-    
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Failed to fetch statistics');
-    }
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching statistics:', error);
-    return null;
-  }
-}
-
-// Get all identities (for overview page)
-export async function getAllIdentities(): Promise<UnifiedStudentIdentity[]> {
-  try {
-    const response = await fetch('/api/profile-sync/identities');
-    if (!response.ok) {
-      throw new Error('Failed to fetch identities');
-    }
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching identities:', error);
-    return [];
-  }
-}
-
-// Conflict Resolution Types
 export interface ConflictResolution {
   id: string;
   studentId: string;
@@ -154,46 +80,121 @@ export interface ManualCorrectionRequest {
   correctedBy: string;
 }
 
-// Manual Correction APIs
+export async function getStudentIdentity(studentId: string): Promise<UnifiedStudentIdentity | null> {
+  return createApiHandler(
+    async () => {
+      return await apiClient.get<UnifiedStudentIdentity>(
+        PROFILE_SYNC_ENDPOINTS.IDENTITY(studentId),
+        { showErrorToast: false }
+      );
+    },
+    null,
+    'Öğrenci kimlik bilgileri yüklenemedi'
+  )();
+}
+
+export async function refreshStudentIdentity(studentId: string): Promise<void> {
+  return apiClient.post<void>(
+    PROFILE_SYNC_ENDPOINTS.REFRESH(studentId),
+    undefined,
+    {
+      showSuccessToast: true,
+      successMessage: 'Öğrenci profili yenilendi',
+      errorMessage: 'Profil yenilenemedi',
+    }
+  );
+}
+
+export async function getStudentSyncLogs(studentId: string, limit = 50): Promise<ProfileSyncLog[]> {
+  return createApiHandler(
+    async () => {
+      const url = PROFILE_SYNC_ENDPOINTS.LOGS_BY_STUDENT(studentId) + buildQueryParams({ limit });
+      return await apiClient.get<ProfileSyncLog[]>(url, { showErrorToast: false });
+    },
+    [],
+    'Senkronizasyon logları yüklenemedi'
+  )();
+}
+
+export async function getSyncStatistics(studentId?: string): Promise<SyncStatistics | null> {
+  return createApiHandler(
+    async () => {
+      const url = studentId 
+        ? PROFILE_SYNC_ENDPOINTS.STATISTICS + buildQueryParams({ studentId })
+        : PROFILE_SYNC_ENDPOINTS.STATISTICS;
+      return await apiClient.get<SyncStatistics>(url, { showErrorToast: false });
+    },
+    null,
+    'İstatistikler yüklenemedi'
+  )();
+}
+
+export async function getAllIdentities(): Promise<UnifiedStudentIdentity[]> {
+  return createApiHandler(
+    async () => {
+      return await apiClient.get<UnifiedStudentIdentity[]>(
+        PROFILE_SYNC_ENDPOINTS.IDENTITIES,
+        { showErrorToast: false }
+      );
+    },
+    [],
+    'Öğrenci kimlikleri yüklenemedi'
+  )();
+}
+
 export async function correctAIExtraction(correction: ManualCorrectionRequest): Promise<void> {
-  const response = await fetch('/api/profile-sync/correction', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(correction),
-  });
-  if (!response.ok) throw new Error('Failed to save correction');
+  return apiClient.post<void>(
+    PROFILE_SYNC_ENDPOINTS.CORRECTION,
+    correction,
+    {
+      showSuccessToast: true,
+      successMessage: 'Düzeltme kaydedildi',
+      errorMessage: 'Düzeltme kaydedilemedi',
+    }
+  );
 }
 
 export async function getCorrectionHistory(studentId: string): Promise<any[]> {
-  const response = await fetch(`/api/profile-sync/corrections/${studentId}`);
-  if (!response.ok) throw new Error('Failed to fetch correction history');
-  const data = await response.json();
-  return data.corrections || [];
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.get<{ corrections: any[] }>(
+        PROFILE_SYNC_ENDPOINTS.CORRECTIONS(studentId),
+        { showErrorToast: false }
+      );
+      return response.corrections || [];
+    },
+    [],
+    'Düzeltme geçmişi yüklenemedi'
+  )();
 }
 
 export async function undoLastUpdate(studentId: string, logId: string, performedBy: string): Promise<void> {
-  const response = await fetch('/api/profile-sync/undo', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ studentId, logId, performedBy }),
-  });
-  if (!response.ok) throw new Error('Failed to undo update');
+  return apiClient.post<void>(
+    PROFILE_SYNC_ENDPOINTS.UNDO,
+    { studentId, logId, performedBy },
+    {
+      showSuccessToast: true,
+      successMessage: 'Güncelleme geri alındı',
+      errorMessage: 'Geri alma işlemi başarısız',
+    }
+  );
 }
 
-// Conflict Resolution APIs
 export async function getPendingConflicts(studentId?: string): Promise<ConflictResolution[]> {
-  try {
-    const url = studentId 
-      ? `/api/profile-sync/conflicts/pending?studentId=${studentId}`
-      : '/api/profile-sync/conflicts/pending';
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch pending conflicts');
-    const data = await response.json();
-    return data.conflicts || [];
-  } catch (error) {
-    console.error('Error fetching pending conflicts:', error);
-    return [];
-  }
+  return createApiHandler(
+    async () => {
+      const url = studentId 
+        ? PROFILE_SYNC_ENDPOINTS.CONFLICTS_PENDING + buildQueryParams({ studentId })
+        : PROFILE_SYNC_ENDPOINTS.CONFLICTS_PENDING;
+      const response = await apiClient.get<{ conflicts: ConflictResolution[] }>(
+        url,
+        { showErrorToast: false }
+      );
+      return response.conflicts || [];
+    },
+    [],
+    'Çakışmalar yüklenemedi'
+  )();
 }
 
 export async function resolveConflictManually(
@@ -202,63 +203,65 @@ export async function resolveConflictManually(
   resolvedBy: string,
   reason?: string
 ): Promise<void> {
-  const response = await fetch('/api/profile-sync/conflicts/resolve', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ conflictId, selectedValue, resolvedBy, reason }),
-  });
-  if (!response.ok) throw new Error('Failed to resolve conflict');
+  return apiClient.post<void>(
+    PROFILE_SYNC_ENDPOINTS.CONFLICTS_RESOLVE,
+    { conflictId, selectedValue, resolvedBy, reason },
+    {
+      showSuccessToast: true,
+      successMessage: 'Çakışma çözüldü',
+      errorMessage: 'Çakışma çözülemedi',
+    }
+  );
 }
 
 export async function bulkResolveConflicts(
   resolutions: Array<{ conflictId: string; selectedValue: any }>,
   resolvedBy: string
 ): Promise<void> {
-  const response = await fetch('/api/profile-sync/conflicts/bulk-resolve', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ resolutions, resolvedBy }),
-  });
-  if (!response.ok) throw new Error('Failed to bulk resolve conflicts');
+  return apiClient.post<void>(
+    PROFILE_SYNC_ENDPOINTS.CONFLICTS_BULK_RESOLVE,
+    { resolutions, resolvedBy },
+    {
+      showSuccessToast: true,
+      successMessage: `${resolutions.length} çakışma çözüldü`,
+      errorMessage: 'Toplu çakışma çözümü başarısız',
+    }
+  );
 }
 
-// Class Analytics APIs
 export async function getClassProfileSummary(classId: string): Promise<any> {
-  try {
-    const response = await fetch(`/api/profile-sync/class/${encodeURIComponent(classId)}/summary`);
-    if (!response.ok) throw new Error('Failed to fetch class summary');
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching class summary:', error);
-    return null;
-  }
+  return createApiHandler(
+    async () => {
+      return await apiClient.get<any>(
+        PROFILE_SYNC_ENDPOINTS.CLASS_SUMMARY(classId),
+        { showErrorToast: false }
+      );
+    },
+    null,
+    'Sınıf özeti yüklenemedi'
+  )();
 }
 
 export async function getClassTrends(classId: string, period?: string): Promise<any> {
-  try {
-    const url = period
-      ? `/api/profile-sync/class/${encodeURIComponent(classId)}/trends?period=${period}`
-      : `/api/profile-sync/class/${encodeURIComponent(classId)}/trends`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch class trends');
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching class trends:', error);
-    return null;
-  }
+  return createApiHandler(
+    async () => {
+      const url = period
+        ? PROFILE_SYNC_ENDPOINTS.CLASS_TRENDS(classId) + buildQueryParams({ period })
+        : PROFILE_SYNC_ENDPOINTS.CLASS_TRENDS(classId);
+      return await apiClient.get<any>(url, { showErrorToast: false });
+    },
+    null,
+    'Sınıf trendleri yüklenemedi'
+  )();
 }
 
 export async function compareClasses(classIds: string[]): Promise<any> {
-  try {
-    const params = new URLSearchParams({ classes: classIds.join(',') });
-    const response = await fetch(`/api/profile-sync/class/compare?${params}`);
-    if (!response.ok) throw new Error('Failed to compare classes');
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error comparing classes:', error);
-    return null;
-  }
+  return createApiHandler(
+    async () => {
+      const url = PROFILE_SYNC_ENDPOINTS.CLASS_COMPARE + buildQueryParams({ classes: classIds.join(',') });
+      return await apiClient.get<any>(url, { showErrorToast: false });
+    },
+    null,
+    'Sınıflar karşılaştırılamadı'
+  )();
 }

@@ -10,74 +10,62 @@ import type {
   SuggestionFilters,
   SuggestionStats
 } from '../../../shared/types/ai-suggestion.types';
+import { apiClient, createApiHandler } from './api-client';
+import { AI_SUGGESTIONS_ENDPOINTS, buildQueryParams } from '../constants/api-endpoints';
 
-const API_BASE = '/api/ai-suggestions';
+interface ApiSuccessResponse<T> {
+  success: true;
+  data: T;
+}
 
-/**
- * Bekleyen tüm önerileri getir
- */
 export async function getPendingSuggestions(limit?: number): Promise<AISuggestion[]> {
-  const url = limit ? `${API_BASE}/pending?limit=${limit}` : `${API_BASE}/pending`;
-  const response = await fetch(url);
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneriler alınamadı');
-  }
-  
-  return data.data;
+  return createApiHandler(
+    async () => {
+      const url = limit 
+        ? AI_SUGGESTIONS_ENDPOINTS.PENDING + buildQueryParams({ limit })
+        : AI_SUGGESTIONS_ENDPOINTS.PENDING;
+      const response = await apiClient.get<ApiSuccessResponse<AISuggestion[]>>(
+        url,
+        { showErrorToast: false }
+      );
+      return response.data;
+    },
+    [],
+    'Öneriler alınamadı'
+  )();
 }
 
-/**
- * Öğrenci için bekleyen önerileri getir
- */
 export async function getStudentSuggestions(studentId: string): Promise<AISuggestion[]> {
-  const response = await fetch(`${API_BASE}/student/${studentId}`);
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öğrenci önerileri alınamadı');
-  }
-  
-  return data.data;
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.get<ApiSuccessResponse<AISuggestion[]>>(
+        AI_SUGGESTIONS_ENDPOINTS.BY_STUDENT(studentId),
+        { showErrorToast: false }
+      );
+      return response.data;
+    },
+    [],
+    'Öğrenci önerileri alınamadı'
+  )();
 }
 
-/**
- * Öneriyi ID ile getir
- */
 export async function getSuggestionById(id: string): Promise<AISuggestion> {
-  const response = await fetch(`${API_BASE}/${id}`);
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneri bulunamadı');
-  }
-  
-  return data.data;
+  const response = await apiClient.get<ApiSuccessResponse<AISuggestion>>(
+    AI_SUGGESTIONS_ENDPOINTS.BY_ID(id),
+    { errorMessage: 'Öneri bulunamadı' }
+  );
+  return response.data;
 }
 
-/**
- * Filtrelerle öneri ara
- */
 export async function searchSuggestions(filters: SuggestionFilters): Promise<AISuggestion[]> {
-  const response = await fetch(`${API_BASE}/search`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(filters)
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneri araması yapılamadı');
-  }
-  
-  return data.data;
+  const response = await apiClient.post<ApiSuccessResponse<AISuggestion[]>>(
+    AI_SUGGESTIONS_ENDPOINTS.SEARCH,
+    filters,
+    { errorMessage: 'Öneri araması yapılamadı' }
+  );
+  return response.data;
 }
 
-/**
- * Öneriyi onayla
- */
 export async function approveSuggestion(
   id: string,
   reviewedBy: string,
@@ -85,27 +73,22 @@ export async function approveSuggestion(
   feedbackRating?: number,
   feedbackNotes?: string
 ): Promise<void> {
-  const response = await fetch(`${API_BASE}/${id}/approve`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  await apiClient.post<ApiSuccessResponse<void>>(
+    AI_SUGGESTIONS_ENDPOINTS.APPROVE(id),
+    {
       reviewedBy,
       reviewNotes,
       feedbackRating,
       feedbackNotes
-    })
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneri onaylanamadı');
-  }
+    },
+    {
+      showSuccessToast: true,
+      successMessage: 'Öneri onaylandı',
+      errorMessage: 'Öneri onaylanamadı',
+    }
+  );
 }
 
-/**
- * Öneriyi reddet
- */
 export async function rejectSuggestion(
   id: string,
   reviewedBy: string,
@@ -113,27 +96,22 @@ export async function rejectSuggestion(
   feedbackRating?: number,
   feedbackNotes?: string
 ): Promise<void> {
-  const response = await fetch(`${API_BASE}/${id}/reject`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  await apiClient.post<ApiSuccessResponse<void>>(
+    AI_SUGGESTIONS_ENDPOINTS.REJECT(id),
+    {
       reviewedBy,
       reviewNotes,
       feedbackRating,
       feedbackNotes
-    })
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneri reddedilemedi');
-  }
+    },
+    {
+      showSuccessToast: true,
+      successMessage: 'Öneri reddedildi',
+      errorMessage: 'Öneri reddedilemedi',
+    }
+  );
 }
 
-/**
- * Öneriyi düzenle ve uygula
- */
 export async function modifySuggestion(
   id: string,
   reviewedBy: string,
@@ -142,107 +120,84 @@ export async function modifySuggestion(
   feedbackRating?: number,
   feedbackNotes?: string
 ): Promise<void> {
-  const response = await fetch(`${API_BASE}/${id}/modify`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  await apiClient.post<ApiSuccessResponse<void>>(
+    AI_SUGGESTIONS_ENDPOINTS.MODIFY(id),
+    {
       reviewedBy,
       modifiedChanges,
       reviewNotes,
       feedbackRating,
       feedbackNotes
-    })
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneri düzenlenemedi');
-  }
+    },
+    {
+      showSuccessToast: true,
+      successMessage: 'Öneri düzenlendi ve uygulandı',
+      errorMessage: 'Öneri düzenlenemedi',
+    }
+  );
 }
 
-/**
- * Öneriyi incele (genel review fonksiyonu)
- */
 export async function reviewSuggestion(request: ReviewSuggestionRequest): Promise<void> {
-  const response = await fetch(`${API_BASE}/${request.suggestionId}/review`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request)
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneri incelenemedi');
-  }
+  await apiClient.post<ApiSuccessResponse<void>>(
+    AI_SUGGESTIONS_ENDPOINTS.REVIEW(request.suggestionId),
+    request,
+    {
+      showSuccessToast: true,
+      successMessage: 'Öneri incelendi',
+      errorMessage: 'Öneri incelenemedi',
+    }
+  );
 }
 
-/**
- * İstatistikleri getir
- */
-export async function getSuggestionStats(): Promise<SuggestionStats> {
-  const response = await fetch(`${API_BASE}/stats/overview`);
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'İstatistikler alınamadı');
-  }
-  
-  return data.data;
+export async function getSuggestionStats(): Promise<SuggestionStats | null> {
+  return createApiHandler(
+    async () => {
+      const response = await apiClient.get<ApiSuccessResponse<SuggestionStats>>(
+        AI_SUGGESTIONS_ENDPOINTS.STATS,
+        { showErrorToast: false }
+      );
+      return response.data;
+    },
+    null,
+    'İstatistikler alınamadı'
+  )();
 }
 
-/**
- * Süresi dolmuş önerileri temizle
- */
 export async function cleanupExpiredSuggestions(): Promise<number> {
-  const response = await fetch(`${API_BASE}/cleanup`, {
-    method: 'POST'
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Temizlik yapılamadı');
-  }
-  
-  return data.data.cleanedCount;
+  const response = await apiClient.post<ApiSuccessResponse<{ cleanedCount: number }>>(
+    AI_SUGGESTIONS_ENDPOINTS.CLEANUP,
+    undefined,
+    {
+      showSuccessToast: true,
+      successMessage: 'Süresi dolmuş öneriler temizlendi',
+      errorMessage: 'Temizlik yapılamadı',
+    }
+  );
+  return response.data.cleanedCount;
 }
 
-/**
- * Yeni öneri oluştur (admin/sistem kullanımı için)
- */
 export async function createSuggestion(request: CreateSuggestionRequest): Promise<string> {
-  const response = await fetch(`${API_BASE}/create`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request)
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Öneri oluşturulamadı');
-  }
-  
-  return data.data.id;
+  const response = await apiClient.post<ApiSuccessResponse<{ id: string }>>(
+    AI_SUGGESTIONS_ENDPOINTS.CREATE,
+    request,
+    {
+      showSuccessToast: true,
+      successMessage: 'Öneri oluşturuldu',
+      errorMessage: 'Öneri oluşturulamadı',
+    }
+  );
+  return response.data.id;
 }
 
-/**
- * Toplu öneri oluştur
- */
 export async function createBulkSuggestions(requests: CreateSuggestionRequest[]): Promise<string[]> {
-  const response = await fetch(`${API_BASE}/bulk-create`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ suggestions: requests })
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Toplu öneri oluşturulamadı');
-  }
-  
-  return data.data.ids;
+  const response = await apiClient.post<ApiSuccessResponse<{ ids: string[] }>>(
+    AI_SUGGESTIONS_ENDPOINTS.BULK_CREATE,
+    { suggestions: requests },
+    {
+      showSuccessToast: true,
+      successMessage: `${requests.length} öneri oluşturuldu`,
+      errorMessage: 'Toplu öneri oluşturulamadı',
+    }
+  );
+  return response.data.ids;
 }
