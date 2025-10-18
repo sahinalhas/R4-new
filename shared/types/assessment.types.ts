@@ -16,8 +16,11 @@ export type AssessmentCategory =
 
 export type ExamType =
   | 'TYT'
-  | 'AYT'
+  | 'AYT-SAY'      // AYT Sayısal
+  | 'AYT-SOZ'      // AYT Sözel
+  | 'AYT-EA'       // AYT Eşit Ağırlık
   | 'LGS'
+  | 'YDT'          // Yabancı Dil Testi
   | 'KPSS'
   | 'ALES'
   | 'DGS'
