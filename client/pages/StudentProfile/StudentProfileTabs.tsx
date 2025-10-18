@@ -20,6 +20,7 @@ import OzelEgitimSection from "@/components/student-profile/sections/OzelEgitimS
 
 // Akademik bileşenler
 import StandardizedAcademicSection from "@/components/student-profile/sections/StandardizedAcademicSection";
+import { AssessmentDashboard } from "@/components/student-profile/sections/olcme-degerlendirme/AssessmentDashboard";
 import CalismaProgramiSection from "@/components/student-profile/sections/CalismaProgramiSection";
 import IlerlemeTakibiSection from "@/components/student-profile/sections/IlerlemeTakibiSection";
 import AnketlerSection from "@/components/student-profile/sections/AnketlerSection";
@@ -156,6 +157,13 @@ export function StudentProfileTabs({
 
           <TabsContent value="performans">
             <StandardizedAcademicSection
+              studentId={studentId}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="olcme-degerlendirme">
+            <AssessmentDashboard
               studentId={studentId}
               onUpdate={onUpdate}
             />

@@ -1,4 +1,4 @@
-import { getDatabase } from '../../../lib/database';
+import getDatabase from '../../../lib/database';
 import { AssessmentsRepository } from '../repository/assessments.repository';
 import type {
   Assessment,

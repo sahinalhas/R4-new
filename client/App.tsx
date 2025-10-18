@@ -21,6 +21,7 @@ const SettingsPage = lazy(() => import("./pages/Settings"));
 const PublicSurvey = lazy(() => import("./pages/PublicSurvey"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AIToolsPage = lazy(() => import("./pages/AIToolsPage"));
+const AssessmentsPage = lazy(() => import("./pages/AssessmentsPage"));
 const AdvancedStudentAnalysis = lazy(() => import("./pages/AdvancedStudentAnalysis"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const InterventionTracking = lazy(() => import("./pages/InterventionTracking"));
@@ -74,6 +75,10 @@ const App = () => {
                   <Route
                     path="/anketler"
                     element={<Suspense fallback={<LoadingFallback />}><Surveys /></Suspense>}
+                  />
+                  <Route
+                    path="/olcme-degerlendirme"
+                    element={<Suspense fallback={<LoadingFallback />}><AssessmentsPage /></Suspense>}
                   />
                   <Route
                     path="/raporlar"

@@ -26,6 +26,8 @@ import {
   LayoutDashboard,
   Settings,
   Home,
+  ClipboardCheck,
+  LineChart,
 } from "lucide-react";
 
 // YENİ DÜZENLENMİŞ ANA SEKMELER
@@ -111,6 +113,11 @@ export const AKADEMIK_TABS = [
     value: "performans",
     label: "Akademik Performans",
     icon: TrendingUp,
+  },
+  {
+    value: "olcme-degerlendirme",
+    label: "Ölçme ve Değerlendirme",
+    icon: ClipboardCheck,
   },
   {
     value: "calisma-programi",

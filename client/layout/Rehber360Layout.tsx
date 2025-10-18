@@ -60,6 +60,7 @@ import {
   Brain,
   ChevronDown,
   Sparkles,
+  ClipboardCheck,
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { loadSettings, updateSettings, SETTINGS_KEY, AppSettings } from "@/lib/app-settings";
@@ -278,6 +279,13 @@ export default function Rehber360Layout() {
                   <SidebarMenuButton asChild tooltip="Anket & Test">
                     <NavLink to="/anketler">
                       <MessageSquare /> <span>Anket & Test</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Ölçme ve Değerlendirme">
+                    <NavLink to="/olcme-degerlendirme">
+                      <ClipboardCheck /> <span>Ölçme ve Değerlendirme</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
