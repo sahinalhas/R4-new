@@ -18,6 +18,7 @@ import {
 import { getAssessments, getAssessmentTypes, uploadMockExamExcel, downloadMockExamTemplate } from "@/lib/api/assessments.api";
 import { EXAM_TYPES } from "@shared/constants/exam-formats";
 import { toast } from "sonner";
+import { StudentExamEntrySection } from "@/components/assessments/StudentExamEntrySection";
 
 export default function AssessmentsPage() {
   const [selectedType, setSelectedType] = useState<string>("all");
@@ -260,17 +261,7 @@ export default function AssessmentsPage() {
         </TabsContent>
 
         <TabsContent value="students" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Öğrenci Bazlı Değerlendirmeler</CardTitle>
-              <CardDescription>Her öğrencinin değerlendirme geçmişi</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                Öğrenci profil sayfasından erişilebilir
-              </div>
-            </CardContent>
-          </Card>
+          <StudentExamEntrySection />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
