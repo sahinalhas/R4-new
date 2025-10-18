@@ -16,7 +16,7 @@ import {
   FileText,
 } from "lucide-react";
 import { getAssessments, getAssessmentTypes, uploadMockExamExcel, downloadMockExamTemplate } from "@/lib/api/assessments.api";
-import { EXAM_TYPES } from "../../../shared/constants/exam-formats";
+import { EXAM_TYPES } from "@shared/constants/exam-formats";
 import { toast } from "sonner";
 
 export default function AssessmentsPage() {
