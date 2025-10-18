@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import type { MockExamBulkUpload, SubjectGradeBulkUpload } from '@shared/types/assessment.types';
+import { getExamFormat, calculateNet, type ExamSection } from '../../../../shared/constants/exam-formats.js';
 
 /**
  * Excel/CSV Import Service
@@ -9,8 +10,9 @@ export class ExcelImportService {
   
   /**
    * Parse mock exam results from Excel/CSV file
+   * Exam format'a göre otomatik parse eder
    */
-  parseMockExamFile(buffer: Buffer): {
+  parseMockExamFile(buffer: Buffer, examType: string): {
     examType: string;
     examProvider: string;
     examNumber: string;
@@ -24,6 +26,7 @@ export class ExcelImportService {
         correct: number;
         wrong: number;
         empty: number;
+        net: number;
       }>;
     }>;
   } {
@@ -36,28 +39,37 @@ export class ExcelImportService {
       throw new Error('Excel dosyası boş');
     }
 
-    // Extract metadata from first row or dedicated metadata sheet
+    // Get exam format
+    const format = getExamFormat(examType);
+    if (!format) {
+      throw new Error(`Geçersiz sınav tipi: ${examType}`);
+    }
+
+    // Extract metadata - can be from first row or separate cells
     const firstRow = data[0];
-    const examType = firstRow['Sınav Türü'] || firstRow['examType'] || 'TYT';
-    const examProvider = firstRow['Yayın'] || firstRow['provider'] || 'Bilinmiyor';
-    const examNumber = firstRow['Deneme No'] || firstRow['examNumber'] || '1';
+    const examProvider = firstRow['Yayın'] || firstRow['provider'] || 'Yayın Belirtilmemiş';
+    const examNumber = firstRow['Deneme No'] || firstRow['examNumber'] || '1. Deneme';
     const examDate = firstRow['Tarih'] || firstRow['date'] || new Date().toISOString().split('T')[0];
     const className = firstRow['Sınıf'] || firstRow['class'] || '';
 
-    // Parse student results
+    // Parse student results based on exam format
     const students = data.map(row => {
       const studentId = row['Öğrenci No'] || row['studentId'] || '';
       const studentName = row['Öğrenci Adı'] || row['studentName'] || '';
 
-      // Parse section results - flexible column naming
-      const sections = this.parseSectionResults(row);
+      if (!studentId) {
+        return null;
+      }
+
+      // Parse sections according to exam format
+      const sections = this.parseSectionResultsByFormat(row, format.sections);
 
       return {
         studentId,
         studentName,
         sections
       };
-    });
+    }).filter(s => s !== null) as any[];
 
     return {
       examType,
@@ -124,50 +136,121 @@ export class ExcelImportService {
   }
 
   /**
-   * Parse section results from a row - handles different column name formats
+   * Parse section results based on exam format
    */
-  private parseSectionResults(row: any): Array<{
+  private parseSectionResultsByFormat(row: any, sections: ExamSection[]): Array<{
     sectionName: string;
     correct: number;
     wrong: number;
     empty: number;
+    net: number;
   }> {
-    const sections: Array<{
+    const results: Array<{
       sectionName: string;
       correct: number;
       wrong: number;
       empty: number;
+      net: number;
     }> = [];
 
-    // Common TYT/AYT section names
-    const sectionNames = [
-      'Türkçe', 'Matematik', 'Fen', 'Sosyal',
-      'Geometri', 'Fizik', 'Kimya', 'Biyoloji',
-      'Edebiyat', 'Tarih', 'Coğrafya', 'Felsefe', 'Din'
-    ];
-
-    for (const sectionName of sectionNames) {
-      const correctKey = `${sectionName} Doğru` || `${sectionName}_D`;
-      const wrongKey = `${sectionName} Yanlış` || `${sectionName}_Y`;
-      const emptyKey = `${sectionName} Boş` || `${sectionName}_B`;
-
-      // Try different possible column names
-      const correct = row[correctKey] || row[`${sectionName}_correct`] || row[`${sectionName}D`] || 0;
-      const wrong = row[wrongKey] || row[`${sectionName}_wrong`] || row[`${sectionName}Y`] || 0;
-      const empty = row[emptyKey] || row[`${sectionName}_empty`] || row[`${sectionName}B`] || 0;
-
-      // Only include section if it has data
-      if (correct || wrong || empty) {
-        sections.push({
-          sectionName,
-          correct: parseInt(correct.toString()) || 0,
-          wrong: parseInt(wrong.toString()) || 0,
-          empty: parseInt(empty.toString()) || 0
-        });
+    for (const section of sections) {
+      if (section.subsections && section.subsections.length > 0) {
+        // Parse subsections (e.g., TYT Fen -> Fizik, Kimya, Biyoloji)
+        for (const subsection of section.subsections) {
+          const result = this.parseRowSection(row, subsection.name, subsection.id);
+          if (result) {
+            results.push(result);
+          }
+        }
+      } else {
+        // Parse main section
+        const result = this.parseRowSection(row, section.name, section.id);
+        if (result) {
+          results.push(result);
+        }
       }
     }
 
-    return sections;
+    return results;
+  }
+
+  /**
+   * Parse a single section from Excel row
+   */
+  private parseRowSection(row: any, sectionName: string, sectionId: string): {
+    sectionName: string;
+    correct: number;
+    wrong: number;
+    empty: number;
+    net: number;
+  } | null {
+    // Try multiple column name formats
+    const correctKeys = [
+      `${sectionName} D`,
+      `${sectionName} Doğru`,
+      `${sectionName}_D`,
+      `${sectionId}_correct`,
+      `${sectionName}D`,
+    ];
+
+    const wrongKeys = [
+      `${sectionName} Y`,
+      `${sectionName} Yanlış`,
+      `${sectionName}_Y`,
+      `${sectionId}_wrong`,
+      `${sectionName}Y`,
+    ];
+
+    const emptyKeys = [
+      `${sectionName} B`,
+      `${sectionName} Boş`,
+      `${sectionName}_B`,
+      `${sectionId}_empty`,
+      `${sectionName}B`,
+    ];
+
+    let correct = 0;
+    let wrong = 0;
+    let empty = 0;
+
+    // Find correct value
+    for (const key of correctKeys) {
+      if (row[key] !== undefined && row[key] !== null && row[key] !== '') {
+        correct = parseInt(row[key].toString()) || 0;
+        break;
+      }
+    }
+
+    // Find wrong value
+    for (const key of wrongKeys) {
+      if (row[key] !== undefined && row[key] !== null && row[key] !== '') {
+        wrong = parseInt(row[key].toString()) || 0;
+        break;
+      }
+    }
+
+    // Find empty value
+    for (const key of emptyKeys) {
+      if (row[key] !== undefined && row[key] !== null && row[key] !== '') {
+        empty = parseInt(row[key].toString()) || 0;
+        break;
+      }
+    }
+
+    // Only include if has any data
+    if (correct === 0 && wrong === 0 && empty === 0) {
+      return null;
+    }
+
+    const net = calculateNet(correct, wrong);
+
+    return {
+      sectionName,
+      correct,
+      wrong,
+      empty,
+      net
+    };
   }
 
   /**
@@ -234,54 +317,6 @@ export class ExcelImportService {
     });
 
     return errors;
-  }
-
-  /**
-   * Generate Excel template for mock exams
-   */
-  generateMockExamTemplate(examType: 'TYT' | 'AYT' | 'LGS'): Buffer {
-    const headers = ['Sınav Türü', 'Yayın', 'Deneme No', 'Tarih', 'Sınıf', 'Öğrenci No', 'Öğrenci Adı'];
-    
-    // Add section columns based on exam type
-    if (examType === 'TYT') {
-      headers.push(
-        'Türkçe Doğru', 'Türkçe Yanlış', 'Türkçe Boş',
-        'Matematik Doğru', 'Matematik Yanlış', 'Matematik Boş',
-        'Fen Doğru', 'Fen Yanlış', 'Fen Boş',
-        'Sosyal Doğru', 'Sosyal Yanlış', 'Sosyal Boş'
-      );
-    } else if (examType === 'AYT') {
-      headers.push(
-        'Matematik Doğru', 'Matematik Yanlış', 'Matematik Boş',
-        'Fizik Doğru', 'Fizik Yanlış', 'Fizik Boş',
-        'Kimya Doğru', 'Kimya Yanlış', 'Kimya Boş',
-        'Biyoloji Doğru', 'Biyoloji Yanlış', 'Biyoloji Boş'
-      );
-    } else if (examType === 'LGS') {
-      headers.push(
-        'Türkçe Doğru', 'Türkçe Yanlış', 'Türkçe Boş',
-        'Matematik Doğru', 'Matematik Yanlış', 'Matematik Boş',
-        'Fen Doğru', 'Fen Yanlış', 'Fen Boş',
-        'İnkılap Doğru', 'İnkılap Yanlış', 'İnkılap Boş',
-        'Din Doğru', 'Din Yanlış', 'Din Boş',
-        'İngilizce Doğru', 'İngilizce Yanlış', 'İngilizce Boş'
-      );
-    }
-
-    // Create sample row
-    const sampleRow = [examType, 'Örnek Yayın', '1. Deneme', new Date().toISOString().split('T')[0], '12-A', '12345', 'Örnek Öğrenci'];
-    // Add zeros for all sections
-    for (let i = 0; i < (headers.length - 7); i++) {
-      sampleRow.push('0');
-    }
-
-    const data = [headers, sampleRow];
-    
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Deneme Sınavı');
-
-    return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
   }
 
   /**
