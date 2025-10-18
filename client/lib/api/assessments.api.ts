@@ -334,6 +334,47 @@ export async function uploadAssessmentExcel(file: File, assessmentTypeId: string
   return response.json();
 }
 
+export async function uploadMockExamExcel(file: File, examType: string): Promise<{
+  success: boolean;
+  assessmentId: string;
+  mockExamId: string;
+  processedCount: number;
+}> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('examType', examType);
+  
+  const response = await fetch('/api/assessments/bulk-upload/mock-exam', {
+    method: 'POST',
+    body: formData,
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Dosya yüklenemedi');
+  }
+  
+  return response.json();
+}
+
+export async function downloadMockExamTemplate(examType: string): Promise<void> {
+  const response = await fetch(`/api/assessments/templates/mock-exam/${examType}`);
+  
+  if (!response.ok) {
+    throw new Error('Template indirilemedi');
+  }
+  
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `deneme-sinav-${examType}-sablonu.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 // ============= ANALYTICS =============
 
 export async function getStudentAssessmentSummary(studentId: string): Promise<{

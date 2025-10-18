@@ -1,24 +1,30 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ClipboardCheck,
   Upload,
   Users,
   BarChart3,
-  AlertTriangle,
   Download,
   FileSpreadsheet,
+  FileText,
 } from "lucide-react";
-import { getAssessments, getAssessmentTypes } from "@/lib/api/assessments.api";
-import { BulkUploadSection } from "@/components/student-profile/sections/olcme-degerlendirme/BulkUploadSection";
+import { getAssessments, getAssessmentTypes, uploadMockExamExcel, downloadMockExamTemplate } from "@/lib/api/assessments.api";
+import { EXAM_TYPES } from "../../../shared/constants/exam-formats";
+import { toast } from "sonner";
 
 export default function AssessmentsPage() {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedExamType, setSelectedExamType] = useState<string>("LGS");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: assessments = [], isLoading } = useQuery({
     queryKey: ['assessments', selectedType],
@@ -175,7 +181,82 @@ export default function AssessmentsPage() {
         </TabsContent>
 
         <TabsContent value="bulk-upload" className="space-y-4">
-          <BulkUploadSection studentId="" onUpdate={() => {}} />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Mock Sınav Toplu Yükleme
+              </CardTitle>
+              <CardDescription>
+                Excel dosyası ile toplu sınav sonuçları yükleyin
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label>Sınav Tipi</Label>
+                <Select value={selectedExamType} onValueChange={setSelectedExamType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXAM_TYPES.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => downloadMockExamTemplate(selectedExamType)}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  {selectedExamType} Şablonunu İndir
+                </Button>
+
+                <div className="space-y-2">
+                  <Input 
+                    type="file" 
+                    accept=".xlsx,.xls"
+                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                  />
+                </div>
+              </div>
+
+              <Button 
+                className="w-full"
+                disabled={!uploadFile}
+                onClick={async () => {
+                  if (!uploadFile) return;
+                  try {
+                    const result = await uploadMockExamExcel(uploadFile, selectedExamType);
+                    toast.success(`${result.processedCount} öğrenci sonucu yüklendi`);
+                    setUploadFile(null);
+                    queryClient.invalidateQueries({ queryKey: ['assessments'] });
+                  } catch (error: any) {
+                    toast.error(error.message || 'Yükleme başarısız');
+                  }
+                }}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Dosyayı Yükle ve İşle
+              </Button>
+
+              <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
+                <p className="font-semibold">Kullanım Talimatları:</p>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                  <li>Yukarıdan sınav tipine uygun şablonu indirin</li>
+                  <li>Şablonu doldurun (Öğrenci No, her ders için D/Y/B)</li>
+                  <li>Doldurduğunuz dosyayı yükleyin</li>
+                  <li>Sistem otomatik olarak netleri hesaplayacaktır</li>
+                </ol>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="students" className="space-y-4">
