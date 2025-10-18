@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import { AssessmentService } from '../services/assessment.service';
 import { ExcelImportService } from '../services/excel-import.service';
+import { excelTemplateService } from '../services/excel-template.service';
 import multer from 'multer';
 
 const router = Router();
@@ -17,7 +18,7 @@ const upload = multer({
 
 router.get('/types', (req: Request, res: Response) => {
   try {
-    const types = assessmentService.repository.getAssessmentTypes();
+    const types = assessmentService.getAssessmentTypes();
     res.json(types);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -27,7 +28,7 @@ router.get('/types', (req: Request, res: Response) => {
 router.get('/types/category/:category', (req: Request, res: Response) => {
   try {
     const { category } = req.params;
-    const types = assessmentService.repository.getAssessmentTypesByCategory(category);
+    const types = assessmentService.getAssessmentTypesByCategory(category);
     res.json(types);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -219,7 +220,12 @@ router.post('/bulk-upload/mock-exam', upload.single('file'), async (req: Request
       return res.status(400).json({ error: 'Dosya yüklenmedi' });
     }
 
-    const parsedData = excelService.parseMockExamFile(req.file.buffer);
+    const examType = req.body.examType || req.query.examType;
+    if (!examType) {
+      return res.status(400).json({ error: 'Sınav tipi belirtilmedi' });
+    }
+
+    const parsedData = excelService.parseMockExamFile(req.file.buffer, examType as string);
     const errors = excelService.validateMockExamData(parsedData);
 
     if (errors.length > 0) {
@@ -296,7 +302,7 @@ router.post('/bulk-upload/subject-grades', upload.single('file'), async (req: Re
 router.get('/templates/mock-exam/:examType', (req: Request, res: Response) => {
   try {
     const { examType } = req.params;
-    const buffer = excelService.generateMockExamTemplate(examType as any);
+    const buffer = excelTemplateService.generateMockExamTemplate(examType);
     
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename=deneme-sinav-${examType}-sablonu.xlsx`);

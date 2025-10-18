@@ -24,6 +24,16 @@ export class AssessmentService {
     this.repository = new AssessmentsRepository(db);
   }
 
+  // ============= ASSESSMENT TYPES =============
+
+  getAssessmentTypes() {
+    return this.repository.getAssessmentTypes();
+  }
+
+  getAssessmentTypesByCategory(category: string) {
+    return this.repository.getAssessmentTypesByCategory(category);
+  }
+
   // ============= ASSESSMENTS =============
 
   getAssessments(filters?: AssessmentFilters): Assessment[] {
