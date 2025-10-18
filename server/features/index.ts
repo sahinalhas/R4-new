@@ -42,6 +42,7 @@ import aiTextPolishRouter from '../routes/ai-text-polish.routes.js';
 import profileSyncRouter from './profile-sync/index.js';
 import aiStatusRouter from '../routes/ai-status.routes.js';
 import aiSuggestionsRouter from './ai-suggestions/index.js';
+import assessmentsRouter from './assessments/index.js';
 
 /**
  * Feature Registry
@@ -128,6 +129,7 @@ featureRegistry.use('/', subjectsRouter);
 featureRegistry.use('/', progressRouter);
 featureRegistry.use('/', attendanceRouter);
 featureRegistry.use('/exams', examsRouter);
+featureRegistry.use('/assessments', assessmentsRouter);
 featureRegistry.use('/coaching', coachingRouter);
 featureRegistry.use('/study-sessions', sessionsRouter);
 featureRegistry.use('/', studyRouter);

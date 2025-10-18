@@ -17,12 +17,15 @@ import { createNotificationTables } from './notifications.schema';
 import { createEarlyWarningTables } from './early-warning.schema';
 import { createStudyPlanTables } from './study-plan.schema';
 import { createDailyInsightsTables } from './daily-insights.schema';
+import { createAssessmentTables, seedAssessmentTypes } from './assessment.schema';
 
 export function initializeDatabaseSchema(db: Database.Database): void {
   createUsersTable(db);
   seedDemoUser(db);
   createStudentsTables(db);
   createAcademicTables(db);
+  createAssessmentTables(db);
+  seedAssessmentTypes(db);
   createSurveysTables(db);
   createCounselingTables(db);
   createCoachingTables(db);
